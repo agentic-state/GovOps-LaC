@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GovOps - Deployable MVP Preview</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>&#9878;</text></svg>">
+    <style>
+        :root {
+            --bg: #f8f9fa;
+            --card: #ffffff;
+            --border: #dee2e6;
+            --text: #212529;
+            --muted: #6c757d;
+            --primary: #1a5276;
+            --primary-light: #2980b9;
+            --success: #27ae60;
+            --danger: #c0392b;
+            --warning: #f39c12;
+            --info: #2980b9;
+            --accent: #e8f4fd;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+        }
+        header {
+            background: var(--primary);
+            color: white;
+            padding: 0.8rem 2rem;
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+        }
+        header h1 { font-size: 1.4rem; font-weight: 600; }
+        header nav { display: flex; gap: 1.5rem; flex: 1; }
+        header nav a { color: rgba(255,255,255,0.85); text-decoration: none; font-size: 0.9rem; }
+        header nav a:hover { color: white; }
+        .header-controls { display: flex; gap: 0.5rem; align-items: center; }
+        .header-controls select {
+            padding: 0.25rem 0.4rem;
+            border: 1px solid rgba(255,255,255,0.3);
+            border-radius: 4px;
+            background: rgba(255,255,255,0.15);
+            color: white;
+            font-size: 0.8rem;
+            cursor: pointer;
+        }
+        .header-controls select option { color: #212529; background: white; }
+        .container { max-width: 1100px; margin: 0 auto; padding: 2rem; }
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        .card h2 { font-size: 1.1rem; color: var(--primary); margin-bottom: 1rem; border-bottom: 2px solid var(--accent); padding-bottom: 0.5rem; }
+        .card h3 { font-size: 0.95rem; color: var(--muted); margin-bottom: 0.5rem; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+        th { text-align: left; padding: 0.6rem 0.8rem; background: var(--accent); color: var(--primary); font-weight: 600; }
+        td { padding: 0.6rem 0.8rem; border-bottom: 1px solid var(--border); }
+        tr:hover td { background: #f1f5f9; }
+        a { color: var(--primary-light); }
+        .badge {
+            display: inline-block;
+            padding: 0.15rem 0.6rem;
+            border-radius: 12px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        .badge-success { background: #d4edda; color: #155724; }
+        .badge-danger { background: #f8d7da; color: #721c24; }
+        .badge-warning { background: #fff3cd; color: #856404; }
+        .badge-info { background: #d1ecf1; color: #0c5460; }
+        .badge-muted { background: #e9ecef; color: #495057; }
+        .btn {
+            display: inline-block;
+            padding: 0.5rem 1.2rem;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            color: white;
+        }
+        .btn-primary { background: var(--primary); }
+        .btn-primary:hover { background: var(--primary-light); }
+        .btn-success { background: var(--success); }
+        .btn-danger { background: var(--danger); }
+        .btn-warning { background: var(--warning); color: #212529; }
+        .btn-sm { padding: 0.3rem 0.8rem; font-size: 0.8rem; }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+        .text-muted { color: var(--muted); }
+        .text-sm { font-size: 0.85rem; }
+        .mb-1 { margin-bottom: 0.5rem; }
+        .mb-2 { margin-bottom: 1rem; }
+        .mt-1 { margin-top: 0.5rem; }
+        .mt-2 { margin-top: 1rem; }
+        textarea, select, input[type="text"] {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            font-family: inherit;
+            font-size: 0.9rem;
+        }
+        textarea { min-height: 80px; resize: vertical; }
+        .rule-eval {
+            padding: 0.8rem;
+            margin-bottom: 0.5rem;
+            border-radius: 6px;
+            border-left: 4px solid;
+        }
+        .rule-eval.satisfied { border-color: var(--success); background: #f0fdf4; }
+        .rule-eval.not_satisfied { border-color: var(--danger); background: #fef2f2; }
+        .rule-eval.insufficient_evidence { border-color: var(--warning); background: #fffbeb; }
+        .rule-eval.not_applicable { border-color: var(--muted); background: #f9fafb; }
+        .citation { font-style: italic; color: var(--muted); font-size: 0.82rem; }
+        .chain-item {
+            padding: 0.8rem 1rem;
+            margin-left: 1.5rem;
+            border-left: 3px solid var(--primary-light);
+            margin-bottom: 0.3rem;
+        }
+        .chain-item:first-child { margin-left: 0; border-left: 3px solid var(--primary); }
+        pre { background: #f1f5f9; padding: 1rem; border-radius: 6px; overflow-x: auto; font-size: 0.82rem; white-space: pre-wrap; }
+        footer { text-align: center; padding: 2rem; color: var(--muted); font-size: 0.8rem; }
+        .flag { font-size: 1.1rem; }
+        @media (max-width: 768px) {
+            .grid-2 { grid-template-columns: 1fr; }
+            header { flex-direction: column; align-items: flex-start; gap: 0.5rem; }
+        }
+    </style>
+</head>
+<body><div style="position:fixed;top:0;left:0;right:0;z-index:9999;background:#c0392b;color:white;text-align:center;padding:0.6rem 1rem;font-family:-apple-system,sans-serif;font-size:0.85rem;">
+This is a static preview. <a href="https://github.com/eva-foundry/61-GovOps" style="color:#ffd700;font-weight:600;">Install GovOps</a> to run the live demo: <code style="background:rgba(0,0,0,0.3);padding:0.15rem 0.4rem;border-radius:3px;">pip install -e . && govops-demo</code>
+</div>
+<div style="height:2.5rem;"></div>
+    <header>
+        <h1>GovOps</h1>
+        <nav>
+            <a href="/?lang=en">About</a>
+            <a href="#" onclick="return false;">Cases</a>
+            <a href="#" onclick="return false;">Authority Chain</a>
+            <a href="#" onclick="return false;">Encode</a>
+            <a href="#" onclick="return false;">MVP</a>
+            <a href="#" onclick="return false;" style="color:rgba(255,255,255,0.6);">Admin</a>
+            <a href="#" onclick="return false;">API</a>
+        </nav>
+        <div class="header-controls">
+            
+            <form method="POST" action="#" onclick="return false;" style="display:flex; gap:0.3rem; align-items:center;">
+                <input type="hidden" name="lang" value="en">
+                <select name="jur_code" onchange="return false;">
+                    
+                    <option value="ca" selected>
+                        Government of Canada
+                    </option>
+                    
+                    <option value="br" >
+                        Republica Federativa do Brasil
+                    </option>
+                    
+                    <option value="es" >
+                        Reino de Espana
+                    </option>
+                    
+                    <option value="fr" >
+                        Republique francaise
+                    </option>
+                    
+                    <option value="de" >
+                        Bundesrepublik Deutschland
+                    </option>
+                    
+                    <option value="ua" >
+                        Ukraina
+                    </option>
+                    
+                </select>
+            </form>
+            
+            
+            <select onchange="window.location.href=window.location.pathname+'?lang='+this.value">
+                
+                <option value="en" selected>English</option>
+                
+                <option value="fr" >Francais</option>
+                
+                <option value="pt" >Portugues</option>
+                
+                <option value="es" >Espanol</option>
+                
+                <option value="de" >Deutsch</option>
+                
+                <option value="uk" >Ukrainska</option>
+                
+            </select>
+            
+        </div>
+    </header>
+    <div class="container">
+        
+<h2 class="mb-2" style="font-size:1.3rem;">Deployable MVP Preview</h2>
+<p class="text-sm text-muted mb-2">
+    This page shows what a production GovOps deployment would look like for a single government program.
+    The layout below is a realistic officer workstation view — not the demo navigation.
+</p>
+
+<div style="background:#1a5276; color:white; padding:1rem 2rem; border-radius:8px 8px 0 0; display:flex; justify-content:space-between; align-items:center;">
+    <div>
+        <strong style="font-size:1.2rem;">Old Age Security (OAS)</strong>
+        <span style="opacity:0.7; margin-left:1rem; font-size:0.85rem;">Eligibility Decision Support System</span>
+    </div>
+    <div style="font-size:0.85rem; opacity:0.8;">
+        Officer: <strong>J. Smith</strong> &nbsp;|&nbsp; Region: Central &nbsp;|&nbsp; CA
+    </div>
+</div>
+
+<div style="border:1px solid var(--border); border-top:none; border-radius:0 0 8px 8px; padding:0;">
+
+<!-- Workstation layout -->
+<div style="display:grid; grid-template-columns:300px 1fr 350px; min-height:600px;">
+
+    <!-- Left panel: Queue -->
+    <div style="border-right:1px solid var(--border); padding:1rem; background:#f8f9fa;">
+        <h3 style="font-size:0.9rem; color:var(--primary); margin-bottom:0.8rem;">Case Queue</h3>
+        
+        <div style="padding:0.6rem; margin-bottom:0.4rem; background:white; border:1px solid var(--border); border-radius:4px; cursor:pointer; border-left:3px solid var(--primary);">
+            <div style="display:flex; justify-content:space-between;">
+                <strong class="text-sm">Margaret Chen</strong>
+                
+                    <span class="badge badge-success" style="font-size:0.65rem;">DONE</span>
+                
+            </div>
+            <div class="text-sm text-muted">demo-case-001 &mdash; 1955-03-15</div>
+        </div>
+        
+        <div style="padding:0.6rem; margin-bottom:0.4rem; background:white; border:1px solid var(--border); border-radius:4px; cursor:pointer; ">
+            <div style="display:flex; justify-content:space-between;">
+                <strong class="text-sm">David Park</strong>
+                
+                    <span class="badge badge-muted" style="font-size:0.65rem;">NEW</span>
+                
+            </div>
+            <div class="text-sm text-muted">demo-case-002 &mdash; 1975-08-22</div>
+        </div>
+        
+        <div style="padding:0.6rem; margin-bottom:0.4rem; background:white; border:1px solid var(--border); border-radius:4px; cursor:pointer; ">
+            <div style="display:flex; justify-content:space-between;">
+                <strong class="text-sm">Amara Osei</strong>
+                
+                    <span class="badge badge-muted" style="font-size:0.65rem;">NEW</span>
+                
+            </div>
+            <div class="text-sm text-muted">demo-case-003 &mdash; 1958-11-03</div>
+        </div>
+        
+        <div style="padding:0.6rem; margin-bottom:0.4rem; background:white; border:1px solid var(--border); border-radius:4px; cursor:pointer; ">
+            <div style="display:flex; justify-content:space-between;">
+                <strong class="text-sm">Jean-Pierre Tremblay</strong>
+                
+                    <span class="badge badge-muted" style="font-size:0.65rem;">NEW</span>
+                
+            </div>
+            <div class="text-sm text-muted">demo-case-004 &mdash; 1952-01-10</div>
+        </div>
+        
+        <div style="margin-top:1rem; padding:0.5rem; text-align:center; border:1px dashed var(--border); border-radius:4px;">
+            <span class="text-sm text-muted">4 cases in queue</span>
+        </div>
+    </div>
+
+    <!-- Center panel: Case detail -->
+    <div style="padding:1.5rem;">
+        
+        
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+            <h3 style="font-size:1.1rem; color:var(--primary); margin:0;">Margaret Chen</h3>
+            <span class="badge badge-muted">demo-case-001</span>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:1rem;">
+            <div>
+                <div class="text-sm text-muted">Date of Birth</div>
+                <div><strong>1955-03-15</strong></div>
+            </div>
+            <div>
+                <div class="text-sm text-muted">Legal Status</div>
+                <div><strong>Citizen</strong></div>
+            </div>
+        </div>
+
+        <!-- Evaluation result mockup -->
+        <div style="background:var(--accent); border-radius:6px; padding:1rem; margin-bottom:1rem;">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <strong>System Recommendation</strong>
+                <span class="badge badge-success" style="font-size:0.9rem; padding:0.3rem 1rem;">ELIGIBLE</span>
+            </div>
+            <div class="text-sm mt-1" style="color:var(--primary);">Full pension (40/40) &mdash; all statutory conditions satisfied</div>
+        </div>
+
+        <!-- Rule evaluations -->
+        <div class="mb-2">
+            <h3 class="text-sm text-muted mb-1">Rule-by-Rule Assessment</h3>
+            <div class="rule-eval satisfied" style="padding:0.5rem 0.8rem;">
+                <div style="display:flex; justify-content:space-between;">
+                    <span class="text-sm">Age >= 65</span>
+                    <span class="badge badge-success" style="font-size:0.65rem;">PASS</span>
+                </div>
+                <span class="citation">OAS Act, s. 3(1)</span>
+            </div>
+            <div class="rule-eval satisfied" style="padding:0.5rem 0.8rem;">
+                <div style="display:flex; justify-content:space-between;">
+                    <span class="text-sm">Residency >= 10 years</span>
+                    <span class="badge badge-success" style="font-size:0.65rem;">PASS</span>
+                </div>
+                <span class="citation">OAS Act, s. 3(1)</span>
+            </div>
+            <div class="rule-eval satisfied" style="padding:0.5rem 0.8rem;">
+                <div style="display:flex; justify-content:space-between;">
+                    <span class="text-sm">Full pension (40+ years)</span>
+                    <span class="badge badge-success" style="font-size:0.65rem;">PASS</span>
+                </div>
+                <span class="citation">OAS Act, s. 3(2)</span>
+            </div>
+        </div>
+
+        <!-- Decision buttons -->
+        <div style="background:#f8f9fa; padding:1rem; border-radius:6px; border:1px solid var(--border);">
+            <div class="text-sm text-muted mb-1"><strong>Your Decision</strong></div>
+            <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
+                <button class="btn btn-success btn-sm">Approve</button>
+                <button class="btn btn-warning btn-sm">Request Info</button>
+                <button class="btn btn-danger btn-sm">Reject</button>
+                <button class="btn btn-primary btn-sm">Escalate</button>
+            </div>
+            <textarea placeholder="Decision rationale..." style="margin-top:0.5rem; min-height:50px;"></textarea>
+        </div>
+        
+    </div>
+
+    <!-- Right panel: Evidence + Authority -->
+    <div style="border-left:1px solid var(--border); padding:1rem; background:#f8f9fa; overflow-y:auto;">
+        <h3 style="font-size:0.9rem; color:var(--primary); margin-bottom:0.8rem;">Evidence</h3>
+        <div style="padding:0.5rem; background:white; border:1px solid var(--border); border-radius:4px; margin-bottom:0.4rem;">
+            <div class="text-sm"><strong>Birth Certificate</strong></div>
+            <div style="display:flex; justify-content:space-between;">
+                <span class="text-sm text-muted">Provided</span>
+                <span class="badge badge-success" style="font-size:0.6rem;">VERIFIED</span>
+            </div>
+        </div>
+        <div style="padding:0.5rem; background:white; border:1px solid var(--border); border-radius:4px; margin-bottom:0.4rem;">
+            <div class="text-sm"><strong>Tax Records</strong></div>
+            <div style="display:flex; justify-content:space-between;">
+                <span class="text-sm text-muted">1973-2025</span>
+                <span class="badge badge-success" style="font-size:0.6rem;">VERIFIED</span>
+            </div>
+        </div>
+
+        <h3 style="font-size:0.9rem; color:var(--primary); margin-bottom:0.8rem; margin-top:1.5rem;">Authority Chain</h3>
+        <div class="text-sm" style="line-height:2;">
+            <div style="padding-left:0;">Constitution Act, 1867</div>
+            <div style="padding-left:0.8rem; border-left:2px solid var(--primary-light);">Old Age Security Act</div>
+            <div style="padding-left:1.6rem; border-left:2px solid var(--primary-light);">OAS Regulations</div>
+            <div style="padding-left:2.4rem; border-left:2px solid var(--primary-light);">OAS Program</div>
+            <div style="padding-left:3.2rem; border-left:2px solid var(--success);">Eligibility Determination</div>
+        </div>
+
+        <h3 style="font-size:0.9rem; color:var(--primary); margin-bottom:0.8rem; margin-top:1.5rem;">Audit Actions</h3>
+        <div class="text-sm text-muted">
+            <div>09:41:02 &mdash; Case opened</div>
+            <div>09:41:03 &mdash; Engine evaluated</div>
+            <div>09:41:03 &mdash; 5 rules checked</div>
+            <div style="color:var(--primary); font-weight:600;">Awaiting officer decision...</div>
+        </div>
+    </div>
+</div>
+</div>
+
+<div class="card mt-2" style="text-align:center;">
+    <p class="text-sm text-muted">
+        This is a non-functional preview of a production officer workstation.
+        The real demo with working evaluation is at <a href="#" onclick="return false;">Cases</a>.
+        <br>
+        A deployable MVP would add: user authentication, persistent database, document upload,
+        role-based access, and integration with government registries.
+    </p>
+</div>
+
+    </div>
+    <footer>
+        GovOps &mdash; Policy-Driven Service Delivery Machine &mdash; Open Public Good (Apache 2.0)
+    </footer>
+</body>
+</html>

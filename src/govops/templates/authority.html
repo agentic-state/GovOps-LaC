@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% block title %}GovOps - Authority Chain{% endblock %}
+{% block content %}
+<p class="mb-2"><a href="/cases?lang={{ lang }}">&larr; {{ t('common.back_to_cases') if t else 'Back to cases' }}</a></p>
+
+<div class="card">
+    <h2>Jurisdiction</h2>
+    {% if jurisdiction %}
+    <table>
+        <tr><td><strong>Name</strong></td><td>{{ jurisdiction.name }}</td></tr>
+        <tr><td><strong>Country</strong></td><td>{{ jurisdiction.country }}</td></tr>
+        <tr><td><strong>Level</strong></td><td>{{ jurisdiction.level | title }}</td></tr>
+        <tr><td><strong>Legal Tradition</strong></td><td>{{ jurisdiction.legal_tradition }}</td></tr>
+        <tr><td><strong>Language Regime</strong></td><td>{{ jurisdiction.language_regime }}</td></tr>
+    </table>
+    {% endif %}
+</div>
+
+<div class="card">
+    <h2>Authority Chain</h2>
+    <p class="text-sm text-muted mb-2">
+        Every rule in the GovOps engine traces back through this authority chain to its sovereign context.
+    </p>
+    {% for ref in chain %}
+    <div class="chain-item" style="margin-left: {{ loop.index0 * 1.5 }}rem;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <strong>{{ ref.title }}</strong>
+            <span class="badge badge-info">{{ ref.layer | title }}</span>
+        </div>
+        <p class="citation">{{ ref.citation }}</p>
+        {% if ref.effective_date %}
+        <p class="text-sm text-muted">Effective: {{ ref.effective_date }}</p>
+        {% endif %}
+        {% if ref.url %}
+        <p class="text-sm"><a href="{{ ref.url }}" target="_blank">View source &rarr;</a></p>
+        {% endif %}
+    </div>
+    {% endfor %}
+</div>
+
+<div class="card">
+    <h2>Legal Documents</h2>
+    {% for doc in documents %}
+    <div class="mb-2" style="border-bottom: 1px solid var(--border); padding-bottom: 1rem;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <strong>{{ doc.title }}</strong>
+            <span class="badge badge-muted">{{ doc.document_type.value | replace("_", " ") | title }}</span>
+        </div>
+        <p class="citation">{{ doc.citation }}</p>
+        {% for sec in doc.sections %}
+        <div style="margin-top: 0.5rem; padding: 0.6rem; background: #f8f9fa; border-radius: 4px;">
+            <strong>{{ sec.section_ref }}</strong>
+            {% if sec.heading %} &mdash; {{ sec.heading }}{% endif %}
+            <p class="text-sm mt-1" style="line-height: 1.5;">{{ sec.text }}</p>
+        </div>
+        {% endfor %}
+    </div>
+    {% endfor %}
+</div>
+
+<div class="card">
+    <h2>Formalized Rules</h2>
+    <p class="text-sm text-muted mb-2">Rules extracted from the legal corpus and formalized for deterministic evaluation.</p>
+    <table>
+        <thead>
+            <tr>
+                <th>Rule</th>
+                <th>Type</th>
+                <th>Formal Expression</th>
+                <th>Citation</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for rule in rules %}
+        <tr>
+            <td>{{ rule.description }}</td>
+            <td><span class="badge badge-info">{{ rule.rule_type.value | replace("_", " ") | title }}</span></td>
+            <td><code>{{ rule.formal_expression }}</code></td>
+            <td class="citation">{{ rule.citation }}</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

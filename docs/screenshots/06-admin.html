@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GovOps - Admin: Glass Window</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>&#9878;</text></svg>">
+    <style>
+        :root {
+            --bg: #f8f9fa;
+            --card: #ffffff;
+            --border: #dee2e6;
+            --text: #212529;
+            --muted: #6c757d;
+            --primary: #1a5276;
+            --primary-light: #2980b9;
+            --success: #27ae60;
+            --danger: #c0392b;
+            --warning: #f39c12;
+            --info: #2980b9;
+            --accent: #e8f4fd;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+        }
+        header {
+            background: var(--primary);
+            color: white;
+            padding: 0.8rem 2rem;
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+        }
+        header h1 { font-size: 1.4rem; font-weight: 600; }
+        header nav { display: flex; gap: 1.5rem; flex: 1; }
+        header nav a { color: rgba(255,255,255,0.85); text-decoration: none; font-size: 0.9rem; }
+        header nav a:hover { color: white; }
+        .header-controls { display: flex; gap: 0.5rem; align-items: center; }
+        .header-controls select {
+            padding: 0.25rem 0.4rem;
+            border: 1px solid rgba(255,255,255,0.3);
+            border-radius: 4px;
+            background: rgba(255,255,255,0.15);
+            color: white;
+            font-size: 0.8rem;
+            cursor: pointer;
+        }
+        .header-controls select option { color: #212529; background: white; }
+        .container { max-width: 1100px; margin: 0 auto; padding: 2rem; }
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        .card h2 { font-size: 1.1rem; color: var(--primary); margin-bottom: 1rem; border-bottom: 2px solid var(--accent); padding-bottom: 0.5rem; }
+        .card h3 { font-size: 0.95rem; color: var(--muted); margin-bottom: 0.5rem; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+        th { text-align: left; padding: 0.6rem 0.8rem; background: var(--accent); color: var(--primary); font-weight: 600; }
+        td { padding: 0.6rem 0.8rem; border-bottom: 1px solid var(--border); }
+        tr:hover td { background: #f1f5f9; }
+        a { color: var(--primary-light); }
+        .badge {
+            display: inline-block;
+            padding: 0.15rem 0.6rem;
+            border-radius: 12px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        .badge-success { background: #d4edda; color: #155724; }
+        .badge-danger { background: #f8d7da; color: #721c24; }
+        .badge-warning { background: #fff3cd; color: #856404; }
+        .badge-info { background: #d1ecf1; color: #0c5460; }
+        .badge-muted { background: #e9ecef; color: #495057; }
+        .btn {
+            display: inline-block;
+            padding: 0.5rem 1.2rem;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            color: white;
+        }
+        .btn-primary { background: var(--primary); }
+        .btn-primary:hover { background: var(--primary-light); }
+        .btn-success { background: var(--success); }
+        .btn-danger { background: var(--danger); }
+        .btn-warning { background: var(--warning); color: #212529; }
+        .btn-sm { padding: 0.3rem 0.8rem; font-size: 0.8rem; }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+        .text-muted { color: var(--muted); }
+        .text-sm { font-size: 0.85rem; }
+        .mb-1 { margin-bottom: 0.5rem; }
+        .mb-2 { margin-bottom: 1rem; }
+        .mt-1 { margin-top: 0.5rem; }
+        .mt-2 { margin-top: 1rem; }
+        textarea, select, input[type="text"] {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            font-family: inherit;
+            font-size: 0.9rem;
+        }
+        textarea { min-height: 80px; resize: vertical; }
+        .rule-eval {
+            padding: 0.8rem;
+            margin-bottom: 0.5rem;
+            border-radius: 6px;
+            border-left: 4px solid;
+        }
+        .rule-eval.satisfied { border-color: var(--success); background: #f0fdf4; }
+        .rule-eval.not_satisfied { border-color: var(--danger); background: #fef2f2; }
+        .rule-eval.insufficient_evidence { border-color: var(--warning); background: #fffbeb; }
+        .rule-eval.not_applicable { border-color: var(--muted); background: #f9fafb; }
+        .citation { font-style: italic; color: var(--muted); font-size: 0.82rem; }
+        .chain-item {
+            padding: 0.8rem 1rem;
+            margin-left: 1.5rem;
+            border-left: 3px solid var(--primary-light);
+            margin-bottom: 0.3rem;
+        }
+        .chain-item:first-child { margin-left: 0; border-left: 3px solid var(--primary); }
+        pre { background: #f1f5f9; padding: 1rem; border-radius: 6px; overflow-x: auto; font-size: 0.82rem; white-space: pre-wrap; }
+        footer { text-align: center; padding: 2rem; color: var(--muted); font-size: 0.8rem; }
+        .flag { font-size: 1.1rem; }
+        @media (max-width: 768px) {
+            .grid-2 { grid-template-columns: 1fr; }
+            header { flex-direction: column; align-items: flex-start; gap: 0.5rem; }
+        }
+    </style>
+</head>
+<body><div style="position:fixed;top:0;left:0;right:0;z-index:9999;background:#c0392b;color:white;text-align:center;padding:0.6rem 1rem;font-family:-apple-system,sans-serif;font-size:0.85rem;">
+This is a static preview. <a href="https://github.com/eva-foundry/61-GovOps" style="color:#ffd700;font-weight:600;">Install GovOps</a> to run the live demo: <code style="background:rgba(0,0,0,0.3);padding:0.15rem 0.4rem;border-radius:3px;">pip install -e . && govops-demo</code>
+</div>
+<div style="height:2.5rem;"></div>
+    <header>
+        <h1>GovOps</h1>
+        <nav>
+            <a href="/?lang=en">About</a>
+            <a href="#" onclick="return false;">Cases</a>
+            <a href="#" onclick="return false;">Authority Chain</a>
+            <a href="#" onclick="return false;">Encode</a>
+            <a href="#" onclick="return false;">MVP</a>
+            <a href="#" onclick="return false;" style="color:rgba(255,255,255,0.6);">Admin</a>
+            <a href="#" onclick="return false;">API</a>
+        </nav>
+        <div class="header-controls">
+            
+            <form method="POST" action="#" onclick="return false;" style="display:flex; gap:0.3rem; align-items:center;">
+                <input type="hidden" name="lang" value="en">
+                <select name="jur_code" onchange="return false;">
+                    
+                    <option value="ca" selected>
+                        Government of Canada
+                    </option>
+                    
+                    <option value="br" >
+                        Republica Federativa do Brasil
+                    </option>
+                    
+                    <option value="es" >
+                        Reino de Espana
+                    </option>
+                    
+                    <option value="fr" >
+                        Republique francaise
+                    </option>
+                    
+                    <option value="de" >
+                        Bundesrepublik Deutschland
+                    </option>
+                    
+                    <option value="ua" >
+                        Ukraina
+                    </option>
+                    
+                </select>
+            </form>
+            
+            
+            <select onchange="window.location.href=window.location.pathname+'?lang='+this.value">
+                
+                <option value="en" selected>English</option>
+                
+                <option value="fr" >Francais</option>
+                
+                <option value="pt" >Portugues</option>
+                
+                <option value="es" >Espanol</option>
+                
+                <option value="de" >Deutsch</option>
+                
+                <option value="uk" >Ukrainska</option>
+                
+            </select>
+            
+        </div>
+    </header>
+    <div class="container">
+        
+<h2 class="mb-2" style="font-size:1.3rem;">Glass Window &mdash; Data Behind the Scenes</h2>
+<p class="text-sm text-muted mb-2">
+    Everything the engine uses to make decisions is visible here. No hidden state. No black boxes.
+</p>
+
+<div style="display:flex; gap:0.5rem; flex-wrap:wrap; margin-bottom:1.5rem;">
+    <a href="#jur" class="btn btn-primary btn-sm">Jurisdiction</a>
+    <a href="#chain" class="btn btn-primary btn-sm">Authority Chain</a>
+    <a href="#docs" class="btn btn-primary btn-sm">Legal Documents</a>
+    <a href="#rules" class="btn btn-primary btn-sm">Rules</a>
+    <a href="#cases" class="btn btn-primary btn-sm">Cases</a>
+    <a href="#recs" class="btn btn-primary btn-sm">Recommendations</a>
+    <a href="#reviews" class="btn btn-primary btn-sm">Reviews</a>
+    <a href="#audit" class="btn btn-primary btn-sm">Audit Trails</a>
+    <a href="#stats" class="btn btn-primary btn-sm">Statistics</a>
+</div>
+
+<!-- Statistics -->
+<div class="card" id="stats">
+    <h2>Store Statistics</h2>
+    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap:1rem;">
+        <div style="text-align:center; padding:1rem; background:var(--accent); border-radius:8px;">
+            <div style="font-size:2rem; font-weight:700; color:var(--primary);">1</div>
+            <div class="text-sm text-muted">Jurisdictions</div>
+        </div>
+        <div style="text-align:center; padding:1rem; background:var(--accent); border-radius:8px;">
+            <div style="font-size:2rem; font-weight:700; color:var(--primary);">6</div>
+            <div class="text-sm text-muted">Authority Links</div>
+        </div>
+        <div style="text-align:center; padding:1rem; background:var(--accent); border-radius:8px;">
+            <div style="font-size:2rem; font-weight:700; color:var(--primary);">2</div>
+            <div class="text-sm text-muted">Legal Documents</div>
+        </div>
+        <div style="text-align:center; padding:1rem; background:var(--accent); border-radius:8px;">
+            <div style="font-size:2rem; font-weight:700; color:var(--primary);">5</div>
+            <div class="text-sm text-muted">Formalized Rules</div>
+        </div>
+        <div style="text-align:center; padding:1rem; background:var(--accent); border-radius:8px;">
+            <div style="font-size:2rem; font-weight:700; color:var(--primary);">4</div>
+            <div class="text-sm text-muted">Cases</div>
+        </div>
+        <div style="text-align:center; padding:1rem; background:var(--accent); border-radius:8px;">
+            <div style="font-size:2rem; font-weight:700; color:var(--primary);">1</div>
+            <div class="text-sm text-muted">Recommendations</div>
+        </div>
+        <div style="text-align:center; padding:1rem; background:var(--accent); border-radius:8px;">
+            <div style="font-size:2rem; font-weight:700; color:var(--primary);">1</div>
+            <div class="text-sm text-muted">Reviews</div>
+        </div>
+        <div style="text-align:center; padding:1rem; background:var(--accent); border-radius:8px;">
+            <div style="font-size:2rem; font-weight:700; color:var(--primary);">12</div>
+            <div class="text-sm text-muted">Audit Entries</div>
+        </div>
+    </div>
+</div>
+
+<!-- Jurisdiction -->
+<div class="card" id="jur">
+    <h2>Jurisdiction</h2>
+    
+    <table>
+        <tr><td style="width:160px;"><strong>ID</strong></td><td><code>jur-ca-federal</code></td></tr>
+        <tr><td><strong>Name</strong></td><td>Government of Canada</td></tr>
+        <tr><td><strong>Country</strong></td><td>CA</td></tr>
+        <tr><td><strong>Level</strong></td><td>federal</td></tr>
+        <tr><td><strong>Legal Tradition</strong></td><td>Bijural (common law / civil law)</td></tr>
+        <tr><td><strong>Language Regime</strong></td><td>English and French (Official Languages Act)</td></tr>
+    </table>
+    
+</div>
+
+<!-- Authority Chain -->
+<div class="card" id="chain">
+    <h2>Authority Chain (6 links)</h2>
+    <table>
+        <thead><tr><th>ID</th><th>Layer</th><th>Title</th><th>Citation</th><th>Effective</th><th>Parent</th></tr></thead>
+        <tbody>
+        
+        <tr>
+            <td><code class="text-sm">auth-constitution</code></td>
+            <td><span class="badge badge-info">constitution</span></td>
+            <td>Constitution Act, 1867</td>
+            <td class="citation">30 &amp; 31 Vict., c. 3 (U.K.), s. 91(2A)</td>
+            <td class="text-sm">1867-07-01</td>
+            <td><code class="text-sm">root</code></td>
+        </tr>
+        
+        <tr>
+            <td><code class="text-sm">auth-oas-act</code></td>
+            <td><span class="badge badge-info">act</span></td>
+            <td>Old Age Security Act</td>
+            <td class="citation">R.S.C., 1985, c. O-9</td>
+            <td class="text-sm">1985-01-01</td>
+            <td><code class="text-sm">auth-constitution</code></td>
+        </tr>
+        
+        <tr>
+            <td><code class="text-sm">auth-oas-regs</code></td>
+            <td><span class="badge badge-info">regulation</span></td>
+            <td>Old Age Security Regulations</td>
+            <td class="citation">C.R.C., c. 1246</td>
+            <td class="text-sm">1985-01-01</td>
+            <td><code class="text-sm">auth-oas-act</code></td>
+        </tr>
+        
+        <tr>
+            <td><code class="text-sm">auth-oas-delivery</code></td>
+            <td><span class="badge badge-info">program</span></td>
+            <td>Federal Department Responsible for OAS Delivery</td>
+            <td class="citation">Department of Employment and Social Development Act, S.C. 2005, c. 34</td>
+            <td class="text-sm">2005-12-12</td>
+            <td><code class="text-sm">auth-oas-act</code></td>
+        </tr>
+        
+        <tr>
+            <td><code class="text-sm">auth-oas-program</code></td>
+            <td><span class="badge badge-info">program</span></td>
+            <td>Old Age Security Program</td>
+            <td class="citation">OAS Act, Part I</td>
+            <td class="text-sm"></td>
+            <td><code class="text-sm">auth-oas-delivery</code></td>
+        </tr>
+        
+        <tr>
+            <td><code class="text-sm">auth-oas-eligibility</code></td>
+            <td><span class="badge badge-info">service</span></td>
+            <td>OAS Initial Eligibility Determination</td>
+            <td class="citation">OAS Act, ss. 3-3.1</td>
+            <td class="text-sm"></td>
+            <td><code class="text-sm">auth-oas-program</code></td>
+        </tr>
+        
+        </tbody>
+    </table>
+</div>
+
+<!-- Legal Documents -->
+<div class="card" id="docs">
+    <h2>Legal Documents (2)</h2>
+    
+    <div style="border: 1px solid var(--border); border-radius: 6px; padding: 1rem; margin-bottom: 1rem;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <strong>Old Age Security Act</strong>
+            <span class="badge badge-muted">statute</span>
+        </div>
+        <p class="text-sm text-muted"><code>doc-oas-act</code> &mdash; R.S.C., 1985, c. O-9</p>
+        
+        <div style="margin-top: 0.5rem; padding: 0.6rem; background: #f8f9fa; border-radius: 4px; border-left: 3px solid var(--primary-light);">
+            <strong>s. 3(1)</strong> &mdash; Payment of pension
+            <p class="text-sm mt-1" style="line-height:1.5;">Subject to this Act and the regulations, a monthly pension may be paid to every person who, being sixty-five years of age or over, has resided in Canada after reaching eighteen years of age and after July 1, 1977 for periods the aggregate of which is not less than ten years.</p>
+            <p class="text-sm text-muted">ID: <code>sec-3-1</code></p>
+        </div>
+        
+        <div style="margin-top: 0.5rem; padding: 0.6rem; background: #f8f9fa; border-radius: 4px; border-left: 3px solid var(--primary-light);">
+            <strong>s. 3(2)</strong> &mdash; Amount of pension
+            <p class="text-sm mt-1" style="line-height:1.5;">The amount of the pension that may be paid to a pensioner is (a) where the pensioner has resided in Canada after reaching eighteen years of age and after July 1, 1977 for periods the aggregate of which is not less than forty years, a full pension, and (b) in any other case, a proportion of a full pension equal to one-fortieth of a full pension for each complete year of residence in Canada after the pensioner reached eighteen years of age.</p>
+            <p class="text-sm text-muted">ID: <code>sec-3-2</code></p>
+        </div>
+        
+        <div style="margin-top: 0.5rem; padding: 0.6rem; background: #f8f9fa; border-radius: 4px; border-left: 3px solid var(--primary-light);">
+            <strong>s. 3.1(1)</strong> &mdash; Requirement for application
+            <p class="text-sm mt-1" style="line-height:1.5;">No pension may be paid to any person unless an application therefor has been made by or on behalf of that person and payment of the pension has been approved.</p>
+            <p class="text-sm text-muted">ID: <code>sec-3-1-1</code></p>
+        </div>
+        
+    </div>
+    
+    <div style="border: 1px solid var(--border); border-radius: 6px; padding: 1rem; margin-bottom: 1rem;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <strong>Old Age Security Regulations</strong>
+            <span class="badge badge-muted">regulation</span>
+        </div>
+        <p class="text-sm text-muted"><code>doc-oas-regs</code> &mdash; C.R.C., c. 1246</p>
+        
+        <div style="margin-top: 0.5rem; padding: 0.6rem; background: #f8f9fa; border-radius: 4px; border-left: 3px solid var(--primary-light);">
+            <strong>s. 21(1)</strong> &mdash; Evidence of age
+            <p class="text-sm mt-1" style="line-height:1.5;">An applicant for a benefit shall furnish evidence of the applicant&#39;s age, which evidence shall be a birth certificate or a certified copy thereof.</p>
+            <p class="text-sm text-muted">ID: <code>sec-reg-21</code></p>
+        </div>
+        
+    </div>
+    
+</div>
+
+<!-- Rules -->
+<div class="card" id="rules">
+    <h2>Formalized Rules (5)</h2>
+    <table>
+        <thead><tr><th>ID</th><th>Type</th><th>Description</th><th>Formal Expression</th><th>Citation</th><th>Parameters</th></tr></thead>
+        <tbody>
+        
+        <tr>
+            <td><code class="text-sm">rule-age-65</code></td>
+            <td><span class="badge badge-info">age_threshold</span></td>
+            <td>Applicant must be 65 years of age or older</td>
+            <td><code class="text-sm">applicant.age &gt;= 65</code></td>
+            <td class="citation">Old Age Security Act, R.S.C. 1985, c. O-9, s. 3(1)</td>
+            <td class="text-sm"><code>{&#39;min_age&#39;: 65}</code></td>
+        </tr>
+        
+        <tr>
+            <td><code class="text-sm">rule-residency-10</code></td>
+            <td><span class="badge badge-info">residency_minimum</span></td>
+            <td>Minimum 10 years of Canadian residency after age 18</td>
+            <td><code class="text-sm">canadian_residency_years_after_18 &gt;= 10</code></td>
+            <td class="citation">Old Age Security Act, R.S.C. 1985, c. O-9, s. 3(1)</td>
+            <td class="text-sm"><code>{&#39;min_years&#39;: 10, &#39;home_countries&#39;: [&#39;CA&#39;, &#39;CANADA&#39;, &#39;CAN&#39;]}</code></td>
+        </tr>
+        
+        <tr>
+            <td><code class="text-sm">rule-residency-pension-type</code></td>
+            <td><span class="badge badge-info">residency_partial</span></td>
+            <td>Full pension at 40+ years; partial pension at 10-39 years (1/40 per year)</td>
+            <td><code class="text-sm">pension_ratio = min(residency_years, 40) / 40</code></td>
+            <td class="citation">Old Age Security Act, R.S.C. 1985, c. O-9, s. 3(2)</td>
+            <td class="text-sm"><code>{&#39;full_years&#39;: 40, &#39;min_years&#39;: 10}</code></td>
+        </tr>
+        
+        <tr>
+            <td><code class="text-sm">rule-legal-status</code></td>
+            <td><span class="badge badge-info">legal_status</span></td>
+            <td>Applicant must be a Canadian citizen or permanent resident</td>
+            <td><code class="text-sm">applicant.legal_status in [&#39;citizen&#39;, &#39;permanent_resident&#39;]</code></td>
+            <td class="citation">Old Age Security Act, R.S.C. 1985, c. O-9, s. 3(1)</td>
+            <td class="text-sm"><code>{&#39;accepted_statuses&#39;: [&#39;citizen&#39;, &#39;permanent_resident&#39;]}</code></td>
+        </tr>
+        
+        <tr>
+            <td><code class="text-sm">rule-evidence-age</code></td>
+            <td><span class="badge badge-info">evidence_required</span></td>
+            <td>Evidence of age must be provided (birth certificate or equivalent)</td>
+            <td><code class="text-sm">has_evidence(&#39;birth_certificate&#39;) or has_evidence(&#39;passport&#39;)</code></td>
+            <td class="citation">Old Age Security Regulations, C.R.C. c. 1246, s. 21(1)</td>
+            <td class="text-sm"><code>{&#39;required_types&#39;: [&#39;birth_certificate&#39;]}</code></td>
+        </tr>
+        
+        </tbody>
+    </table>
+</div>
+
+<!-- Cases -->
+<div class="card" id="cases">
+    <h2>Cases (4)</h2>
+    
+    <div style="border: 1px solid var(--border); border-radius: 6px; padding: 1rem; margin-bottom: 0.8rem;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <strong>demo-case-001</strong>
+            
+                <span class="badge badge-success">decided</span>
+            
+        </div>
+        <table class="text-sm mt-1">
+            <tr><td style="width:140px;">Applicant</td><td><strong>Margaret Chen</strong></td></tr>
+            <tr><td>Date of Birth</td><td>1955-03-15</td></tr>
+            <tr><td>Legal Status</td><td>citizen</td></tr>
+            <tr><td>Jurisdiction</td><td><code>jur-ca-federal</code></td></tr>
+            <tr><td>Residency</td><td>1 period(s): Canada (1955-03-15)</td></tr>
+            <tr><td>Evidence</td><td>2 item(s): birth_certificate, tax_record</td></tr>
+        </table>
+    </div>
+    
+    <div style="border: 1px solid var(--border); border-radius: 6px; padding: 1rem; margin-bottom: 0.8rem;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <strong>demo-case-002</strong>
+            
+                <span class="badge badge-muted">intake</span>
+            
+        </div>
+        <table class="text-sm mt-1">
+            <tr><td style="width:140px;">Applicant</td><td><strong>David Park</strong></td></tr>
+            <tr><td>Date of Birth</td><td>1975-08-22</td></tr>
+            <tr><td>Legal Status</td><td>citizen</td></tr>
+            <tr><td>Jurisdiction</td><td><code>jur-ca-federal</code></td></tr>
+            <tr><td>Residency</td><td>1 period(s): Canada (1975-08-22)</td></tr>
+            <tr><td>Evidence</td><td>2 item(s): birth_certificate, tax_record</td></tr>
+        </table>
+    </div>
+    
+    <div style="border: 1px solid var(--border); border-radius: 6px; padding: 1rem; margin-bottom: 0.8rem;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <strong>demo-case-003</strong>
+            
+                <span class="badge badge-muted">intake</span>
+            
+        </div>
+        <table class="text-sm mt-1">
+            <tr><td style="width:140px;">Applicant</td><td><strong>Amara Osei</strong></td></tr>
+            <tr><td>Date of Birth</td><td>1958-11-03</td></tr>
+            <tr><td>Legal Status</td><td>permanent_resident</td></tr>
+            <tr><td>Jurisdiction</td><td><code>jur-ca-federal</code></td></tr>
+            <tr><td>Residency</td><td>2 period(s): Ghana (1958-11-03 to 1993-06-01), Canada (1993-06-01)</td></tr>
+            <tr><td>Evidence</td><td>3 item(s): birth_certificate, tax_record, residency_declaration</td></tr>
+        </table>
+    </div>
+    
+    <div style="border: 1px solid var(--border); border-radius: 6px; padding: 1rem; margin-bottom: 0.8rem;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <strong>demo-case-004</strong>
+            
+                <span class="badge badge-muted">intake</span>
+            
+        </div>
+        <table class="text-sm mt-1">
+            <tr><td style="width:140px;">Applicant</td><td><strong>Jean-Pierre Tremblay</strong></td></tr>
+            <tr><td>Date of Birth</td><td>1952-01-10</td></tr>
+            <tr><td>Legal Status</td><td>citizen</td></tr>
+            <tr><td>Jurisdiction</td><td><code>jur-ca-federal</code></td></tr>
+            <tr><td>Residency</td><td>1 period(s): Canada (1952-01-10)</td></tr>
+            <tr><td>Evidence</td><td>1 item(s): tax_record</td></tr>
+        </table>
+    </div>
+    
+</div>
+
+<!-- Recommendations -->
+<div class="card" id="recs">
+    <h2>Recommendations (1)</h2>
+    
+    
+    <div style="border: 1px solid var(--border); border-radius: 6px; padding: 1rem; margin-bottom: 0.8rem;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <strong>demo-case-001</strong>
+            
+                <span class="badge badge-success">eligible</span>
+            
+        </div>
+        <table class="text-sm mt-1">
+            <tr><td style="width:140px;">Recommendation ID</td><td><code>6a6b1a6f2a45</code></td></tr>
+            <tr><td>Timestamp</td><td>2026-04-13 13:52:30 UTC</td></tr>
+            <tr><td>Pension Type</td><td>full (40/40)</td></tr>
+            <tr><td>Rules Evaluated</td><td>5</td></tr>
+            <tr><td>Missing Evidence</td><td>0 item(s)</td></tr>
+            <tr><td>Flags</td><td>0</td></tr>
+        </table>
+        <details class="mt-1">
+            <summary class="text-sm" style="cursor:pointer; color:var(--primary-light);">Rule evaluations</summary>
+            
+            <div class="rule-eval satisfied mt-1">
+                <strong class="text-sm">rule-age-65</strong> &mdash; <span class="badge badge-success">satisfied</span>
+                <p class="text-sm">Applicant age: 71.1 years (threshold: 65)</p>
+                <p class="citation">Old Age Security Act, R.S.C. 1985, c. O-9, s. 3(1)</p>
+            </div>
+            
+            <div class="rule-eval satisfied mt-1">
+                <strong class="text-sm">rule-residency-10</strong> &mdash; <span class="badge badge-success">satisfied</span>
+                <p class="text-sm">Residency/contribution after age 18: 53.1 years (minimum: 10)</p>
+                <p class="citation">Old Age Security Act, R.S.C. 1985, c. O-9, s. 3(1)</p>
+            </div>
+            
+            <div class="rule-eval satisfied mt-1">
+                <strong class="text-sm">rule-residency-pension-type</strong> &mdash; <span class="badge badge-success">satisfied</span>
+                <p class="text-sm">Full pension: 53.1 years &gt;= 40 year threshold</p>
+                <p class="citation">Old Age Security Act, R.S.C. 1985, c. O-9, s. 3(2)</p>
+            </div>
+            
+            <div class="rule-eval satisfied mt-1">
+                <strong class="text-sm">rule-legal-status</strong> &mdash; <span class="badge badge-success">satisfied</span>
+                <p class="text-sm">Legal status &#39;citizen&#39; is accepted</p>
+                <p class="citation">Old Age Security Act, R.S.C. 1985, c. O-9, s. 3(1)</p>
+            </div>
+            
+            <div class="rule-eval satisfied mt-1">
+                <strong class="text-sm">rule-evidence-age</strong> &mdash; <span class="badge badge-success">satisfied</span>
+                <p class="text-sm">All required evidence provided</p>
+                <p class="citation">Old Age Security Regulations, C.R.C. c. 1246, s. 21(1)</p>
+            </div>
+            
+        </details>
+    </div>
+    
+    
+</div>
+
+<!-- Reviews -->
+<div class="card" id="reviews">
+    <h2>Human Review Actions (1)</h2>
+    
+    
+    
+    <div class="rule-eval satisfied">
+        <strong>demo-case-001</strong> &mdash; Approve
+        <span class="text-sm text-muted">by officer at 2026-04-13 13:52:30 UTC</span>
+        <p class="text-sm mt-1">All evidence verified.</p>
+        <p class="text-sm">Final: <span class="badge badge-info">eligible</span></p>
+    </div>
+    
+    
+    
+</div>
+
+<!-- Audit Trails -->
+<div class="card" id="audit">
+    <h2>Audit Trails (12 entries across 4 cases)</h2>
+    
+    
+    <details class="mb-1">
+        <summary style="cursor:pointer; font-weight:600; color:var(--primary);">demo-case-001 (9 entries)</summary>
+        <table class="text-sm mt-1">
+            <thead><tr><th>Time</th><th>Event</th><th>Actor</th><th>Detail</th></tr></thead>
+            <tbody>
+            
+            <tr>
+                <td>13:52:30</td>
+                <td><span class="badge badge-muted">case_created</span></td>
+                <td>system:seed</td>
+                <td>Demo case created: Margaret Chen</td>
+            </tr>
+            
+            <tr>
+                <td>13:52:30</td>
+                <td><span class="badge badge-muted">evaluation_start</span></td>
+                <td>system:oas-engine</td>
+                <td>Evaluating case demo-case-001</td>
+            </tr>
+            
+            <tr>
+                <td>13:52:30</td>
+                <td><span class="badge badge-muted">rule_evaluated</span></td>
+                <td>system:oas-engine</td>
+                <td>rule-age-65: satisfied</td>
+            </tr>
+            
+            <tr>
+                <td>13:52:30</td>
+                <td><span class="badge badge-muted">rule_evaluated</span></td>
+                <td>system:oas-engine</td>
+                <td>rule-residency-10: satisfied</td>
+            </tr>
+            
+            <tr>
+                <td>13:52:30</td>
+                <td><span class="badge badge-muted">rule_evaluated</span></td>
+                <td>system:oas-engine</td>
+                <td>rule-residency-pension-type: satisfied</td>
+            </tr>
+            
+            <tr>
+                <td>13:52:30</td>
+                <td><span class="badge badge-muted">rule_evaluated</span></td>
+                <td>system:oas-engine</td>
+                <td>rule-legal-status: satisfied</td>
+            </tr>
+            
+            <tr>
+                <td>13:52:30</td>
+                <td><span class="badge badge-muted">rule_evaluated</span></td>
+                <td>system:oas-engine</td>
+                <td>rule-evidence-age: satisfied</td>
+            </tr>
+            
+            <tr>
+                <td>13:52:30</td>
+                <td><span class="badge badge-muted">recommendation_produced</span></td>
+                <td>system:oas-engine</td>
+                <td>Outcome: eligible</td>
+            </tr>
+            
+            <tr>
+                <td>13:52:30</td>
+                <td><span class="badge badge-muted">human_review</span></td>
+                <td>officer</td>
+                <td>Action: approve | Rationale: All evidence verified.</td>
+            </tr>
+            
+            </tbody>
+        </table>
+    </details>
+    
+    
+    
+    <details class="mb-1">
+        <summary style="cursor:pointer; font-weight:600; color:var(--primary);">demo-case-002 (1 entries)</summary>
+        <table class="text-sm mt-1">
+            <thead><tr><th>Time</th><th>Event</th><th>Actor</th><th>Detail</th></tr></thead>
+            <tbody>
+            
+            <tr>
+                <td>13:52:30</td>
+                <td><span class="badge badge-muted">case_created</span></td>
+                <td>system:seed</td>
+                <td>Demo case created: David Park</td>
+            </tr>
+            
+            </tbody>
+        </table>
+    </details>
+    
+    
+    
+    <details class="mb-1">
+        <summary style="cursor:pointer; font-weight:600; color:var(--primary);">demo-case-003 (1 entries)</summary>
+        <table class="text-sm mt-1">
+            <thead><tr><th>Time</th><th>Event</th><th>Actor</th><th>Detail</th></tr></thead>
+            <tbody>
+            
+            <tr>
+                <td>13:52:30</td>
+                <td><span class="badge badge-muted">case_created</span></td>
+                <td>system:seed</td>
+                <td>Demo case created: Amara Osei</td>
+            </tr>
+            
+            </tbody>
+        </table>
+    </details>
+    
+    
+    
+    <details class="mb-1">
+        <summary style="cursor:pointer; font-weight:600; color:var(--primary);">demo-case-004 (1 entries)</summary>
+        <table class="text-sm mt-1">
+            <thead><tr><th>Time</th><th>Event</th><th>Actor</th><th>Detail</th></tr></thead>
+            <tbody>
+            
+            <tr>
+                <td>13:52:30</td>
+                <td><span class="badge badge-muted">case_created</span></td>
+                <td>system:seed</td>
+                <td>Demo case created: Jean-Pierre Tremblay</td>
+            </tr>
+            
+            </tbody>
+        </table>
+    </details>
+    
+    
+</div>
+
+<div class="card" style="text-align:center;">
+    <p class="text-sm text-muted">
+        This is the complete state of the GovOps engine. Every object that participates in a decision is visible here.
+        <br>No hidden layers. No shadow state. Glass window.
+    </p>
+</div>
+
+    </div>
+    <footer>
+        GovOps &mdash; Policy-Driven Service Delivery Machine &mdash; Open Public Good (Apache 2.0)
+    </footer>
+</body>
+</html>

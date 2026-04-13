@@ -1,0 +1,1137 @@
+"""Multi-jurisdiction seed data for GovOps.
+
+Each jurisdiction defines its own:
+  - Jurisdiction object
+  - Authority chain (constitution -> law -> regulation -> program -> service)
+  - Legal documents with statutory text
+  - Formalized rules with parameters
+  - Demo cases covering all decision paths
+  - Default language
+
+Pension programs encoded:
+  - Canada: Old Age Security (OAS) - age 65, 10y residency
+  - Brazil: Aposentadoria por Idade (INSS) - age 65m/62f, 15y contribution
+  - Spain: Pension de jubilacion - age 66, 15y contribution
+  - France: Retraite de base - age 64, 2y minimum contribution
+  - Germany: Gesetzliche Rente - age 67, 5y contribution
+  - Ukraine: Pensiia za vikom - age 60, 25y contribution (men)
+"""
+
+from __future__ import annotations
+
+from datetime import date
+
+from govops.models import (
+    Applicant,
+    AuthorityReference,
+    CaseBundle,
+    DocumentType,
+    EvidenceItem,
+    Jurisdiction,
+    LegalDocument,
+    LegalRule,
+    LegalSection,
+    ResidencyPeriod,
+    RuleType,
+)
+
+
+# ===================================================================
+# BRAZIL
+# ===================================================================
+
+BRAZIL_FEDERAL = Jurisdiction(
+    id="jur-br-federal",
+    name="Republica Federativa do Brasil",
+    country="BR",
+    level="federal",
+    legal_tradition="Civil law (Romano-Germanic)",
+    language_regime="Portuguese",
+)
+
+BRAZIL_AUTHORITY_CHAIN = [
+    AuthorityReference(
+        id="auth-br-constitution",
+        jurisdiction_id="jur-br-federal",
+        layer="constitution",
+        title="Constituicao da Republica Federativa do Brasil de 1988",
+        citation="CF/1988, Art. 201",
+        effective_date=date(1988, 10, 5),
+        url="https://www.planalto.gov.br/ccivil_03/constituicao/constituicao.htm",
+    ),
+    AuthorityReference(
+        id="auth-br-law-8213",
+        jurisdiction_id="jur-br-federal",
+        layer="act",
+        title="Lei de Beneficios da Previdencia Social",
+        citation="Lei n. 8.213/1991",
+        effective_date=date(1991, 7, 24),
+        url="https://www.planalto.gov.br/ccivil_03/leis/l8213cons.htm",
+        parent_id="auth-br-constitution",
+    ),
+    AuthorityReference(
+        id="auth-br-ec-103",
+        jurisdiction_id="jur-br-federal",
+        layer="act",
+        title="Emenda Constitucional n. 103/2019 (Reforma da Previdencia)",
+        citation="EC n. 103/2019",
+        effective_date=date(2019, 11, 13),
+        parent_id="auth-br-constitution",
+    ),
+    AuthorityReference(
+        id="auth-br-inss",
+        jurisdiction_id="jur-br-federal",
+        layer="program",
+        title="Instituto Nacional do Seguro Social (INSS)",
+        citation="Lei n. 8.029/1990, Art. 17",
+        parent_id="auth-br-law-8213",
+    ),
+    AuthorityReference(
+        id="auth-br-aposentadoria",
+        jurisdiction_id="jur-br-federal",
+        layer="service",
+        title="Aposentadoria por Idade",
+        citation="Lei n. 8.213/1991, Art. 48; EC 103/2019, Art. 19",
+        parent_id="auth-br-inss",
+    ),
+]
+
+BRAZIL_LEGAL_DOCS = [
+    LegalDocument(
+        id="doc-br-lei-8213",
+        jurisdiction_id="jur-br-federal",
+        document_type=DocumentType.STATUTE,
+        title="Lei de Beneficios da Previdencia Social",
+        citation="Lei n. 8.213/1991",
+        effective_date=date(1991, 7, 24),
+        sections=[
+            LegalSection(
+                id="sec-br-art48",
+                section_ref="Art. 48",
+                heading="Aposentadoria por idade",
+                text=(
+                    "A aposentadoria por idade sera devida ao segurado que, cumprida a "
+                    "carencia exigida nesta Lei, completar 65 (sessenta e cinco) anos de "
+                    "idade, se homem, e 62 (sessenta e dois) anos, se mulher. (Redacao "
+                    "dada pela Emenda Constitucional n. 103, de 2019)"
+                ),
+            ),
+            LegalSection(
+                id="sec-br-art25",
+                section_ref="Art. 25, II",
+                heading="Carencia",
+                text=(
+                    "A concessao da aposentadoria por idade depende de carencia de 180 "
+                    "contribuicoes mensais (15 anos)."
+                ),
+            ),
+        ],
+    ),
+]
+
+BRAZIL_RULES = [
+    LegalRule(
+        id="rule-br-age",
+        source_document_id="doc-br-lei-8213",
+        source_section_ref="Art. 48",
+        rule_type=RuleType.AGE_THRESHOLD,
+        description="Idade minima: 65 anos (homens) ou 62 anos (mulheres)",
+        formal_expression="age >= 65 (male) or age >= 62 (female)",
+        citation="Lei n. 8.213/1991, Art. 48; EC 103/2019",
+        parameters={"min_age": 65},  # Using male threshold for demo
+    ),
+    LegalRule(
+        id="rule-br-contribution",
+        source_document_id="doc-br-lei-8213",
+        source_section_ref="Art. 25, II",
+        rule_type=RuleType.RESIDENCY_MINIMUM,
+        description="Minimo de 15 anos (180 meses) de contribuicao ao INSS",
+        formal_expression="contribution_years >= 15",
+        citation="Lei n. 8.213/1991, Art. 25, II",
+        parameters={"min_years": 15, "home_countries": ["BR", "BRAZIL"]},
+    ),
+    LegalRule(
+        id="rule-br-contribution-calc",
+        source_document_id="doc-br-lei-8213",
+        source_section_ref="Art. 48",
+        rule_type=RuleType.RESIDENCY_PARTIAL,
+        description="Beneficio integral com 40 anos de contribuicao; proporcional com 15-39 anos",
+        formal_expression="pension_ratio = min(contribution_years, 40) / 40",
+        citation="EC 103/2019, Art. 26",
+        parameters={"full_years": 40, "min_years": 15},
+    ),
+    LegalRule(
+        id="rule-br-status",
+        source_document_id="doc-br-lei-8213",
+        source_section_ref="Art. 48",
+        rule_type=RuleType.LEGAL_STATUS,
+        description="Segurado deve estar inscrito no INSS (cidadao ou residente permanente)",
+        formal_expression="legal_status in ['citizen', 'permanent_resident']",
+        citation="Lei n. 8.213/1991, Art. 11",
+        parameters={"accepted_statuses": ["citizen", "permanent_resident"]},
+    ),
+    LegalRule(
+        id="rule-br-evidence",
+        source_document_id="doc-br-lei-8213",
+        source_section_ref="Art. 48",
+        rule_type=RuleType.EVIDENCE_REQUIRED,
+        description="Comprovante de idade (certidao de nascimento ou documento de identidade)",
+        formal_expression="has_evidence('birth_certificate') or has_evidence('id_card')",
+        citation="Lei n. 8.213/1991, Art. 62",
+        parameters={"required_types": ["birth_certificate"]},
+    ),
+]
+
+
+def _brazil_demo_cases() -> list[CaseBundle]:
+    return [
+        CaseBundle(
+            id="demo-br-001",
+            jurisdiction_id="jur-br-federal",
+            applicant=Applicant(
+                id="app-br-001", date_of_birth=date(1955, 6, 12),
+                legal_name="Carlos Alberto Silva", legal_status="citizen", country_of_birth="BR",
+            ),
+            residency_periods=[ResidencyPeriod(country="Brazil", start_date=date(1955, 6, 12), verified=True)],
+            evidence_items=[
+                EvidenceItem(evidence_type="birth_certificate", description="Certidao de nascimento", provided=True, verified=True),
+                EvidenceItem(evidence_type="tax_record", description="CNIS - contribuicoes INSS 1975-2025", provided=True, verified=True),
+            ],
+        ),
+        CaseBundle(
+            id="demo-br-002",
+            jurisdiction_id="jur-br-federal",
+            applicant=Applicant(
+                id="app-br-002", date_of_birth=date(1980, 3, 20),
+                legal_name="Ana Lucia Ferreira", legal_status="citizen", country_of_birth="BR",
+            ),
+            residency_periods=[ResidencyPeriod(country="Brazil", start_date=date(1980, 3, 20), verified=True)],
+            evidence_items=[
+                EvidenceItem(evidence_type="birth_certificate", description="Certidao de nascimento", provided=True, verified=True),
+                EvidenceItem(evidence_type="tax_record", description="CNIS", provided=True),
+            ],
+        ),
+        CaseBundle(
+            id="demo-br-003",
+            jurisdiction_id="jur-br-federal",
+            applicant=Applicant(
+                id="app-br-003", date_of_birth=date(1958, 9, 5),
+                legal_name="Joao Pedro Oliveira", legal_status="permanent_resident", country_of_birth="PT",
+            ),
+            residency_periods=[
+                ResidencyPeriod(country="Portugal", start_date=date(1958, 9, 5), end_date=date(1995, 1, 1)),
+                ResidencyPeriod(country="Brazil", start_date=date(1995, 1, 1), verified=True),
+            ],
+            evidence_items=[
+                EvidenceItem(evidence_type="birth_certificate", description="Certidao de nascimento (Portugal, traduzida)", provided=True, verified=True),
+                EvidenceItem(evidence_type="tax_record", description="CNIS 1995-2025", provided=True, verified=True),
+                EvidenceItem(evidence_type="residency_declaration", description="RNE - Registro Nacional de Estrangeiros", provided=True),
+            ],
+        ),
+        CaseBundle(
+            id="demo-br-004",
+            jurisdiction_id="jur-br-federal",
+            applicant=Applicant(
+                id="app-br-004", date_of_birth=date(1950, 12, 1),
+                legal_name="Maria das Gracas Costa", legal_status="citizen", country_of_birth="BR",
+            ),
+            residency_periods=[ResidencyPeriod(country="Brazil", start_date=date(1950, 12, 1))],
+            evidence_items=[
+                EvidenceItem(evidence_type="tax_record", description="CNIS parcial", provided=True),
+            ],
+        ),
+    ]
+
+
+# ===================================================================
+# SPAIN
+# ===================================================================
+
+SPAIN = Jurisdiction(
+    id="jur-es-national",
+    name="Reino de Espana",
+    country="ES",
+    level="federal",
+    legal_tradition="Civil law (Continental European)",
+    language_regime="Castellano (Spanish); co-official languages in autonomous communities",
+)
+
+SPAIN_AUTHORITY_CHAIN = [
+    AuthorityReference(
+        id="auth-es-constitution",
+        jurisdiction_id="jur-es-national",
+        layer="constitution",
+        title="Constitucion Espanola de 1978",
+        citation="CE 1978, Art. 41, Art. 50",
+        effective_date=date(1978, 12, 29),
+        url="https://www.boe.es/buscar/act.php?id=BOE-A-1978-31229",
+    ),
+    AuthorityReference(
+        id="auth-es-lgss",
+        jurisdiction_id="jur-es-national",
+        layer="act",
+        title="Ley General de la Seguridad Social",
+        citation="Real Decreto Legislativo 8/2015",
+        effective_date=date(2015, 10, 30),
+        url="https://www.boe.es/buscar/act.php?id=BOE-A-2015-11724",
+        parent_id="auth-es-constitution",
+    ),
+    AuthorityReference(
+        id="auth-es-seg-social",
+        jurisdiction_id="jur-es-national",
+        layer="program",
+        title="Seguridad Social - Instituto Nacional de la Seguridad Social (INSS)",
+        citation="LGSS, Art. 1",
+        parent_id="auth-es-lgss",
+    ),
+    AuthorityReference(
+        id="auth-es-jubilacion",
+        jurisdiction_id="jur-es-national",
+        layer="service",
+        title="Pension de jubilacion ordinaria",
+        citation="LGSS, Arts. 205-209",
+        parent_id="auth-es-seg-social",
+    ),
+]
+
+SPAIN_LEGAL_DOCS = [
+    LegalDocument(
+        id="doc-es-lgss",
+        jurisdiction_id="jur-es-national",
+        document_type=DocumentType.STATUTE,
+        title="Ley General de la Seguridad Social",
+        citation="Real Decreto Legislativo 8/2015",
+        effective_date=date(2015, 10, 30),
+        sections=[
+            LegalSection(
+                id="sec-es-art205",
+                section_ref="Art. 205.1",
+                heading="Pension de jubilacion",
+                text=(
+                    "Tendran derecho a la pension de jubilacion las personas incluidas en "
+                    "el Regimen General que, ademas de la general, reuna la edad de 66 anos "
+                    "y 4 meses o 65 anos cuando se acrediten 38 anos y 3 meses de cotizacion."
+                ),
+            ),
+            LegalSection(
+                id="sec-es-art205-carencia",
+                section_ref="Art. 205.1.b",
+                heading="Periodo minimo de cotizacion",
+                text=(
+                    "Tener cubierto un periodo minimo de cotizacion de 15 anos, de los cuales "
+                    "al menos 2 anos deberan estar comprendidos dentro de los 15 anos "
+                    "inmediatamente anteriores al momento de causar el derecho."
+                ),
+            ),
+        ],
+    ),
+]
+
+SPAIN_RULES = [
+    LegalRule(
+        id="rule-es-age",
+        source_document_id="doc-es-lgss",
+        source_section_ref="Art. 205.1",
+        rule_type=RuleType.AGE_THRESHOLD,
+        description="Edad minima de jubilacion: 66 anos y 4 meses (regla general 2025)",
+        formal_expression="age >= 66",
+        citation="LGSS, Art. 205.1.a",
+        parameters={"min_age": 66},
+    ),
+    LegalRule(
+        id="rule-es-contribution-min",
+        source_document_id="doc-es-lgss",
+        source_section_ref="Art. 205.1.b",
+        rule_type=RuleType.RESIDENCY_MINIMUM,
+        description="Periodo minimo de cotizacion: 15 anos",
+        formal_expression="contribution_years >= 15",
+        citation="LGSS, Art. 205.1.b",
+        parameters={"min_years": 15, "home_countries": ["ES", "SPAIN"]},
+    ),
+    LegalRule(
+        id="rule-es-contribution-calc",
+        source_document_id="doc-es-lgss",
+        source_section_ref="Art. 205.1.b",
+        rule_type=RuleType.RESIDENCY_PARTIAL,
+        description="Pension completa con 36+ anos de cotizacion; proporcional con 15-35 anos",
+        formal_expression="pension_ratio = min(contribution_years, 36) / 36",
+        citation="LGSS, Art. 210",
+        parameters={"full_years": 36, "min_years": 15},
+    ),
+    LegalRule(
+        id="rule-es-status",
+        source_document_id="doc-es-lgss",
+        source_section_ref="Art. 205.1",
+        rule_type=RuleType.LEGAL_STATUS,
+        description="Afiliado al Regimen General de la Seguridad Social",
+        formal_expression="legal_status in ['citizen', 'permanent_resident']",
+        citation="LGSS, Art. 7",
+        parameters={"accepted_statuses": ["citizen", "permanent_resident"]},
+    ),
+    LegalRule(
+        id="rule-es-evidence",
+        source_document_id="doc-es-lgss",
+        source_section_ref="Art. 205.1",
+        rule_type=RuleType.EVIDENCE_REQUIRED,
+        description="Documento de identidad (DNI, NIE, o pasaporte)",
+        formal_expression="has_evidence('birth_certificate') or has_evidence('id_card')",
+        citation="LGSS, Disposicion adicional",
+        parameters={"required_types": ["birth_certificate"]},
+    ),
+]
+
+
+def _spain_demo_cases() -> list[CaseBundle]:
+    return [
+        CaseBundle(
+            id="demo-es-001",
+            jurisdiction_id="jur-es-national",
+            applicant=Applicant(
+                id="app-es-001", date_of_birth=date(1957, 4, 18),
+                legal_name="Antonio Garcia Lopez", legal_status="citizen", country_of_birth="ES",
+            ),
+            residency_periods=[ResidencyPeriod(country="Spain", start_date=date(1957, 4, 18), verified=True)],
+            evidence_items=[
+                EvidenceItem(evidence_type="birth_certificate", description="Certificado de nacimiento", provided=True, verified=True),
+                EvidenceItem(evidence_type="tax_record", description="Vida laboral - TGSS 1977-2025", provided=True, verified=True),
+            ],
+        ),
+        CaseBundle(
+            id="demo-es-002",
+            jurisdiction_id="jur-es-national",
+            applicant=Applicant(
+                id="app-es-002", date_of_birth=date(1970, 11, 3),
+                legal_name="Maria Carmen Rodriguez", legal_status="citizen", country_of_birth="ES",
+            ),
+            residency_periods=[ResidencyPeriod(country="Spain", start_date=date(1970, 11, 3), verified=True)],
+            evidence_items=[
+                EvidenceItem(evidence_type="birth_certificate", description="Certificado de nacimiento", provided=True, verified=True),
+                EvidenceItem(evidence_type="tax_record", description="Vida laboral", provided=True),
+            ],
+        ),
+        CaseBundle(
+            id="demo-es-003",
+            jurisdiction_id="jur-es-national",
+            applicant=Applicant(
+                id="app-es-003", date_of_birth=date(1956, 7, 22),
+                legal_name="Mohammed El Fassi", legal_status="permanent_resident", country_of_birth="MA",
+            ),
+            residency_periods=[
+                ResidencyPeriod(country="Morocco", start_date=date(1956, 7, 22), end_date=date(2000, 3, 1)),
+                ResidencyPeriod(country="Spain", start_date=date(2000, 3, 1), verified=True),
+            ],
+            evidence_items=[
+                EvidenceItem(evidence_type="birth_certificate", description="Acta de nacimiento (traducida)", provided=True, verified=True),
+                EvidenceItem(evidence_type="tax_record", description="Vida laboral 2000-2025", provided=True, verified=True),
+                EvidenceItem(evidence_type="residency_declaration", description="NIE - tarjeta de residencia", provided=True),
+            ],
+        ),
+        CaseBundle(
+            id="demo-es-004",
+            jurisdiction_id="jur-es-national",
+            applicant=Applicant(
+                id="app-es-004", date_of_birth=date(1952, 2, 14),
+                legal_name="Pilar Fernandez Ruiz", legal_status="citizen", country_of_birth="ES",
+            ),
+            residency_periods=[ResidencyPeriod(country="Spain", start_date=date(1952, 2, 14))],
+            evidence_items=[
+                EvidenceItem(evidence_type="tax_record", description="Vida laboral parcial", provided=True),
+            ],
+        ),
+    ]
+
+
+# ===================================================================
+# FRANCE
+# ===================================================================
+
+FRANCE = Jurisdiction(
+    id="jur-fr-national",
+    name="Republique francaise",
+    country="FR",
+    level="federal",
+    legal_tradition="Civil law (Napoleonic code)",
+    language_regime="Francais",
+)
+
+FRANCE_AUTHORITY_CHAIN = [
+    AuthorityReference(
+        id="auth-fr-constitution",
+        jurisdiction_id="jur-fr-national",
+        layer="constitution",
+        title="Constitution de la Ve Republique",
+        citation="Constitution du 4 octobre 1958, Preambule de 1946, al. 11",
+        effective_date=date(1958, 10, 4),
+        url="https://www.legifrance.gouv.fr/loda/id/LEGITEXT000006071194",
+    ),
+    AuthorityReference(
+        id="auth-fr-css",
+        jurisdiction_id="jur-fr-national",
+        layer="act",
+        title="Code de la securite sociale",
+        citation="CSS, Livre III, Titre V",
+        effective_date=date(1985, 1, 1),
+        url="https://www.legifrance.gouv.fr/codes/id/LEGITEXT000006073189/",
+        parent_id="auth-fr-constitution",
+    ),
+    AuthorityReference(
+        id="auth-fr-reform-2023",
+        jurisdiction_id="jur-fr-national",
+        layer="act",
+        title="Loi de financement rectificative de la securite sociale pour 2023",
+        citation="Loi n. 2023-270 du 14 avril 2023",
+        effective_date=date(2023, 9, 1),
+        parent_id="auth-fr-constitution",
+    ),
+    AuthorityReference(
+        id="auth-fr-cnav",
+        jurisdiction_id="jur-fr-national",
+        layer="program",
+        title="Caisse nationale d'assurance vieillesse (CNAV)",
+        citation="CSS, Art. L. 222-1",
+        parent_id="auth-fr-css",
+    ),
+    AuthorityReference(
+        id="auth-fr-retraite",
+        jurisdiction_id="jur-fr-national",
+        layer="service",
+        title="Retraite de base - pension de vieillesse",
+        citation="CSS, Art. L. 351-1 et seq.",
+        parent_id="auth-fr-cnav",
+    ),
+]
+
+FRANCE_LEGAL_DOCS = [
+    LegalDocument(
+        id="doc-fr-css",
+        jurisdiction_id="jur-fr-national",
+        document_type=DocumentType.STATUTE,
+        title="Code de la securite sociale",
+        citation="CSS, Livre III, Titre V",
+        sections=[
+            LegalSection(
+                id="sec-fr-l351-1",
+                section_ref="Art. L. 351-1",
+                heading="Conditions d'ouverture du droit",
+                text=(
+                    "L'assurance vieillesse garantit une pension de retraite a l'assure qui "
+                    "en demande la liquidation a partir de l'age de 64 ans. "
+                    "(Modifie par Loi n. 2023-270 du 14 avril 2023)"
+                ),
+            ),
+            LegalSection(
+                id="sec-fr-l351-1-duree",
+                section_ref="Art. L. 351-1, al. 2",
+                heading="Duree d'assurance",
+                text=(
+                    "Le montant de la pension est calcule en fonction de la duree d'assurance, "
+                    "avec un taux plein pour 172 trimestres (43 annees) de cotisation."
+                ),
+            ),
+        ],
+    ),
+]
+
+FRANCE_RULES = [
+    LegalRule(
+        id="rule-fr-age",
+        source_document_id="doc-fr-css",
+        source_section_ref="Art. L. 351-1",
+        rule_type=RuleType.AGE_THRESHOLD,
+        description="Age legal de depart a la retraite : 64 ans (reforme 2023)",
+        formal_expression="age >= 64",
+        citation="CSS, Art. L. 351-1; Loi n. 2023-270",
+        parameters={"min_age": 64},
+    ),
+    LegalRule(
+        id="rule-fr-trimestres-min",
+        source_document_id="doc-fr-css",
+        source_section_ref="Art. L. 351-1, al. 2",
+        rule_type=RuleType.RESIDENCY_MINIMUM,
+        description="Duree minimale d'assurance : 2 ans (8 trimestres) pour ouvrir le droit",
+        formal_expression="contribution_years >= 2",
+        citation="CSS, Art. L. 351-1",
+        parameters={"min_years": 2, "home_countries": ["FR", "FRANCE"]},
+    ),
+    LegalRule(
+        id="rule-fr-trimestres-calc",
+        source_document_id="doc-fr-css",
+        source_section_ref="Art. L. 351-1, al. 2",
+        rule_type=RuleType.RESIDENCY_PARTIAL,
+        description="Taux plein a 43 ans de cotisation (172 trimestres); proratise en dessous",
+        formal_expression="pension_ratio = min(contribution_years, 43) / 43",
+        citation="CSS, Art. L. 351-1",
+        parameters={"full_years": 43, "min_years": 2},
+    ),
+    LegalRule(
+        id="rule-fr-status",
+        source_document_id="doc-fr-css",
+        source_section_ref="Art. L. 351-1",
+        rule_type=RuleType.LEGAL_STATUS,
+        description="Assure du regime general (citoyen ou resident)",
+        formal_expression="legal_status in ['citizen', 'permanent_resident']",
+        citation="CSS, Art. L. 311-2",
+        parameters={"accepted_statuses": ["citizen", "permanent_resident"]},
+    ),
+    LegalRule(
+        id="rule-fr-evidence",
+        source_document_id="doc-fr-css",
+        source_section_ref="Art. L. 351-1",
+        rule_type=RuleType.EVIDENCE_REQUIRED,
+        description="Piece d'identite (acte de naissance, carte d'identite, ou passeport)",
+        formal_expression="has_evidence('birth_certificate')",
+        citation="CSS, Art. R. 351-1",
+        parameters={"required_types": ["birth_certificate"]},
+    ),
+]
+
+
+def _france_demo_cases() -> list[CaseBundle]:
+    return [
+        CaseBundle(
+            id="demo-fr-001",
+            jurisdiction_id="jur-fr-national",
+            applicant=Applicant(
+                id="app-fr-001", date_of_birth=date(1958, 5, 20),
+                legal_name="Jean-Claude Dupont", legal_status="citizen", country_of_birth="FR",
+            ),
+            residency_periods=[ResidencyPeriod(country="France", start_date=date(1958, 5, 20), verified=True)],
+            evidence_items=[
+                EvidenceItem(evidence_type="birth_certificate", description="Acte de naissance", provided=True, verified=True),
+                EvidenceItem(evidence_type="tax_record", description="Releve de carriere CNAV 1978-2025", provided=True, verified=True),
+            ],
+        ),
+        CaseBundle(
+            id="demo-fr-002",
+            jurisdiction_id="jur-fr-national",
+            applicant=Applicant(
+                id="app-fr-002", date_of_birth=date(1975, 8, 14),
+                legal_name="Sophie Martin", legal_status="citizen", country_of_birth="FR",
+            ),
+            residency_periods=[ResidencyPeriod(country="France", start_date=date(1975, 8, 14), verified=True)],
+            evidence_items=[
+                EvidenceItem(evidence_type="birth_certificate", description="Acte de naissance", provided=True, verified=True),
+                EvidenceItem(evidence_type="tax_record", description="Releve de carriere", provided=True),
+            ],
+        ),
+        CaseBundle(
+            id="demo-fr-003",
+            jurisdiction_id="jur-fr-national",
+            applicant=Applicant(
+                id="app-fr-003", date_of_birth=date(1957, 1, 30),
+                legal_name="Fatima Benali", legal_status="permanent_resident", country_of_birth="DZ",
+            ),
+            residency_periods=[
+                ResidencyPeriod(country="Algeria", start_date=date(1957, 1, 30), end_date=date(1990, 6, 1)),
+                ResidencyPeriod(country="France", start_date=date(1990, 6, 1), verified=True),
+            ],
+            evidence_items=[
+                EvidenceItem(evidence_type="birth_certificate", description="Acte de naissance (traduit)", provided=True, verified=True),
+                EvidenceItem(evidence_type="tax_record", description="Releve de carriere CNAV 1990-2025", provided=True, verified=True),
+                EvidenceItem(evidence_type="residency_declaration", description="Titre de sejour", provided=True),
+            ],
+        ),
+        CaseBundle(
+            id="demo-fr-004",
+            jurisdiction_id="jur-fr-national",
+            applicant=Applicant(
+                id="app-fr-004", date_of_birth=date(1953, 11, 7),
+                legal_name="Pierre Lefevre", legal_status="citizen", country_of_birth="FR",
+            ),
+            residency_periods=[ResidencyPeriod(country="France", start_date=date(1953, 11, 7))],
+            evidence_items=[
+                EvidenceItem(evidence_type="tax_record", description="Releve partiel", provided=True),
+            ],
+        ),
+    ]
+
+
+# ===================================================================
+# GERMANY
+# ===================================================================
+
+GERMANY = Jurisdiction(
+    id="jur-de-federal",
+    name="Bundesrepublik Deutschland",
+    country="DE",
+    level="federal",
+    legal_tradition="Civil law (Germanic tradition)",
+    language_regime="Deutsch",
+)
+
+GERMANY_AUTHORITY_CHAIN = [
+    AuthorityReference(
+        id="auth-de-grundgesetz",
+        jurisdiction_id="jur-de-federal",
+        layer="constitution",
+        title="Grundgesetz fur die Bundesrepublik Deutschland",
+        citation="GG, Art. 20 Abs. 1 (Sozialstaatsprinzip)",
+        effective_date=date(1949, 5, 23),
+        url="https://www.gesetze-im-internet.de/gg/",
+    ),
+    AuthorityReference(
+        id="auth-de-sgb6",
+        jurisdiction_id="jur-de-federal",
+        layer="act",
+        title="Sozialgesetzbuch Sechstes Buch - Gesetzliche Rentenversicherung",
+        citation="SGB VI",
+        effective_date=date(1992, 1, 1),
+        url="https://www.gesetze-im-internet.de/sgb_6/",
+        parent_id="auth-de-grundgesetz",
+    ),
+    AuthorityReference(
+        id="auth-de-drv",
+        jurisdiction_id="jur-de-federal",
+        layer="program",
+        title="Deutsche Rentenversicherung (DRV)",
+        citation="SGB VI, 12. Kapitel",
+        parent_id="auth-de-sgb6",
+    ),
+    AuthorityReference(
+        id="auth-de-regelaltersrente",
+        jurisdiction_id="jur-de-federal",
+        layer="service",
+        title="Regelaltersrente",
+        citation="SGB VI, Para. 35, Para. 235",
+        parent_id="auth-de-drv",
+    ),
+]
+
+GERMANY_LEGAL_DOCS = [
+    LegalDocument(
+        id="doc-de-sgb6",
+        jurisdiction_id="jur-de-federal",
+        document_type=DocumentType.STATUTE,
+        title="Sozialgesetzbuch Sechstes Buch (SGB VI)",
+        citation="SGB VI",
+        effective_date=date(1992, 1, 1),
+        sections=[
+            LegalSection(
+                id="sec-de-p35",
+                section_ref="Para. 35",
+                heading="Regelaltersrente",
+                text=(
+                    "Versicherte haben Anspruch auf Regelaltersrente, wenn sie die "
+                    "Regelaltersgrenze erreicht und die allgemeine Wartezeit von "
+                    "funf Jahren erfullt haben."
+                ),
+            ),
+            LegalSection(
+                id="sec-de-p235",
+                section_ref="Para. 235",
+                heading="Regelaltersgrenze",
+                text=(
+                    "Die Regelaltersgrenze wird ab dem Geburtsjahrgang 1964 auf "
+                    "67 Jahre angehoben (stufenweise Anhebung von 65 auf 67 Jahre)."
+                ),
+            ),
+        ],
+    ),
+]
+
+GERMANY_RULES = [
+    LegalRule(
+        id="rule-de-age",
+        source_document_id="doc-de-sgb6",
+        source_section_ref="Para. 35, Para. 235",
+        rule_type=RuleType.AGE_THRESHOLD,
+        description="Regelaltersgrenze: 67 Jahre (Jahrgang 1964 und spater)",
+        formal_expression="age >= 67",
+        citation="SGB VI, Para. 35, Para. 235",
+        parameters={"min_age": 67},
+    ),
+    LegalRule(
+        id="rule-de-wartezeit",
+        source_document_id="doc-de-sgb6",
+        source_section_ref="Para. 35",
+        rule_type=RuleType.RESIDENCY_MINIMUM,
+        description="Allgemeine Wartezeit: mindestens 5 Jahre Beitragszeit",
+        formal_expression="contribution_years >= 5",
+        citation="SGB VI, Para. 35, Para. 50",
+        parameters={"min_years": 5, "home_countries": ["DE", "GERMANY"]},
+    ),
+    LegalRule(
+        id="rule-de-beitragszeit",
+        source_document_id="doc-de-sgb6",
+        source_section_ref="Para. 35",
+        rule_type=RuleType.RESIDENCY_PARTIAL,
+        description="Volle Rente mit 45 Beitragsjahren; anteilig mit 5-44 Jahren",
+        formal_expression="pension_ratio = min(contribution_years, 45) / 45",
+        citation="SGB VI, Para. 66",
+        parameters={"full_years": 45, "min_years": 5},
+    ),
+    LegalRule(
+        id="rule-de-status",
+        source_document_id="doc-de-sgb6",
+        source_section_ref="Para. 35",
+        rule_type=RuleType.LEGAL_STATUS,
+        description="Versicherter der gesetzlichen Rentenversicherung",
+        formal_expression="legal_status in ['citizen', 'permanent_resident']",
+        citation="SGB VI, Para. 1",
+        parameters={"accepted_statuses": ["citizen", "permanent_resident"]},
+    ),
+    LegalRule(
+        id="rule-de-evidence",
+        source_document_id="doc-de-sgb6",
+        source_section_ref="Para. 35",
+        rule_type=RuleType.EVIDENCE_REQUIRED,
+        description="Personalausweis oder Reisepass, Geburtsurkunde",
+        formal_expression="has_evidence('birth_certificate') or has_evidence('id_card')",
+        citation="SGB VI, Para. 151",
+        parameters={"required_types": ["birth_certificate"]},
+    ),
+]
+
+
+def _germany_demo_cases() -> list[CaseBundle]:
+    return [
+        CaseBundle(
+            id="demo-de-001",
+            jurisdiction_id="jur-de-federal",
+            applicant=Applicant(
+                id="app-de-001", date_of_birth=date(1957, 3, 10),
+                legal_name="Hans Mueller", legal_status="citizen", country_of_birth="DE",
+            ),
+            residency_periods=[ResidencyPeriod(country="Germany", start_date=date(1957, 3, 10), verified=True)],
+            evidence_items=[
+                EvidenceItem(evidence_type="birth_certificate", description="Geburtsurkunde", provided=True, verified=True),
+                EvidenceItem(evidence_type="tax_record", description="Versicherungsverlauf DRV 1977-2025", provided=True, verified=True),
+            ],
+        ),
+        CaseBundle(
+            id="demo-de-002",
+            jurisdiction_id="jur-de-federal",
+            applicant=Applicant(
+                id="app-de-002", date_of_birth=date(1972, 6, 25),
+                legal_name="Petra Schmidt", legal_status="citizen", country_of_birth="DE",
+            ),
+            residency_periods=[ResidencyPeriod(country="Germany", start_date=date(1972, 6, 25), verified=True)],
+            evidence_items=[
+                EvidenceItem(evidence_type="birth_certificate", description="Geburtsurkunde", provided=True, verified=True),
+                EvidenceItem(evidence_type="tax_record", description="Versicherungsverlauf", provided=True),
+            ],
+        ),
+        CaseBundle(
+            id="demo-de-003",
+            jurisdiction_id="jur-de-federal",
+            applicant=Applicant(
+                id="app-de-003", date_of_birth=date(1956, 9, 15),
+                legal_name="Mehmet Yilmaz", legal_status="permanent_resident", country_of_birth="TR",
+            ),
+            residency_periods=[
+                ResidencyPeriod(country="Turkey", start_date=date(1956, 9, 15), end_date=date(1985, 4, 1)),
+                ResidencyPeriod(country="Germany", start_date=date(1985, 4, 1), verified=True),
+            ],
+            evidence_items=[
+                EvidenceItem(evidence_type="birth_certificate", description="Geburtsurkunde (ubersetzt)", provided=True, verified=True),
+                EvidenceItem(evidence_type="tax_record", description="Versicherungsverlauf DRV 1985-2025", provided=True, verified=True),
+                EvidenceItem(evidence_type="residency_declaration", description="Aufenthaltstitel", provided=True),
+            ],
+        ),
+        CaseBundle(
+            id="demo-de-004",
+            jurisdiction_id="jur-de-federal",
+            applicant=Applicant(
+                id="app-de-004", date_of_birth=date(1950, 8, 3),
+                legal_name="Ingrid Weber", legal_status="citizen", country_of_birth="DE",
+            ),
+            residency_periods=[ResidencyPeriod(country="Germany", start_date=date(1950, 8, 3))],
+            evidence_items=[
+                EvidenceItem(evidence_type="tax_record", description="Versicherungsverlauf (unvollstandig)", provided=True),
+            ],
+        ),
+    ]
+
+
+# ===================================================================
+# UKRAINE
+# ===================================================================
+
+UKRAINE = Jurisdiction(
+    id="jur-ua-national",
+    name="Ukraina",
+    country="UA",
+    level="federal",
+    legal_tradition="Civil law (Continental European / post-Soviet)",
+    language_regime="Ukrainska mova (Ukrainian)",
+)
+
+UKRAINE_AUTHORITY_CHAIN = [
+    AuthorityReference(
+        id="auth-ua-constitution",
+        jurisdiction_id="jur-ua-national",
+        layer="constitution",
+        title="Konstytutsiia Ukrainy",
+        citation="Konstytutsiia Ukrainy, st. 46",
+        effective_date=date(1996, 6, 28),
+        url="https://zakon.rada.gov.ua/laws/show/254%D0%BA/96-%D0%B2%D1%80",
+    ),
+    AuthorityReference(
+        id="auth-ua-pension-law",
+        jurisdiction_id="jur-ua-national",
+        layer="act",
+        title="Zakon Ukrainy 'Pro zahalnooboviazkove derzhavne pensiine strakhuvannia'",
+        citation="Zakon No. 1058-IV vid 09.07.2003",
+        effective_date=date(2004, 1, 1),
+        url="https://zakon.rada.gov.ua/laws/show/1058-15",
+        parent_id="auth-ua-constitution",
+    ),
+    AuthorityReference(
+        id="auth-ua-pfu",
+        jurisdiction_id="jur-ua-national",
+        layer="program",
+        title="Pensiinyi fond Ukrainy (PFU)",
+        citation="Zakon No. 1058-IV, Rozdil VIII",
+        parent_id="auth-ua-pension-law",
+    ),
+    AuthorityReference(
+        id="auth-ua-pension-age",
+        jurisdiction_id="jur-ua-national",
+        layer="service",
+        title="Pensiia za vikom (starosna pensiia)",
+        citation="Zakon No. 1058-IV, st. 26",
+        parent_id="auth-ua-pfu",
+    ),
+]
+
+UKRAINE_LEGAL_DOCS = [
+    LegalDocument(
+        id="doc-ua-pension-law",
+        jurisdiction_id="jur-ua-national",
+        document_type=DocumentType.STATUTE,
+        title="Zakon Ukrainy 'Pro zahalnooboviazkove derzhavne pensiine strakhuvannia'",
+        citation="Zakon No. 1058-IV vid 09.07.2003",
+        effective_date=date(2004, 1, 1),
+        sections=[
+            LegalSection(
+                id="sec-ua-st26",
+                section_ref="st. 26",
+                heading="Umovy pryznachennia pensii za vikom",
+                text=(
+                    "Pravo na pensiiu za vikom maie osoba, yaka dosiahla 60 rokiv ta maie "
+                    "strakhovyi stazh ne menshe 25 rokiv (choloviky) abo 20 rokiv (zhinky) "
+                    "na 1 sichnia 2028 roku."
+                ),
+            ),
+            LegalSection(
+                id="sec-ua-st28",
+                section_ref="st. 28",
+                heading="Rozmir pensii za vikom",
+                text=(
+                    "Rozmir pensii za vikom vyznachaietsia za formuloiu: "
+                    "P = Zs x Ks x Kv, de Zs - zarobitna plata, Ks - koefitsiient "
+                    "strakhovoho stazhu, Kv - koefitsiient viku."
+                ),
+            ),
+        ],
+    ),
+]
+
+UKRAINE_RULES = [
+    LegalRule(
+        id="rule-ua-age",
+        source_document_id="doc-ua-pension-law",
+        source_section_ref="st. 26",
+        rule_type=RuleType.AGE_THRESHOLD,
+        description="Pensiinyi vik: 60 rokiv",
+        formal_expression="age >= 60",
+        citation="Zakon No. 1058-IV, st. 26",
+        parameters={"min_age": 60},
+    ),
+    LegalRule(
+        id="rule-ua-stazh-min",
+        source_document_id="doc-ua-pension-law",
+        source_section_ref="st. 26",
+        rule_type=RuleType.RESIDENCY_MINIMUM,
+        description="Minimalnyi strakhovyi stazh: 25 rokiv (choloviky)",
+        formal_expression="contribution_years >= 25",
+        citation="Zakon No. 1058-IV, st. 26",
+        parameters={"min_years": 25, "home_countries": ["UA", "UKRAINE"]},
+    ),
+    LegalRule(
+        id="rule-ua-stazh-calc",
+        source_document_id="doc-ua-pension-law",
+        source_section_ref="st. 28",
+        rule_type=RuleType.RESIDENCY_PARTIAL,
+        description="Povna pensiia z 35+ rokamy stazhu; proportsionalna z 25-34 rokamy",
+        formal_expression="pension_ratio = min(contribution_years, 35) / 35",
+        citation="Zakon No. 1058-IV, st. 28",
+        parameters={"full_years": 35, "min_years": 25},
+    ),
+    LegalRule(
+        id="rule-ua-status",
+        source_document_id="doc-ua-pension-law",
+        source_section_ref="st. 26",
+        rule_type=RuleType.LEGAL_STATUS,
+        description="Hromadianyn Ukrainy abo osoba z postiinymy pravom na prozhyvannia",
+        formal_expression="legal_status in ['citizen', 'permanent_resident']",
+        citation="Zakon No. 1058-IV, st. 4",
+        parameters={"accepted_statuses": ["citizen", "permanent_resident"]},
+    ),
+    LegalRule(
+        id="rule-ua-evidence",
+        source_document_id="doc-ua-pension-law",
+        source_section_ref="st. 26",
+        rule_type=RuleType.EVIDENCE_REQUIRED,
+        description="Pasport hromadianyna Ukrainy abo svidotstvo pro narodzhennia",
+        formal_expression="has_evidence('birth_certificate') or has_evidence('passport')",
+        citation="Zakon No. 1058-IV, st. 45",
+        parameters={"required_types": ["birth_certificate"]},
+    ),
+]
+
+
+def _ukraine_demo_cases() -> list[CaseBundle]:
+    return [
+        CaseBundle(
+            id="demo-ua-001",
+            jurisdiction_id="jur-ua-national",
+            applicant=Applicant(
+                id="app-ua-001", date_of_birth=date(1960, 4, 22),
+                legal_name="Oleksandr Kovalenko", legal_status="citizen", country_of_birth="UA",
+            ),
+            residency_periods=[ResidencyPeriod(country="Ukraine", start_date=date(1960, 4, 22), verified=True)],
+            evidence_items=[
+                EvidenceItem(evidence_type="birth_certificate", description="Svidotstvo pro narodzhennia", provided=True, verified=True),
+                EvidenceItem(evidence_type="tax_record", description="Dovidka pro strakhovyi stazh PFU 1980-2025", provided=True, verified=True),
+            ],
+        ),
+        CaseBundle(
+            id="demo-ua-002",
+            jurisdiction_id="jur-ua-national",
+            applicant=Applicant(
+                id="app-ua-002", date_of_birth=date(1978, 12, 5),
+                legal_name="Nataliia Shevchenko", legal_status="citizen", country_of_birth="UA",
+            ),
+            residency_periods=[ResidencyPeriod(country="Ukraine", start_date=date(1978, 12, 5), verified=True)],
+            evidence_items=[
+                EvidenceItem(evidence_type="birth_certificate", description="Svidotstvo pro narodzhennia", provided=True, verified=True),
+                EvidenceItem(evidence_type="tax_record", description="Dovidka PFU", provided=True),
+            ],
+        ),
+        CaseBundle(
+            id="demo-ua-003",
+            jurisdiction_id="jur-ua-national",
+            applicant=Applicant(
+                id="app-ua-003", date_of_birth=date(1959, 7, 18),
+                legal_name="Vasyl Bondarenko", legal_status="citizen", country_of_birth="UA",
+            ),
+            residency_periods=[
+                ResidencyPeriod(country="Ukraine", start_date=date(1959, 7, 18), end_date=date(2005, 1, 1)),
+                ResidencyPeriod(country="Poland", start_date=date(2005, 1, 1), end_date=date(2015, 6, 1)),
+                ResidencyPeriod(country="Ukraine", start_date=date(2015, 6, 1), verified=True),
+            ],
+            evidence_items=[
+                EvidenceItem(evidence_type="birth_certificate", description="Svidotstvo pro narodzhennia", provided=True, verified=True),
+                EvidenceItem(evidence_type="tax_record", description="Dovidka PFU (neповна)", provided=True, verified=True),
+                EvidenceItem(evidence_type="residency_declaration", description="Dovidka pro prozhyvannia", provided=True),
+            ],
+        ),
+        CaseBundle(
+            id="demo-ua-004",
+            jurisdiction_id="jur-ua-national",
+            applicant=Applicant(
+                id="app-ua-004", date_of_birth=date(1955, 2, 28),
+                legal_name="Halyna Tkachenko", legal_status="citizen", country_of_birth="UA",
+            ),
+            residency_periods=[ResidencyPeriod(country="Ukraine", start_date=date(1955, 2, 28))],
+            evidence_items=[
+                EvidenceItem(evidence_type="tax_record", description="Dovidka PFU (chastkova)", provided=True),
+            ],
+        ),
+    ]
+
+
+# ===================================================================
+# Registry
+# ===================================================================
+
+class JurisdictionPack:
+    """All data needed to run a jurisdiction demo."""
+    def __init__(
+        self,
+        jurisdiction: Jurisdiction,
+        authority_chain: list[AuthorityReference],
+        legal_documents: list[LegalDocument],
+        rules: list[LegalRule],
+        cases_factory,
+        default_language: str,
+        program_name: str,
+    ):
+        self.jurisdiction = jurisdiction
+        self.authority_chain = authority_chain
+        self.legal_documents = legal_documents
+        self.rules = rules
+        self.cases_factory = cases_factory
+        self.default_language = default_language
+        self.program_name = program_name
+
+    def make_cases(self) -> list[CaseBundle]:
+        return self.cases_factory()
+
+
+# Import Canada data from original seed module
+from govops.seed import (
+    AUTHORITY_CHAIN as CA_AUTHORITY_CHAIN,
+    CANADA_FEDERAL,
+    LEGAL_DOCUMENTS as CA_LEGAL_DOCUMENTS,
+    OAS_RULES as CA_RULES,
+    make_demo_cases as _ca_demo_cases,
+)
+
+JURISDICTION_REGISTRY: dict[str, JurisdictionPack] = {
+    "ca": JurisdictionPack(
+        jurisdiction=CANADA_FEDERAL,
+        authority_chain=CA_AUTHORITY_CHAIN,
+        legal_documents=CA_LEGAL_DOCUMENTS,
+        rules=CA_RULES,
+        cases_factory=_ca_demo_cases,
+        default_language="en",
+        program_name="Old Age Security (OAS)",
+    ),
+    "br": JurisdictionPack(
+        jurisdiction=BRAZIL_FEDERAL,
+        authority_chain=BRAZIL_AUTHORITY_CHAIN,
+        legal_documents=BRAZIL_LEGAL_DOCS,
+        rules=BRAZIL_RULES,
+        cases_factory=_brazil_demo_cases,
+        default_language="pt",
+        program_name="Aposentadoria por Idade (INSS)",
+    ),
+    "es": JurisdictionPack(
+        jurisdiction=SPAIN,
+        authority_chain=SPAIN_AUTHORITY_CHAIN,
+        legal_documents=SPAIN_LEGAL_DOCS,
+        rules=SPAIN_RULES,
+        cases_factory=_spain_demo_cases,
+        default_language="es",
+        program_name="Pension de jubilacion",
+    ),
+    "fr": JurisdictionPack(
+        jurisdiction=FRANCE,
+        authority_chain=FRANCE_AUTHORITY_CHAIN,
+        legal_documents=FRANCE_LEGAL_DOCS,
+        rules=FRANCE_RULES,
+        cases_factory=_france_demo_cases,
+        default_language="fr",
+        program_name="Retraite de base (CNAV)",
+    ),
+    "de": JurisdictionPack(
+        jurisdiction=GERMANY,
+        authority_chain=GERMANY_AUTHORITY_CHAIN,
+        legal_documents=GERMANY_LEGAL_DOCS,
+        rules=GERMANY_RULES,
+        cases_factory=_germany_demo_cases,
+        default_language="de",
+        program_name="Regelaltersrente (DRV)",
+    ),
+    "ua": JurisdictionPack(
+        jurisdiction=UKRAINE,
+        authority_chain=UKRAINE_AUTHORITY_CHAIN,
+        legal_documents=UKRAINE_LEGAL_DOCS,
+        rules=UKRAINE_RULES,
+        cases_factory=_ukraine_demo_cases,
+        default_language="uk",
+        program_name="Pensiia za vikom (PFU)",
+    ),
+}

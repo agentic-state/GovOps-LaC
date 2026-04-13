@@ -1,0 +1,458 @@
+{% extends "base.html" %}
+{% block title %}GovOps - Policy-Driven Service Delivery{% endblock %}
+{% block content %}
+
+<div style="background:#fff3cd; border:1px solid #ffc107; border-radius:6px; padding:0.8rem 1.2rem; margin-bottom:1.5rem; font-size:0.82rem; line-height:1.6; color:#664d03;">
+    <strong>Disclaimer:</strong> This is an independent prototype. It is not affiliated with, endorsed by, or representing the Government of Canada, Service Canada, ESDC, or any government entity.
+    Legislative text (including the Old Age Security Act and equivalent laws from other jurisdictions) is publicly available law interpreted by the author as illustrative case studies &mdash; not authoritative operational guidance.
+    Rule encodings are for demonstration purposes and should not be relied upon for actual eligibility determinations.
+</div>
+
+<div class="card" style="border-left: 4px solid var(--primary); background: var(--accent);">
+    <h2 style="border:none; font-size:1.4rem; margin-bottom:0.5rem;">What is GovOps?</h2>
+    <p style="font-size:1.05rem; line-height:1.7;">
+        GovOps is a method for turning <strong>laws, regulations, and policies</strong> into
+        <strong>working government services</strong> that are transparent, traceable, and auditable.
+    </p>
+    <p class="text-sm text-muted mt-1">
+        It is not an AI that makes decisions for you. It is a tool that helps public servants
+        make <em>better, faster, and more consistent</em> decisions &mdash; while keeping humans
+        in control and keeping the reasoning visible.
+    </p>
+</div>
+
+<!-- The Problem -->
+<div class="card">
+    <h2>The Problem GovOps Solves</h2>
+    <p>Every government program starts with legislation. A law says who is eligible, what the rules are,
+       and what evidence is needed. But between the law and the person receiving service, a lot can go wrong:</p>
+    <div class="grid-2 mt-2">
+        <div style="padding:0.8rem; background:#fef2f2; border-radius:6px; border-left:3px solid var(--danger);">
+            <strong>Rules get lost in translation</strong>
+            <p class="text-sm mt-1">Policy staff interpret the law. IT staff build systems based on that interpretation.
+            Over time, the system drifts away from what the law actually says.</p>
+        </div>
+        <div style="padding:0.8rem; background:#fef2f2; border-radius:6px; border-left:3px solid var(--danger);">
+            <strong>Decisions are inconsistent</strong>
+            <p class="text-sm mt-1">Two officers reviewing the same case with the same evidence can reach different conclusions,
+            because the rules are buried in manuals and training materials.</p>
+        </div>
+        <div style="padding:0.8rem; background:#fef2f2; border-radius:6px; border-left:3px solid var(--danger);">
+            <strong>Audits are painful</strong>
+            <p class="text-sm mt-1">When someone asks "why was this person denied?", finding the answer means
+            digging through case files, policy documents, and system logs that were never designed to tell a coherent story.</p>
+        </div>
+        <div style="padding:0.8rem; background:#fef2f2; border-radius:6px; border-left:3px solid var(--danger);">
+            <strong>Changes take too long</strong>
+            <p class="text-sm mt-1">When a law is amended, updating every system, form, and procedure that depends on it
+            can take months or years &mdash; and things get missed.</p>
+        </div>
+    </div>
+</div>
+
+<!-- How GovOps works -->
+<div class="card">
+    <h2>How GovOps Works</h2>
+    <p>GovOps starts from the law itself and builds a direct, traceable path to the service decision.</p>
+
+    <div style="margin: 1.5rem 0;">
+        <div style="display:flex; gap:0.5rem; flex-wrap:wrap; align-items:center; justify-content:center; font-size:0.9rem;">
+            <div style="background:var(--primary); color:white; padding:0.6rem 1rem; border-radius:6px; text-align:center;">
+                <strong>Jurisdiction</strong><br><span style="font-size:0.78rem;">Which country, which level of government?</span>
+            </div>
+            <span style="font-size:1.2rem; color:var(--muted);">&rarr;</span>
+            <div style="background:var(--primary); color:white; padding:0.6rem 1rem; border-radius:6px; text-align:center;">
+                <strong>Legislation</strong><br><span style="font-size:0.78rem;">The Act, the Regulations</span>
+            </div>
+            <span style="font-size:1.2rem; color:var(--muted);">&rarr;</span>
+            <div style="background:var(--primary); color:white; padding:0.6rem 1rem; border-radius:6px; text-align:center;">
+                <strong>Rules</strong><br><span style="font-size:0.78rem;">Formalized conditions from the law</span>
+            </div>
+            <span style="font-size:1.2rem; color:var(--muted);">&rarr;</span>
+            <div style="background:var(--primary); color:white; padding:0.6rem 1rem; border-radius:6px; text-align:center;">
+                <strong>Evidence</strong><br><span style="font-size:0.78rem;">What documents prove the facts?</span>
+            </div>
+            <span style="font-size:1.2rem; color:var(--muted);">&rarr;</span>
+            <div style="background:var(--success); color:white; padding:0.6rem 1rem; border-radius:6px; text-align:center;">
+                <strong>Recommendation</strong><br><span style="font-size:0.78rem;">With full reasoning and citations</span>
+            </div>
+            <span style="font-size:1.2rem; color:var(--muted);">&rarr;</span>
+            <div style="background:#e67e22; color:white; padding:0.6rem 1rem; border-radius:6px; text-align:center;">
+                <strong>Human Decision</strong><br><span style="font-size:0.78rem;">Officer approves, modifies, or rejects</span>
+            </div>
+        </div>
+    </div>
+
+    <p>At every step, the system knows <em>which section of which law</em> justifies the action.
+       Nothing is hidden. Nothing is guessed.</p>
+</div>
+
+<!-- Step by step -->
+<div class="card">
+    <h2>What Happens in Practice</h2>
+    <table>
+        <thead>
+            <tr><th style="width:2rem;">#</th><th>Step</th><th>What the System Does</th><th>What the Officer Does</th></tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>1</strong></td>
+                <td><strong>Case arrives</strong></td>
+                <td>Collects the applicant's information and supporting documents into a structured case file</td>
+                <td>Reviews that the submission is complete</td>
+            </tr>
+            <tr>
+                <td><strong>2</strong></td>
+                <td><strong>Evidence check</strong></td>
+                <td>Identifies what documents have been provided, what is missing, and what needs verification</td>
+                <td>Confirms document authenticity where needed</td>
+            </tr>
+            <tr>
+                <td><strong>3</strong></td>
+                <td><strong>Rule evaluation</strong></td>
+                <td>Checks each statutory condition one by one: Does the applicant meet the age requirement?
+                    The residency requirement? Each check cites the exact section of the law.</td>
+                <td>Reviews the rule-by-rule breakdown</td>
+            </tr>
+            <tr>
+                <td><strong>4</strong></td>
+                <td><strong>Recommendation</strong></td>
+                <td>Produces a draft recommendation (eligible, ineligible, needs more information, or escalate)
+                    with a full explanation of why</td>
+                <td>Reads the recommendation and the reasoning</td>
+            </tr>
+            <tr>
+                <td><strong>5</strong></td>
+                <td><strong>Human decision</strong></td>
+                <td>Records the officer's decision and rationale</td>
+                <td><strong>Makes the final call</strong>: approve, modify, reject, request more information, or escalate to a supervisor</td>
+            </tr>
+            <tr>
+                <td><strong>6</strong></td>
+                <td><strong>Audit package</strong></td>
+                <td>Generates a complete record: which rules were applied, what evidence was used,
+                    what the system recommended, and what the officer decided &mdash; all linked back to the legislation</td>
+                <td>Can be provided to auditors, appeals bodies, or oversight authorities at any time</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<!-- What makes it different -->
+<div class="card">
+    <h2>What Makes GovOps Different</h2>
+    <div class="grid-2">
+        <div style="padding:0.8rem; background:#f0fdf4; border-radius:6px; border-left:3px solid var(--success);">
+            <strong>Traceable</strong>
+            <p class="text-sm mt-1">Every recommendation links back through a clear chain:
+            <em>Decision &rarr; Rule &rarr; Policy &rarr; Regulation &rarr; Act &rarr; Jurisdiction</em>.
+            If someone asks "why?", the answer is always available.</p>
+        </div>
+        <div style="padding:0.8rem; background:#f0fdf4; border-radius:6px; border-left:3px solid var(--success);">
+            <strong>Deterministic</strong>
+            <p class="text-sm mt-1">The same applicant, with the same evidence, always gets the same assessment.
+            No randomness, no hidden factors, no "it depends on the model."</p>
+        </div>
+        <div style="padding:0.8rem; background:#f0fdf4; border-radius:6px; border-left:3px solid var(--success);">
+            <strong>Honest about uncertainty</strong>
+            <p class="text-sm mt-1">When evidence is missing or a situation is ambiguous, the system says so explicitly.
+            It never guesses or fills in gaps with assumptions.</p>
+        </div>
+        <div style="padding:0.8rem; background:#f0fdf4; border-radius:6px; border-left:3px solid var(--success);">
+            <strong>Human authority preserved</strong>
+            <p class="text-sm mt-1">The system recommends. The officer decides. Every human action is recorded.
+            This is decision <em>support</em>, not decision <em>replacement</em>.</p>
+        </div>
+        <div style="padding:0.8rem; background:#f0fdf4; border-radius:6px; border-left:3px solid var(--success);">
+            <strong>Open and inspectable</strong>
+            <p class="text-sm mt-1">GovOps is open source (Apache 2.0). Any government can inspect the logic,
+            adapt it to their own laws, and deploy it without vendor lock-in.</p>
+        </div>
+        <div style="padding:0.8rem; background:#f0fdf4; border-radius:6px; border-left:3px solid var(--success);">
+            <strong>Jurisdiction-aware</strong>
+            <p class="text-sm mt-1">Different countries, different laws, different rules &mdash; but the same method.
+            GovOps is designed to be adapted to any jurisdiction, not locked to one.</p>
+        </div>
+    </div>
+</div>
+
+<!-- Where it can be used -->
+<div class="card">
+    <h2>Where Can Governments Use This?</h2>
+    <p>GovOps works best for <strong>high-volume, rule-based decisions</strong> where the law defines clear criteria.
+       Good candidates share these properties:</p>
+    <table class="mt-2">
+        <thead>
+            <tr><th>Program Type</th><th>Example</th><th>Why It Fits</th></tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Benefit eligibility</td>
+                <td>Pensions, disability allowances, housing subsidies</td>
+                <td>Clear statutory thresholds (age, income, residency)</td>
+            </tr>
+            <tr>
+                <td>Application screening</td>
+                <td>Permits, licenses, grant applications</td>
+                <td>Standardized completeness and compliance checks</td>
+            </tr>
+            <tr>
+                <td>Compliance review</td>
+                <td>Tax filings, regulatory reporting, workplace safety</td>
+                <td>Checklist-driven assessment against known rules</td>
+            </tr>
+            <tr>
+                <td>Appeals triage</td>
+                <td>Administrative appeals, review requests</td>
+                <td>Structured classification by grounds and evidence</td>
+            </tr>
+            <tr>
+                <td>Entitlement calculations</td>
+                <td>Pension amounts, benefit rates, fee schedules</td>
+                <td>Deterministic formulas defined in legislation</td>
+            </tr>
+        </tbody>
+    </table>
+    <p class="text-sm text-muted mt-2">
+        The method is the same regardless of country or program:
+        identify the jurisdiction, map the legislation to formal rules, check the evidence,
+        produce a traceable recommendation, and let a human decide.
+    </p>
+</div>
+
+<!-- Live jurisdictions -->
+<div class="card">
+    <h2>Live in This Demo: 6 Jurisdictions, 6 Languages</h2>
+    <p class="text-sm text-muted mb-2">
+        Each jurisdiction implements its own pension eligibility program with rules taken directly from that country's legislation.
+        Switch between them using the dropdown in the top-right corner.
+    </p>
+    <table>
+        <thead>
+            <tr><th>Country</th><th>Program</th><th>Key Rules</th><th>Legislation</th><th>Language</th></tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>Canada</strong></td>
+                <td>Old Age Security (OAS)</td>
+                <td>Age 65+, 10 years residency</td>
+                <td>OAS Act, R.S.C. 1985, c. O-9</td>
+                <td>English / Francais</td>
+            </tr>
+            <tr>
+                <td><strong>Brazil</strong></td>
+                <td>Aposentadoria por Idade (INSS)</td>
+                <td>Age 65 (M) / 62 (F), 15 years contribution</td>
+                <td>Lei n. 8.213/1991; EC 103/2019</td>
+                <td>Portugues</td>
+            </tr>
+            <tr>
+                <td><strong>Spain</strong></td>
+                <td>Pension de jubilacion</td>
+                <td>Age 66, 15 years contribution</td>
+                <td>LGSS, RDL 8/2015</td>
+                <td>Espanol</td>
+            </tr>
+            <tr>
+                <td><strong>France</strong></td>
+                <td>Retraite de base (CNAV)</td>
+                <td>Age 64, 43 years for full rate</td>
+                <td>CSS, Art. L. 351-1; Loi 2023-270</td>
+                <td>Francais</td>
+            </tr>
+            <tr>
+                <td><strong>Germany</strong></td>
+                <td>Regelaltersrente (DRV)</td>
+                <td>Age 67, 5 years minimum contribution</td>
+                <td>SGB VI, Para. 35</td>
+                <td>Deutsch</td>
+            </tr>
+            <tr>
+                <td><strong>Ukraine</strong></td>
+                <td>Pensiia za vikom (PFU)</td>
+                <td>Age 60, 25 years contribution</td>
+                <td>Zakon No. 1058-IV, st. 26</td>
+                <td>Ukrainska</td>
+            </tr>
+        </tbody>
+    </table>
+    <p class="text-sm text-muted mt-2">
+        Same engine, same method, same traceability &mdash; different laws, different thresholds, different languages.
+        That is the point: the approach is portable across jurisdictions.
+    </p>
+</div>
+
+<!-- Try the demo -->
+<div class="card" style="text-align:center; background: var(--accent); border: 2px solid var(--primary);">
+    <h2 style="border:none; font-size:1.3rem;">Try It Yourself</h2>
+    <p style="font-size:1rem; margin-bottom:1rem;">
+        Six countries are ready to explore. Each has four demo cases covering
+        eligible, ineligible, partial, and insufficient-evidence outcomes &mdash;
+        with rules from real legislation.
+    </p>
+    <p style="margin-bottom:1.5rem;">
+        Switch jurisdictions with the dropdown in the header. The UI language switches automatically.
+    </p>
+    <div style="display:flex; gap:1rem; justify-content:center; flex-wrap:wrap;">
+        <a href="/cases" class="btn btn-primary" style="font-size:1rem; padding:0.7rem 2rem;">Open Case Dashboard</a>
+        <a href="/authority" class="btn btn-success" style="font-size:1rem; padding:0.7rem 2rem;">Browse Authority Chain</a>
+    </div>
+</div>
+
+<!-- What's real today -->
+<div class="card">
+    <h2>What GovOps Can Do Today (Honest Assessment)</h2>
+    <p>GovOps today is a <strong>working proof of method</strong>, not a production system. Here is what is real and what is not.</p>
+
+    <h3 class="mt-2" style="color: var(--success);">Proven and Working</h3>
+    <table class="mt-1">
+        <thead><tr><th>Capability</th><th>Status</th><th>Evidence</th></tr></thead>
+        <tbody>
+            <tr><td>Traceability to legislation</td><td><span class="badge badge-success">Working</span></td><td>Every rule cites specific articles of each country's law</td></tr>
+            <tr><td>Deterministic evaluation</td><td><span class="badge badge-success">Working</span></td><td>45 tests prove identical inputs produce identical outputs</td></tr>
+            <tr><td>Evidence awareness</td><td><span class="badge badge-success">Working</span></td><td>Missing documents are flagged, never guessed</td></tr>
+            <tr><td>Explicit uncertainty</td><td><span class="badge badge-success">Working</span></td><td>Insufficient evidence and escalation paths both function</td></tr>
+            <tr><td>Human-in-the-loop review</td><td><span class="badge badge-success">Working</span></td><td>Approve, reject, escalate, request info &mdash; all logged</td></tr>
+            <tr><td>Full audit trail</td><td><span class="badge badge-success">Working</span></td><td>Authority chain + rules + evidence + human actions in one package</td></tr>
+            <tr><td>Multi-jurisdiction</td><td><span class="badge badge-success">Working</span></td><td>6 countries, same engine, different laws</td></tr>
+            <tr><td>Multi-language UI</td><td><span class="badge badge-success">Working</span></td><td>6 languages with automatic switching</td></tr>
+        </tbody>
+    </table>
+
+    <h3 class="mt-2" style="color: var(--danger);">Not Yet Built</h3>
+    <table class="mt-1">
+        <thead><tr><th>Gap</th><th>Reality</th></tr></thead>
+        <tbody>
+            <tr><td>No persistence</td><td>In-memory only &mdash; data resets on restart. No database yet.</td></tr>
+            <tr><td>One program type</td><td>Only pension eligibility. Real governments have hundreds of programs.</td></tr>
+            <tr><td>Simplified rules</td><td>5 rules per jurisdiction. Real legislation has dozens of conditions, exceptions, and transitional provisions.</td></tr>
+            <tr><td>No document ingestion</td><td>Cannot read scanned documents, PDFs, or handwritten forms.</td></tr>
+            <tr><td>No system integration</td><td>Does not connect to any government registry or identity system.</td></tr>
+            <tr><td>No authentication</td><td>No user accounts, roles, or access control.</td></tr>
+            <tr><td>No case management</td><td>Cannot track real case lifecycle, assignments, or deadlines.</td></tr>
+            <tr><td>No production infrastructure</td><td>No deployment, monitoring, backup, or security hardening.</td></tr>
+        </tbody>
+    </table>
+</div>
+
+<!-- Why it matters for reconstruction -->
+<div class="card">
+    <h2>Why This Matters for Countries Rebuilding Systems</h2>
+    <p>Most government modernization projects start with technology and work backward to policy.
+       GovOps starts with <strong>the law itself</strong> and builds forward to the service.</p>
+    <p class="mt-1">For countries rebuilding institutional capacity, this is a different proposition:</p>
+    <div class="grid-2 mt-2">
+        <div style="padding:0.8rem; background:#f0fdf4; border-radius:6px; border-left:3px solid var(--success);">
+            <strong>Laws change fast during reconstruction</strong>
+            <p class="text-sm mt-1">GovOps traces every rule to its legislative source. When a law is amended,
+            you can see exactly which services are affected and what needs to change.</p>
+        </div>
+        <div style="padding:0.8rem; background:#f0fdf4; border-radius:6px; border-left:3px solid var(--success);">
+            <strong>New staff need to make decisions</strong>
+            <p class="text-sm mt-1">Many experienced civil servants may be displaced or unavailable.
+            A decision-support system that shows the rules and evidence &mdash; not a black box &mdash;
+            helps new staff make consistent, defensible decisions.</p>
+        </div>
+        <div style="padding:0.8rem; background:#f0fdf4; border-radius:6px; border-left:3px solid var(--success);">
+            <strong>Audit and accountability are critical</strong>
+            <p class="text-sm mt-1">International donors, oversight bodies, and citizens need to see that decisions
+            are traceable and defensible. GovOps produces audit packages by design, not as an afterthought.</p>
+        </div>
+        <div style="padding:0.8rem; background:#f0fdf4; border-radius:6px; border-left:3px solid var(--success);">
+            <strong>No vendor lock-in</strong>
+            <p class="text-sm mt-1">The approach is open source (Apache 2.0). During periods when budgets are constrained
+            and donor accountability is high, governments can inspect, adapt, and own the logic without
+            depending on a single vendor.</p>
+        </div>
+    </div>
+</div>
+
+<!-- Adoption roadmap -->
+<div class="card">
+    <h2>Adoption Roadmap: From Demo to Production</h2>
+    <p class="text-sm text-muted mb-2">A practical path for any government evaluating GovOps. Each phase has a clear deliverable and a go/no-go gate.</p>
+    <table>
+        <thead>
+            <tr><th>Phase</th><th>Duration</th><th>Goal</th><th>Deliverable</th></tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><span class="badge badge-info">Phase 0</span></td>
+                <td>4 weeks</td>
+                <td><strong>Validate the method</strong> &mdash; can we encode one real program end-to-end?</td>
+                <td>Full rule set from one piece of legislation, validated by 2&ndash;3 public servants.
+                    Real database. Realistic demo cases from published guidance.</td>
+            </tr>
+            <tr>
+                <td><span class="badge badge-info">Phase 1</span></td>
+                <td>8 weeks</td>
+                <td><strong>Production hardening</strong> &mdash; can an officer actually use it?</td>
+                <td>User authentication, real case lifecycle, document upload, persistent storage,
+                    security review. Pilot deployment in one regional office.</td>
+            </tr>
+            <tr>
+                <td><span class="badge badge-info">Phase 2</span></td>
+                <td>12 weeks</td>
+                <td><strong>Prove value</strong> &mdash; does it actually help?</td>
+                <td>500+ real cases processed alongside existing process. Measured: time per case,
+                    consistency, audit readiness, officer confidence. Evidence report.</td>
+            </tr>
+            <tr>
+                <td><span class="badge badge-info">Phase 3</span></td>
+                <td>8 weeks</td>
+                <td><strong>Second program</strong> &mdash; is the method reusable?</td>
+                <td>A different program type (e.g., housing subsidy, disability, IDP assistance)
+                    encoded with the same engine. Proof that the approach scales.</td>
+            </tr>
+            <tr>
+                <td><span class="badge badge-muted">Phase 4</span></td>
+                <td>Ongoing</td>
+                <td><strong>Platform</strong> &mdash; only if Phases 0&ndash;3 succeed</td>
+                <td>Multi-program dashboard, system integration, policy change detection,
+                    training, knowledge transfer, open-source contribution back.</td>
+            </tr>
+        </tbody>
+    </table>
+    <p class="text-sm text-muted mt-2">
+        <strong>Phase 0 is the real test.</strong> If one full program can be encoded end-to-end and validated
+        by actual public servants, the rest is engineering. If it cannot, no amount of platform vision matters.
+        <br><a href="/encode" style="font-weight:600;">Open the Encoding Pipeline &rarr;</a> to start Phase 0 now.
+    </p>
+</div>
+
+<!-- Bottom line -->
+<div class="card" style="border-left: 4px solid var(--primary); background: var(--accent);">
+    <h2 style="border:none;">Honest Bottom Line</h2>
+    <p>GovOps today is a working proof of concept, not a production system.
+       It proves that legislation can be formalized into deterministic, traceable, auditable decision support
+       that works across jurisdictions and languages.</p>
+    <p class="mt-1">The demo below is the proof point. Switch to your country. Evaluate the cases.
+       Inspect the audit trail. See whether the method makes sense for your context.
+       Everything else is a plan &mdash; and plans should follow evidence, not the other way around.</p>
+</div>
+
+<!-- Origin -->
+<div class="card">
+    <h2>Origin and Lineage</h2>
+    <p>GovOps was inspired by the <a href="https://agenticstate.org" target="_blank">Agentic State</a>
+       framework (Ilves &amp; Kilian, 2025), which maps 12 layers of government service delivery where
+       intelligent systems can operate &mdash; from service design and workflows through governance,
+       accountability, and public finance.</p>
+    <p class="mt-1">GovOps is a practical implementation of that vision, starting from
+       <strong>Layer 3</strong> (policy and rule making) and <strong>Layer 7</strong> (governance and accountability):
+       a working method that any government can adopt to make policy-driven services transparent,
+       traceable, and auditable.</p>
+    <p class="mt-1 text-sm text-muted">This project is an independent, nights-and-weekends open public-good contribution
+       to support the Agentic State mission. It is not affiliated with or endorsed by the Agentic State authors &mdash;
+       it is one builder's answer to the question they posed.</p>
+</div>
+
+<!-- Guiding principle -->
+<div class="card" style="text-align:center;">
+    <p style="font-size:1.05rem; font-style:italic; color: var(--primary); line-height:1.7; max-width:700px; margin:0 auto;">
+        "Government systems should not invent their own rules.
+        They should execute existing authority faithfully, visibly, and defensibly."
+    </p>
+</div>
+
+{% endblock %}

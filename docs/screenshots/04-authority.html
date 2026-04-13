@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GovOps - Authority Chain</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>&#9878;</text></svg>">
+    <style>
+        :root {
+            --bg: #f8f9fa;
+            --card: #ffffff;
+            --border: #dee2e6;
+            --text: #212529;
+            --muted: #6c757d;
+            --primary: #1a5276;
+            --primary-light: #2980b9;
+            --success: #27ae60;
+            --danger: #c0392b;
+            --warning: #f39c12;
+            --info: #2980b9;
+            --accent: #e8f4fd;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+        }
+        header {
+            background: var(--primary);
+            color: white;
+            padding: 0.8rem 2rem;
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+        }
+        header h1 { font-size: 1.4rem; font-weight: 600; }
+        header nav { display: flex; gap: 1.5rem; flex: 1; }
+        header nav a { color: rgba(255,255,255,0.85); text-decoration: none; font-size: 0.9rem; }
+        header nav a:hover { color: white; }
+        .header-controls { display: flex; gap: 0.5rem; align-items: center; }
+        .header-controls select {
+            padding: 0.25rem 0.4rem;
+            border: 1px solid rgba(255,255,255,0.3);
+            border-radius: 4px;
+            background: rgba(255,255,255,0.15);
+            color: white;
+            font-size: 0.8rem;
+            cursor: pointer;
+        }
+        .header-controls select option { color: #212529; background: white; }
+        .container { max-width: 1100px; margin: 0 auto; padding: 2rem; }
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        .card h2 { font-size: 1.1rem; color: var(--primary); margin-bottom: 1rem; border-bottom: 2px solid var(--accent); padding-bottom: 0.5rem; }
+        .card h3 { font-size: 0.95rem; color: var(--muted); margin-bottom: 0.5rem; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+        th { text-align: left; padding: 0.6rem 0.8rem; background: var(--accent); color: var(--primary); font-weight: 600; }
+        td { padding: 0.6rem 0.8rem; border-bottom: 1px solid var(--border); }
+        tr:hover td { background: #f1f5f9; }
+        a { color: var(--primary-light); }
+        .badge {
+            display: inline-block;
+            padding: 0.15rem 0.6rem;
+            border-radius: 12px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        .badge-success { background: #d4edda; color: #155724; }
+        .badge-danger { background: #f8d7da; color: #721c24; }
+        .badge-warning { background: #fff3cd; color: #856404; }
+        .badge-info { background: #d1ecf1; color: #0c5460; }
+        .badge-muted { background: #e9ecef; color: #495057; }
+        .btn {
+            display: inline-block;
+            padding: 0.5rem 1.2rem;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            color: white;
+        }
+        .btn-primary { background: var(--primary); }
+        .btn-primary:hover { background: var(--primary-light); }
+        .btn-success { background: var(--success); }
+        .btn-danger { background: var(--danger); }
+        .btn-warning { background: var(--warning); color: #212529; }
+        .btn-sm { padding: 0.3rem 0.8rem; font-size: 0.8rem; }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+        .text-muted { color: var(--muted); }
+        .text-sm { font-size: 0.85rem; }
+        .mb-1 { margin-bottom: 0.5rem; }
+        .mb-2 { margin-bottom: 1rem; }
+        .mt-1 { margin-top: 0.5rem; }
+        .mt-2 { margin-top: 1rem; }
+        textarea, select, input[type="text"] {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            font-family: inherit;
+            font-size: 0.9rem;
+        }
+        textarea { min-height: 80px; resize: vertical; }
+        .rule-eval {
+            padding: 0.8rem;
+            margin-bottom: 0.5rem;
+            border-radius: 6px;
+            border-left: 4px solid;
+        }
+        .rule-eval.satisfied { border-color: var(--success); background: #f0fdf4; }
+        .rule-eval.not_satisfied { border-color: var(--danger); background: #fef2f2; }
+        .rule-eval.insufficient_evidence { border-color: var(--warning); background: #fffbeb; }
+        .rule-eval.not_applicable { border-color: var(--muted); background: #f9fafb; }
+        .citation { font-style: italic; color: var(--muted); font-size: 0.82rem; }
+        .chain-item {
+            padding: 0.8rem 1rem;
+            margin-left: 1.5rem;
+            border-left: 3px solid var(--primary-light);
+            margin-bottom: 0.3rem;
+        }
+        .chain-item:first-child { margin-left: 0; border-left: 3px solid var(--primary); }
+        pre { background: #f1f5f9; padding: 1rem; border-radius: 6px; overflow-x: auto; font-size: 0.82rem; white-space: pre-wrap; }
+        footer { text-align: center; padding: 2rem; color: var(--muted); font-size: 0.8rem; }
+        .flag { font-size: 1.1rem; }
+        @media (max-width: 768px) {
+            .grid-2 { grid-template-columns: 1fr; }
+            header { flex-direction: column; align-items: flex-start; gap: 0.5rem; }
+        }
+    </style>
+</head>
+<body><div style="position:fixed;top:0;left:0;right:0;z-index:9999;background:#c0392b;color:white;text-align:center;padding:0.6rem 1rem;font-family:-apple-system,sans-serif;font-size:0.85rem;">
+This is a static preview. <a href="https://github.com/eva-foundry/61-GovOps" style="color:#ffd700;font-weight:600;">Install GovOps</a> to run the live demo: <code style="background:rgba(0,0,0,0.3);padding:0.15rem 0.4rem;border-radius:3px;">pip install -e . && govops-demo</code>
+</div>
+<div style="height:2.5rem;"></div>
+    <header>
+        <h1>GovOps</h1>
+        <nav>
+            <a href="/?lang=en">About</a>
+            <a href="#" onclick="return false;">Cases</a>
+            <a href="#" onclick="return false;">Authority Chain</a>
+            <a href="#" onclick="return false;">Encode</a>
+            <a href="#" onclick="return false;">MVP</a>
+            <a href="#" onclick="return false;" style="color:rgba(255,255,255,0.6);">Admin</a>
+            <a href="#" onclick="return false;">API</a>
+        </nav>
+        <div class="header-controls">
+            
+            <form method="POST" action="#" onclick="return false;" style="display:flex; gap:0.3rem; align-items:center;">
+                <input type="hidden" name="lang" value="en">
+                <select name="jur_code" onchange="return false;">
+                    
+                    <option value="ca" selected>
+                        Government of Canada
+                    </option>
+                    
+                    <option value="br" >
+                        Republica Federativa do Brasil
+                    </option>
+                    
+                    <option value="es" >
+                        Reino de Espana
+                    </option>
+                    
+                    <option value="fr" >
+                        Republique francaise
+                    </option>
+                    
+                    <option value="de" >
+                        Bundesrepublik Deutschland
+                    </option>
+                    
+                    <option value="ua" >
+                        Ukraina
+                    </option>
+                    
+                </select>
+            </form>
+            
+            
+            <select onchange="window.location.href=window.location.pathname+'?lang='+this.value">
+                
+                <option value="en" selected>English</option>
+                
+                <option value="fr" >Francais</option>
+                
+                <option value="pt" >Portugues</option>
+                
+                <option value="es" >Espanol</option>
+                
+                <option value="de" >Deutsch</option>
+                
+                <option value="uk" >Ukrainska</option>
+                
+            </select>
+            
+        </div>
+    </header>
+    <div class="container">
+        
+<p class="mb-2"><a href="#" onclick="return false;">&larr; Back to cases</a></p>
+
+<div class="card">
+    <h2>Jurisdiction</h2>
+    
+    <table>
+        <tr><td><strong>Name</strong></td><td>Government of Canada</td></tr>
+        <tr><td><strong>Country</strong></td><td>CA</td></tr>
+        <tr><td><strong>Level</strong></td><td>Federal</td></tr>
+        <tr><td><strong>Legal Tradition</strong></td><td>Bijural (common law / civil law)</td></tr>
+        <tr><td><strong>Language Regime</strong></td><td>English and French (Official Languages Act)</td></tr>
+    </table>
+    
+</div>
+
+<div class="card">
+    <h2>Authority Chain</h2>
+    <p class="text-sm text-muted mb-2">
+        Every rule in the GovOps engine traces back through this authority chain to its sovereign context.
+    </p>
+    
+    <div class="chain-item" style="margin-left: 0.0rem;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <strong>Constitution Act, 1867</strong>
+            <span class="badge badge-info">Constitution</span>
+        </div>
+        <p class="citation">30 &amp; 31 Vict., c. 3 (U.K.), s. 91(2A)</p>
+        
+        <p class="text-sm text-muted">Effective: 1867-07-01</p>
+        
+        
+        <p class="text-sm"><a href="https://laws-lois.justice.gc.ca/eng/const/page-1.html" target="_blank">View source &rarr;</a></p>
+        
+    </div>
+    
+    <div class="chain-item" style="margin-left: 1.5rem;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <strong>Old Age Security Act</strong>
+            <span class="badge badge-info">Act</span>
+        </div>
+        <p class="citation">R.S.C., 1985, c. O-9</p>
+        
+        <p class="text-sm text-muted">Effective: 1985-01-01</p>
+        
+        
+        <p class="text-sm"><a href="https://laws-lois.justice.gc.ca/eng/acts/o-9/" target="_blank">View source &rarr;</a></p>
+        
+    </div>
+    
+    <div class="chain-item" style="margin-left: 3.0rem;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <strong>Old Age Security Regulations</strong>
+            <span class="badge badge-info">Regulation</span>
+        </div>
+        <p class="citation">C.R.C., c. 1246</p>
+        
+        <p class="text-sm text-muted">Effective: 1985-01-01</p>
+        
+        
+        <p class="text-sm"><a href="https://laws-lois.justice.gc.ca/eng/regulations/c.r.c.,_c._1246/" target="_blank">View source &rarr;</a></p>
+        
+    </div>
+    
+    <div class="chain-item" style="margin-left: 4.5rem;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <strong>Federal Department Responsible for OAS Delivery</strong>
+            <span class="badge badge-info">Program</span>
+        </div>
+        <p class="citation">Department of Employment and Social Development Act, S.C. 2005, c. 34</p>
+        
+        <p class="text-sm text-muted">Effective: 2005-12-12</p>
+        
+        
+    </div>
+    
+    <div class="chain-item" style="margin-left: 6.0rem;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <strong>Old Age Security Program</strong>
+            <span class="badge badge-info">Program</span>
+        </div>
+        <p class="citation">OAS Act, Part I</p>
+        
+        
+    </div>
+    
+    <div class="chain-item" style="margin-left: 7.5rem;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <strong>OAS Initial Eligibility Determination</strong>
+            <span class="badge badge-info">Service</span>
+        </div>
+        <p class="citation">OAS Act, ss. 3-3.1</p>
+        
+        
+    </div>
+    
+</div>
+
+<div class="card">
+    <h2>Legal Documents</h2>
+    
+    <div class="mb-2" style="border-bottom: 1px solid var(--border); padding-bottom: 1rem;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <strong>Old Age Security Act</strong>
+            <span class="badge badge-muted">Statute</span>
+        </div>
+        <p class="citation">R.S.C., 1985, c. O-9</p>
+        
+        <div style="margin-top: 0.5rem; padding: 0.6rem; background: #f8f9fa; border-radius: 4px;">
+            <strong>s. 3(1)</strong>
+             &mdash; Payment of pension
+            <p class="text-sm mt-1" style="line-height: 1.5;">Subject to this Act and the regulations, a monthly pension may be paid to every person who, being sixty-five years of age or over, has resided in Canada after reaching eighteen years of age and after July 1, 1977 for periods the aggregate of which is not less than ten years.</p>
+        </div>
+        
+        <div style="margin-top: 0.5rem; padding: 0.6rem; background: #f8f9fa; border-radius: 4px;">
+            <strong>s. 3(2)</strong>
+             &mdash; Amount of pension
+            <p class="text-sm mt-1" style="line-height: 1.5;">The amount of the pension that may be paid to a pensioner is (a) where the pensioner has resided in Canada after reaching eighteen years of age and after July 1, 1977 for periods the aggregate of which is not less than forty years, a full pension, and (b) in any other case, a proportion of a full pension equal to one-fortieth of a full pension for each complete year of residence in Canada after the pensioner reached eighteen years of age.</p>
+        </div>
+        
+        <div style="margin-top: 0.5rem; padding: 0.6rem; background: #f8f9fa; border-radius: 4px;">
+            <strong>s. 3.1(1)</strong>
+             &mdash; Requirement for application
+            <p class="text-sm mt-1" style="line-height: 1.5;">No pension may be paid to any person unless an application therefor has been made by or on behalf of that person and payment of the pension has been approved.</p>
+        </div>
+        
+    </div>
+    
+    <div class="mb-2" style="border-bottom: 1px solid var(--border); padding-bottom: 1rem;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <strong>Old Age Security Regulations</strong>
+            <span class="badge badge-muted">Regulation</span>
+        </div>
+        <p class="citation">C.R.C., c. 1246</p>
+        
+        <div style="margin-top: 0.5rem; padding: 0.6rem; background: #f8f9fa; border-radius: 4px;">
+            <strong>s. 21(1)</strong>
+             &mdash; Evidence of age
+            <p class="text-sm mt-1" style="line-height: 1.5;">An applicant for a benefit shall furnish evidence of the applicant&#39;s age, which evidence shall be a birth certificate or a certified copy thereof.</p>
+        </div>
+        
+    </div>
+    
+</div>
+
+<div class="card">
+    <h2>Formalized Rules</h2>
+    <p class="text-sm text-muted mb-2">Rules extracted from the legal corpus and formalized for deterministic evaluation.</p>
+    <table>
+        <thead>
+            <tr>
+                <th>Rule</th>
+                <th>Type</th>
+                <th>Formal Expression</th>
+                <th>Citation</th>
+            </tr>
+        </thead>
+        <tbody>
+        
+        <tr>
+            <td>Applicant must be 65 years of age or older</td>
+            <td><span class="badge badge-info">Age Threshold</span></td>
+            <td><code>applicant.age &gt;= 65</code></td>
+            <td class="citation">Old Age Security Act, R.S.C. 1985, c. O-9, s. 3(1)</td>
+        </tr>
+        
+        <tr>
+            <td>Minimum 10 years of Canadian residency after age 18</td>
+            <td><span class="badge badge-info">Residency Minimum</span></td>
+            <td><code>canadian_residency_years_after_18 &gt;= 10</code></td>
+            <td class="citation">Old Age Security Act, R.S.C. 1985, c. O-9, s. 3(1)</td>
+        </tr>
+        
+        <tr>
+            <td>Full pension at 40+ years; partial pension at 10-39 years (1/40 per year)</td>
+            <td><span class="badge badge-info">Residency Partial</span></td>
+            <td><code>pension_ratio = min(residency_years, 40) / 40</code></td>
+            <td class="citation">Old Age Security Act, R.S.C. 1985, c. O-9, s. 3(2)</td>
+        </tr>
+        
+        <tr>
+            <td>Applicant must be a Canadian citizen or permanent resident</td>
+            <td><span class="badge badge-info">Legal Status</span></td>
+            <td><code>applicant.legal_status in [&#39;citizen&#39;, &#39;permanent_resident&#39;]</code></td>
+            <td class="citation">Old Age Security Act, R.S.C. 1985, c. O-9, s. 3(1)</td>
+        </tr>
+        
+        <tr>
+            <td>Evidence of age must be provided (birth certificate or equivalent)</td>
+            <td><span class="badge badge-info">Evidence Required</span></td>
+            <td><code>has_evidence(&#39;birth_certificate&#39;) or has_evidence(&#39;passport&#39;)</code></td>
+            <td class="citation">Old Age Security Regulations, C.R.C. c. 1246, s. 21(1)</td>
+        </tr>
+        
+        </tbody>
+    </table>
+</div>
+
+    </div>
+    <footer>
+        GovOps &mdash; Policy-Driven Service Delivery Machine &mdash; Open Public Good (Apache 2.0)
+    </footer>
+</body>
+</html>

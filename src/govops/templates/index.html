@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}GovOps - {{ t('dashboard.title') }}{% endblock %}
+{% block content %}
+<h2 class="mb-2" style="font-size:1.3rem;">{{ program_name }} - {{ t('dashboard.title') }}</h2>
+
+<div class="card">
+    <h2>{{ t('common.jurisdiction') }}</h2>
+    {% if jurisdiction %}
+    <p><strong>{{ jurisdiction.name }}</strong> ({{ jurisdiction.level | title }})</p>
+    <p class="text-sm text-muted">{{ jurisdiction.legal_tradition }}</p>
+    <p class="text-sm text-muted">{{ jurisdiction.language_regime }}</p>
+    {% endif %}
+</div>
+
+<div class="card">
+    <h2>{{ t('dashboard.active_cases') }}</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>{{ t('dashboard.case_id') }}</th>
+                <th>{{ t('dashboard.applicant') }}</th>
+                <th>{{ t('dashboard.dob') }}</th>
+                <th>{{ t('dashboard.legal_status') }}</th>
+                <th>{{ t('common.status') }}</th>
+                <th>{{ t('dashboard.actions') }}</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for c in cases %}
+            <tr>
+                <td><a href="/cases/{{ c.id }}?lang={{ lang }}">{{ c.id }}</a></td>
+                <td>{{ c.applicant_name }}</td>
+                <td>{{ c.dob }}</td>
+                <td>{{ c.legal_status | title }}</td>
+                <td>
+                    {% if c.status == "intake" %}
+                        <span class="badge badge-muted">{{ t('status.intake') }}</span>
+                    {% elif c.status == "recommendation_ready" %}
+                        <span class="badge badge-info">{{ t('status.recommendation_ready') }}</span>
+                    {% elif c.status == "decided" %}
+                        <span class="badge badge-success">{{ t('status.decided') }}</span>
+                    {% elif c.status == "escalated" %}
+                        <span class="badge badge-warning">{{ t('status.escalated') }}</span>
+                    {% else %}
+                        <span class="badge badge-muted">{{ c.status }}</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <a href="/cases/{{ c.id }}?lang={{ lang }}" class="btn btn-primary btn-sm">{{ t('common.view') }}</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

@@ -1,0 +1,258 @@
+{% extends "base.html" %}
+{% block title %}GovOps - Admin: Glass Window{% endblock %}
+{% block content %}
+<h2 class="mb-2" style="font-size:1.3rem;">Glass Window &mdash; Data Behind the Scenes</h2>
+<p class="text-sm text-muted mb-2">
+    Everything the engine uses to make decisions is visible here. No hidden state. No black boxes.
+</p>
+
+<div style="display:flex; gap:0.5rem; flex-wrap:wrap; margin-bottom:1.5rem;">
+    <a href="#jur" class="btn btn-primary btn-sm">Jurisdiction</a>
+    <a href="#chain" class="btn btn-primary btn-sm">Authority Chain</a>
+    <a href="#docs" class="btn btn-primary btn-sm">Legal Documents</a>
+    <a href="#rules" class="btn btn-primary btn-sm">Rules</a>
+    <a href="#cases" class="btn btn-primary btn-sm">Cases</a>
+    <a href="#recs" class="btn btn-primary btn-sm">Recommendations</a>
+    <a href="#reviews" class="btn btn-primary btn-sm">Reviews</a>
+    <a href="#audit" class="btn btn-primary btn-sm">Audit Trails</a>
+    <a href="#stats" class="btn btn-primary btn-sm">Statistics</a>
+</div>
+
+<!-- Statistics -->
+<div class="card" id="stats">
+    <h2>Store Statistics</h2>
+    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap:1rem;">
+        <div style="text-align:center; padding:1rem; background:var(--accent); border-radius:8px;">
+            <div style="font-size:2rem; font-weight:700; color:var(--primary);">{{ stats.jurisdictions }}</div>
+            <div class="text-sm text-muted">Jurisdictions</div>
+        </div>
+        <div style="text-align:center; padding:1rem; background:var(--accent); border-radius:8px;">
+            <div style="font-size:2rem; font-weight:700; color:var(--primary);">{{ stats.authority_links }}</div>
+            <div class="text-sm text-muted">Authority Links</div>
+        </div>
+        <div style="text-align:center; padding:1rem; background:var(--accent); border-radius:8px;">
+            <div style="font-size:2rem; font-weight:700; color:var(--primary);">{{ stats.legal_documents }}</div>
+            <div class="text-sm text-muted">Legal Documents</div>
+        </div>
+        <div style="text-align:center; padding:1rem; background:var(--accent); border-radius:8px;">
+            <div style="font-size:2rem; font-weight:700; color:var(--primary);">{{ stats.rules }}</div>
+            <div class="text-sm text-muted">Formalized Rules</div>
+        </div>
+        <div style="text-align:center; padding:1rem; background:var(--accent); border-radius:8px;">
+            <div style="font-size:2rem; font-weight:700; color:var(--primary);">{{ stats.cases }}</div>
+            <div class="text-sm text-muted">Cases</div>
+        </div>
+        <div style="text-align:center; padding:1rem; background:var(--accent); border-radius:8px;">
+            <div style="font-size:2rem; font-weight:700; color:var(--primary);">{{ stats.recommendations }}</div>
+            <div class="text-sm text-muted">Recommendations</div>
+        </div>
+        <div style="text-align:center; padding:1rem; background:var(--accent); border-radius:8px;">
+            <div style="font-size:2rem; font-weight:700; color:var(--primary);">{{ stats.reviews }}</div>
+            <div class="text-sm text-muted">Reviews</div>
+        </div>
+        <div style="text-align:center; padding:1rem; background:var(--accent); border-radius:8px;">
+            <div style="font-size:2rem; font-weight:700; color:var(--primary);">{{ stats.audit_entries }}</div>
+            <div class="text-sm text-muted">Audit Entries</div>
+        </div>
+    </div>
+</div>
+
+<!-- Jurisdiction -->
+<div class="card" id="jur">
+    <h2>Jurisdiction</h2>
+    {% for jid, j in store_jurisdictions.items() %}
+    <table>
+        <tr><td style="width:160px;"><strong>ID</strong></td><td><code>{{ j.id }}</code></td></tr>
+        <tr><td><strong>Name</strong></td><td>{{ j.name }}</td></tr>
+        <tr><td><strong>Country</strong></td><td>{{ j.country }}</td></tr>
+        <tr><td><strong>Level</strong></td><td>{{ j.level }}</td></tr>
+        <tr><td><strong>Legal Tradition</strong></td><td>{{ j.legal_tradition }}</td></tr>
+        <tr><td><strong>Language Regime</strong></td><td>{{ j.language_regime }}</td></tr>
+    </table>
+    {% endfor %}
+</div>
+
+<!-- Authority Chain -->
+<div class="card" id="chain">
+    <h2>Authority Chain ({{ authority_chain | length }} links)</h2>
+    <table>
+        <thead><tr><th>ID</th><th>Layer</th><th>Title</th><th>Citation</th><th>Effective</th><th>Parent</th></tr></thead>
+        <tbody>
+        {% for ref in authority_chain %}
+        <tr>
+            <td><code class="text-sm">{{ ref.id }}</code></td>
+            <td><span class="badge badge-info">{{ ref.layer }}</span></td>
+            <td>{{ ref.title }}</td>
+            <td class="citation">{{ ref.citation }}</td>
+            <td class="text-sm">{{ ref.effective_date or "" }}</td>
+            <td><code class="text-sm">{{ ref.parent_id or "root" }}</code></td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Legal Documents -->
+<div class="card" id="docs">
+    <h2>Legal Documents ({{ legal_documents | length }})</h2>
+    {% for doc in legal_documents %}
+    <div style="border: 1px solid var(--border); border-radius: 6px; padding: 1rem; margin-bottom: 1rem;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <strong>{{ doc.title }}</strong>
+            <span class="badge badge-muted">{{ doc.document_type.value }}</span>
+        </div>
+        <p class="text-sm text-muted"><code>{{ doc.id }}</code> &mdash; {{ doc.citation }}</p>
+        {% for sec in doc.sections %}
+        <div style="margin-top: 0.5rem; padding: 0.6rem; background: #f8f9fa; border-radius: 4px; border-left: 3px solid var(--primary-light);">
+            <strong>{{ sec.section_ref }}</strong>{% if sec.heading %} &mdash; {{ sec.heading }}{% endif %}
+            <p class="text-sm mt-1" style="line-height:1.5;">{{ sec.text }}</p>
+            <p class="text-sm text-muted">ID: <code>{{ sec.id }}</code></p>
+        </div>
+        {% endfor %}
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Rules -->
+<div class="card" id="rules">
+    <h2>Formalized Rules ({{ rules | length }})</h2>
+    <table>
+        <thead><tr><th>ID</th><th>Type</th><th>Description</th><th>Formal Expression</th><th>Citation</th><th>Parameters</th></tr></thead>
+        <tbody>
+        {% for rule in rules %}
+        <tr>
+            <td><code class="text-sm">{{ rule.id }}</code></td>
+            <td><span class="badge badge-info">{{ rule.rule_type.value }}</span></td>
+            <td>{{ rule.description }}</td>
+            <td><code class="text-sm">{{ rule.formal_expression }}</code></td>
+            <td class="citation">{{ rule.citation }}</td>
+            <td class="text-sm"><code>{{ rule.parameters }}</code></td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Cases -->
+<div class="card" id="cases">
+    <h2>Cases ({{ cases | length }})</h2>
+    {% for case in cases %}
+    <div style="border: 1px solid var(--border); border-radius: 6px; padding: 1rem; margin-bottom: 0.8rem;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <strong>{{ case.id }}</strong>
+            {% if case.status.value == "intake" %}
+                <span class="badge badge-muted">{{ case.status.value }}</span>
+            {% elif case.status.value == "recommendation_ready" %}
+                <span class="badge badge-info">{{ case.status.value }}</span>
+            {% elif case.status.value == "decided" %}
+                <span class="badge badge-success">{{ case.status.value }}</span>
+            {% else %}
+                <span class="badge badge-warning">{{ case.status.value }}</span>
+            {% endif %}
+        </div>
+        <table class="text-sm mt-1">
+            <tr><td style="width:140px;">Applicant</td><td><strong>{{ case.applicant.legal_name }}</strong></td></tr>
+            <tr><td>Date of Birth</td><td>{{ case.applicant.date_of_birth }}</td></tr>
+            <tr><td>Legal Status</td><td>{{ case.applicant.legal_status }}</td></tr>
+            <tr><td>Jurisdiction</td><td><code>{{ case.jurisdiction_id }}</code></td></tr>
+            <tr><td>Residency</td><td>{{ case.residency_periods | length }} period(s): {% for p in case.residency_periods %}{{ p.country }} ({{ p.start_date }}{% if p.end_date %} to {{ p.end_date }}{% endif %}){% if not loop.last %}, {% endif %}{% endfor %}</td></tr>
+            <tr><td>Evidence</td><td>{{ case.evidence_items | length }} item(s): {% for e in case.evidence_items %}{{ e.evidence_type }}{% if not loop.last %}, {% endif %}{% endfor %}</td></tr>
+        </table>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Recommendations -->
+<div class="card" id="recs">
+    <h2>Recommendations ({{ recommendations | length }})</h2>
+    {% if recommendations %}
+    {% for case_id, rec in recommendations.items() %}
+    <div style="border: 1px solid var(--border); border-radius: 6px; padding: 1rem; margin-bottom: 0.8rem;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <strong>{{ case_id }}</strong>
+            {% if rec.outcome.value == "eligible" %}
+                <span class="badge badge-success">{{ rec.outcome.value }}</span>
+            {% elif rec.outcome.value == "ineligible" %}
+                <span class="badge badge-danger">{{ rec.outcome.value }}</span>
+            {% elif rec.outcome.value == "insufficient_evidence" %}
+                <span class="badge badge-warning">{{ rec.outcome.value }}</span>
+            {% else %}
+                <span class="badge badge-warning">{{ rec.outcome.value }}</span>
+            {% endif %}
+        </div>
+        <table class="text-sm mt-1">
+            <tr><td style="width:140px;">Recommendation ID</td><td><code>{{ rec.id }}</code></td></tr>
+            <tr><td>Timestamp</td><td>{{ rec.timestamp.strftime("%Y-%m-%d %H:%M:%S UTC") }}</td></tr>
+            <tr><td>Pension Type</td><td>{{ rec.pension_type or "N/A" }} {% if rec.partial_ratio %}({{ rec.partial_ratio }}){% endif %}</td></tr>
+            <tr><td>Rules Evaluated</td><td>{{ rec.rule_evaluations | length }}</td></tr>
+            <tr><td>Missing Evidence</td><td>{{ rec.missing_evidence | length }} item(s)</td></tr>
+            <tr><td>Flags</td><td>{{ rec.flags | length }}</td></tr>
+        </table>
+        <details class="mt-1">
+            <summary class="text-sm" style="cursor:pointer; color:var(--primary-light);">Rule evaluations</summary>
+            {% for ev in rec.rule_evaluations %}
+            <div class="rule-eval {{ ev.outcome.value }} mt-1">
+                <strong class="text-sm">{{ ev.rule_id }}</strong> &mdash; <span class="badge {% if ev.outcome.value == 'satisfied' %}badge-success{% elif ev.outcome.value == 'not_satisfied' %}badge-danger{% else %}badge-warning{% endif %}">{{ ev.outcome.value }}</span>
+                <p class="text-sm">{{ ev.detail }}</p>
+                <p class="citation">{{ ev.citation }}</p>
+            </div>
+            {% endfor %}
+        </details>
+    </div>
+    {% endfor %}
+    {% else %}
+    <p class="text-muted text-sm">No cases have been evaluated yet. <a href="/cases?lang={{ lang }}">Evaluate a case</a> to see recommendations here.</p>
+    {% endif %}
+</div>
+
+<!-- Reviews -->
+<div class="card" id="reviews">
+    <h2>Human Review Actions ({{ review_count }})</h2>
+    {% if review_actions %}
+    {% for case_id, reviews in review_actions.items() %}
+    {% for r in reviews %}
+    <div class="rule-eval satisfied">
+        <strong>{{ case_id }}</strong> &mdash; {{ r.action.value | replace("_", " ") | title }}
+        <span class="text-sm text-muted">by {{ r.reviewer }} at {{ r.timestamp.strftime("%Y-%m-%d %H:%M:%S UTC") }}</span>
+        {% if r.rationale %}<p class="text-sm mt-1">{{ r.rationale }}</p>{% endif %}
+        {% if r.final_outcome %}<p class="text-sm">Final: <span class="badge badge-info">{{ r.final_outcome.value }}</span></p>{% endif %}
+    </div>
+    {% endfor %}
+    {% endfor %}
+    {% else %}
+    <p class="text-muted text-sm">No reviews submitted yet.</p>
+    {% endif %}
+</div>
+
+<!-- Audit Trails -->
+<div class="card" id="audit">
+    <h2>Audit Trails ({{ audit_entry_count }} entries across {{ audit_trails | length }} cases)</h2>
+    {% for case_id, trail in audit_trails.items() %}
+    {% if trail %}
+    <details class="mb-1">
+        <summary style="cursor:pointer; font-weight:600; color:var(--primary);">{{ case_id }} ({{ trail | length }} entries)</summary>
+        <table class="text-sm mt-1">
+            <thead><tr><th>Time</th><th>Event</th><th>Actor</th><th>Detail</th></tr></thead>
+            <tbody>
+            {% for entry in trail %}
+            <tr>
+                <td>{{ entry.timestamp.strftime("%H:%M:%S") }}</td>
+                <td><span class="badge badge-muted">{{ entry.event_type }}</span></td>
+                <td>{{ entry.actor }}</td>
+                <td>{{ entry.detail }}</td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </details>
+    {% endif %}
+    {% endfor %}
+</div>
+
+<div class="card" style="text-align:center;">
+    <p class="text-sm text-muted">
+        This is the complete state of the GovOps engine. Every object that participates in a decision is visible here.
+        <br>No hidden layers. No shadow state. Glass window.
+    </p>
+</div>
+{% endblock %}

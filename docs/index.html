@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GovOps - Policy-Driven Service Delivery Machine</title>
+    <meta name="description" content="Open-source method for turning legislation into traceable, auditable government decision-support services. 6 jurisdictions, 6 languages, zero vendor lock-in.">
+    <style>
+        :root { --primary: #1a5276; --primary-light: #2980b9; --success: #27ae60; --accent: #e8f4fd; --text: #212529; --muted: #6c757d; --bg: #f8f9fa; --card: #fff; --border: #dee2e6; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; color: var(--text); line-height: 1.7; }
+        .hero { background: linear-gradient(135deg, #1a5276 0%, #2980b9 100%); color: white; padding: 4rem 2rem; text-align: center; }
+        .hero h1 { font-size: 2.5rem; margin-bottom: 0.5rem; }
+        .hero p { font-size: 1.2rem; opacity: 0.9; max-width: 700px; margin: 0 auto; }
+        .hero .badges { display: flex; gap: 0.5rem; justify-content: center; flex-wrap: wrap; margin-top: 1.5rem; }
+        .hero .badge { background: rgba(255,255,255,0.2); padding: 0.3rem 0.8rem; border-radius: 20px; font-size: 0.85rem; }
+        .lang-switcher { margin-top: 1.2rem; }
+        .lang-switcher button { background: rgba(255,255,255,0.15); color: white; border: 1px solid rgba(255,255,255,0.3); padding: 0.3rem 0.7rem; border-radius: 4px; cursor: pointer; font-size: 0.85rem; margin: 0.15rem; }
+        .lang-switcher button.active { background: white; color: var(--primary); font-weight: 600; }
+        .section { padding: 3rem 2rem; }
+        .section:nth-child(even) { background: var(--bg); }
+        .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; }
+        .card { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 1.5rem; }
+        .card h3 { margin-bottom: 0.5rem; color: var(--primary); font-size: 1.1rem; }
+        .card p { color: var(--muted); font-size: 0.9rem; }
+        h2 { font-size: 1.6rem; color: var(--primary); margin-bottom: 1rem; }
+        .btn { display: inline-block; padding: 0.7rem 2rem; border-radius: 6px; font-weight: 600; text-decoration: none; font-size: 1rem; }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-outline { background: transparent; color: white; border: 2px solid white; }
+        .btn-outline:hover { background: white; color: var(--primary); }
+        .screenshot { border: 1px solid var(--border); border-radius: 8px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .screenshot iframe { width: 100%; height: 500px; border: none; pointer-events: none; }
+        .screenshot-label { background: var(--accent); padding: 0.5rem 1rem; font-size: 0.85rem; color: var(--primary); font-weight: 600; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+        th { text-align: left; padding: 0.6rem; background: var(--accent); color: var(--primary); }
+        td { padding: 0.6rem; border-bottom: 1px solid var(--border); }
+        .cta { background: var(--primary); color: white; text-align: center; padding: 3rem 2rem; }
+        .cta h2 { color: white; }
+        .cta p { color: rgba(255,255,255,0.85); max-width: 600px; margin: 0 auto 1.5rem; }
+        footer { text-align: center; padding: 2rem; color: var(--muted); font-size: 0.85rem; }
+        blockquote { border: none; padding: 1rem; font-style: italic; color: var(--primary); font-size: 1.15rem; text-align: center; }
+        @media (max-width: 768px) { .grid-2, .grid-3 { grid-template-columns: 1fr; } .hero h1 { font-size: 1.8rem; } }
+    </style>
+</head>
+<body>
+
+<div style="background:#fff3cd; border-bottom:1px solid #ffc107; padding:0.6rem 1rem; text-align:center; font-size:0.78rem; color:#664d03; line-height:1.5;">
+    <strong>Disclaimer:</strong> Independent prototype. Not affiliated with, endorsed by, or representing any government entity.
+    Legislative text is publicly available law interpreted by the author as illustrative case studies &mdash; not authoritative operational guidance.
+</div>
+
+<!-- Hero -->
+<div class="hero">
+    <h1>GovOps</h1>
+    <p><span data-i18n="subtitle">Policy-Driven Service Delivery Machine</span></p>
+    <p style="font-size:1rem; opacity:0.8; margin-top:0.5rem;"><span data-i18n="tagline">Turn legislation into traceable, deterministic, auditable government decision-support services. Open source. Multi-jurisdiction. No vendor lock-in.</span></p>
+    <div class="lang-switcher">
+        <button onclick="setLang('en')" id="btn-en" class="active">English</button>
+        <button onclick="setLang('fr')" id="btn-fr">Francais</button>
+        <button onclick="setLang('pt')" id="btn-pt">Portugues</button>
+        <button onclick="setLang('es')" id="btn-es">Espanol</button>
+        <button onclick="setLang('de')" id="btn-de">Deutsch</button>
+        <button onclick="setLang('uk')" id="btn-uk">Ukrainska</button>
+    </div>
+    <div style="display:flex; gap:1rem; justify-content:center; flex-wrap:wrap; margin-top:1.5rem;">
+        <a href="https://github.com/eva-foundry/61-GovOps" class="btn btn-outline"><span data-i18n="btn_github">View on GitHub</span></a>
+        <a href="screenshots/01-about.html" class="btn btn-primary" style="background:var(--success);"><span data-i18n="btn_demo">Live Demo Preview</span></a>
+    </div>
+    <div class="badges">
+        <span class="badge" data-i18n="badge_jur">6 Jurisdictions</span>
+        <span class="badge" data-i18n="badge_lang">6 Languages</span>
+        <span class="badge" data-i18n="badge_tests">65 Tests</span>
+        <span class="badge">Apache 2.0</span>
+    </div>
+</div>
+
+<!-- What is it -->
+<div class="section">
+    <div style="max-width:1100px; margin:0 auto;">
+        <h2 data-i18n="what_title">What is GovOps?</h2>
+        <p><span data-i18n="what_p1">GovOps is a method for turning <strong>laws, regulations, and policies</strong> into <strong>working government services</strong> that are transparent, traceable, and auditable.</span></p>
+        <p style="margin-top:0.5rem;"><span data-i18n="what_p2">It is not an AI that makes decisions for you. It is a tool that helps public servants make better, faster, and more consistent decisions -- while keeping humans in control.</span></p>
+        <div class="grid-3" style="margin-top:2rem;">
+            <div class="card"><h3 data-i18n="prop_trace_t">Traceable</h3><p data-i18n="prop_trace_p">Every recommendation links back: Decision, Rule, Regulation, Act, Jurisdiction. If someone asks "why?", the answer is always available.</p></div>
+            <div class="card"><h3 data-i18n="prop_determ_t">Deterministic</h3><p data-i18n="prop_determ_p">Same applicant, same evidence, same result. Every time. No randomness, no hidden factors.</p></div>
+            <div class="card"><h3 data-i18n="prop_human_t">Human Authority Preserved</h3><p data-i18n="prop_human_p">The system recommends. The officer decides. Every human action is recorded.</p></div>
+            <div class="card"><h3 data-i18n="prop_open_t">Open and Inspectable</h3><p data-i18n="prop_open_p">Apache 2.0. Any government can inspect the logic, adapt it to their own laws, deploy without vendor lock-in.</p></div>
+            <div class="card"><h3 data-i18n="prop_honest_t">Honest About Uncertainty</h3><p data-i18n="prop_honest_p">When evidence is missing or a situation is ambiguous, the system says so. It never guesses.</p></div>
+            <div class="card"><h3 data-i18n="prop_jur_t">Jurisdiction-Aware</h3><p data-i18n="prop_jur_p">Different countries, different laws, different languages -- same method. Portable across jurisdictions.</p></div>
+        </div>
+    </div>
+</div>
+
+<!-- Screenshots -->
+<div class="section" style="background:var(--bg);">
+    <div style="max-width:1100px; margin:0 auto;">
+        <h2 data-i18n="see_title">See It Working</h2>
+        <p style="margin-bottom:2rem;" data-i18n="see_sub">Click any screenshot to view the full page.</p>
+        <div class="grid-2">
+            <div><a href="screenshots/01-about.html" class="screenshot" style="display:block;text-decoration:none;"><div class="screenshot-label">About</div><iframe src="screenshots/01-about.html" loading="lazy" sandbox></iframe></a></div>
+            <div><a href="screenshots/03-case-detail.html" class="screenshot" style="display:block;text-decoration:none;"><div class="screenshot-label">Case Evaluation</div><iframe src="screenshots/03-case-detail.html" loading="lazy" sandbox></iframe></a></div>
+            <div><a href="screenshots/04-authority.html" class="screenshot" style="display:block;text-decoration:none;"><div class="screenshot-label">Authority Chain</div><iframe src="screenshots/04-authority.html" loading="lazy" sandbox></iframe></a></div>
+            <div><a href="screenshots/05-audit.html" class="screenshot" style="display:block;text-decoration:none;"><div class="screenshot-label">Audit Package</div><iframe src="screenshots/05-audit.html" loading="lazy" sandbox></iframe></a></div>
+            <div><a href="screenshots/07-encode.html" class="screenshot" style="display:block;text-decoration:none;"><div class="screenshot-label">Encoding Pipeline</div><iframe src="screenshots/07-encode.html" loading="lazy" sandbox></iframe></a></div>
+            <div><a href="screenshots/08-mvp.html" class="screenshot" style="display:block;text-decoration:none;"><div class="screenshot-label">MVP Workstation</div><iframe src="screenshots/08-mvp.html" loading="lazy" sandbox></iframe></a></div>
+        </div>
+        <h3 style="margin-top:2rem; margin-bottom:1rem;" data-i18n="i18n_title">Same Engine, 6 Languages</h3>
+        <div class="grid-3">
+            <div><a href="screenshots/02-cases-fr.html" class="screenshot" style="display:block;text-decoration:none;"><div class="screenshot-label">Canada -- Francais</div><iframe src="screenshots/02-cases-fr.html" loading="lazy" sandbox></iframe></a></div>
+            <div><a href="screenshots/10-brazil-case-pt.html" class="screenshot" style="display:block;text-decoration:none;"><div class="screenshot-label">Brazil -- Portugues</div><iframe src="screenshots/10-brazil-case-pt.html" loading="lazy" sandbox></iframe></a></div>
+            <div><a href="screenshots/12-spain-case-es.html" class="screenshot" style="display:block;text-decoration:none;"><div class="screenshot-label">Spain -- Espanol</div><iframe src="screenshots/12-spain-case-es.html" loading="lazy" sandbox></iframe></a></div>
+            <div><a href="screenshots/13-france-cases-fr.html" class="screenshot" style="display:block;text-decoration:none;"><div class="screenshot-label">France -- Francais</div><iframe src="screenshots/13-france-cases-fr.html" loading="lazy" sandbox></iframe></a></div>
+            <div><a href="screenshots/14-germany-case-de.html" class="screenshot" style="display:block;text-decoration:none;"><div class="screenshot-label">Germany -- Deutsch</div><iframe src="screenshots/14-germany-case-de.html" loading="lazy" sandbox></iframe></a></div>
+            <div><a href="screenshots/15-ukraine-case-uk.html" class="screenshot" style="display:block;text-decoration:none;"><div class="screenshot-label">Ukraine -- Ukrainska</div><iframe src="screenshots/15-ukraine-case-uk.html" loading="lazy" sandbox></iframe></a></div>
+        </div>
+    </div>
+</div>
+
+<!-- Ecosystem -->
+<div class="section">
+    <div style="max-width:1100px; margin:0 auto;">
+        <h2 data-i18n="eco_title">Build a Practice Around GovOps</h2>
+        <p style="margin-bottom:1.5rem;" data-i18n="eco_sub">GovOps is designed to create demand and supply. Governments need it. Consultants implement it. Everyone benefits.</p>
+        <div class="grid-3">
+            <div class="card"><h3 data-i18n="eco_gov_t">For Governments</h3><p data-i18n="eco_gov_p">Modernize service delivery without vendor lock-in. Start with one program. Prove value. Scale deliberately.</p><p style="margin-top:0.5rem;"><a href="https://github.com/eva-foundry/61-GovOps/blob/main/docs/ecosystem/business-case-template.md">Business Case &rarr;</a> | <a href="https://github.com/eva-foundry/61-GovOps/blob/main/docs/ecosystem/rfp-template.md">RFP Template &rarr;</a></p></div>
+            <div class="card"><h3 data-i18n="eco_con_t">For Consultants</h3><p data-i18n="eco_con_p">Build an implementation practice. Get certified. Every jurisdiction is a new engagement.</p><p style="margin-top:0.5rem;"><a href="https://github.com/eva-foundry/61-GovOps/blob/main/docs/ecosystem/implementation-guide.md">Implementation Guide &rarr;</a> | <a href="https://github.com/eva-foundry/61-GovOps/blob/main/docs/ecosystem/partner-program.md">Partner Program &rarr;</a></p></div>
+            <div class="card"><h3 data-i18n="eco_train_t">For Trainers</h3><p data-i18n="eco_train_p">Deliver officer training, encoder certification, and technical deployment courses.</p><p style="margin-top:0.5rem;"><a href="https://github.com/eva-foundry/61-GovOps/blob/main/docs/ecosystem/training-curriculum.md">Curriculum &rarr;</a> | <a href="https://github.com/eva-foundry/61-GovOps/blob/main/docs/ecosystem/certification-program.md">Certification &rarr;</a></p></div>
+            <div class="card"><h3 data-i18n="eco_legal_t">For Legal Analysts</h3><p data-i18n="eco_legal_p">Turn legislation expertise into encoded rules governments can use. Every jurisdiction needs domain experts.</p><p style="margin-top:0.5rem;"><a href="https://github.com/eva-foundry/61-GovOps/blob/main/docs/ecosystem/use-case-library.md">Use Case Library &rarr;</a></p></div>
+            <div class="card"><h3 data-i18n="eco_dev_t">For Developers</h3><p data-i18n="eco_dev_p">Contribute jurisdictions, improve the engine, add integrations. Architecture is clean, tests are green.</p><p style="margin-top:0.5rem;"><a href="https://github.com/eva-foundry/61-GovOps/blob/main/CONTRIBUTING.md">Contributing Guide &rarr;</a></p></div>
+            <div class="card"><h3 data-i18n="eco_donor_t">For Donors and NGOs</h3><p data-i18n="eco_donor_p">Fund GovOps adoption in developing countries and post-conflict zones. Transparent, auditable, open.</p><p style="margin-top:0.5rem;"><a href="https://github.com/eva-foundry/61-GovOps/blob/main/docs/ecosystem/use-case-library.md#disaster-and-emergency">Reconstruction Use Cases &rarr;</a></p></div>
+        </div>
+    </div>
+</div>
+
+<!-- Origin -->
+<div class="section" style="background:var(--bg);">
+    <div style="max-width:800px; margin:0 auto; text-align:center;">
+        <h2 data-i18n="origin_title">Origin</h2>
+        <p data-i18n="origin_p1">GovOps was inspired by the <a href="https://agenticstate.org" target="_blank"><strong>Agentic State</strong></a> framework (Ilves &amp; Kilian, 2025), which maps 12 layers of government service delivery where intelligent systems can operate.</p>
+        <p style="margin-top:0.5rem;" data-i18n="origin_p2">A practical implementation of that vision -- starting from Layer 3 (policy and rule making) and Layer 7 (governance and accountability).</p>
+        <p style="margin-top:1rem; color:var(--muted); font-size:0.9rem;" data-i18n="origin_p3">An independent, nights-and-weekends open public-good contribution to support the Agentic State mission.</p>
+        <blockquote data-i18n="quote">"Government systems should not invent their own rules. They should execute existing authority faithfully, visibly, and defensibly."</blockquote>
+    </div>
+</div>
+
+<!-- CTA -->
+<div class="cta">
+    <h2 data-i18n="cta_title">Get Started</h2>
+    <p data-i18n="cta_sub">Clone the repo. Install. Run the demo. See if the method makes sense for your context.</p>
+    <pre style="background:rgba(0,0,0,0.3); display:inline-block; padding:1rem 2rem; border-radius:6px; font-size:0.95rem; text-align:left; margin-bottom:1.5rem; color:white;">git clone https://github.com/eva-foundry/61-GovOps.git
+cd 61-GovOps
+pip install -e ".[dev]"
+govops-demo</pre>
+    <div style="display:flex; gap:1rem; justify-content:center; flex-wrap:wrap;">
+        <a href="https://github.com/eva-foundry/61-GovOps" class="btn btn-outline">GitHub</a>
+        <a href="https://github.com/eva-foundry/61-GovOps/blob/main/CONTRIBUTING.md" class="btn btn-outline" data-i18n="btn_contribute">Contribute</a>
+        <a href="https://github.com/eva-foundry/61-GovOps/issues/new?template=new_jurisdiction.md" class="btn btn-outline" data-i18n="btn_add_country">Add Your Country</a>
+    </div>
+</div>
+
+<footer>
+    <p>GovOps -- Open Public Good (Apache 2.0) -- <a href="https://github.com/eva-foundry/61-GovOps">github.com/eva-foundry/61-GovOps</a></p>
+    <p style="margin-top:0.5rem; font-size:0.72rem; color:#999; max-width:700px; margin-left:auto; margin-right:auto;">
+        Independent prototype. Not affiliated with, endorsed by, or representing the Government of Canada, Service Canada, ESDC, or any government entity.
+        Legislative text is publicly available law interpreted by the author for illustrative purposes &mdash; not authoritative operational guidance.
+    </p>
+</footer>
+
+<script>
+const T = {
+  en: {
+    subtitle: "Policy-Driven Service Delivery Machine",
+    tagline: "Turn legislation into traceable, deterministic, auditable government decision-support services. Open source. Multi-jurisdiction. No vendor lock-in.",
+    btn_github: "View on GitHub", btn_demo: "Live Demo Preview", btn_contribute: "Contribute", btn_add_country: "Add Your Country",
+    badge_jur: "6 Jurisdictions", badge_lang: "6 Languages", badge_tests: "65 Tests",
+    what_title: "What is GovOps?",
+    what_p1: "GovOps is a method for turning <strong>laws, regulations, and policies</strong> into <strong>working government services</strong> that are transparent, traceable, and auditable.",
+    what_p2: "It is not an AI that makes decisions for you. It is a tool that helps public servants make better, faster, and more consistent decisions -- while keeping humans in control.",
+    prop_trace_t: "Traceable", prop_trace_p: "Every recommendation links back: Decision, Rule, Regulation, Act, Jurisdiction. If someone asks \"why?\", the answer is always available.",
+    prop_determ_t: "Deterministic", prop_determ_p: "Same applicant, same evidence, same result. Every time. No randomness, no hidden factors.",
+    prop_human_t: "Human Authority Preserved", prop_human_p: "The system recommends. The officer decides. Every human action is recorded.",
+    prop_open_t: "Open and Inspectable", prop_open_p: "Apache 2.0. Any government can inspect the logic, adapt it to their own laws, deploy without vendor lock-in.",
+    prop_honest_t: "Honest About Uncertainty", prop_honest_p: "When evidence is missing or a situation is ambiguous, the system says so. It never guesses.",
+    prop_jur_t: "Jurisdiction-Aware", prop_jur_p: "Different countries, different laws, different languages -- same method. Portable across jurisdictions.",
+    see_title: "See It Working", see_sub: "Click any screenshot to view the full page.",
+    i18n_title: "Same Engine, 6 Languages",
+    eco_title: "Build a Practice Around GovOps", eco_sub: "GovOps is designed to create demand and supply. Governments need it. Consultants implement it. Everyone benefits.",
+    eco_gov_t: "For Governments", eco_gov_p: "Modernize service delivery without vendor lock-in. Start with one program. Prove value. Scale deliberately.",
+    eco_con_t: "For Consultants", eco_con_p: "Build an implementation practice. Get certified. Every jurisdiction is a new engagement.",
+    eco_train_t: "For Trainers", eco_train_p: "Deliver officer training, encoder certification, and technical deployment courses.",
+    eco_legal_t: "For Legal Analysts", eco_legal_p: "Turn legislation expertise into encoded rules governments can use. Every jurisdiction needs domain experts.",
+    eco_dev_t: "For Developers", eco_dev_p: "Contribute jurisdictions, improve the engine, add integrations. Architecture is clean, tests are green.",
+    eco_donor_t: "For Donors and NGOs", eco_donor_p: "Fund GovOps adoption in developing countries and post-conflict zones. Transparent, auditable, open.",
+    origin_title: "Origin",
+    origin_p1: "GovOps was inspired by the <a href='https://agenticstate.org' target='_blank'><strong>Agentic State</strong></a> framework (Ilves & Kilian, 2025), which maps 12 layers of government service delivery where intelligent systems can operate.",
+    origin_p2: "A practical implementation of that vision -- starting from Layer 3 (policy and rule making) and Layer 7 (governance and accountability).",
+    origin_p3: "An independent, nights-and-weekends open public-good contribution to support the Agentic State mission.",
+    quote: "\"Government systems should not invent their own rules. They should execute existing authority faithfully, visibly, and defensibly.\"",
+    cta_title: "Get Started", cta_sub: "Clone the repo. Install. Run the demo. See if the method makes sense for your context."
+  },
+  fr: {
+    subtitle: "Machine de prestation de services axee sur les politiques",
+    tagline: "Transformez la legislation en services decisionnels gouvernementaux tracables, deterministes et auditables. Code ouvert. Multi-juridiction. Sans dependance fournisseur.",
+    btn_github: "Voir sur GitHub", btn_demo: "Apercu de la demo", btn_contribute: "Contribuer", btn_add_country: "Ajouter votre pays",
+    badge_jur: "6 Juridictions", badge_lang: "6 Langues", badge_tests: "65 Tests",
+    what_title: "Qu'est-ce que GovOps?",
+    what_p1: "GovOps est une methode pour transformer les <strong>lois, reglements et politiques</strong> en <strong>services gouvernementaux operationnels</strong> transparents, tracables et auditables.",
+    what_p2: "Ce n'est pas une IA qui prend des decisions a votre place. C'est un outil qui aide les fonctionnaires a prendre des decisions meilleures, plus rapides et plus coherentes -- tout en gardant l'humain aux commandes.",
+    prop_trace_t: "Tracable", prop_trace_p: "Chaque recommandation remonte a : Decision, Regle, Reglement, Loi, Juridiction. Si quelqu'un demande \"pourquoi?\", la reponse est toujours disponible.",
+    prop_determ_t: "Deterministe", prop_determ_p: "Meme demandeur, memes preuves, meme resultat. A chaque fois. Aucun aleatoire, aucun facteur cache.",
+    prop_human_t: "Autorite humaine preservee", prop_human_p: "Le systeme recommande. L'agent decide. Chaque action humaine est enregistree.",
+    prop_open_t: "Ouvert et inspectable", prop_open_p: "Apache 2.0. Tout gouvernement peut inspecter la logique, l'adapter a ses propres lois, deployer sans dependance fournisseur.",
+    prop_honest_t: "Honnete face a l'incertitude", prop_honest_p: "Quand des preuves manquent ou qu'une situation est ambigue, le systeme le dit. Il ne devine jamais.",
+    prop_jur_t: "Conscient des juridictions", prop_jur_p: "Differents pays, differentes lois, differentes langues -- meme methode. Portable entre juridictions.",
+    see_title: "Voyez-le en action", see_sub: "Cliquez sur une capture d'ecran pour voir la page complete.",
+    i18n_title: "Meme moteur, 6 langues",
+    eco_title: "Construisez une pratique autour de GovOps", eco_sub: "GovOps est concu pour creer offre et demande. Les gouvernements en ont besoin. Les consultants l'implementent. Tout le monde en beneficie.",
+    eco_gov_t: "Pour les gouvernements", eco_gov_p: "Modernisez la prestation de services sans dependance fournisseur. Commencez par un programme. Prouvez la valeur. Evoluez deliberement.",
+    eco_con_t: "Pour les consultants", eco_con_p: "Construisez une pratique d'implementation. Obtenez la certification. Chaque juridiction est un nouveau mandat.",
+    eco_train_t: "Pour les formateurs", eco_train_p: "Dispensez la formation des agents, la certification des encodeurs et les cours de deploiement technique.",
+    eco_legal_t: "Pour les analystes juridiques", eco_legal_p: "Transformez votre expertise legislative en regles encodees que les gouvernements peuvent utiliser.",
+    eco_dev_t: "Pour les developpeurs", eco_dev_p: "Contribuez des juridictions, ameliorez le moteur, ajoutez des integrations.",
+    eco_donor_t: "Pour les donateurs et ONG", eco_donor_p: "Financez l'adoption de GovOps dans les pays en developpement et les zones post-conflit.",
+    origin_title: "Origine",
+    origin_p1: "GovOps s'inspire du cadre <a href='https://agenticstate.org' target='_blank'><strong>Agentic State</strong></a> (Ilves & Kilian, 2025), qui cartographie 12 couches de prestation de services gouvernementaux.",
+    origin_p2: "Une implementation pratique de cette vision -- a partir de la Couche 3 (elaboration de politiques et regles) et de la Couche 7 (gouvernance et responsabilite).",
+    origin_p3: "Une contribution independante, realisee les soirs et weekends, en tant que bien public ouvert pour soutenir la mission Agentic State.",
+    quote: "\"Les systemes gouvernementaux ne devraient pas inventer leurs propres regles. Ils devraient executer l'autorite existante fidelement, visiblement et de maniere defensible.\"",
+    cta_title: "Commencer", cta_sub: "Clonez le depot. Installez. Lancez la demo. Voyez si la methode convient a votre contexte."
+  },
+  pt: {
+    subtitle: "Maquina de Prestacao de Servicos Orientada por Politicas",
+    tagline: "Transforme legislacao em servicos de apoio a decisao governamental rascreaveis, deterministicos e auditaveis. Codigo aberto. Multi-jurisdicao. Sem dependencia de fornecedor.",
+    btn_github: "Ver no GitHub", btn_demo: "Visualizar Demo", btn_contribute: "Contribuir", btn_add_country: "Adicionar seu pais",
+    badge_jur: "6 Jurisdicoes", badge_lang: "6 Idiomas", badge_tests: "65 Testes",
+    what_title: "O que e o GovOps?",
+    what_p1: "GovOps e um metodo para transformar <strong>leis, regulamentos e politicas</strong> em <strong>servicos governamentais funcionais</strong> transparentes, rascreaveis e auditaveis.",
+    what_p2: "Nao e uma IA que toma decisoes por voce. E uma ferramenta que ajuda servidores publicos a tomar decisoes melhores, mais rapidas e consistentes -- mantendo humanos no controle.",
+    prop_trace_t: "Rasreavel", prop_trace_p: "Cada recomendacao remonta a: Decisao, Regra, Regulamento, Lei, Jurisdicao.",
+    prop_determ_t: "Deterministico", prop_determ_p: "Mesmo requerente, mesmas evidencias, mesmo resultado. Sempre.",
+    prop_human_t: "Autoridade humana preservada", prop_human_p: "O sistema recomenda. O servidor decide. Cada acao humana e registrada.",
+    prop_open_t: "Aberto e inspecionavel", prop_open_p: "Apache 2.0. Qualquer governo pode inspecionar a logica e adaptar as suas leis.",
+    prop_honest_t: "Honesto sobre incerteza", prop_honest_p: "Quando evidencias faltam, o sistema diz. Nunca adivinha.",
+    prop_jur_t: "Consciente de jurisdicao", prop_jur_p: "Diferentes paises, diferentes leis, diferentes idiomas -- mesmo metodo.",
+    see_title: "Veja funcionando", see_sub: "Clique em qualquer captura para ver a pagina completa.",
+    i18n_title: "Mesmo motor, 6 idiomas",
+    eco_title: "Construa uma pratica em torno do GovOps", eco_sub: "GovOps cria demanda e oferta. Governos precisam. Consultores implementam. Todos se beneficiam.",
+    eco_gov_t: "Para governos", eco_gov_p: "Modernize a prestacao de servicos sem dependencia de fornecedor.",
+    eco_con_t: "Para consultores", eco_con_p: "Construa uma pratica de implementacao. Obtenha certificacao.",
+    eco_train_t: "Para instrutores", eco_train_p: "Ofereca treinamento para servidores, certificacao de codificadores e cursos tecnicos.",
+    eco_legal_t: "Para analistas juridicos", eco_legal_p: "Transforme expertise legislativa em regras codificadas que governos podem usar.",
+    eco_dev_t: "Para desenvolvedores", eco_dev_p: "Contribua jurisdicoes, melhore o motor, adicione integracoes.",
+    eco_donor_t: "Para doadores e ONGs", eco_donor_p: "Financie a adocao do GovOps em paises em desenvolvimento e zonas pos-conflito.",
+    origin_title: "Origem",
+    origin_p1: "GovOps foi inspirado pelo framework <a href='https://agenticstate.org' target='_blank'><strong>Agentic State</strong></a> (Ilves & Kilian, 2025).",
+    origin_p2: "Uma implementacao pratica dessa visao -- comecando pela Camada 3 (politicas e regras) e Camada 7 (governanca e responsabilidade).",
+    origin_p3: "Uma contribuicao independente, feita em noites e fins de semana, como bem publico aberto.",
+    quote: "\"Sistemas governamentais nao devem inventar suas proprias regras. Devem executar a autoridade existente com fidelidade, visibilidade e defensabilidade.\"",
+    cta_title: "Comece agora", cta_sub: "Clone o repositorio. Instale. Execute a demo. Veja se o metodo faz sentido para seu contexto."
+  },
+  es: {
+    subtitle: "Maquina de Prestacion de Servicios Impulsada por Politicas",
+    tagline: "Convierta legislacion en servicios de apoyo a decisiones gubernamentales trazables, deterministicos y auditables. Codigo abierto. Multi-jurisdiccion. Sin dependencia de proveedor.",
+    btn_github: "Ver en GitHub", btn_demo: "Vista previa", btn_contribute: "Contribuir", btn_add_country: "Agregar su pais",
+    badge_jur: "6 Jurisdicciones", badge_lang: "6 Idiomas", badge_tests: "65 Pruebas",
+    what_title: "Que es GovOps?",
+    what_p1: "GovOps es un metodo para convertir <strong>leyes, regulaciones y politicas</strong> en <strong>servicios gubernamentales funcionales</strong> transparentes, trazables y auditables.",
+    what_p2: "No es una IA que toma decisiones por usted. Es una herramienta que ayuda a los servidores publicos a tomar decisiones mejores, mas rapidas y consistentes -- manteniendo a los humanos en control.",
+    prop_trace_t: "Trazable", prop_trace_p: "Cada recomendacion se vincula a: Decision, Regla, Regulacion, Ley, Jurisdiccion.",
+    prop_determ_t: "Deterministico", prop_determ_p: "Mismo solicitante, misma evidencia, mismo resultado. Siempre.",
+    prop_human_t: "Autoridad humana preservada", prop_human_p: "El sistema recomienda. El funcionario decide. Cada accion humana se registra.",
+    prop_open_t: "Abierto e inspeccionable", prop_open_p: "Apache 2.0. Cualquier gobierno puede inspeccionar la logica y adaptarla a sus leyes.",
+    prop_honest_t: "Honesto sobre la incertidumbre", prop_honest_p: "Cuando faltan evidencias, el sistema lo dice. Nunca adivina.",
+    prop_jur_t: "Consciente de jurisdiccion", prop_jur_p: "Diferentes paises, diferentes leyes, diferentes idiomas -- mismo metodo.",
+    see_title: "Vealo funcionando", see_sub: "Haga clic en cualquier captura para ver la pagina completa.",
+    i18n_title: "Mismo motor, 6 idiomas",
+    eco_title: "Construya una practica alrededor de GovOps", eco_sub: "GovOps crea demanda y oferta. Los gobiernos lo necesitan. Los consultores lo implementan. Todos se benefician.",
+    eco_gov_t: "Para gobiernos", eco_gov_p: "Modernice la prestacion de servicios sin dependencia de proveedor.",
+    eco_con_t: "Para consultores", eco_con_p: "Construya una practica de implementacion. Obtenga certificacion.",
+    eco_train_t: "Para formadores", eco_train_p: "Imparta formacion a funcionarios, certificacion de codificadores y cursos tecnicos.",
+    eco_legal_t: "Para analistas juridicos", eco_legal_p: "Convierta experiencia legislativa en reglas codificadas que los gobiernos puedan usar.",
+    eco_dev_t: "Para desarrolladores", eco_dev_p: "Contribuya jurisdicciones, mejore el motor, agregue integraciones.",
+    eco_donor_t: "Para donantes y ONGs", eco_donor_p: "Financie la adopcion de GovOps en paises en desarrollo y zonas posconflicto.",
+    origin_title: "Origen",
+    origin_p1: "GovOps fue inspirado por el marco <a href='https://agenticstate.org' target='_blank'><strong>Agentic State</strong></a> (Ilves & Kilian, 2025).",
+    origin_p2: "Una implementacion practica de esa vision -- comenzando por la Capa 3 (politicas y reglas) y la Capa 7 (gobernanza y responsabilidad).",
+    origin_p3: "Una contribucion independiente, realizada en noches y fines de semana, como bien publico abierto.",
+    quote: "\"Los sistemas gubernamentales no deben inventar sus propias reglas. Deben ejecutar la autoridad existente con fidelidad, visibilidad y defensabilidad.\"",
+    cta_title: "Comience ahora", cta_sub: "Clone el repositorio. Instale. Ejecute la demo. Vea si el metodo tiene sentido para su contexto."
+  },
+  de: {
+    subtitle: "Richtliniengesteuerte Dienstleistungsmaschine",
+    tagline: "Verwandeln Sie Gesetzgebung in nachvollziehbare, deterministische, pruefbare staatliche Entscheidungsunterstuetzungsdienste. Open Source. Multi-Jurisdiktion. Keine Anbieterabhaengigkeit.",
+    btn_github: "Auf GitHub ansehen", btn_demo: "Demo-Vorschau", btn_contribute: "Beitragen", btn_add_country: "Ihr Land hinzufuegen",
+    badge_jur: "6 Rechtsgebiete", badge_lang: "6 Sprachen", badge_tests: "65 Tests",
+    what_title: "Was ist GovOps?",
+    what_p1: "GovOps ist eine Methode, um <strong>Gesetze, Verordnungen und Richtlinien</strong> in <strong>funktionierende Regierungsdienste</strong> umzuwandeln, die transparent, nachvollziehbar und pruefbar sind.",
+    what_p2: "Es ist keine KI, die Entscheidungen fuer Sie trifft. Es ist ein Werkzeug, das Beamten hilft, bessere, schnellere und konsistentere Entscheidungen zu treffen -- waehrend Menschen die Kontrolle behalten.",
+    prop_trace_t: "Nachvollziehbar", prop_trace_p: "Jede Empfehlung fuehrt zurueck zu: Entscheidung, Regel, Verordnung, Gesetz, Rechtsgebiet.",
+    prop_determ_t: "Deterministisch", prop_determ_p: "Gleicher Antragsteller, gleiche Nachweise, gleiches Ergebnis. Jedes Mal.",
+    prop_human_t: "Menschliche Autoritaet bewahrt", prop_human_p: "Das System empfiehlt. Der Beamte entscheidet. Jede menschliche Handlung wird protokolliert.",
+    prop_open_t: "Offen und inspizierbar", prop_open_p: "Apache 2.0. Jede Regierung kann die Logik pruefen und an ihre eigenen Gesetze anpassen.",
+    prop_honest_t: "Ehrlich bei Unsicherheit", prop_honest_p: "Wenn Nachweise fehlen, sagt das System dies. Es raet nie.",
+    prop_jur_t: "Jurisdiktionsbewusst", prop_jur_p: "Verschiedene Laender, verschiedene Gesetze, verschiedene Sprachen -- gleiche Methode.",
+    see_title: "Sehen Sie es in Aktion", see_sub: "Klicken Sie auf einen Screenshot, um die vollstaendige Seite zu sehen.",
+    i18n_title: "Gleicher Motor, 6 Sprachen",
+    eco_title: "Bauen Sie eine Praxis rund um GovOps auf", eco_sub: "GovOps schafft Angebot und Nachfrage. Regierungen brauchen es. Berater setzen es um. Alle profitieren.",
+    eco_gov_t: "Fuer Regierungen", eco_gov_p: "Modernisieren Sie die Dienstleistungserbringung ohne Anbieterabhaengigkeit.",
+    eco_con_t: "Fuer Berater", eco_con_p: "Bauen Sie eine Implementierungspraxis auf. Lassen Sie sich zertifizieren.",
+    eco_train_t: "Fuer Trainer", eco_train_p: "Fuehren Sie Beamtenschulungen, Encoder-Zertifizierung und technische Kurse durch.",
+    eco_legal_t: "Fuer Rechtsanalysten", eco_legal_p: "Verwandeln Sie Gesetzgebungsexpertise in kodierte Regeln, die Regierungen nutzen koennen.",
+    eco_dev_t: "Fuer Entwickler", eco_dev_p: "Tragen Sie Rechtsgebiete bei, verbessern Sie den Motor, fuegen Sie Integrationen hinzu.",
+    eco_donor_t: "Fuer Geber und NGOs", eco_donor_p: "Finanzieren Sie die GovOps-Einfuehrung in Entwicklungslaendern und Nachkonfliktgebieten.",
+    origin_title: "Ursprung",
+    origin_p1: "GovOps wurde vom <a href='https://agenticstate.org' target='_blank'><strong>Agentic State</strong></a>-Framework (Ilves & Kilian, 2025) inspiriert.",
+    origin_p2: "Eine praktische Umsetzung dieser Vision -- beginnend mit Schicht 3 (Politik und Regelgestaltung) und Schicht 7 (Governance und Verantwortlichkeit).",
+    origin_p3: "Ein unabhaengiger Beitrag, an Abenden und Wochenenden entstanden, als offenes oeffentliches Gut.",
+    quote: "\"Regierungssysteme sollten keine eigenen Regeln erfinden. Sie sollten bestehende Autoritaet treu, sichtbar und verteidigungsfaehig ausfuehren.\"",
+    cta_title: "Jetzt starten", cta_sub: "Klonen Sie das Repository. Installieren Sie. Starten Sie die Demo. Sehen Sie, ob die Methode fuer Ihren Kontext passt."
+  },
+  uk: {
+    subtitle: "Полiтично-орiєнтована машина надання послуг",
+    tagline: "Перетворiть законодавство на вiдстежуванi, детермiнiстичнi, аудитоспроможнi державнi послуги пiдтримки рiшень. Вiдкритий код. Мульти-юрисдикцiя. Без залежностi вiд постачальника.",
+    btn_github: "Переглянути на GitHub", btn_demo: "Попереднiй перегляд демо", btn_contribute: "Зробити внесок", btn_add_country: "Додати свою країну",
+    badge_jur: "6 Юрисдикцiй", badge_lang: "6 Мов", badge_tests: "65 Тестiв",
+    what_title: "Що таке GovOps?",
+    what_p1: "GovOps -- це метод перетворення <strong>законiв, нормативних актiв та полiтик</strong> у <strong>працюючi державнi послуги</strong>, що є прозорими, вiдстежуваними та аудитоспроможними.",
+    what_p2: "Це не ШI, який приймає рiшення за вас. Це iнструмент, що допомагає державним службовцям приймати кращi, швидшi та послiдовнiшi рiшення -- зберiгаючи людський контроль.",
+    prop_trace_t: "Вiдстежуванiсть", prop_trace_p: "Кожна рекомендацiя веде до: Рiшення, Правило, Регуляцiя, Закон, Юрисдикцiя.",
+    prop_determ_t: "Детермiнiстичнiсть", prop_determ_p: "Той самий заявник, тi самi докази, той самий результат. Завжди.",
+    prop_human_t: "Людська влада збережена", prop_human_p: "Система рекомендує. Службовець вирiшує. Кожна дiя людини фiксується.",
+    prop_open_t: "Вiдкритiсть та iнспектованiсть", prop_open_p: "Apache 2.0. Будь-який уряд може перевiрити логiку та адаптувати до своїх законiв.",
+    prop_honest_t: "Чеснiсть щодо невизначеностi", prop_honest_p: "Коли доказiв бракує, система про це каже. Нiколи не вгадує.",
+    prop_jur_t: "Обiзнанiсть щодо юрисдикцiї", prop_jur_p: "Рiзнi країни, рiзнi закони, рiзнi мови -- однаковий метод.",
+    see_title: "Подивiться як це працює", see_sub: "Натиснiть на знiмок екрана, щоб побачити повну сторiнку.",
+    i18n_title: "Один двигун, 6 мов",
+    eco_title: "Побудуйте практику навколо GovOps", eco_sub: "GovOps створює попит та пропозицiю. Урядам це потрiбно. Консультанти впроваджують. Усi виграють.",
+    eco_gov_t: "Для урядiв", eco_gov_p: "Модернiзуйте надання послуг без залежностi вiд постачальника.",
+    eco_con_t: "Для консультантiв", eco_con_p: "Побудуйте практику впровадження. Отримайте сертифiкацiю.",
+    eco_train_t: "Для тренерiв", eco_train_p: "Проводьте навчання службовцiв, сертифiкацiю кодувальникiв та технiчнi курси.",
+    eco_legal_t: "Для юридичних аналiтикiв", eco_legal_p: "Перетворiть законодавчу експертизу на кодованi правила, якi уряди можуть використовувати.",
+    eco_dev_t: "Для розробникiв", eco_dev_p: "Додавайте юрисдикцiї, покращуйте двигун, додавайте iнтеграцiї.",
+    eco_donor_t: "Для донорiв та НУО", eco_donor_p: "Фiнансуйте впровадження GovOps у країнах, що розвиваються, та постконфлiктних зонах.",
+    origin_title: "Походження",
+    origin_p1: "GovOps натхненний фреймворком <a href='https://agenticstate.org' target='_blank'><strong>Agentic State</strong></a> (Ilves & Kilian, 2025).",
+    origin_p2: "Практична реалiзацiя цього бачення -- починаючи з Рiвня 3 (полiтики та правила) та Рiвня 7 (управлiння та вiдповiдальнiсть).",
+    origin_p3: "Незалежний внесок, створений вечорами та на вихiдних, як вiдкрите суспiльне благо.",
+    quote: "\"Державнi системи не повиннi винаходити власнi правила. Вони повиннi виконувати iснуючу владу вiрно, видимо та захисно.\"",
+    cta_title: "Почати", cta_sub: "Клонуйте репозиторiй. Встановiть. Запустiть демо. Перевiрте, чи метод пiдходить для вашого контексту."
+  }
+};
+
+function setLang(lang) {
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    if (T[lang] && T[lang][key]) el.innerHTML = T[lang][key];
+  });
+  document.querySelectorAll('.lang-switcher button').forEach(b => b.classList.remove('active'));
+  const btn = document.getElementById('btn-' + lang);
+  if (btn) btn.classList.add('active');
+  document.documentElement.lang = lang;
+}
+
+// Check URL param
+const urlLang = new URLSearchParams(window.location.search).get('lang');
+if (urlLang && T[urlLang]) setLang(urlLang);
+</script>
+
+</body>
+</html>
