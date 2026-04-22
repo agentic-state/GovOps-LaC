@@ -1,0 +1,12 @@
+# Gitleaks config. Extends the default ruleset.
+# Allowlist is reserved for values that look secret-shaped but are not secrets.
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "False positives flagged by default rules"
+
+regexes = []
+
+paths = []
