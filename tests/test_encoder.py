@@ -1,6 +1,5 @@
 """Tests for the rule encoding pipeline."""
 
-import pytest
 
 from govops.encoder import (
     EncodingBatch,

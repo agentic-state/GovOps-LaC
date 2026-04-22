@@ -18,15 +18,12 @@ Four possible outcomes:
 
 from __future__ import annotations
 
-from datetime import date, timezone, datetime
+from datetime import date
 
 from govops.models import (
-    Applicant,
     AuditEntry,
     CaseBundle,
-    CaseStatus,
     DecisionOutcome,
-    EvidenceItem,
     LegalRule,
     Recommendation,
     ResidencyPeriod,

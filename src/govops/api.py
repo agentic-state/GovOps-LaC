@@ -9,7 +9,8 @@ from __future__ import annotations
 from contextlib import asynccontextmanager
 from pathlib import Path
 
-from fastapi import FastAPI, HTTPException, Query, Request
+from fastapi import FastAPI, HTTPException, Request
+from starlette.datastructures import FormData, UploadFile as StarletteUploadFile
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -21,7 +22,6 @@ from govops.encoder import (
     ProposalStatus,
     extract_rules_manual,
     extract_rules_with_llm,
-    parse_llm_response,
 )
 from govops.engine import OASEngine
 from govops.i18n import DEFAULT_LANGUAGE, SUPPORTED_LANGUAGES, get_translator
@@ -77,6 +77,15 @@ app = FastAPI(
 templates = Jinja2Templates(directory=str(TEMPLATES_DIR))
 if STATIC_DIR.exists():
     app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
+
+
+def _form_str(form: FormData, key: str, default: str = "") -> str:
+    v = form.get(key)
+    if v is None:
+        return default
+    if isinstance(v, StarletteUploadFile):
+        raise HTTPException(400, f"Field '{key}' must be text, not a file upload")
+    return v
 
 
 def _current_jur_code() -> str:
@@ -323,8 +332,8 @@ def ui_evaluate(request: Request, case_id: str):
 async def ui_review(request: Request, case_id: str):
     lang = _get_lang(request)
     form = await request.form()
-    action = form.get("action", "approve")
-    rationale = form.get("rationale", "")
+    action = _form_str(form, "action", "approve")
+    rationale = _form_str(form, "rationale")
     rec = store.recommendations.get(case_id)
     if not rec:
         raise HTTPException(400, "Evaluate first")
@@ -418,11 +427,11 @@ def ui_encode(request: Request):
 async def ui_encode_ingest(request: Request):
     lang = _get_lang(request)
     form = await request.form()
-    document_title = form.get("document_title", "")
-    document_citation = form.get("document_citation", "")
-    input_text = form.get("input_text", "")
-    method = form.get("method", "manual")
-    api_key = form.get("api_key", "")
+    document_title = _form_str(form, "document_title")
+    document_citation = _form_str(form, "document_citation")
+    input_text = _form_str(form, "input_text")
+    method = _form_str(form, "method", "manual")
+    api_key = _form_str(form, "api_key")
 
     jur_code = _current_jur_code()
     batch = encoding_store.create_batch(
@@ -438,7 +447,7 @@ async def ui_encode_ingest(request: Request):
                 batch, api_key=api_key,
             )
             encoding_store.add_proposals(
-                batch.id, proposals, method=f"llm:claude",
+                batch.id, proposals, method="llm:claude",
                 prompt=prompt, raw_response=raw_response,
             )
         except Exception as e:
@@ -470,8 +479,8 @@ def ui_encode_review(request: Request, batch_id: str):
 async def ui_encode_proposal_review(request: Request, batch_id: str, proposal_id: str):
     lang = _get_lang(request)
     form = await request.form()
-    status_str = form.get("status", "approved")
-    notes = form.get("notes", "")
+    status_str = _form_str(form, "status", "approved")
+    notes = _form_str(form, "notes")
     try:
         status = ProposalStatus(status_str)
     except ValueError:

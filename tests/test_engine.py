@@ -5,7 +5,6 @@ Determinism property: identical inputs must produce identical outputs.
 
 from datetime import date
 
-import pytest
 
 from govops.engine import OASEngine
 from govops.models import (

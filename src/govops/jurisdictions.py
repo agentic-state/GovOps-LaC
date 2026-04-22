@@ -19,6 +19,7 @@ Pension programs encoded:
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from datetime import date
 
 from govops.models import (
@@ -1054,7 +1055,7 @@ class JurisdictionPack:
         authority_chain: list[AuthorityReference],
         legal_documents: list[LegalDocument],
         rules: list[LegalRule],
-        cases_factory,
+        cases_factory: Callable[[], list[CaseBundle]],
         default_language: str,
         program_name: str,
     ):
@@ -1070,8 +1071,8 @@ class JurisdictionPack:
         return self.cases_factory()
 
 
-# Import Canada data from original seed module
-from govops.seed import (
+# Late import: seed.py imports from this module, so importing at top would cycle.
+from govops.seed import (  # noqa: E402
     AUTHORITY_CHAIN as CA_AUTHORITY_CHAIN,
     CANADA_FEDERAL,
     LEGAL_DOCUMENTS as CA_LEGAL_DOCUMENTS,
