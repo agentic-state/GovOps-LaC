@@ -47,12 +47,12 @@ Every value the system uses — thresholds, accepted statuses, evidence types, c
 
 | # | Gate | Recommendation | Lock by | Status |
 | --- | --- | --- | --- | --- |
-| 1 | YAML over JSON for artefacts | YAML (comments, editor round-trip) | End of Phase 0 | OPEN |
+| 1 | YAML over JSON for artefacts | YAML (comments, editor round-trip) | End of Phase 0 | **LOCKED** — ADR-003 |
 | 2 | ConfigValue granularity | Per-parameter (`ca-oas.rule.age-65.min_age`) | End of Phase 1 | OPEN |
 | 3 | Storage model for Phases 1–10 | In-memory; storage migration is a separate track | End of Phase 1 | OPEN |
 | 4 | Prompt-as-config approval policy | Dual approval (domain expert + maintainer) | End of Phase 4 | OPEN |
-| 5 | **(added)** Lovable code repo location | Separate repo, OpenAPI as contract; or monorepo `web/` folder? | End of Phase 0 | OPEN |
-| 6 | **(added)** Backwards-compat strategy during Phase 1–2 | `resolve()` falls back to current Python constants until Phase 2 cuts each domain over; tests stay green throughout | End of Phase 1 | OPEN |
+| 5 | **(added)** Lovable code repo location | Separate repo, OpenAPI as contract; or monorepo `web/` folder? | End of Phase 0 | **OPEN** — needs decision (ADR-005) |
+| 6 | **(added)** Backwards-compat strategy during Phase 1–2 | `resolve()` falls back to current Python constants until Phase 2 cuts each domain over; tests stay green throughout | End of Phase 1 | **LOCKED** — ADR-004 |
 | 7 | **(added)** Federation trust model (Phase 8) | Signed manifests + checksum pinning in `lawcode/REGISTRY.yaml`; reject unsigned by default | End of Phase 7 | OPEN |
 
 Record gate decisions as ADRs in `docs/design/ADRs/`.
@@ -69,13 +69,13 @@ Format: each phase has **entry**, **work**, **exit**, **artefacts**. Tests must 
 **Work**:
 - Tag `pre-lawcode-v0.2.0` on main (rollback point)
 - Apply CLAUDE.md gap fixes from §1 (test count, encoder, single-test, rule-type table, disclaimer)
-- Audit `seed.py` and `jurisdictions.py` for hidden coupling; record findings in `docs/design/ADRs/ADR-001-coupling-audit.md`
+- Audit `seed.py` and `jurisdictions.py` for hidden coupling; record findings in `docs/design/ADRs/ADR-002-coupling-audit.md` (ADR-001 was a v1.0-era proposal that was never adopted; preserved as Superseded for history)
 - Publish `openapi.json` snapshot under `docs/api/openapi-v0.2.0.json` and freeze as the contract surface for Phase 6 (Lovable)
-- Lock Gates 1, 5, 6 (YAML/JSON, Lovable repo location, backcompat strategy) as ADRs
-- Decide: does Lovable live in same repo (`web/`) or in a sibling repo? Document in ADR
+- Lock Gates 1, 6 as ADRs (ADR-003 YAML over JSON, ADR-004 backcompat strategy); Gate 5 (Lovable repo location) deferred to ADR-005 — needs decision
+- Decide: does Lovable live in same repo (`web/`) or in a sibling repo? Document in ADR-005
 
-**Exit**: tag exists; CLAUDE.md accurate; ADR-001 + Gate-1/5/6 ADRs merged; OpenAPI snapshot present.
-**Artefacts**: `pre-lawcode-v0.2.0` tag, updated `CLAUDE.md`, `docs/api/openapi-v0.2.0.json`, ADR-001/002/003.
+**Exit**: tag exists; CLAUDE.md accurate; ADR-002/003/004 merged; ADR-005 either merged or explicitly held; OpenAPI snapshot present.
+**Artefacts**: `pre-lawcode-v0.2.0` tag, updated `CLAUDE.md`, `docs/api/openapi-v0.2.0.json`, ADR-002/003/004 (and ADR-005 if locked).
 
 ### Phase 1 — ConfigValue substrate (4 days)
 
