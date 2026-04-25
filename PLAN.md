@@ -1,0 +1,310 @@
+# GovOps PLAN.md — Law-as-Code v2.0
+
+**Status**: Active — single source of truth for the v2.0 build
+**Branch**: `feat/law-as-code-v2`
+**Source vision**: [docs/IDEA-GovOps-v2.0-LawAsCode.md](docs/IDEA-GovOps-v2.0-LawAsCode.md)
+**Baseline tag (to create at Phase 0)**: `pre-lawcode-v0.2.0`
+**License**: Apache 2.0 (preserved)
+
+> This document is the operational plan. The vision doc is the strategic argument; this doc is what gets executed and tracked. If the two ever conflict, this doc wins for execution and the vision doc wins for intent — open an ADR to reconcile.
+
+---
+
+## 1. Where we start (baseline truth, 2026-04-25)
+
+| Fact | Value | Source |
+| --- | --- | --- |
+| Test count | **65** (engine: 14, api: 36, encoder: 15) | `pytest --collect-only` |
+| Jurisdictions | 6 (CA, BR, ES, FR, DE, UA) | `JURISDICTION_REGISTRY` in `src/govops/jurisdictions.py` |
+| Languages | 6 (en, fr, pt, es, de, uk) | `_TRANSLATIONS` in `src/govops/i18n.py` |
+| Rule types | 6: `age_threshold`, `residency_minimum`, `residency_partial`, `legal_status`, `evidence_required`, `exclusion` | `RuleType` enum in `src/govops/models.py` |
+| Python support | 3.10 / 3.11 / 3.12 | `.github/workflows/ci.yml` |
+| CI gates | tests on 3 Python versions, CodeQL, gitleaks | `.github/workflows/` |
+| UI | Jinja2 served by FastAPI | `src/govops/api.py` + `src/govops/templates/` |
+| Persistence | In-memory only, reseeded on startup | `src/govops/store.py` |
+| Encoder | Working pipeline: ingest → extract (LLM) → review → commit | `src/govops/encoder.py` |
+| Disclaimer | Not gov-affiliated; statutory text used illustratively | [README.md](README.md) |
+
+### Doc gaps captured during baseline (carry into Phase 0)
+
+These were found during PLAN authoring; they are not v2.0 features but they distort the baseline. Fix them in Phase 0 alongside the rollback tag.
+
+- [ ] [CLAUDE.md](CLAUDE.md) says "45 tests passing" — actual is 65. **Update**.
+- [ ] CLAUDE.md does not mention `encoder.py` / `encoding_example.py` / `test_encoder.py` — a major surface. **Add**.
+- [ ] CLAUDE.md missing single-test commands, `--reload` flag, CI matrix, rule-type list, disclaimer rule. **Add** (proposal already drafted in conversation; apply to file).
+- [ ] CONTRIBUTING.md is the only place the `RuleType` table lives — **mirror** to CLAUDE.md.
+- [ ] No ADR index yet under `docs/design/ADRs/` is referenced from a top-level entry point — **add an ADR-000 index** as we start cutting v2.0 ADRs.
+
+---
+
+## 2. v2.0 thesis (one paragraph)
+
+Every value the system uses — thresholds, accepted statuses, evidence types, country lists, UI labels, audit event types, and the LLM prompts themselves — becomes a dated `ConfigValue` record resolved by `(domain, key, evaluation_date, jurisdiction_id)`. Behaviour changes are configuration writes, not deploys. Old evaluations remain reproducible against the substrate that was in effect on their evaluation date. The Jinja UI is replaced by a Lovable app; the pipeline is extended upstream (self-screening) and downstream (calculation, notification, life-event reassessment). Boundaries from v1.0 (decision support, human-in-the-loop, evidence-first, full traceability, Apache 2.0) are preserved and strengthened.
+
+---
+
+## 3. Decision gates (lock before the phase begins)
+
+| # | Gate | Recommendation | Lock by | Status |
+| --- | --- | --- | --- | --- |
+| 1 | YAML over JSON for artefacts | YAML (comments, editor round-trip) | End of Phase 0 | OPEN |
+| 2 | ConfigValue granularity | Per-parameter (`ca-oas.rule.age-65.min_age`) | End of Phase 1 | OPEN |
+| 3 | Storage model for Phases 1–10 | In-memory; storage migration is a separate track | End of Phase 1 | OPEN |
+| 4 | Prompt-as-config approval policy | Dual approval (domain expert + maintainer) | End of Phase 4 | OPEN |
+| 5 | **(added)** Lovable code repo location | Separate repo, OpenAPI as contract; or monorepo `web/` folder? | End of Phase 0 | OPEN |
+| 6 | **(added)** Backwards-compat strategy during Phase 1–2 | `resolve()` falls back to current Python constants until Phase 2 cuts each domain over; tests stay green throughout | End of Phase 1 | OPEN |
+| 7 | **(added)** Federation trust model (Phase 8) | Signed manifests + checksum pinning in `lawcode/REGISTRY.yaml`; reject unsigned by default | End of Phase 7 | OPEN |
+
+Record gate decisions as ADRs in `docs/design/ADRs/`.
+
+---
+
+## 4. Phase plan with entry/exit criteria
+
+Format: each phase has **entry**, **work**, **exit**, **artefacts**. Tests must stay green at every exit.
+
+### Phase 0 — Pre-flight (1 day)
+
+**Entry**: clean main, 65/65 green.
+**Work**:
+- Tag `pre-lawcode-v0.2.0` on main (rollback point)
+- Apply CLAUDE.md gap fixes from §1 (test count, encoder, single-test, rule-type table, disclaimer)
+- Audit `seed.py` and `jurisdictions.py` for hidden coupling; record findings in `docs/design/ADRs/ADR-001-coupling-audit.md`
+- Publish `openapi.json` snapshot under `docs/api/openapi-v0.2.0.json` and freeze as the contract surface for Phase 6 (Lovable)
+- Lock Gates 1, 5, 6 (YAML/JSON, Lovable repo location, backcompat strategy) as ADRs
+- Decide: does Lovable live in same repo (`web/`) or in a sibling repo? Document in ADR
+
+**Exit**: tag exists; CLAUDE.md accurate; ADR-001 + Gate-1/5/6 ADRs merged; OpenAPI snapshot present.
+**Artefacts**: `pre-lawcode-v0.2.0` tag, updated `CLAUDE.md`, `docs/api/openapi-v0.2.0.json`, ADR-001/002/003.
+
+### Phase 1 — ConfigValue substrate (4 days)
+
+**Entry**: Gates 1, 5, 6 locked.
+**Work**:
+- Add `ConfigValue` Pydantic model per the v2.0 spec (`id`, `domain`, `key`, `jurisdiction_id`, `value`, `value_type`, `effective_from`, `effective_to`, `citation`, `author`, `approved_by`, `rationale`, `supersedes`, `created_at`)
+- In-memory `ConfigStore` with `resolve(key, evaluation_date, jurisdiction_id=None)` and `list_versions(key)`
+- `/api/config/values` (GET list/filter), `/api/config/values/{id}` (GET), `/api/config/resolve` (GET; query by key + date)
+- Engine integration: `OASEngine.evaluation_date` already exists; thread it through any call that resolves
+- Audit: every `resolve()` call inside an evaluation appends a `ConfigResolution` entry to the audit package
+- Lock Gates 2, 3 (granularity, storage) as ADRs
+
+**Exit**: 65/65 still green; new tests cover `ConfigStore` (round-trip, effective-date semantics, supersession chain, jurisdiction scoping); `/api/config/resolve` returns answers for a hand-seeded fixture key.
+**Artefacts**: `src/govops/config.py`, `tests/test_config.py` (~15 new tests), ADR-004/005.
+
+### Phase 2 — Migrate hardcoded values to ConfigValue (5 days)
+
+**Entry**: Phase 1 exit met. Backwards-compat strategy (Gate 6) in effect: `resolve()` falls back to current Python constants for any key not yet seeded.
+**Work**: lockstep across all 6 jurisdictions, migrate domain by domain.
+- `rule.parameter` — every `parameters` dict in seed/jurisdictions
+- `enum.legal_status` — accepted statuses per rule
+- `engine.threshold` — `home_countries` lists, evidence keys
+- `ui.label` — every `_TRANSLATIONS` entry (one ConfigValue per key per language)
+- `global.config.default_language` and similar globals
+
+After each domain migrates: drop the Python constant, leave the call site reading via `resolve()`.
+
+**Exit**: 65/65 green; no business constants left in `seed.py`, `jurisdictions.py`, or `i18n.py`; grep gate added in CI to prevent regression (`scripts/check_no_hardcoded_constants.py`).
+**Artefacts**: rewritten `seed.py`/`jurisdictions.py`/`i18n.py`, new CI grep gate.
+
+### Phase 3 — Externalize ConfigValues to YAML (3 days)
+
+**Entry**: Phase 2 exit met.
+**Work**:
+- New `lawcode/<jurisdiction>/config/*.yaml` tree (one file per domain, e.g. `rules.yaml`, `enums.yaml`, `ui-labels.yaml`)
+- `ConfigStore.load_from_yaml(path)` at startup; legacy seed code retired
+- Add `lawcode/global/` for non-jurisdictional values
+- Validate against schema-in-progress (Phase 5 publishes the formal schema)
+
+**Exit**: server starts cleanly with empty Python seeds; all 65 tests still green; a non-Python contributor can edit `lawcode/ca/config/rules.yaml` and see the change without touching code.
+**Artefacts**: `lawcode/` directory, `ConfigStore.load_from_yaml`, contributor guide section.
+
+### Phase 4 — Promote prompts to ConfigValues (2 days)
+
+**Entry**: Phase 3 exit met. Gate 4 locked.
+**Work**:
+- Migrate `EXTRACTION_SYSTEM_PROMPT`, `EXTRACTION_USER_TEMPLATE`, officer-explanation, audit-summary prompts to `ConfigValue` records (`value_type=prompt`)
+- Encoder records the prompt `ConfigValue.id` used per batch into the batch audit
+- Test: re-running extraction with a fixture batch + pinned prompt id produces identical output
+
+**Exit**: all prompts in `lawcode/global/prompts.yaml`; batch audit pins prompt id; new test verifies prompt reproducibility.
+**Artefacts**: `lawcode/global/prompts.yaml`, encoder changes, ~3 new tests.
+
+### Phase 5 — Schema publish (2 days)
+
+**Entry**: Phase 4 exit met.
+**Work**:
+- `schema/configvalue-v1.0.json` (JSON Schema for `ConfigValue` records)
+- `schema/lawcode-v1.0.json` (JSON Schema for the YAML file shape)
+- CI step that validates every YAML file under `lawcode/` against the schema; fails the build on violation
+- Publish under `docs/api/` with a link from README
+
+**Exit**: CI fails on a deliberately malformed YAML test; schema versioned and linked publicly.
+**Artefacts**: `schema/*.json`, new CI job.
+
+### Phase 6 — Admin UI (4 days, Lovable)
+
+**Entry**: Phase 5 exit met. OpenAPI snapshot from Phase 0 still aligned with current API (revalidate).
+**Work** (separate Lovable surface; backend exposes only what's needed):
+- ConfigValue search by key prefix, jurisdiction filter
+- Effective-value timeline view per key
+- Draft new value: form with `value`, `effective_from`, `citation`, `rationale`
+- Approval flow: draft → review → approved (state transitions logged)
+- Diff view between adjacent versions
+- Prompt admin: markdown editor, diff, "test this prompt against fixture X"
+
+**Exit**: a maintainer can change `ca-oas.rule.age-65.min_age` from 65 to 67 effective 2027-01-01 entirely through the UI, and a case evaluated on 2027-01-02 picks up the new value.
+**Artefacts**: Lovable app pages, backend endpoints `POST /api/config/values`, `POST /api/config/values/{id}/approve`.
+
+### Phase 7 — Reverse index and impact analysis (2 days)
+
+**Entry**: Phase 6 exit met.
+**Work**:
+- New endpoint `GET /api/impact?citation=<citation>` returning all rules and prompts referencing that citation across all jurisdictions
+- CLI: `govops impact-of <citation>`
+- Lovable surface: search by citation, see all dependent ConfigValues
+
+**Exit**: `govops impact-of "OAS Act, s. 3(1)"` lists the age-threshold rule for CA plus any other citation-linked records.
+**Artefacts**: new endpoint, CLI command, ~5 new tests.
+
+### Phase 8 — Federation and registry (3 days)
+
+**Entry**: Phase 7 exit met. Gate 7 (federation trust) locked.
+**Work**:
+- `lawcode/REGISTRY.yaml` schema: per-entry `name`, `source_url`, `commit_hash`, `signed_manifest_url`, `trusted_keys`
+- `govops fetch <registry_url>` validates checksum + signature, caches under `lawcode/.federated/`
+- Provenance: every fetched ConfigValue records `source_repo`, `source_commit`, `fetched_at` in audit
+- Reject unsigned by default; require `--allow-unsigned` flag for trial fetches
+
+**Exit**: a second demo repo can publish a jurisdiction; the main repo can fetch it and evaluate cases against it; audit shows source_repo + commit.
+**Artefacts**: `govops fetch` command, REGISTRY schema, federation tests.
+
+### Phase 9 — SPRIND alignment artefacts (2 days)
+
+**Entry**: Phase 8 exit met.
+**Work**:
+- `docs/design/LAW-AS-CODE.md` mapping GovOps to SPRIND's 5 elements with code references
+- README hero update across all 6 languages naming "Law as Code" explicitly
+- Cross-link from ecosystem docs
+
+**Exit**: a SPRIND-literate reader can identify which file in this repo implements each of the five elements.
+**Artefacts**: `LAW-AS-CODE.md`, README updates.
+
+### Phase 10 — Pipeline extensions (21 days)
+
+Sequenced; each sub-phase ships independently.
+
+| # | Extension | Backend | Lovable | Depends on |
+| --- | --- | --- | --- | --- |
+| 10A | Self-screening (`POST /api/screen`, no PII, no audit) | 5 d | 5 d (parallel) | Phase 6 |
+| 10B | Entitlement calculation (`RuleType.CALCULATION`, `engine.calculate()`) | 6 d | 3 d | 10A |
+| 10C | Notification artefact generation (templates as ConfigValue, HTML/PDF/email) | 4 d | 3 d | 10A + 10B |
+| 10D | Life-event reassessment (`Event` model, `POST /api/cases/{id}/events`) | 3 d | 2 d | 10C |
+
+**Per-extension exit criteria**:
+
+- **10A**: a citizen can self-screen for OAS without creating a case; output matches what the officer engine would produce for the same facts; no row added to the case store.
+- **10B**: an eligible CA case returns a `BenefitAmount` with formula trace and per-step citation; calculation parameters resolve via Phase-1 substrate; cost-of-living adjustment can be made via configure-without-deploy.
+- **10C**: an approved case produces an HTML + PDF notice; template version is recorded in audit; changing the template via admin UI reflects in next case.
+- **10D**: posting an event with a future date triggers reassessment using rules in effect on that date; new recommendation links to the prior via `supersedes`; notification fires automatically.
+
+---
+
+## 5. Cumulative timeline
+
+| Block | Days | Cumulative |
+| --- | ---: | ---: |
+| 0. Pre-flight | 1 | 1 |
+| 1. ConfigValue substrate | 4 | 5 |
+| 2. Migrate hardcoded values | 5 | 10 |
+| 3. Externalize to YAML | 3 | 13 |
+| 4. Promote prompts | 2 | 15 |
+| 5. Schema publish | 2 | 17 |
+| 6. Admin UI (Lovable) | 4 | 21 |
+| 7. Reverse index | 2 | 23 |
+| 8. Federation | 3 | 26 |
+| 9. SPRIND alignment | 2 | 28 |
+| 10. Pipeline extensions | 21 | 49 |
+
+~49 working days. At evening/weekend pace: ~16–18 calendar weeks. Lovable work runs in parallel from Phase 1 onward.
+
+---
+
+## 6. Test budget per phase (non-regression target)
+
+| Phase | Target test count | Notes |
+| ---: | ---: | --- |
+| 0 (start) | 65 | baseline |
+| 1 | ~80 | + ConfigStore tests |
+| 2 | ~80 | migration, no behaviour change |
+| 3 | ~85 | + YAML loader tests |
+| 4 | ~88 | + prompt reproducibility tests |
+| 5 | ~90 | + schema validation tests |
+| 6 | ~100 | + admin endpoint tests |
+| 7 | ~105 | + impact endpoint tests |
+| 8 | ~115 | + federation tests |
+| 9 | ~115 | docs only |
+| 10 | ~160 | + 4 extension surfaces (~10 tests each backend, more for E2E) |
+
+Tests must stay green at every phase exit. CI matrix stays at Python 3.10/3.11/3.12.
+
+---
+
+## 7. Non-goals (preserved from v2.0 vision)
+
+- No new jurisdictions during Phases 1–3 (doubles migration cost). Defer until Phase 3 exit.
+- No persistence layer. In-memory through all 10 phases. Database migration is a separate track.
+- No authentication or RBAC during structural work.
+- No new rule types beyond `RuleType.CALCULATION` (added in Phase 10B).
+- No new languages beyond the current 6.
+
+---
+
+## 8. Success criteria (the 11 from the vision doc, restated for tracking)
+
+- [ ] 1. Every value resolvable through effective-value substrate; no hardcoded business constants in Python
+- [ ] 2. Every jurisdiction contributable in YAML by a non-Python developer
+- [ ] 3. Schema published, versioned, validated in CI
+- [ ] 4. Statute changes are temporal, not destructive; historical evaluations reproducible
+- [ ] 5. Citation impact queryable across all 6 jurisdictions in one command
+- [ ] 6. Encoding pipeline produces commit-ready YAML, not Python
+- [ ] 7. Prompts are dated configuration; the prompt that ran on date D is reconstructable
+- [ ] 8. A second repository can federate its own jurisdiction into a GovOps deployment
+- [ ] 9. Lovable UI replaces all Jinja templates and adds the configure-without-deploy admin surface
+- [ ] 10. Pipeline runs end-to-end from self-screening through eligibility, calculation, notification, life-event reassessment, in all 6 jurisdictions
+- [ ] 11. Repo's public framing names "Law as Code" explicitly and maps to SPRIND's 5 foundational elements
+
+---
+
+## 9. Risk register (kept live; update as phases progress)
+
+| Risk | Likelihood | Impact | Mitigation |
+| --- | --- | --- | --- |
+| Phase 2 migration breaks tests in subtle ways (timezone, type coercion) | Medium | High | Per-domain cutover with green-tests gate; backwards-compat fallback (Gate 6) lets us revert one domain at a time |
+| Lovable contract drifts from backend OpenAPI | Medium | Medium | OpenAPI frozen at Phase 0; CI diff gate on `openapi.json` after Phase 6 |
+| Effective-date semantics surprise users (timezone, midnight cutover) | Medium | High | All `effective_from` are UTC midnight; document explicitly; add edge-case tests |
+| Federation pulls in malicious or wrong jurisdiction data | Low | High | Gate 7 (signed manifests, checksum pinning); reject unsigned by default |
+| Calculation rules (Phase 10B) reveal modeling gaps in `LegalRule` | Medium | Medium | Spike `RuleType.CALCULATION` schema during Phase 1 to avoid late rework |
+| Lovable surface scope creeps | High | Medium | Lock Phase 6 scope to ConfigValue admin + replacing Jinja; pipeline-extension UIs are Phase 10 |
+| Prompt changes affect outputs without anyone noticing | Medium | High | Gate 4 dual-approval policy; encoder pins prompt id per batch; CI diff gate on `lawcode/global/prompts.yaml` |
+| Doc gaps (CLAUDE.md staleness) reappear | Low | Low | Phase 0 cleanup + add a periodic "doc-freshness" CI check (compare test count assertion in CLAUDE.md to `pytest --collect-only`) |
+
+---
+
+## 10. Branch and commit strategy
+
+- All v2.0 work lands on `feat/law-as-code-v2` until Phase 5 exit, then we evaluate squash-vs-merge into `main`.
+- Per-phase tags: `lawcode-v2-phase-<N>-complete` after each phase exit.
+- Every ADR is a separate commit in `docs/design/ADRs/` referencing the gate or decision it captures.
+- Commit message convention: `phase-<N>: <imperative>` (e.g. `phase-1: add ConfigStore.resolve()`).
+- Conventional Commits not enforced in CI yet; revisit at Phase 5.
+
+---
+
+## 11. Out-of-scope items captured for later (do not let these creep in)
+
+- Persistence layer (SQLite / PostgreSQL) — separate track after Phase 10
+- AuthN / AuthZ — separate track
+- Multi-tenant deployment — out of scope for reference implementation
+- Real LLM provider integration in encoder (currently pluggable backend) — separate track
+- Production hardening (rate limits, observability, secrets management) — separate track
+- Cross-program rules within a jurisdiction (today: pension only) — defer until federation proves out
