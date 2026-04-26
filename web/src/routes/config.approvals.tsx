@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { FormattedMessage, useIntl } from "react-intl";
 
 import { ApprovalRow } from "@/components/govops/ApprovalRow";
+import { Breadcrumb } from "@/components/govops/Breadcrumb";
 import { ProvenanceRibbon } from "@/components/govops/ProvenanceRibbon";
 import { RouteError } from "@/components/govops/RouteError";
 import { RouteLoading } from "@/components/govops/RouteLoading";
@@ -122,6 +123,12 @@ function ApprovalsPage() {
 
   return (
     <section aria-labelledby="approvals-heading" className="space-y-8">
+      <Breadcrumb
+        items={[
+          { label: "nav.config", i18n: true, to: "/config" },
+          { label: "nav.approvals", i18n: true },
+        ]}
+      />
       <header className="flex items-stretch">
         <ProvenanceRibbon variant="human" />
         <div className="space-y-3">

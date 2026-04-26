@@ -4,6 +4,7 @@ import { Plus } from "lucide-react";
 import { listEncodingBatches } from "@/lib/api";
 import type { EncodingBatchSummary } from "@/lib/types";
 import { BatchRow } from "@/components/govops/encode/BatchRow";
+import { Runbook } from "@/components/govops/Runbook";
 import { Button } from "@/components/ui/button";
 import { RouteError } from "@/components/govops/RouteError";
 import { RouteLoading } from "@/components/govops/RouteLoading";
@@ -39,6 +40,14 @@ function EncodeListPage() {
 
   return (
     <div className="space-y-6">
+      <Runbook
+        prefix="runbook.encode"
+        scenarios={[
+          { id: "ingest", steps: 4 },
+          { id: "review", steps: 5 },
+          { id: "commit", steps: 3 },
+        ]}
+      />
       <header className="flex flex-wrap items-start justify-between gap-3">
         <div className="space-y-1">
           <h1

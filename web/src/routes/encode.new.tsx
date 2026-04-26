@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useIntl } from "react-intl";
 import { ChevronLeft } from "lucide-react";
 import { IngestForm } from "@/components/govops/encode/IngestForm";
+import { Breadcrumb } from "@/components/govops/Breadcrumb";
 
 export const Route = createFileRoute("/encode/new")({
   head: () => ({
@@ -14,6 +15,12 @@ function NewEncodePage() {
   const intl = useIntl();
   return (
     <div className="space-y-6">
+      <Breadcrumb
+        items={[
+          { label: "nav.encode", i18n: true, to: "/encode" },
+          { label: "encode.new.crumb", i18n: true },
+        ]}
+      />
       <Link
         to="/encode"
         className="inline-flex items-center gap-1 text-sm text-foreground-muted hover:text-foreground"

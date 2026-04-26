@@ -4,6 +4,7 @@ import { useIntl } from "react-intl";
 import { listCases } from "@/lib/api";
 import type { CaseListItem, CaseStatus } from "@/lib/types";
 import { CaseRow } from "@/components/govops/cases/CaseRow";
+import { Runbook } from "@/components/govops/Runbook";
 import { RouteError } from "@/components/govops/RouteError";
 import { RouteLoading } from "@/components/govops/RouteLoading";
 
@@ -75,6 +76,14 @@ function CasesListPage() {
 
   return (
     <div className="space-y-6">
+      <Runbook
+        prefix="runbook.cases"
+        scenarios={[
+          { id: "triage", steps: 4 },
+          { id: "evaluate", steps: 5 },
+          { id: "decide", steps: 4 },
+        ]}
+      />
       <header className="space-y-2">
         <h1
           className="text-3xl tracking-tight text-foreground"

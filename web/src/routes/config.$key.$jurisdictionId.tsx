@@ -10,6 +10,7 @@ import { ValueTypeBadge } from "@/components/govops/ValueTypeBadge";
 import { JurisdictionChip } from "@/components/govops/JurisdictionChip";
 import { CopyButton } from "@/components/govops/CopyButton";
 import { Timeline } from "@/components/govops/Timeline";
+import { Breadcrumb } from "@/components/govops/Breadcrumb";
 import { RouteError } from "@/components/govops/RouteError";
 import { RouteLoading } from "@/components/govops/RouteLoading";
 
@@ -72,7 +73,13 @@ function ConfigDetailPage() {
 
   return (
     <section aria-labelledby="config-detail-heading" className="space-y-8">
-      <nav aria-label="Breadcrumb" className="text-sm">
+      <Breadcrumb
+        items={[
+          { label: "nav.config", i18n: true, to: "/config" },
+          { label: decodedKey, truncate: true },
+        ]}
+      />
+      <nav aria-label="Breadcrumb back-link" className="text-sm">
         <Link to="/config" className="text-foreground-muted underline-offset-4 hover:underline">
           ← {intl.formatMessage({ id: "nav.config" })}
         </Link>

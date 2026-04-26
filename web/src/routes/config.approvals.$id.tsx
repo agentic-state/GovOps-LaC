@@ -2,6 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { FormattedDate, useIntl } from "react-intl";
 
 import { ApprovalActions } from "@/components/govops/ApprovalActions";
+import { Breadcrumb } from "@/components/govops/Breadcrumb";
 import { CurrentVsProposed } from "@/components/govops/CurrentVsProposed";
 import { ProvenanceRibbon } from "@/components/govops/ProvenanceRibbon";
 import { ValueDiff } from "@/components/govops/ValueDiff";
@@ -69,6 +70,13 @@ function ApprovalDetailPage() {
 
   return (
     <div className="space-y-6">
+      <Breadcrumb
+        items={[
+          { label: "nav.config", i18n: true, to: "/config" },
+          { label: "nav.approvals", i18n: true, to: "/config/approvals" },
+          { label: proposed.id, truncate: true },
+        ]}
+      />
       <Link
         to="/config/approvals"
         className="inline-flex items-center gap-1 text-sm text-foreground-muted hover:text-foreground"

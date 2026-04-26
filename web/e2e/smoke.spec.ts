@@ -79,6 +79,46 @@ test("home: modules + actors + walkthrough CTA all render", async ({ page }) => 
   });
 });
 
+test("breadcrumb: walkthrough page shows a breadcrumb back to home", async ({ page }) => {
+  await page.goto("/walkthrough");
+  await page.waitForLoadState("networkidle");
+  // Breadcrumb is a nav with role=list; the home crumb is a link with the
+  // home icon's sr-only label, and the current page crumb is non-link text.
+  const crumbNav = page.getByRole("navigation").filter({
+    has: page.locator('ol[role="list"]'),
+  });
+  await expect(crumbNav).toBeVisible();
+  await expect(crumbNav.getByRole("link").first()).toHaveAttribute("href", "/");
+});
+
+test("help drawer: Help button opens a sheet with route-aware content", async ({ page }) => {
+  await page.goto("/walkthrough");
+  await page.waitForLoadState("networkidle");
+  // Click the Help button (label varies by locale; English default is "Help")
+  const helpButton = page.getByRole("button", { name: /^Help$/i });
+  await expect(helpButton).toBeVisible();
+  await helpButton.click();
+  // Sheet renders a dialog with the route-specific title
+  const dialog = page.getByRole("dialog");
+  await expect(dialog).toBeVisible();
+  // Walkthrough route help title contains "Walkthrough" or its locale variant
+  await expect(dialog.getByRole("heading").first()).toContainText(/walkthrough|paid statutory/i);
+});
+
+test("runbook: cases page shows the operator runbook with collapsible scenarios", async ({
+  page,
+}) => {
+  await page.goto("/cases");
+  await page.waitForLoadState("networkidle");
+  // Runbook section heading + 3 scenario buttons
+  const scenarioButtons = page.locator('section[aria-labelledby="runbook.cases-heading"] button');
+  await expect(scenarioButtons).toHaveCount(3);
+  // Click the first scenario; its body should expand
+  const first = scenarioButtons.first();
+  await first.click();
+  await expect(first).toHaveAttribute("aria-expanded", "true");
+});
+
 test("walkthrough: 7-step paid-vacation scenario renders end to end", async ({ page }) => {
   await page.goto("/walkthrough");
   await page.waitForLoadState("networkidle");

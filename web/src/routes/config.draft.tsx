@@ -1,6 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 
+import { Breadcrumb } from "@/components/govops/Breadcrumb";
 import { DraftConfigForm } from "@/components/govops/DraftConfigForm";
 import { RecentDrafts } from "@/components/govops/RecentDrafts";
 import { createConfigValue, getConfigValue } from "@/lib/api";
@@ -91,6 +92,12 @@ function DraftPage() {
 
   return (
     <div className="space-y-6">
+      <Breadcrumb
+        items={[
+          { label: "nav.config", i18n: true, to: "/config" },
+          { label: "config.draft.crumb", i18n: true },
+        ]}
+      />
       <RecentDrafts activeSearch={formKey === "blank" ? "" : formKey} />
       <DraftConfigForm
         key={formKey}

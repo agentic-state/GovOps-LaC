@@ -4,6 +4,7 @@ import { FormattedMessage, useIntl } from "react-intl";
 import { toast } from "sonner";
 
 import { PromptEditor } from "@/components/govops/PromptEditor";
+import { Breadcrumb } from "@/components/govops/Breadcrumb";
 import { PromptPreview } from "@/components/govops/PromptPreview";
 import { FixtureTestPanel } from "@/components/govops/FixtureTestPanel";
 import { ValueDiff } from "@/components/govops/ValueDiff";
@@ -188,6 +189,14 @@ function PromptEditPage() {
 
   return (
     <section aria-labelledby="edit-heading" className="space-y-6">
+      <Breadcrumb
+        items={[
+          { label: "nav.config", i18n: true, to: "/config" },
+          { label: "nav.prompts", i18n: true, to: "/config/prompts" },
+          { label: decodeURIComponent(key), truncate: true },
+          { label: "config.prompts.edit.crumb", i18n: true },
+        ]}
+      />
       <header className="flex items-stretch">
         <ProvenanceRibbon variant="hybrid" />
         <div className="flex-1 space-y-2">

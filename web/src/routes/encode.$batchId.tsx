@@ -10,6 +10,7 @@ import {
 } from "@/lib/api";
 import type { EncodingBatch, ProposalStatus, RuleProposal } from "@/lib/types";
 import { ProposalCard } from "@/components/govops/encode/ProposalCard";
+import { Breadcrumb } from "@/components/govops/Breadcrumb";
 import { BulkActionBar } from "@/components/govops/encode/BulkActionBar";
 import { EncodeAuditLog } from "@/components/govops/encode/EncodeAuditLog";
 import { CommitConfirmDialog } from "@/components/govops/encode/CommitConfirmDialog";
@@ -150,6 +151,12 @@ function BatchReviewPage() {
 
   return (
     <div className="space-y-6 pb-24">
+      <Breadcrumb
+        items={[
+          { label: "nav.encode", i18n: true, to: "/encode" },
+          { label: batch.id, truncate: true },
+        ]}
+      />
       <Link
         to="/encode"
         className="inline-flex items-center gap-1 text-sm text-foreground-muted hover:text-foreground"

@@ -8,6 +8,7 @@ import type { ConfigValue, ListConfigValuesResponse } from "@/lib/types";
 import { ProvenanceRibbon } from "@/components/govops/ProvenanceRibbon";
 import { ConfigValueFilters, type FiltersState } from "@/components/govops/ConfigValueFilters";
 import { ConfigValueRow } from "@/components/govops/ConfigValueRow";
+import { Runbook } from "@/components/govops/Runbook";
 import { RouteError } from "@/components/govops/RouteError";
 import { RouteLoading } from "@/components/govops/RouteLoading";
 import {
@@ -150,6 +151,14 @@ function ConfigPage() {
 
   return (
     <section aria-labelledby="config-heading" className="space-y-8">
+      <Runbook
+        prefix="runbook.config"
+        scenarios={[
+          { id: "find", steps: 4 },
+          { id: "history", steps: 3 },
+          { id: "draft", steps: 5 },
+        ]}
+      />
       <header className="flex items-stretch">
         <ProvenanceRibbon variant="system" />
         <div className="space-y-3">

@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { Wordmark } from "@/components/govops/Wordmark";
 import { ProvenanceRibbon } from "@/components/govops/ProvenanceRibbon";
+import { DataFlowDiagram } from "@/components/govops/DataFlowDiagram";
 import { MOCK_CONFIG_VALUES } from "@/lib/mock-config-values";
 import { ValueTypeBadge } from "@/components/govops/ValueTypeBadge";
 import { JurisdictionChip } from "@/components/govops/JurisdictionChip";
@@ -133,6 +134,14 @@ function Index() {
             </article>
           ))}
         </div>
+      </section>
+
+      {/* Data flow diagram */}
+      <section aria-labelledby="dataflow-heading" className="space-y-6">
+        <h2 id="dataflow-heading" className="sr-only">
+          {t("dataflow.eyebrow")}
+        </h2>
+        <DataFlowDiagram />
       </section>
 
       {/* Modules */}

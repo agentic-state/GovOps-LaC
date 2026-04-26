@@ -6,6 +6,7 @@ import { getConfigValue } from "@/lib/api";
 import { MOCK_CONFIG_VALUES } from "@/lib/mock-config-values";
 import type { ConfigValue } from "@/lib/types";
 import { DiffPane } from "@/components/govops/DiffPane";
+import { Breadcrumb } from "@/components/govops/Breadcrumb";
 import { DiffMetadataStrip } from "@/components/govops/DiffMetadataStrip";
 import { ValueDiff } from "@/components/govops/ValueDiff";
 import { JurisdictionChip } from "@/components/govops/JurisdictionChip";
@@ -99,8 +100,16 @@ function DiffPage() {
 
   return (
     <section aria-labelledby="diff-heading" className="space-y-6 print:space-y-3">
+      <div className="print:hidden">
+        <Breadcrumb
+          items={[
+            { label: "nav.config", i18n: true, to: "/config" },
+            { label: "config.diff.crumb", i18n: true },
+          ]}
+        />
+      </div>
       {/* Back link — hidden in print */}
-      <nav aria-label="Breadcrumb" className="text-sm print:hidden">
+      <nav aria-label="Breadcrumb back-link" className="text-sm print:hidden">
         {sameRecord ? (
           <Link
             to="/config/$key/$jurisdictionId"

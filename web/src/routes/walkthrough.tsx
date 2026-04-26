@@ -10,6 +10,7 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import { ProvenanceRibbon } from "@/components/govops/ProvenanceRibbon";
+import { Breadcrumb } from "@/components/govops/Breadcrumb";
 
 export const Route = createFileRoute("/walkthrough")({
   head: () => ({
@@ -468,6 +469,8 @@ function Walkthrough() {
 
   return (
     <div className="space-y-16">
+      <Breadcrumb items={[{ label: "nav.walkthrough", i18n: true }]} />
+
       {/* Hero */}
       <section aria-labelledby="walkthrough-heading" className="flex items-stretch">
         <ProvenanceRibbon variant="hybrid" />

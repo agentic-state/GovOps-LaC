@@ -5,6 +5,7 @@ import { ChevronDown, Menu } from "lucide-react";
 import { Wordmark } from "./Wordmark";
 import { ThemeToggle } from "./ThemeToggle";
 import { LanguageSwitcher } from "./LanguageSwitcher";
+import { HelpDrawer } from "./HelpDrawer";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
 import {
   DropdownMenu,
@@ -98,6 +99,7 @@ export function Masthead() {
           <div className="hidden items-center gap-3 md:flex">
             <LanguageSwitcher />
             <ThemeToggle />
+            <HelpDrawer />
           </div>
 
           <Sheet open={open} onOpenChange={setOpen}>
@@ -149,6 +151,7 @@ export function Masthead() {
               <div className="mt-6 flex items-center gap-3 border-t border-border pt-4">
                 <LanguageSwitcher />
                 <ThemeToggle />
+                <HelpDrawer />
               </div>
             </SheetContent>
           </Sheet>
