@@ -48,9 +48,14 @@ def _home_residency_years_after_18(
     dob: date,
     residency_periods: list[ResidencyPeriod],
     ref_date: date,
-    home_countries: tuple[str, ...] = ("CA", "CANADA", "CAN"),
+    home_countries: tuple[str, ...],
 ) -> float:
-    """Total years of home-country residency/contribution after the applicant turned 18."""
+    """Total years of home-country residency/contribution after the applicant turned 18.
+
+    Callers must pass ``home_countries`` explicitly (post-Phase-2 there's no
+    default to fall back on; jurisdictional values come from the registry via
+    ``OASEngine._get_home_countries()``).
+    """
     age_18_date = date(dob.year + 18, dob.month, dob.day)
     total_days = 0
     for period in residency_periods:
