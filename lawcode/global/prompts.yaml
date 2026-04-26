@@ -1,4 +1,4 @@
-# yaml-language-server: $schema=../../schema/lawcode-v1.0.json (Phase 5)
+# yaml-language-server: $schema=../../schema/lawcode-v1.0.json
 # global/prompts.yaml — LLM prompts the encoder uses (Phase 4 / ADR-008).
 # Per ADR-008 Gate 4: changes to entries in this file require dual approval
 # (domain expert + maintainer).

@@ -1,4 +1,4 @@
-# yaml-language-server: $schema=../../schema/lawcode-v1.0.json (Phase 5)
+# yaml-language-server: $schema=../../../schema/lawcode-v1.0.json
 # fr/config/rules.yaml — generated from legacy_constants.py at Phase 3.2 cutover.
 # Schema: defaults + values list per ADR-003 §Mitigations.
 

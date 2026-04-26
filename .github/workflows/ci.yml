@@ -19,6 +19,10 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - run: pip install -e ".[dev]"
       - run: python scripts/check_no_hardcoded_constants.py
+      # Phase 5 gate: every YAML under lawcode/ must validate against
+      # schema/lawcode-v1.0.json + schema/configvalue-v1.0.json.
+      - name: Validate lawcode/ against JSON Schema
+        run: python scripts/validate_lawcode.py
       - run: pytest -v
       # Phase 3 strict-mode gate (per ADR-004 §3): every resolve must hit the
       # substrate (YAML) — never fall through to LEGACY_CONSTANTS.

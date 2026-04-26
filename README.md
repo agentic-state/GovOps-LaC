@@ -211,6 +211,13 @@ src/govops/
   api.py               # FastAPI (JSON API + HTML UI)
   cli.py               # CLI entry point
   templates/           # Jinja2 templates (about, cases, authority, audit, admin, encode, mvp)
+  config.py            # ConfigValue substrate (Law-as-Code v2.0)
+lawcode/               # Effective-dated ConfigValue records (YAML, schema-validated)
+  global/              # Cross-jurisdictional values (engine thresholds, UI labels, prompts)
+  {ca,br,es,fr,de,ua}/config/  # Per-jurisdiction rule parameters
+schema/
+  configvalue-v1.0.json  # JSON Schema for a single ConfigValue record
+  lawcode-v1.0.json      # JSON Schema for the lawcode/*.yaml file shape
 tests/
   test_engine.py       # Rule engine tests
   test_api.py          # API, multi-jurisdiction, and HTML tests
@@ -221,6 +228,10 @@ docs/
   ecosystem/           # Implementation guide, training, certification, RFP, use cases, partner program
   design/              # MVP spec, CDD, architecture baselines, ADRs, compliance
 ```
+
+### Law-as-Code v2.0
+
+Every business value (thresholds, accepted statuses, UI labels, LLM prompts) lives as a dated `ConfigValue` record under [lawcode/](lawcode/). The on-disk shape is locked by [schema/lawcode-v1.0.json](schema/lawcode-v1.0.json); each merged record satisfies [schema/configvalue-v1.0.json](schema/configvalue-v1.0.json). CI runs `python scripts/validate_lawcode.py` on every push, so a malformed YAML breaks the build before merge. Track the live execution plan in [PLAN.md](PLAN.md).
 
 ---
 
