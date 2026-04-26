@@ -1,17 +1,19 @@
-"""Phase 2 Domain 1 (rule.parameter) migration coverage.
+"""Phase 2 + 3 migration coverage.
 
-These tests prove that all 6 jurisdictions' rules can resolve every
-parameter via the LEGACY_CONSTANTS registry — i.e. no rule.parameter
-keys slipped through the migration. Strict-mode test below would also
-catch any unregistered key the engine reaches for.
+These tests prove that every rule.parameter / engine.threshold / global.config
+/ ui.label key resolves cleanly from the substrate populated at module import
+from ``lawcode/``. After Phase 3.3, LEGACY_CONSTANTS is empty in normal runs;
+the substrate (loaded by ``legacy_constants._resolver``) is the canonical
+source.
 """
 
 from __future__ import annotations
 
 import pytest
 
-from govops.config import LEGACY_CONSTANTS, ConfigKeyNotMigrated
+from govops.config import LEGACY_CONSTANTS, ConfigKeyNotMigrated, ResolutionSource
 from govops.jurisdictions import JURISDICTION_REGISTRY
+from govops.legacy_constants import _JURISDICTION_PREFIX_TO_ID, _resolver
 
 
 # Every rule.id maps to a (jurisdiction, slug) used to compute its key path.
@@ -70,19 +72,21 @@ def test_every_seeded_rule_id_is_in_the_key_map():
     assert not extra, f"Key map has stale entries no longer in seed/jurisdictions: {extra}"
 
 
-def test_every_rule_parameter_resolves_from_legacy():
+def test_every_rule_parameter_resolves_from_substrate():
     """Walk every (rule, parameter) pair across every jurisdiction and confirm
-    its legacy key is registered — even if the rule's parameters dict in seed
-    happens to read it via resolve_param() with a fallback."""
+    the substrate (loaded from lawcode/) holds it."""
     seen = 0
     for pack in JURISDICTION_REGISTRY.values():
         for rule in pack.rules:
             jur, slug = RULE_KEY_MAP[rule.id]
             for param_name in rule.parameters.keys():
                 key = f"{jur}.rule.{slug}.{param_name}"
-                assert key in LEGACY_CONSTANTS, f"Missing legacy entry: {key}"
+                jurisdiction_id = _JURISDICTION_PREFIX_TO_ID[jur]
+                result = _resolver.resolve_value(key, jurisdiction_id=jurisdiction_id)
+                assert result.source == ResolutionSource.SUBSTRATE, (
+                    f"{key} should resolve from substrate, got {result.source}"
+                )
                 seen += 1
-    # 6 jurisdictions × 5 rules; parameter counts vary but stay >= 30.
     assert seen >= 30, f"Coverage suspiciously low: only {seen} resolved keys"
 
 
@@ -106,18 +110,20 @@ def test_strict_mode_passes_for_seeded_rules(monkeypatch):
                     store.resolve_value(key)
 
 
-def test_seeded_parameter_values_match_legacy_registry():
+def test_seeded_parameter_values_match_substrate():
     """The runtime LegalRule.parameters dict must contain the same value the
-    LEGACY_CONSTANTS registry holds — proves resolve_param() actually wired
-    through the registry instead of inline literals."""
+    substrate holds — proves resolve_param() actually wired through the YAML
+    rather than baking inline literals at import time."""
     for pack in JURISDICTION_REGISTRY.values():
         for rule in pack.rules:
             jur, slug = RULE_KEY_MAP[rule.id]
+            jurisdiction_id = _JURISDICTION_PREFIX_TO_ID[jur]
             for param_name, runtime_value in rule.parameters.items():
                 key = f"{jur}.rule.{slug}.{param_name}"
-                assert LEGACY_CONSTANTS[key] == runtime_value, (
-                    f"Drift between LEGACY[{key}] and seeded value: "
-                    f"{LEGACY_CONSTANTS[key]!r} vs {runtime_value!r}"
+                result = _resolver.resolve_value(key, jurisdiction_id=jurisdiction_id)
+                assert result.value == runtime_value, (
+                    f"Drift between substrate[{key}] and seeded value: "
+                    f"{result.value!r} vs {runtime_value!r}"
                 )
 
 
@@ -131,10 +137,12 @@ ENGINE_THRESHOLD_KEYS = [
 ]
 
 
-def test_engine_threshold_keys_registered():
-    """engine.threshold.* keys the engine reads must exist in LEGACY_CONSTANTS."""
+def test_engine_threshold_keys_in_substrate():
+    """engine.threshold.* keys must resolve from the substrate."""
     for key in ENGINE_THRESHOLD_KEYS:
-        assert key in LEGACY_CONSTANTS, f"Missing engine.threshold legacy entry: {key}"
+        result = _resolver.resolve_value(key)
+        assert result.source == ResolutionSource.SUBSTRATE
+        assert result.value is not None
 
 
 def test_engine_dob_evidence_types_match_runtime():
@@ -165,17 +173,16 @@ def test_engine_residency_evidence_types_match_runtime():
 # ---------------------------------------------------------------------------
 
 
-def test_global_config_default_language_registered():
-    from govops.config import LEGACY_CONSTANTS
+def test_global_config_default_language_in_substrate():
+    result = _resolver.resolve_value("global.config.default_language")
+    assert result.source == ResolutionSource.SUBSTRATE
+    assert result.value == "en"
 
-    assert LEGACY_CONSTANTS["global.config.default_language"] == "en"
 
-
-def test_global_config_supported_languages_registered():
-    from govops.config import LEGACY_CONSTANTS
-
-    langs = LEGACY_CONSTANTS["global.config.supported_languages"]
-    assert set(langs.keys()) == {"en", "fr", "pt", "es", "de", "uk"}
+def test_global_config_supported_languages_in_substrate():
+    result = _resolver.resolve_value("global.config.supported_languages")
+    assert result.source == ResolutionSource.SUBSTRATE
+    assert set(result.value.keys()) == {"en", "fr", "pt", "es", "de", "uk"}
 
 
 def test_i18n_module_reads_globals_from_registry():
@@ -191,13 +198,14 @@ def test_i18n_module_reads_globals_from_registry():
 # ---------------------------------------------------------------------------
 
 
-def test_ui_label_translations_registered():
-    """Every ui.label.<key>.<lang> entry is in LEGACY_CONSTANTS."""
-    from govops.config import LEGACY_CONSTANTS
-
-    ui_keys = [k for k in LEGACY_CONSTANTS if k.startswith("ui.label.")]
-    # 54 keys × 6 langs ≈ 276 entries (some keys have fewer langs).
-    assert len(ui_keys) >= 200, f"Suspiciously few ui.label entries: {len(ui_keys)}"
+def test_ui_label_translations_in_substrate():
+    """ui.label.<key>.<lang> entries are loaded into the substrate from
+    lawcode/global/ui-labels.yaml."""
+    ui_records = _resolver.list(domain="ui")
+    # 54 keys × ≤6 langs ≈ 276 entries.
+    assert len(ui_records) >= 200, (
+        f"Suspiciously few ui.label substrate entries: {len(ui_records)}"
+    )
 
 
 def test_t_resolves_known_key():
