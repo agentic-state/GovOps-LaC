@@ -15,7 +15,7 @@ It is an open public-good contribution that governments can inspect, adapt, and 
 ## Quick Start
 
 ```bash
-git clone https://github.com/eva-foundry/61-GovOps.git
+git clone https://github.com/your-org/61-GovOps.git
 cd 61-GovOps
 pip install -e ".[dev]"
 govops-demo

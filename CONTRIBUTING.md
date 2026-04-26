@@ -45,7 +45,7 @@ Use GitHub Issues. Please include:
 ## Development Setup
 
 ```bash
-git clone https://github.com/eva-foundry/61-GovOps.git
+git clone https://github.com/your-org/61-GovOps.git
 cd 61-GovOps
 pip install -e ".[dev]"
 pytest -v          # run tests
