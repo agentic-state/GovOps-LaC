@@ -76,6 +76,73 @@ def _seed_jurisdiction(jur_code: str):
     )
 
 
+def _seed_demo_drafts():
+    """Seed the approvals queue with representative drafts so the admin UI
+    has something to show on first load. Triggered by GOVOPS_SEED_DEMO=1.
+
+    Idempotent: each demo draft has a unique key prefix
+    (`demo.draft.*`) so re-runs don't create duplicates.
+    """
+    demo_drafts = [
+        {
+            "key": "demo.draft.ca-oas.age-67-amendment",
+            "jurisdiction_id": "ca-oas",
+            "value": 67,
+            "value_type": ValueType.NUMBER,
+            "effective_from": datetime(2027, 1, 1, tzinfo=timezone.utc),
+            "citation": "Hypothetical 2027 OAS amendment (demo data)",
+            "author": "demo-author",
+            "rationale": "Sample policy proposal: raise OAS minimum age to 67 effective 2027-01-01.",
+            "status": ApprovalStatus.DRAFT,
+        },
+        {
+            "key": "demo.draft.fr-cnav.indexation-2026",
+            "jurisdiction_id": "fr-cnav",
+            "value": 1.024,
+            "value_type": ValueType.NUMBER,
+            "effective_from": datetime(2026, 7, 1, tzinfo=timezone.utc),
+            "citation": "Hypothetical CNAV revaluation 2026 (demo data)",
+            "author": "demo-author",
+            "rationale": "Sample annual index adjustment for CNAV pension benefits.",
+            "status": ApprovalStatus.PENDING,
+        },
+        {
+            "key": "demo.draft.de-drv.entgeltpunkt-rejected",
+            "jurisdiction_id": "de-drv",
+            "value": 36.50,
+            "value_type": ValueType.NUMBER,
+            "effective_from": datetime(2026, 7, 1, tzinfo=timezone.utc),
+            "citation": "Hypothetical DRV Entgeltpunkt update (demo data)",
+            "author": "demo-author",
+            "rationale": "Sample entgeltpunkt revision; rejected as out of scope for current track.",
+            "status": ApprovalStatus.REJECTED,
+        },
+    ]
+    for draft in demo_drafts:
+        existing = config_store.list_versions(draft["key"], jurisdiction_id=draft["jurisdiction_id"])
+        if existing:
+            continue
+        cv = ConfigValue(
+            domain="rule",
+            key=draft["key"],
+            jurisdiction_id=draft["jurisdiction_id"],
+            value=draft["value"],
+            value_type=draft["value_type"],
+            effective_from=draft["effective_from"],
+            citation=draft["citation"],
+            author=draft["author"],
+            rationale=draft["rationale"],
+            status=draft["status"],
+        )
+        config_store.put(cv)
+        config_store.record_audit(
+            config_value_id=cv.id,
+            event="draft_created",
+            actor=draft["author"],
+            comment=draft["rationale"],
+        )
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     _seed_jurisdiction(DEFAULT_JURISDICTION)
@@ -85,6 +152,10 @@ async def lifespan(app: FastAPI):
     # natural key, so a partially-seeded store is also tolerated.
     if len(config_store) == 0 and LAWCODE_DIR.exists():
         config_store.load_from_yaml(LAWCODE_DIR)
+    # Demo seed: enterprise-grade demo experience requires a non-empty
+    # approvals queue on first load. GOVOPS_SEED_DEMO=1 turns it on.
+    if os.environ.get("GOVOPS_SEED_DEMO") == "1":
+        _seed_demo_drafts()
     yield
 
 

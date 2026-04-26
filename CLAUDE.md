@@ -58,7 +58,32 @@ npm run dev                                    # http://localhost:8080
 npm run build                                  # vite build (SSR + client)
 npm run check:i18n                             # ICU MessageFormat + key parity
 npm run lint                                   # eslint + prettier
+npm test                                       # vitest unit tests
 ```
+
+### E2E (Playwright + axe, in `web/`)
+```bash
+cd web
+npm run test:e2e:install                       # one-time: Chromium/Firefox/WebKit (~300 MB)
+npm run test:e2e                               # full headless suite, all 3 browsers
+npm run test:e2e:headed                        # browser visible (debugging)
+npm run test:e2e:ui                            # interactive Playwright UI mode
+npm run test:e2e:report                        # open last HTML report
+```
+
+`web/playwright.config.ts` auto-orchestrates the backend
+(`uvicorn govops.api:app`) and the frontend dev server, seeding demo
+drafts via `GOVOPS_SEED_DEMO=1` so the approvals queue is non-empty on
+first load. Specs live under `web/e2e/`:
+
+- `smoke.spec.ts` — every primary route renders, screenshot per route
+- `admin-flow.spec.ts` — Phase 6 exit-line scenario through the UI
+- `approval-actions.spec.ts` — reject + request-changes paths
+- `a11y.spec.ts` — axe WCAG 2.1 AA scan on every route (critical violations are hard-fail; others logged unless `E2E_A11Y_STRICT=1`)
+- `i18n.spec.ts` — language selector + locale switch
+
+CI runs the full suite cross-browser after Python tests pass; HTML
+reports, screenshots, and traces upload as artifacts on every run.
 
 The frontend SSR fetches from `VITE_API_BASE_URL` (default `http://127.0.0.1:8000`); set `VITE_USE_MOCK_API=true` to bypass the backend and use in-app mocks.
 
