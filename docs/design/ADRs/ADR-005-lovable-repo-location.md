@@ -24,12 +24,12 @@ The OpenAPI snapshot at `docs/api/openapi-v0.2.0.json` (frozen in Phase 0) is th
 | Single issue tracker / single release | Yes | No |
 | Lovable can ship its own cadence | Possible (separate workflow) | Native |
 | Repo size grows | Yes (UI + backend in one tree) | No |
-| Workspace precedent | Matches P75 (`75-EVA-vNext/web/`) | New pattern |
+| Convention | Same-tree `web/` is a familiar pattern | New folder layout |
 
 The decisive factors:
 
 - **Contract drift is the primary v2.0 risk.** Two-repo separation makes drift invisible until a version bump; same-repo makes it a CI failure on the PR that introduced it.
-- **Workspace already has the pattern.** Project 75's `web/` folder is the precedent; new contributors don't need to learn a new convention.
+- **Same-tree `web/` is a familiar pattern.** Co-locating the frontend with the backend keeps the convention obvious; new contributors don't need to learn a multi-repo layout.
 - **Single release.** A v2.0 release is "this repo at tag X" — backend + UI together. No version-pinning gymnastics.
 
 The cost (repo size, two toolchains in CI) is acceptable. We can revisit and extract `web/` to a sibling repo if Lovable cadence diverges materially from backend cadence — that would be a future ADR superseding this one.

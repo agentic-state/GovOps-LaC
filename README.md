@@ -1,6 +1,6 @@
 # GovOps - Policy-Driven Service Delivery Machine
 
-> **Disclaimer**: This is an independent prototype built as a personal, open-source project. It is **not affiliated with, endorsed by, or representing the Government of Canada, Service Canada, ESDC, or any government entity**. Legislative text used in the demo (including the Old Age Security Act) is publicly available law interpreted by the author for illustrative purposes only — it is **not authoritative operational guidance** and should not be relied upon for actual eligibility determinations.
+> **Disclaimer**: This is an independent prototype built as a personal, open-source project. It is **not affiliated with, endorsed by, or representing any government, department, or public agency**. Legislative text used in the demo (including the Old Age Security Act) is publicly available law interpreted by the author for illustrative purposes only — it is **not authoritative operational guidance** and should not be relied upon for actual eligibility determinations.
 
 **Law -> Policy -> Service -> Decision**
 

@@ -13,7 +13,7 @@
 
 1. **Primary tier**: look up the key in the in-memory ConfigValue store. If a record exists with a matching effective period, return it.
 2. **Fallback tier**: if no record exists, look up the key in a `LEGACY_CONSTANTS` registry that mirrors today's Python values. Return the legacy value and emit a `ConfigResolution` audit entry tagged `source=legacy`.
-3. **Strict mode**: when `EVA_CONFIG_STRICT=1` is set, the fallback path raises `ConfigKeyNotMigrated`. CI runs in strict mode after Phase 2 exit; before that, it runs in lenient mode.
+3. **Strict mode**: when `AIA_CONFIG_STRICT=1` is set, the fallback path raises `ConfigKeyNotMigrated`. CI runs in strict mode after Phase 2 exit; before that, it runs in lenient mode.
 
 The legacy registry is populated at startup from the existing seed/jurisdiction modules. Phase 2 migrates one **domain at a time** (e.g. all `rule.parameter.*` keys, then all `engine.threshold.*`, then `enum.*`, then `ui.label.*`). After each domain migrates, its keys are removed from `LEGACY_CONSTANTS` and the corresponding Python constants are deleted.
 

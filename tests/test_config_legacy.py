@@ -1,7 +1,7 @@
 """Tests for the ADR-004 backcompat layer (Phase 2 plumbing).
 
 `resolve_value()` is a two-tier resolver: substrate → legacy → caller default.
-`EVA_CONFIG_STRICT=1` makes legacy hits or empty resolutions loud — that gate
+`AIA_CONFIG_STRICT=1` makes legacy hits or empty resolutions loud — that gate
 flips on at Phase 2 exit.
 """
 
@@ -29,7 +29,7 @@ UTC = timezone.utc
 @pytest.fixture(autouse=True)
 def _clean_legacy_and_strict(monkeypatch):
     """Reset LEGACY_CONSTANTS and strict mode between tests so they don't leak."""
-    monkeypatch.delenv("EVA_CONFIG_STRICT", raising=False)
+    monkeypatch.delenv("AIA_CONFIG_STRICT", raising=False)
     snapshot = dict(LEGACY_CONSTANTS)
     LEGACY_CONSTANTS.clear()
     yield
@@ -124,12 +124,12 @@ def test_resolve_value_returns_none_when_no_default_and_lenient():
 
 
 # ---------------------------------------------------------------------------
-# Strict mode (EVA_CONFIG_STRICT=1)
+# Strict mode (AIA_CONFIG_STRICT=1)
 # ---------------------------------------------------------------------------
 
 
 def test_resolve_value_strict_raises_on_legacy_hit(monkeypatch):
-    monkeypatch.setenv("EVA_CONFIG_STRICT", "1")
+    monkeypatch.setenv("AIA_CONFIG_STRICT", "1")
     store = ConfigStore()
     register_legacy("ca-oas.rule.age-65.min_age", 65)
 
@@ -141,14 +141,14 @@ def test_resolve_value_strict_raises_on_legacy_hit(monkeypatch):
 
 
 def test_resolve_value_strict_raises_when_nothing_matches(monkeypatch):
-    monkeypatch.setenv("EVA_CONFIG_STRICT", "1")
+    monkeypatch.setenv("AIA_CONFIG_STRICT", "1")
     store = ConfigStore()
     with pytest.raises(ConfigKeyNotMigrated):
         store.resolve_value("nonexistent.key")
 
 
 def test_resolve_value_strict_does_not_raise_on_substrate_hit(monkeypatch):
-    monkeypatch.setenv("EVA_CONFIG_STRICT", "1")
+    monkeypatch.setenv("AIA_CONFIG_STRICT", "1")
     store = _make_store_with(
         "ca-oas.rule.age-65.min_age", 65, jurisdiction_id="ca-oas",
     )
@@ -165,7 +165,7 @@ def test_resolve_value_strict_does_not_raise_on_substrate_hit(monkeypatch):
 
 def test_resolve_value_strict_caller_default_still_raises(monkeypatch):
     """Strict mode forbids silent fallthrough even with explicit default."""
-    monkeypatch.setenv("EVA_CONFIG_STRICT", "1")
+    monkeypatch.setenv("AIA_CONFIG_STRICT", "1")
     store = ConfigStore()
     # Caller default is satisfied before the strict check, so this passes.
     # Documenting the behaviour: explicit default short-circuits the strict raise

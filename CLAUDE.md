@@ -9,7 +9,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 Built on **FKTE** (Fractal Knowledge Transformation Engine):
 `unstructured knowledge -> structured knowledge -> executable knowledge -> operational action`
 
-**Disclaimer (load-bearing for any docs work)**: This is an independent open-source prototype. It is **not affiliated with, endorsed by, or representing the Government of Canada, Service Canada, ESDC, or any government entity**. Legislative text is publicly available law interpreted by the author for illustrative purposes — not authoritative operational guidance. Preserve this framing in any user-facing changes.
+**Disclaimer (load-bearing for any docs work)**: This is an independent open-source prototype. It is **not affiliated with, endorsed by, or representing any government, department, or public agency**. Legislative text is publicly available law interpreted by the author for illustrative purposes — not authoritative operational guidance. Preserve this framing in any user-facing changes.
 
 ## Active Track
 

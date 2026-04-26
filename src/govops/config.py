@@ -11,7 +11,7 @@ Key schema (per ADR-006): <jurisdiction>-<program>.<domain>.<scope>.<param>
 Storage is in-memory (per ADR-007). State is reseeded on startup.
 
 Phase 2 backcompat (per ADR-004): `resolve_value()` is a two-tier resolver —
-substrate first, then `LEGACY_CONSTANTS`. `EVA_CONFIG_STRICT=1` raises
+substrate first, then `LEGACY_CONSTANTS`. `AIA_CONFIG_STRICT=1` raises
 `ConfigKeyNotMigrated` whenever the legacy tier matches, which CI flips on at
 Phase 2 exit so unmigrated keys can't slip through.
 """
@@ -71,7 +71,7 @@ class ResolutionSource(str, Enum):
 class ConfigKeyNotMigrated(KeyError):
     """Raised in strict mode when a key is missing from the substrate.
 
-    Strict mode is enabled by `EVA_CONFIG_STRICT=1`. CI flips it on at Phase 2
+    Strict mode is enabled by `AIA_CONFIG_STRICT=1`. CI flips it on at Phase 2
     exit so unmigrated keys can no longer pass tests via legacy fallback.
     """
 
@@ -92,8 +92,8 @@ def register_legacy(key: str, value: Any) -> None:
 
 
 def is_strict_mode() -> bool:
-    """True when EVA_CONFIG_STRICT=1 is set."""
-    return os.environ.get("EVA_CONFIG_STRICT") == "1"
+    """True when AIA_CONFIG_STRICT=1 is set."""
+    return os.environ.get("AIA_CONFIG_STRICT") == "1"
 
 
 class ConfigValue(BaseModel):
@@ -302,7 +302,7 @@ class ConfigStore:
         2. Legacy: fall back to ``LEGACY_CONSTANTS[key]`` if present.
         3. Caller default: return ``default`` if supplied.
         4. Otherwise: ``None`` (lenient mode) or raise ``ConfigKeyNotMigrated``
-           (when ``EVA_CONFIG_STRICT=1``).
+           (when ``AIA_CONFIG_STRICT=1``).
 
         Strict mode raises whenever the legacy tier matches OR no tier matches,
         making "I forgot to migrate this key" loud at Phase 2 exit.
