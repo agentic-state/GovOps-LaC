@@ -21,6 +21,7 @@ from __future__ import annotations
 import os
 from datetime import datetime, timezone
 from enum import Enum
+from pathlib import Path
 from typing import Any, NamedTuple, Optional
 
 from pydantic import BaseModel, Field
@@ -345,6 +346,114 @@ class ConfigStore:
                 continue
             out.append(v)
         return out
+
+    # --- YAML loader (Phase 3 / ADR-003) ---
+
+    def load_from_yaml(self, path: "str | os.PathLike[str]") -> int:
+        """Load ConfigValue records from a YAML file or directory tree.
+
+        Schema (per ADR-003 §Mitigations):
+        ```yaml
+        # yaml-language-server: $schema=../../schema/lawcode-v1.0.json
+        defaults:               # optional; merged into every record below
+          domain: rule
+          jurisdiction_id: ca-oas
+          value_type: number
+          effective_from: "1900-01-01"
+        values:
+          - key: ca.rule.age-65.min_age
+            value: 65
+            citation: "OAS Act, R.S.C. 1985, c. O-9, s. 3(1)"
+            rationale: "Original statutory minimum age."
+          - key: ca.rule.residency-10.min_years
+            value: 10
+            ...
+        ```
+
+        If ``path`` is a directory, every ``.yaml`` / ``.yml`` file beneath it
+        is loaded (recursively, sorted for determinism). Returns the count of
+        records inserted across all files.
+
+        Per ADR-003: YAML 1.2 only (uses ``yaml.safe_load`` which targets 1.2);
+        no anchors/aliases are honored at this layer (they would parse but
+        wouldn't survive round-trip — discouraged in source).
+        """
+        import yaml  # local import: keep top-level cheap
+
+        target = Path(path) if not isinstance(path, Path) else path
+        if not target.exists():
+            raise FileNotFoundError(f"lawcode path does not exist: {target}")
+
+        files = (
+            sorted(target.rglob("*.yaml")) + sorted(target.rglob("*.yml"))
+            if target.is_dir()
+            else [target]
+        )
+
+        inserted = 0
+        for fp in files:
+            with fp.open("r", encoding="utf-8") as fh:
+                doc = yaml.safe_load(fh)
+            if doc is None:
+                continue
+            if not isinstance(doc, dict) or "values" not in doc:
+                raise ValueError(
+                    f"{fp}: expected top-level mapping with 'values' list"
+                )
+            defaults: dict[str, Any] = doc.get("defaults") or {}
+            for raw in doc["values"]:
+                if not isinstance(raw, dict):
+                    raise ValueError(f"{fp}: each value must be a mapping, got {type(raw).__name__}")
+                merged = {**defaults, **raw}
+                cv = self._build_config_value(merged, source_file=fp)
+                self.put(cv)
+                inserted += 1
+        return inserted
+
+    def _build_config_value(
+        self,
+        record: dict[str, Any],
+        source_file: "Path | None" = None,
+    ) -> ConfigValue:
+        """Validate-and-construct a ConfigValue from a YAML record.
+
+        Defaults sane: ``effective_from = 1900-01-01 UTC`` if omitted (per
+        ADR-004 §Failure modes — every Phase-2/3 record is "always in effect").
+        ``value_type`` is required; ``key`` is required.
+        """
+        if "key" not in record:
+            raise ValueError(f"{source_file or '<inline>'}: record missing 'key': {record!r}")
+        if "value_type" not in record:
+            raise ValueError(f"{source_file or '<inline>'}: record missing 'value_type': {record!r}")
+
+        eff_from = record.get("effective_from")
+        if isinstance(eff_from, str):
+            parsed = datetime.fromisoformat(eff_from)
+            eff_from = parsed if parsed.tzinfo else parsed.replace(tzinfo=timezone.utc)
+        elif eff_from is None:
+            eff_from = datetime(1900, 1, 1, tzinfo=timezone.utc)
+
+        eff_to = record.get("effective_to")
+        if isinstance(eff_to, str):
+            parsed = datetime.fromisoformat(eff_to)
+            eff_to = parsed if parsed.tzinfo else parsed.replace(tzinfo=timezone.utc)
+
+        return ConfigValue(
+            domain=record.get("domain", "rule"),
+            key=record["key"],
+            jurisdiction_id=record.get("jurisdiction_id"),
+            value=record.get("value"),
+            value_type=ValueType(record["value_type"]),
+            effective_from=eff_from,
+            effective_to=eff_to,
+            citation=record.get("citation"),
+            author=record.get("author", "system:yaml"),
+            approved_by=record.get("approved_by"),
+            rationale=record.get("rationale", ""),
+            supersedes=record.get("supersedes"),
+            status=ApprovalStatus(record.get("status", "approved")),
+            language=record.get("language"),
+        )
 
     # --- introspection ---
 
