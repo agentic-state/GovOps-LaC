@@ -61,6 +61,13 @@ secrets.yaml
 htmlcov/
 *.cover
 
+# Playwright (web/)
+web/test-results/
+web/playwright-report/
+web/blob-report/
+web/playwright/.cache/
+web/.last-run.json
+
 # Data Model (temporary local data)
 data/local/*.db
 data/local/*.json
