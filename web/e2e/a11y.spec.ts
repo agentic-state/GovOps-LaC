@@ -12,8 +12,10 @@ import AxeBuilder from "@axe-core/playwright";
 
 const A11Y_ROUTES = [
   "/",
-  "/policies",
+  "/walkthrough",
   "/authority",
+  "/about",
+  "/policies",
   "/cases",
   "/encode",
   "/config",
@@ -21,7 +23,6 @@ const A11Y_ROUTES = [
   "/config/approvals",
   "/config/diff",
   "/config/prompts",
-  "/about",
   "/admin",
 ];
 

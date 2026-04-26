@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as WalkthroughRouteImport } from './routes/walkthrough'
 import { Route as PoliciesRouteImport } from './routes/policies'
 import { Route as EncodeRouteImport } from './routes/encode'
 import { Route as ConfigRouteImport } from './routes/config'
@@ -28,6 +29,11 @@ import { Route as ConfigApprovalsIdRouteImport } from './routes/config.approvals
 import { Route as ConfigKeyJurisdictionIdRouteImport } from './routes/config.$key.$jurisdictionId'
 import { Route as ConfigPromptsKeyJurisdictionIdEditRouteImport } from './routes/config.prompts.$key.$jurisdictionId.edit'
 
+const WalkthroughRoute = WalkthroughRouteImport.update({
+  id: '/walkthrough',
+  path: '/walkthrough',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PoliciesRoute = PoliciesRouteImport.update({
   id: '/policies',
   path: '/policies',
@@ -129,6 +135,7 @@ export interface FileRoutesByFullPath {
   '/config': typeof ConfigRouteWithChildren
   '/encode': typeof EncodeRouteWithChildren
   '/policies': typeof PoliciesRoute
+  '/walkthrough': typeof WalkthroughRoute
   '/cases/$caseId': typeof CasesCaseIdRoute
   '/config/approvals': typeof ConfigApprovalsRouteWithChildren
   '/config/diff': typeof ConfigDiffRoute
@@ -149,6 +156,7 @@ export interface FileRoutesByTo {
   '/config': typeof ConfigRouteWithChildren
   '/encode': typeof EncodeRouteWithChildren
   '/policies': typeof PoliciesRoute
+  '/walkthrough': typeof WalkthroughRoute
   '/cases/$caseId': typeof CasesCaseIdRoute
   '/config/approvals': typeof ConfigApprovalsRouteWithChildren
   '/config/diff': typeof ConfigDiffRoute
@@ -170,6 +178,7 @@ export interface FileRoutesById {
   '/config': typeof ConfigRouteWithChildren
   '/encode': typeof EncodeRouteWithChildren
   '/policies': typeof PoliciesRoute
+  '/walkthrough': typeof WalkthroughRoute
   '/cases/$caseId': typeof CasesCaseIdRoute
   '/config/approvals': typeof ConfigApprovalsRouteWithChildren
   '/config/diff': typeof ConfigDiffRoute
@@ -192,6 +201,7 @@ export interface FileRouteTypes {
     | '/config'
     | '/encode'
     | '/policies'
+    | '/walkthrough'
     | '/cases/$caseId'
     | '/config/approvals'
     | '/config/diff'
@@ -212,6 +222,7 @@ export interface FileRouteTypes {
     | '/config'
     | '/encode'
     | '/policies'
+    | '/walkthrough'
     | '/cases/$caseId'
     | '/config/approvals'
     | '/config/diff'
@@ -232,6 +243,7 @@ export interface FileRouteTypes {
     | '/config'
     | '/encode'
     | '/policies'
+    | '/walkthrough'
     | '/cases/$caseId'
     | '/config/approvals'
     | '/config/diff'
@@ -253,10 +265,18 @@ export interface RootRouteChildren {
   ConfigRoute: typeof ConfigRouteWithChildren
   EncodeRoute: typeof EncodeRouteWithChildren
   PoliciesRoute: typeof PoliciesRoute
+  WalkthroughRoute: typeof WalkthroughRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/walkthrough': {
+      id: '/walkthrough'
+      path: '/walkthrough'
+      fullPath: '/walkthrough'
+      preLoaderRoute: typeof WalkthroughRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/policies': {
       id: '/policies'
       path: '/policies'
@@ -462,6 +482,7 @@ const rootRouteChildren: RootRouteChildren = {
   ConfigRoute: ConfigRouteWithChildren,
   EncodeRoute: EncodeRouteWithChildren,
   PoliciesRoute: PoliciesRoute,
+  WalkthroughRoute: WalkthroughRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
