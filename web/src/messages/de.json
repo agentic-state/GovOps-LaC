@@ -543,6 +543,8 @@
   "encode.proposal.modify": "Modify",
   "encode.proposal.reject": "Reject",
   "encode.proposal.annotate": "Annotate",
+  "encode.proposal.reopen": "Erneut zur Prüfung öffnen",
+  "encode.proposal.locked.hint": "Verdikt erfasst · zum Ändern erneut öffnen",
   "encode.proposal.notes.label": "Notes",
   "encode.proposal.notes.placeholder": "Optional reviewer note…",
   "encode.proposal.modify.heading": "Modify proposal",

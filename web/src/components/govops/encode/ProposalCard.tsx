@@ -32,6 +32,13 @@ export function ProposalCard({
   const [notes, setNotes] = useState("");
   const [busy, setBusy] = useState(false);
 
+  // A proposal that has been approved / modified / rejected is terminal —
+  // the reviewer's verdict is recorded. Surfaces an explicit "Reopen" path
+  // (the ghost button) for cases where they want to revisit; otherwise all
+  // outcome-changing buttons are locked so a stray click can't quietly
+  // overwrite a verdict.
+  const isLocked = proposal.status !== "pending";
+
   const act = async (status: ProposalStatus) => {
     setBusy(true);
     try {
@@ -123,16 +130,18 @@ export function ProposalCard({
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
                 placeholder={intl.formatMessage({ id: "encode.proposal.notes.placeholder" })}
-                className="w-full rounded-md border border-border bg-surface px-3 py-1.5 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                disabled={isLocked && proposal.status !== "pending"}
+                className="w-full rounded-md border border-border bg-surface px-3 py-1.5 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-60"
               />
             </label>
-            <footer className="flex flex-wrap gap-2 pt-1">
+            <footer className="flex flex-wrap items-center gap-2 pt-1">
               <Button
                 type="button"
                 variant="authority"
                 size="sm"
                 onClick={() => act("approved")}
-                disabled={busy}
+                disabled={busy || isLocked}
+                aria-disabled={busy || isLocked}
               >
                 {intl.formatMessage({ id: "encode.proposal.approve" })}
               </Button>
@@ -141,7 +150,8 @@ export function ProposalCard({
                 variant="outline"
                 size="sm"
                 onClick={() => setEditing(true)}
-                disabled={busy}
+                disabled={busy || isLocked}
+                aria-disabled={busy || isLocked}
               >
                 {intl.formatMessage({ id: "encode.proposal.modify" })}
               </Button>
@@ -150,20 +160,43 @@ export function ProposalCard({
                 variant="destructive"
                 size="sm"
                 onClick={() => act("rejected")}
-                disabled={busy}
+                disabled={busy || isLocked}
+                aria-disabled={busy || isLocked}
               >
                 {intl.formatMessage({ id: "encode.proposal.reject" })}
               </Button>
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={() => act("pending")}
-                disabled={busy || !notes.trim()}
-                title={intl.formatMessage({ id: "encode.proposal.annotate" })}
-              >
-                {intl.formatMessage({ id: "encode.proposal.annotate" })}
-              </Button>
+              {isLocked ? (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => act("pending")}
+                  disabled={busy}
+                  title={intl.formatMessage({ id: "encode.proposal.reopen" })}
+                >
+                  {intl.formatMessage({ id: "encode.proposal.reopen" })}
+                </Button>
+              ) : (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => act("pending")}
+                  disabled={busy || !notes.trim()}
+                  title={intl.formatMessage({ id: "encode.proposal.annotate" })}
+                >
+                  {intl.formatMessage({ id: "encode.proposal.annotate" })}
+                </Button>
+              )}
+              {isLocked ? (
+                <span
+                  className="ms-auto text-xs uppercase tracking-[0.18em] text-foreground-subtle"
+                  style={{ fontFamily: "var(--font-mono)" }}
+                  data-testid="proposal-locked-hint"
+                >
+                  {intl.formatMessage({ id: "encode.proposal.locked.hint" })}
+                </span>
+              ) : null}
             </footer>
           </>
         )}

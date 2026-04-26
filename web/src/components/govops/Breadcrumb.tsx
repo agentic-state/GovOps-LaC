@@ -31,11 +31,16 @@ export function Breadcrumb({ items }: { items: BreadcrumbItem[] }) {
   return (
     <nav
       aria-label={intl.formatMessage({ id: "breadcrumb.label" })}
-      className="mb-6"
+      // Sticky just below the masthead. The masthead is `sticky top-0` with
+      // py-4 + 24px text content, so it sits at ~64px tall; we anchor the
+      // breadcrumb at top-[3.75rem] (60px) so it tucks against the masthead's
+      // bottom border and stays visible while scrolling deep pages.
+      className="sticky top-[3.75rem] z-30 -mx-6 mb-6 border-b border-border bg-surface/85 px-6 py-2.5 backdrop-blur"
+      data-testid="breadcrumb"
     >
       <ol
         role="list"
-        className="flex flex-wrap items-center gap-1 text-sm text-foreground-muted"
+        className="mx-auto flex max-w-5xl flex-wrap items-center gap-1 text-sm text-foreground-muted"
         style={{ fontFamily: "var(--font-mono)" }}
       >
         <li className="flex items-center">

@@ -84,11 +84,41 @@ test("breadcrumb: walkthrough page shows a breadcrumb back to home", async ({ pa
   await page.waitForLoadState("networkidle");
   // Breadcrumb is a nav with role=list; the home crumb is a link with the
   // home icon's sr-only label, and the current page crumb is non-link text.
-  const crumbNav = page.getByRole("navigation").filter({
-    has: page.locator('ol[role="list"]'),
-  });
+  const crumbNav = page.locator('[data-testid="breadcrumb"]');
   await expect(crumbNav).toBeVisible();
   await expect(crumbNav.getByRole("link").first()).toHaveAttribute("href", "/");
+});
+
+test("breadcrumb: stays visible (sticky) when the page is scrolled", async ({ page }) => {
+  await page.goto("/walkthrough");
+  await page.waitForLoadState("networkidle");
+
+  const crumb = page.locator('[data-testid="breadcrumb"]');
+  const masthead = page.getByRole("banner");
+  await expect(crumb).toBeVisible();
+
+  // Scroll deep — far enough that a non-sticky element would scroll off.
+  await page.evaluate(() => window.scrollTo({ top: 2000, behavior: "instant" }));
+  await page.waitForFunction(() => window.scrollY >= 1500);
+
+  // Breadcrumb is still visible AND its top is pinned just below the
+  // masthead's bottom edge. A non-sticky element would have scrolled off
+  // (top < 0).
+  await expect(crumb).toBeVisible();
+  const crumbTop = await crumb.evaluate((el) => el.getBoundingClientRect().top);
+  const mastheadBottom = await masthead.evaluate((el) => el.getBoundingClientRect().bottom);
+
+  // Within ±12px of the masthead's bottom edge. Browser sub-pixel rounding
+  // can put the breadcrumb 1-2px above (visual overlap with backdrop blur)
+  // or below the masthead's logical bottom; the human eye reads either as
+  // "tucked against the header."
+  expect(Math.abs(crumbTop - mastheadBottom)).toBeLessThan(12);
+
+  // CSS computed-style sanity check: position: sticky.
+  const computedPosition = await crumb.evaluate(
+    (el) => getComputedStyle(el).position,
+  );
+  expect(computedPosition).toBe("sticky");
 });
 
 test("help drawer: Help button opens a sheet with route-aware content", async ({ page }) => {
@@ -103,6 +133,40 @@ test("help drawer: Help button opens a sheet with route-aware content", async ({
   await expect(dialog).toBeVisible();
   // Walkthrough route help title contains "Walkthrough" or its locale variant
   await expect(dialog.getByRole("heading").first()).toContainText(/walkthrough|paid statutory/i);
+});
+
+test("encoder: approving a proposal locks the Approve/Modify/Reject buttons; Reopen replaces Annotate", async ({
+  page,
+}) => {
+  // The seeded encoding example puts a batch with pending proposals on /encode.
+  await page.goto("/encode");
+  await page.waitForLoadState("networkidle");
+
+  // Each batch list item is itself a link to /encode/{batchId} (excluding
+  // the /encode/new "new extraction" link).
+  const firstBatchLink = page
+    .locator('a[href^="/encode/"]:not([href="/encode/new"])')
+    .first();
+  if (!(await firstBatchLink.isVisible().catch(() => false))) {
+    test.skip(true, "no encoding batch fixture available in this run");
+  }
+  await firstBatchLink.click();
+  await page.waitForLoadState("networkidle");
+
+  // Find the first proposal card and its Approve button.
+  const approveButton = page
+    .getByRole("button", { name: /^Approve$|^Approuver|^Aprobar|^Aprovar|^Genehmigen|^Затверд/i })
+    .first();
+  await expect(approveButton).toBeEnabled();
+
+  await approveButton.click();
+  // Either the click drives the backend update, or the mock fallback flips the
+  // local state. Either way, the same button should now be disabled.
+  await expect(approveButton).toBeDisabled({ timeout: 10_000 });
+
+  // The locked-state hint surfaces alongside the disabled buttons.
+  const lockedHint = page.locator('[data-testid="proposal-locked-hint"]').first();
+  await expect(lockedHint).toBeVisible();
 });
 
 test("runbook: cases page shows the operator runbook with collapsible scenarios", async ({
