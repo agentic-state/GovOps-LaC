@@ -22,6 +22,7 @@ from __future__ import annotations
 from collections.abc import Callable
 from datetime import date
 
+from govops.legacy_constants import resolve_param  # populates LEGACY_CONSTANTS
 from govops.models import (
     Applicant,
     AuthorityReference,
@@ -139,7 +140,7 @@ BRAZIL_RULES = [
         description="Idade minima: 65 anos (homens) ou 62 anos (mulheres)",
         formal_expression="age >= 65 (male) or age >= 62 (female)",
         citation="Lei n. 8.213/1991, Art. 48; EC 103/2019",
-        parameters={"min_age": 65},  # Using male threshold for demo
+        parameters={"min_age": resolve_param("br.rule.age.min_age")},  # Using male threshold for demo
     ),
     LegalRule(
         id="rule-br-contribution",
@@ -149,7 +150,10 @@ BRAZIL_RULES = [
         description="Minimo de 15 anos (180 meses) de contribuicao ao INSS",
         formal_expression="contribution_years >= 15",
         citation="Lei n. 8.213/1991, Art. 25, II",
-        parameters={"min_years": 15, "home_countries": ["BR", "BRAZIL"]},
+        parameters={
+            "min_years": resolve_param("br.rule.contribution.min_years"),
+            "home_countries": resolve_param("br.rule.contribution.home_countries"),
+        },
     ),
     LegalRule(
         id="rule-br-contribution-calc",
@@ -159,7 +163,10 @@ BRAZIL_RULES = [
         description="Beneficio integral com 40 anos de contribuicao; proporcional com 15-39 anos",
         formal_expression="pension_ratio = min(contribution_years, 40) / 40",
         citation="EC 103/2019, Art. 26",
-        parameters={"full_years": 40, "min_years": 15},
+        parameters={
+            "full_years": resolve_param("br.rule.contribution-calc.full_years"),
+            "min_years": resolve_param("br.rule.contribution-calc.min_years"),
+        },
     ),
     LegalRule(
         id="rule-br-status",
@@ -169,7 +176,7 @@ BRAZIL_RULES = [
         description="Segurado deve estar inscrito no INSS (cidadao ou residente permanente)",
         formal_expression="legal_status in ['citizen', 'permanent_resident']",
         citation="Lei n. 8.213/1991, Art. 11",
-        parameters={"accepted_statuses": ["citizen", "permanent_resident"]},
+        parameters={"accepted_statuses": resolve_param("br.rule.status.accepted_statuses")},
     ),
     LegalRule(
         id="rule-br-evidence",
@@ -179,7 +186,7 @@ BRAZIL_RULES = [
         description="Comprovante de idade (certidao de nascimento ou documento de identidade)",
         formal_expression="has_evidence('birth_certificate') or has_evidence('id_card')",
         citation="Lei n. 8.213/1991, Art. 62",
-        parameters={"required_types": ["birth_certificate"]},
+        parameters={"required_types": resolve_param("br.rule.evidence.required_types")},
     ),
 ]
 
@@ -337,7 +344,7 @@ SPAIN_RULES = [
         description="Edad minima de jubilacion: 66 anos y 4 meses (regla general 2025)",
         formal_expression="age >= 66",
         citation="LGSS, Art. 205.1.a",
-        parameters={"min_age": 66},
+        parameters={"min_age": resolve_param("es.rule.age.min_age")},
     ),
     LegalRule(
         id="rule-es-contribution-min",
@@ -347,7 +354,10 @@ SPAIN_RULES = [
         description="Periodo minimo de cotizacion: 15 anos",
         formal_expression="contribution_years >= 15",
         citation="LGSS, Art. 205.1.b",
-        parameters={"min_years": 15, "home_countries": ["ES", "SPAIN"]},
+        parameters={
+                "min_years": resolve_param("es.rule.contribution-min.min_years"),
+                "home_countries": resolve_param("es.rule.contribution-min.home_countries"),
+            },
     ),
     LegalRule(
         id="rule-es-contribution-calc",
@@ -357,7 +367,10 @@ SPAIN_RULES = [
         description="Pension completa con 36+ anos de cotizacion; proporcional con 15-35 anos",
         formal_expression="pension_ratio = min(contribution_years, 36) / 36",
         citation="LGSS, Art. 210",
-        parameters={"full_years": 36, "min_years": 15},
+        parameters={
+            "full_years": resolve_param("es.rule.contribution-calc.full_years"),
+            "min_years": resolve_param("es.rule.contribution-calc.min_years"),
+        },
     ),
     LegalRule(
         id="rule-es-status",
@@ -367,7 +380,7 @@ SPAIN_RULES = [
         description="Afiliado al Regimen General de la Seguridad Social",
         formal_expression="legal_status in ['citizen', 'permanent_resident']",
         citation="LGSS, Art. 7",
-        parameters={"accepted_statuses": ["citizen", "permanent_resident"]},
+        parameters={"accepted_statuses": resolve_param("es.rule.status.accepted_statuses")},
     ),
     LegalRule(
         id="rule-es-evidence",
@@ -377,7 +390,7 @@ SPAIN_RULES = [
         description="Documento de identidad (DNI, NIE, o pasaporte)",
         formal_expression="has_evidence('birth_certificate') or has_evidence('id_card')",
         citation="LGSS, Disposicion adicional",
-        parameters={"required_types": ["birth_certificate"]},
+        parameters={"required_types": resolve_param("es.rule.evidence.required_types")},
     ),
 ]
 
@@ -542,7 +555,7 @@ FRANCE_RULES = [
         description="Age legal de depart a la retraite : 64 ans (reforme 2023)",
         formal_expression="age >= 64",
         citation="CSS, Art. L. 351-1; Loi n. 2023-270",
-        parameters={"min_age": 64},
+        parameters={"min_age": resolve_param("fr.rule.age.min_age")},
     ),
     LegalRule(
         id="rule-fr-trimestres-min",
@@ -552,7 +565,10 @@ FRANCE_RULES = [
         description="Duree minimale d'assurance : 2 ans (8 trimestres) pour ouvrir le droit",
         formal_expression="contribution_years >= 2",
         citation="CSS, Art. L. 351-1",
-        parameters={"min_years": 2, "home_countries": ["FR", "FRANCE"]},
+        parameters={
+            "min_years": resolve_param("fr.rule.trimestres-min.min_years"),
+            "home_countries": resolve_param("fr.rule.trimestres-min.home_countries"),
+        },
     ),
     LegalRule(
         id="rule-fr-trimestres-calc",
@@ -562,7 +578,10 @@ FRANCE_RULES = [
         description="Taux plein a 43 ans de cotisation (172 trimestres); proratise en dessous",
         formal_expression="pension_ratio = min(contribution_years, 43) / 43",
         citation="CSS, Art. L. 351-1",
-        parameters={"full_years": 43, "min_years": 2},
+        parameters={
+            "full_years": resolve_param("fr.rule.trimestres-calc.full_years"),
+            "min_years": resolve_param("fr.rule.trimestres-calc.min_years"),
+        },
     ),
     LegalRule(
         id="rule-fr-status",
@@ -572,7 +591,7 @@ FRANCE_RULES = [
         description="Assure du regime general (citoyen ou resident)",
         formal_expression="legal_status in ['citizen', 'permanent_resident']",
         citation="CSS, Art. L. 311-2",
-        parameters={"accepted_statuses": ["citizen", "permanent_resident"]},
+        parameters={"accepted_statuses": resolve_param("fr.rule.status.accepted_statuses")},
     ),
     LegalRule(
         id="rule-fr-evidence",
@@ -582,7 +601,7 @@ FRANCE_RULES = [
         description="Piece d'identite (acte de naissance, carte d'identite, ou passeport)",
         formal_expression="has_evidence('birth_certificate')",
         citation="CSS, Art. R. 351-1",
-        parameters={"required_types": ["birth_certificate"]},
+        parameters={"required_types": resolve_param("fr.rule.evidence.required_types")},
     ),
 ]
 
@@ -739,7 +758,7 @@ GERMANY_RULES = [
         description="Regelaltersgrenze: 67 Jahre (Jahrgang 1964 und spater)",
         formal_expression="age >= 67",
         citation="SGB VI, Para. 35, Para. 235",
-        parameters={"min_age": 67},
+        parameters={"min_age": resolve_param("de.rule.age.min_age")},
     ),
     LegalRule(
         id="rule-de-wartezeit",
@@ -749,7 +768,10 @@ GERMANY_RULES = [
         description="Allgemeine Wartezeit: mindestens 5 Jahre Beitragszeit",
         formal_expression="contribution_years >= 5",
         citation="SGB VI, Para. 35, Para. 50",
-        parameters={"min_years": 5, "home_countries": ["DE", "GERMANY"]},
+        parameters={
+                "min_years": resolve_param("de.rule.wartezeit.min_years"),
+                "home_countries": resolve_param("de.rule.wartezeit.home_countries"),
+            },
     ),
     LegalRule(
         id="rule-de-beitragszeit",
@@ -759,7 +781,10 @@ GERMANY_RULES = [
         description="Volle Rente mit 45 Beitragsjahren; anteilig mit 5-44 Jahren",
         formal_expression="pension_ratio = min(contribution_years, 45) / 45",
         citation="SGB VI, Para. 66",
-        parameters={"full_years": 45, "min_years": 5},
+        parameters={
+            "full_years": resolve_param("de.rule.beitragszeit.full_years"),
+            "min_years": resolve_param("de.rule.beitragszeit.min_years"),
+        },
     ),
     LegalRule(
         id="rule-de-status",
@@ -769,7 +794,7 @@ GERMANY_RULES = [
         description="Versicherter der gesetzlichen Rentenversicherung",
         formal_expression="legal_status in ['citizen', 'permanent_resident']",
         citation="SGB VI, Para. 1",
-        parameters={"accepted_statuses": ["citizen", "permanent_resident"]},
+        parameters={"accepted_statuses": resolve_param("de.rule.status.accepted_statuses")},
     ),
     LegalRule(
         id="rule-de-evidence",
@@ -779,7 +804,7 @@ GERMANY_RULES = [
         description="Personalausweis oder Reisepass, Geburtsurkunde",
         formal_expression="has_evidence('birth_certificate') or has_evidence('id_card')",
         citation="SGB VI, Para. 151",
-        parameters={"required_types": ["birth_certificate"]},
+        parameters={"required_types": resolve_param("de.rule.evidence.required_types")},
     ),
 ]
 
@@ -937,7 +962,7 @@ UKRAINE_RULES = [
         description="Pensiinyi vik: 60 rokiv",
         formal_expression="age >= 60",
         citation="Zakon No. 1058-IV, st. 26",
-        parameters={"min_age": 60},
+        parameters={"min_age": resolve_param("ua.rule.age.min_age")},
     ),
     LegalRule(
         id="rule-ua-stazh-min",
@@ -947,7 +972,10 @@ UKRAINE_RULES = [
         description="Minimalnyi strakhovyi stazh: 25 rokiv (choloviky)",
         formal_expression="contribution_years >= 25",
         citation="Zakon No. 1058-IV, st. 26",
-        parameters={"min_years": 25, "home_countries": ["UA", "UKRAINE"]},
+        parameters={
+            "min_years": resolve_param("ua.rule.stazh-min.min_years"),
+            "home_countries": resolve_param("ua.rule.stazh-min.home_countries"),
+        },
     ),
     LegalRule(
         id="rule-ua-stazh-calc",
@@ -957,7 +985,10 @@ UKRAINE_RULES = [
         description="Povna pensiia z 35+ rokamy stazhu; proportsionalna z 25-34 rokamy",
         formal_expression="pension_ratio = min(contribution_years, 35) / 35",
         citation="Zakon No. 1058-IV, st. 28",
-        parameters={"full_years": 35, "min_years": 25},
+        parameters={
+            "full_years": resolve_param("ua.rule.stazh-calc.full_years"),
+            "min_years": resolve_param("ua.rule.stazh-calc.min_years"),
+        },
     ),
     LegalRule(
         id="rule-ua-status",
@@ -967,7 +998,7 @@ UKRAINE_RULES = [
         description="Hromadianyn Ukrainy abo osoba z postiinymy pravom na prozhyvannia",
         formal_expression="legal_status in ['citizen', 'permanent_resident']",
         citation="Zakon No. 1058-IV, st. 4",
-        parameters={"accepted_statuses": ["citizen", "permanent_resident"]},
+        parameters={"accepted_statuses": resolve_param("ua.rule.status.accepted_statuses")},
     ),
     LegalRule(
         id="rule-ua-evidence",
@@ -977,7 +1008,7 @@ UKRAINE_RULES = [
         description="Pasport hromadianyna Ukrainy abo svidotstvo pro narodzhennia",
         formal_expression="has_evidence('birth_certificate') or has_evidence('passport')",
         citation="Zakon No. 1058-IV, st. 45",
-        parameters={"required_types": ["birth_certificate"]},
+        parameters={"required_types": resolve_param("ua.rule.evidence.required_types")},
     ),
 ]
 

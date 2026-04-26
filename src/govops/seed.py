@@ -173,6 +173,8 @@ LEGAL_DOCUMENTS = [OAS_ACT, OAS_REGS]
 # Formalized rules
 # ---------------------------------------------------------------------------
 
+from govops.legacy_constants import resolve_param  # populates LEGACY_CONSTANTS
+
 OAS_RULES: list[LegalRule] = [
     LegalRule(
         id="rule-age-65",
@@ -182,7 +184,9 @@ OAS_RULES: list[LegalRule] = [
         description="Applicant must be 65 years of age or older",
         formal_expression="applicant.age >= 65",
         citation="Old Age Security Act, R.S.C. 1985, c. O-9, s. 3(1)",
-        parameters={"min_age": 65},
+        parameters={
+            "min_age": resolve_param("ca.rule.age-65.min_age"),
+        },
     ),
     LegalRule(
         id="rule-residency-10",
@@ -192,7 +196,10 @@ OAS_RULES: list[LegalRule] = [
         description="Minimum 10 years of Canadian residency after age 18",
         formal_expression="canadian_residency_years_after_18 >= 10",
         citation="Old Age Security Act, R.S.C. 1985, c. O-9, s. 3(1)",
-        parameters={"min_years": 10, "home_countries": ["CA", "CANADA", "CAN"]},
+        parameters={
+            "min_years": resolve_param("ca.rule.residency-10.min_years"),
+            "home_countries": resolve_param("ca.rule.residency-10.home_countries"),
+        },
     ),
     LegalRule(
         id="rule-residency-pension-type",
@@ -202,7 +209,10 @@ OAS_RULES: list[LegalRule] = [
         description="Full pension at 40+ years; partial pension at 10-39 years (1/40 per year)",
         formal_expression="pension_ratio = min(residency_years, 40) / 40",
         citation="Old Age Security Act, R.S.C. 1985, c. O-9, s. 3(2)",
-        parameters={"full_years": 40, "min_years": 10},
+        parameters={
+            "full_years": resolve_param("ca.rule.residency-pension-type.full_years"),
+            "min_years": resolve_param("ca.rule.residency-pension-type.min_years"),
+        },
     ),
     LegalRule(
         id="rule-legal-status",
@@ -212,7 +222,9 @@ OAS_RULES: list[LegalRule] = [
         description="Applicant must be a Canadian citizen or permanent resident",
         formal_expression="applicant.legal_status in ['citizen', 'permanent_resident']",
         citation="Old Age Security Act, R.S.C. 1985, c. O-9, s. 3(1)",
-        parameters={"accepted_statuses": ["citizen", "permanent_resident"]},
+        parameters={
+            "accepted_statuses": resolve_param("ca.rule.legal-status.accepted_statuses"),
+        },
     ),
     LegalRule(
         id="rule-evidence-age",
@@ -222,7 +234,9 @@ OAS_RULES: list[LegalRule] = [
         description="Evidence of age must be provided (birth certificate or equivalent)",
         formal_expression="has_evidence('birth_certificate') or has_evidence('passport')",
         citation="Old Age Security Regulations, C.R.C. c. 1246, s. 21(1)",
-        parameters={"required_types": ["birth_certificate"]},
+        parameters={
+            "required_types": resolve_param("ca.rule.evidence-age.required_types"),
+        },
     ),
 ]
 
