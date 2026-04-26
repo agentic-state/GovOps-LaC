@@ -252,7 +252,7 @@ Tests must stay green at every phase exit. CI matrix stays at Python 3.10/3.11/3
 ## 7. Non-goals (preserved from v2.0 vision)
 
 - No new jurisdictions during Phases 1–3 (doubles migration cost). Defer until Phase 3 exit.
-- No persistence layer. In-memory through all 10 phases. Database migration is a separate track.
+- No **production** persistence layer (managed PostgreSQL with HA, backup, ops on-call). The post-Phase-10 "storage track" refers to that. **Embedded SQLite** beside the code is used from Phase 6 onward per [ADR-010](docs/design/ADRs/ADR-010-sqlite-from-phase-6.md) — it is a local file, not infrastructure, and preserves the "clone, install, run" demo principle.
 - No authentication or RBAC during structural work.
 - No new rule types beyond `RuleType.CALCULATION` (added in Phase 10B).
 - No new languages beyond the current 6.

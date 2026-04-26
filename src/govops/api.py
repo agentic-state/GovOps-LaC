@@ -6,8 +6,10 @@ Supports multiple jurisdictions and languages.
 
 from __future__ import annotations
 
+import os
 from contextlib import asynccontextmanager
 from pathlib import Path
+from typing import Any
 
 from fastapi import FastAPI, HTTPException, Request
 from starlette.datastructures import FormData, UploadFile as StarletteUploadFile
@@ -18,7 +20,12 @@ from pydantic import BaseModel
 
 from datetime import datetime, timezone
 
-from govops.config import ConfigStore
+from govops.config import (
+    ApprovalStatus,
+    ConfigStore,
+    ConfigValue,
+    ValueType,
+)
 from govops.encoding_example import seed_encoding_example
 from govops.encoder import (
     EncodingStore,
@@ -45,7 +52,12 @@ STATIC_DIR = Path(__file__).parent / "static"
 
 store = DemoStore()
 encoding_store = EncodingStore()
-config_store = ConfigStore()
+# Per ADR-010: persistent SQLite when GOVOPS_DB_PATH is set, in-memory otherwise.
+# Tests don't set the env var → fresh in-memory DB per process. The govops-demo
+# CLI sets it to var/govops.db so runtime edits survive restarts.
+config_store = ConfigStore(db_path=os.environ.get("GOVOPS_DB_PATH"))
+
+LAWCODE_DIR = Path(__file__).resolve().parent.parent.parent / "lawcode"
 
 DEFAULT_JURISDICTION = "ca"
 
@@ -68,6 +80,11 @@ def _seed_jurisdiction(jur_code: str):
 async def lifespan(app: FastAPI):
     _seed_jurisdiction(DEFAULT_JURISDICTION)
     seed_encoding_example(encoding_store)
+    # Hydrate the substrate from lawcode/ if it's empty (per ADR-010).
+    # Skip when pre-populated (test fixtures rely on this); idempotent on
+    # natural key, so a partially-seeded store is also tolerated.
+    if len(config_store) == 0 and LAWCODE_DIR.exists():
+        config_store.load_from_yaml(LAWCODE_DIR)
     yield
 
 
@@ -317,6 +334,153 @@ def list_config_versions(
         language=language,
     )
     return {"key": key, "versions": versions, "count": len(versions)}
+
+
+# ---------------------------------------------------------------------------
+# ConfigValue write endpoints (Phase 6 — admin UI backend)
+# ---------------------------------------------------------------------------
+
+
+class CreateConfigValueRequest(BaseModel):
+    domain: str
+    key: str
+    jurisdiction_id: str | None = None
+    value: Any
+    value_type: ValueType
+    effective_from: str  # ISO-8601 with tz
+    effective_to: str | None = None
+    citation: str | None = None
+    author: str
+    rationale: str = ""
+    supersedes: str | None = None
+    language: str | None = None
+
+
+class ApproveRequest(BaseModel):
+    approved_by: str
+    comment: str = ""
+
+
+class ReviewRequest(BaseModel):
+    reviewer: str
+    comment: str = ""
+
+
+def _parse_iso(value: str | None, field: str) -> datetime | None:
+    if value is None:
+        return None
+    try:
+        dt = datetime.fromisoformat(value)
+    except ValueError as exc:
+        raise HTTPException(400, f"Invalid {field}: {exc}. Expected ISO-8601 with timezone.") from exc
+    if dt.tzinfo is None:
+        raise HTTPException(400, f"{field} must include a timezone (e.g. ...+00:00).")
+    return dt
+
+
+@app.post("/api/config/values", status_code=201)
+def create_config_value(body: CreateConfigValueRequest):
+    """Create a new ConfigValue draft. Status starts at DRAFT; an /approve
+    call is required before the record participates in resolution."""
+    eff_from = _parse_iso(body.effective_from, "effective_from")
+    eff_to = _parse_iso(body.effective_to, "effective_to")
+    if eff_from is None:
+        raise HTTPException(400, "effective_from is required")
+    cv = ConfigValue(
+        domain=body.domain,
+        key=body.key,
+        jurisdiction_id=body.jurisdiction_id,
+        value=body.value,
+        value_type=body.value_type,
+        effective_from=eff_from,
+        effective_to=eff_to,
+        citation=body.citation,
+        author=body.author,
+        approved_by=None,
+        rationale=body.rationale,
+        supersedes=body.supersedes,
+        status=ApprovalStatus.DRAFT,
+        language=body.language,
+    )
+    config_store.put(cv)
+    config_store.record_audit(
+        config_value_id=cv.id,
+        event="draft_created",
+        actor=body.author,
+        comment=body.rationale,
+    )
+    return cv
+
+
+@app.post("/api/config/values/{value_id}/approve")
+def approve_config_value(value_id: str, body: ApproveRequest):
+    """Approve a draft/pending ConfigValue. Sets status=APPROVED and
+    approved_by; the record now participates in resolution."""
+    cv = config_store.get(value_id)
+    if cv is None:
+        raise HTTPException(404, f"ConfigValue {value_id} not found")
+    if cv.status == ApprovalStatus.APPROVED:
+        raise HTTPException(409, f"ConfigValue {value_id} is already approved")
+    if cv.status == ApprovalStatus.REJECTED:
+        raise HTTPException(409, f"ConfigValue {value_id} was rejected; cannot approve")
+    if body.approved_by == cv.author:
+        # ADR-008 dual-approval: prompts require approver != author. Apply the
+        # constraint to all domains as a defensive default; the admin UI can
+        # surface a specific message.
+        if cv.value_type == ValueType.PROMPT:
+            raise HTTPException(
+                403,
+                "Per ADR-008, prompt approvals require approved_by != author (dual approval).",
+            )
+    cv.status = ApprovalStatus.APPROVED
+    cv.approved_by = body.approved_by
+    config_store.put(cv)
+    config_store.record_audit(
+        config_value_id=value_id,
+        event="approved",
+        actor=body.approved_by,
+        comment=body.comment,
+    )
+    return cv
+
+
+@app.post("/api/config/values/{value_id}/request-changes")
+def request_changes_config_value(value_id: str, body: ReviewRequest):
+    """Send a pending value back to draft for further author edits."""
+    cv = config_store.get(value_id)
+    if cv is None:
+        raise HTTPException(404, f"ConfigValue {value_id} not found")
+    if cv.status == ApprovalStatus.APPROVED:
+        raise HTTPException(409, f"ConfigValue {value_id} already approved")
+    cv.status = ApprovalStatus.DRAFT
+    config_store.put(cv)
+    config_store.record_audit(
+        config_value_id=value_id,
+        event="request_changes",
+        actor=body.reviewer,
+        comment=body.comment,
+    )
+    return cv
+
+
+@app.post("/api/config/values/{value_id}/reject")
+def reject_config_value(value_id: str, body: ReviewRequest):
+    """Reject a draft/pending ConfigValue. Terminal state — record is kept
+    for audit but never participates in resolution."""
+    cv = config_store.get(value_id)
+    if cv is None:
+        raise HTTPException(404, f"ConfigValue {value_id} not found")
+    if cv.status == ApprovalStatus.APPROVED:
+        raise HTTPException(409, f"ConfigValue {value_id} already approved; cannot reject")
+    cv.status = ApprovalStatus.REJECTED
+    config_store.put(cv)
+    config_store.record_audit(
+        config_value_id=value_id,
+        event="rejected",
+        actor=body.reviewer,
+        comment=body.comment,
+    )
+    return cv
 
 
 # ---------------------------------------------------------------------------

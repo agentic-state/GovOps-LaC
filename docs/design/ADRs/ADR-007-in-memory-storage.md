@@ -1,8 +1,8 @@
 # ADR-007 — In-memory storage through Phase 10
 
-**Status**: Accepted
+**Status**: Accepted (storage clause superseded by [ADR-010](ADR-010-sqlite-from-phase-6.md) at start of Phase 6 — embedded SQLite from Phase 6 onward; the rest of this ADR's framing remains in force: no managed-DB ops surface, no production hardening, no auth)
 **Date**: 2026-04-25
-**Gate**: 3 (locked at start of Phase 1)
+**Gate**: 3 (locked at start of Phase 1; revised at start of Phase 6 by ADR-010)
 **Context**: [PLAN.md](../../../PLAN.md) §3 requires choosing the storage model for Phases 1–10. The choice is between **in-memory only** (consistent with v1.0; reseed-on-startup like the existing `DemoStore`) and a **persistence track** (SQLite/Postgres alongside the substrate work).
 
 ---
