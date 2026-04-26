@@ -9,13 +9,19 @@ Key schema (per ADR-006): <jurisdiction>-<program>.<domain>.<scope>.<param>
   global.prompt.encoder.extraction_system
 
 Storage is in-memory (per ADR-007). State is reseeded on startup.
+
+Phase 2 backcompat (per ADR-004): `resolve_value()` is a two-tier resolver —
+substrate first, then `LEGACY_CONSTANTS`. `EVA_CONFIG_STRICT=1` raises
+`ConfigKeyNotMigrated` whenever the legacy tier matches, which CI flips on at
+Phase 2 exit so unmigrated keys can't slip through.
 """
 
 from __future__ import annotations
 
+import os
 from datetime import datetime, timezone
 from enum import Enum
-from typing import Any, Optional
+from typing import Any, NamedTuple, Optional
 
 from pydantic import BaseModel, Field
 from ulid import ULID
@@ -47,6 +53,47 @@ class ApprovalStatus(str, Enum):
     PENDING = "pending"
     APPROVED = "approved"
     REJECTED = "rejected"
+
+
+class ResolutionSource(str, Enum):
+    """Which tier of `ConfigStore.resolve_value()` produced the answer.
+
+    Per ADR-004, the audit trail records which records came from the substrate
+    and which fell through to the legacy registry, so cutover progress is
+    inspectable.
+    """
+
+    SUBSTRATE = "substrate"
+    LEGACY = "legacy"
+    FEDERATED = "federated"
+
+
+class ConfigKeyNotMigrated(KeyError):
+    """Raised in strict mode when a key is missing from the substrate.
+
+    Strict mode is enabled by `EVA_CONFIG_STRICT=1`. CI flips it on at Phase 2
+    exit so unmigrated keys can no longer pass tests via legacy fallback.
+    """
+
+
+# Sentinel distinguishing "no default supplied" from "default = None".
+_MISSING: Any = object()
+
+
+# Populated at startup by modules that own legacy values (e.g. seed.py during
+# Phase 2). Keys mirror the ADR-006 schema. Drained slice-by-slice as each
+# domain migrates; deleted entirely at Phase 2 exit.
+LEGACY_CONSTANTS: dict[str, Any] = {}
+
+
+def register_legacy(key: str, value: Any) -> None:
+    """Register a legacy default. Idempotent within a process."""
+    LEGACY_CONSTANTS[key] = value
+
+
+def is_strict_mode() -> bool:
+    """True when EVA_CONFIG_STRICT=1 is set."""
+    return os.environ.get("EVA_CONFIG_STRICT") == "1"
 
 
 class ConfigValue(BaseModel):
@@ -83,8 +130,21 @@ class ConfigResolution(BaseModel):
     key: str
     jurisdiction_id: Optional[str] = None
     evaluation_date: datetime
-    resolved_value_id: Optional[str] = None  # None if no record found
+    resolved_value_id: Optional[str] = None  # None if no substrate record
+    source: Optional[ResolutionSource] = None  # which tier matched
     resolved_at: datetime = Field(default_factory=_utcnow)
+
+
+class ResolutionResult(NamedTuple):
+    """Lightweight return type for ``ConfigStore.resolve_value()``.
+
+    `value` is the resolved Python value (not a `ConfigValue` wrapper).
+    `source` indicates which tier produced it; `None` means neither substrate
+    nor legacy matched and the caller's explicit default was returned.
+    """
+
+    value: Any
+    source: Optional[ResolutionSource]
 
 
 # ---------------------------------------------------------------------------
@@ -227,6 +287,39 @@ class ConfigStore:
             if global_candidates:
                 return max(global_candidates, key=lambda r: r.effective_from)
         return None
+
+    def resolve_value(
+        self,
+        key: str,
+        evaluation_date: Optional[datetime] = None,
+        jurisdiction_id: Optional[str] = None,
+        language: Optional[str] = None,
+        default: Any = _MISSING,
+    ) -> ResolutionResult:
+        """Two-tier resolver per ADR-004 (Phase 2 backcompat).
+
+        1. Substrate: query the in-memory ConfigValue store via ``resolve()``.
+        2. Legacy: fall back to ``LEGACY_CONSTANTS[key]`` if present.
+        3. Caller default: return ``default`` if supplied.
+        4. Otherwise: ``None`` (lenient mode) or raise ``ConfigKeyNotMigrated``
+           (when ``EVA_CONFIG_STRICT=1``).
+
+        Strict mode raises whenever the legacy tier matches OR no tier matches,
+        making "I forgot to migrate this key" loud at Phase 2 exit.
+        """
+        eval_dt = evaluation_date or _utcnow()
+        cv = self.resolve(key, eval_dt, jurisdiction_id, language)
+        if cv is not None:
+            return ResolutionResult(value=cv.value, source=ResolutionSource.SUBSTRATE)
+        if key in LEGACY_CONSTANTS:
+            if is_strict_mode():
+                raise ConfigKeyNotMigrated(key)
+            return ResolutionResult(value=LEGACY_CONSTANTS[key], source=ResolutionSource.LEGACY)
+        if default is not _MISSING:
+            return ResolutionResult(value=default, source=None)
+        if is_strict_mode():
+            raise ConfigKeyNotMigrated(key)
+        return ResolutionResult(value=None, source=None)
 
     def _candidates_for(
         self,
