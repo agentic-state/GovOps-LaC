@@ -16,6 +16,9 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
 
+from datetime import datetime, timezone
+
+from govops.config import ConfigStore
 from govops.encoding_example import seed_encoding_example
 from govops.encoder import (
     EncodingStore,
@@ -42,6 +45,7 @@ STATIC_DIR = Path(__file__).parent / "static"
 
 store = DemoStore()
 encoding_store = EncodingStore()
+config_store = ConfigStore()
 
 DEFAULT_JURISDICTION = "ca"
 
@@ -228,6 +232,91 @@ def get_audit(case_id: str):
     if not pkg:
         raise HTTPException(404, f"Case {case_id} not found")
     return pkg
+
+
+# ---------------------------------------------------------------------------
+# ConfigValue API (Law-as-Code v2.0 Phase 1)
+# Read-only endpoints; write/approve land in Phase 6.
+# ---------------------------------------------------------------------------
+
+@app.get("/api/config/values")
+def list_config_values(
+    domain: str | None = None,
+    key_prefix: str | None = None,
+    jurisdiction_id: str | None = None,
+    language: str | None = None,
+):
+    """List ConfigValue records, optionally filtered."""
+    rows = config_store.list(
+        domain=domain,
+        key_prefix=key_prefix,
+        jurisdiction_id=jurisdiction_id,
+        language=language,
+    )
+    return {"values": rows, "count": len(rows)}
+
+
+@app.get("/api/config/values/{value_id}")
+def get_config_value(value_id: str):
+    """Fetch a single ConfigValue by id."""
+    cv = config_store.get(value_id)
+    if cv is None:
+        raise HTTPException(404, f"ConfigValue {value_id} not found")
+    return cv
+
+
+@app.get("/api/config/resolve")
+def resolve_config_value(
+    key: str,
+    evaluation_date: str | None = None,
+    jurisdiction_id: str | None = None,
+    language: str | None = None,
+):
+    """Resolve the ConfigValue in effect for `key` at `evaluation_date`.
+
+    `evaluation_date` must be ISO-8601 with timezone (e.g. `2027-01-01T00:00:00+00:00`);
+    defaults to now (UTC) if omitted.
+
+    Returns the matching `ConfigValue` directly, or JSON `null` if no record is in
+    effect. Clients distinguish "no current value" from a fetch error by checking
+    for `null` rather than relying on a 404 status.
+    """
+    if evaluation_date is None:
+        when = datetime.now(timezone.utc)
+    else:
+        try:
+            when = datetime.fromisoformat(evaluation_date)
+        except ValueError as exc:
+            raise HTTPException(
+                400,
+                f"Invalid evaluation_date: {exc}. Expected ISO-8601 with timezone.",
+            ) from exc
+        if when.tzinfo is None:
+            raise HTTPException(
+                400,
+                "evaluation_date must include a timezone (e.g. ...+00:00).",
+            )
+    return config_store.resolve(
+        key=key,
+        evaluation_date=when,
+        jurisdiction_id=jurisdiction_id,
+        language=language,
+    )
+
+
+@app.get("/api/config/versions")
+def list_config_versions(
+    key: str,
+    jurisdiction_id: str | None = None,
+    language: str | None = None,
+):
+    """Return the full version history for a key, oldest-first."""
+    versions = config_store.list_versions(
+        key=key,
+        jurisdiction_id=jurisdiction_id,
+        language=language,
+    )
+    return {"key": key, "versions": versions, "count": len(versions)}
 
 
 # ---------------------------------------------------------------------------

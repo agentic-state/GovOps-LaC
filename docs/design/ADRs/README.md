@@ -23,8 +23,8 @@ Each ADR follows this structure:
 | 003 | [YAML over JSON for Law-as-Code artefacts](ADR-003-yaml-over-json.md) | Accepted | v2.0 / Gate 1 |
 | 004 | [Backwards-compat strategy during ConfigValue migration](ADR-004-backcompat-during-migration.md) | Accepted | v2.0 / Gate 6 |
 | 005 | [Lovable code repo location](ADR-005-lovable-repo-location.md) | Accepted | v2.0 / Gate 5 |
-| 006 | Per-parameter ConfigValue granularity | Pending Phase 1 | v2.0 / Gate 2 |
-| 007 | In-memory storage through Phase 10 | Pending Phase 1 | v2.0 / Gate 3 |
+| 006 | [Per-parameter ConfigValue granularity](ADR-006-per-parameter-granularity.md) | Accepted | v2.0 / Gate 2 |
+| 007 | [In-memory storage through Phase 10](ADR-007-in-memory-storage.md) | Accepted | v2.0 / Gate 3 |
 | 008 | Prompt-as-config dual approval | Pending Phase 4 | v2.0 / Gate 4 |
 | 009 | Federation trust model | Pending Phase 7 | v2.0 / Gate 7 |
 
