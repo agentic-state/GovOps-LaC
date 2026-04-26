@@ -1,0 +1,370 @@
+{
+  "$schema": "https://design-tokens.org/schema.json",
+  "name": "GovOps Design System",
+  "version": "1.0.0",
+  "concept": "Statute meets System — law-as-code made legible. Two registers (legal + machine) coexist with provenance always visible (lavender = agent, gold = human authority).",
+  "audience": "Multilingual, agentic civic software. RTL-first capable. WCAG 2.2 AA minimum.",
+
+  "color": {
+    "_format": "oklch",
+    "_note": "All colors in OKLCH for perceptual uniformity. Hex provided as fallback for non-CSS contexts.",
+
+    "primitive": {
+      "ink": {
+        "50":  { "oklch": "oklch(0.985 0.005 265)", "hex": "#FBFBFC" },
+        "100": { "oklch": "oklch(0.96 0.008 265)",  "hex": "#F2F2F4" },
+        "200": { "oklch": "oklch(0.90 0.012 265)",  "hex": "#DFDFE3" },
+        "300": { "oklch": "oklch(0.78 0.015 265)",  "hex": "#BDBEC5" },
+        "400": { "oklch": "oklch(0.62 0.020 265)",  "hex": "#909199" },
+        "500": { "oklch": "oklch(0.48 0.025 265)",  "hex": "#6A6B75" },
+        "600": { "oklch": "oklch(0.36 0.028 265)",  "hex": "#4D4E58" },
+        "700": { "oklch": "oklch(0.27 0.030 265)",  "hex": "#373842" },
+        "800": { "oklch": "oklch(0.22 0.030 265)",  "hex": "#2A2B34" },
+        "900": { "oklch": "oklch(0.18 0.030 265)",  "hex": "#22232B" },
+        "950": { "oklch": "oklch(0.13 0.025 265)",  "hex": "#181820" }
+      },
+      "parchment": {
+        "_note": "Warm off-white series. Use as base in light mode and as inverse surface in dark mode.",
+        "50":  { "oklch": "oklch(0.992 0.005 90)", "hex": "#FCFBF7" },
+        "100": { "oklch": "oklch(0.985 0.008 90)", "hex": "#F9F7F0" },
+        "200": { "oklch": "oklch(0.965 0.012 88)", "hex": "#F2EFE3" },
+        "300": { "oklch": "oklch(0.93 0.018 85)",  "hex": "#E5E0CD" }
+      },
+      "lavender": {
+        "_role": "AGENTIC. Marks anything proposed, drafted, suggested, or executed by an agent.",
+        "100": { "oklch": "oklch(0.96 0.025 290)", "hex": "#EFECF7" },
+        "200": { "oklch": "oklch(0.90 0.055 290)", "hex": "#DCD3F0" },
+        "400": { "oklch": "oklch(0.78 0.110 290)", "hex": "#B59FE6" },
+        "500": { "oklch": "oklch(0.72 0.130 290)", "hex": "#9E83DD" },
+        "600": { "oklch": "oklch(0.62 0.140 290)", "hex": "#8366C6" },
+        "700": { "oklch": "oklch(0.50 0.130 290)", "hex": "#664CA0" }
+      },
+      "civic-gold": {
+        "_role": "HUMAN AUTHORITY. Marks human enactment, ratification, signature, override.",
+        "100": { "oklch": "oklch(0.96 0.030 80)", "hex": "#F6EFD9" },
+        "200": { "oklch": "oklch(0.90 0.070 80)", "hex": "#EBDAA0" },
+        "400": { "oklch": "oklch(0.82 0.130 78)", "hex": "#D9B85B" },
+        "500": { "oklch": "oklch(0.75 0.140 75)", "hex": "#C29A38" },
+        "600": { "oklch": "oklch(0.62 0.130 72)", "hex": "#9E7B25" },
+        "700": { "oklch": "oklch(0.48 0.110 70)", "hex": "#785C18" }
+      },
+      "verdict": {
+        "_note": "Status colors. Muted, civic — not SaaS-bright.",
+        "enacted":  { "oklch": "oklch(0.62 0.115 155)", "hex": "#3F8B5E" },
+        "pending":  { "oklch": "oklch(0.72 0.130 75)",  "hex": "#B89436" },
+        "rejected": { "oklch": "oklch(0.55 0.180 28)",  "hex": "#B23A2A" },
+        "draft":    { "oklch": "oklch(0.62 0.020 265)", "hex": "#909199" }
+      }
+    },
+
+    "semantic": {
+      "_note": "Token name → primitive reference. The app should consume ONLY semantic tokens, never primitives directly.",
+      "light": {
+        "background":          "parchment.50",
+        "surface":             "parchment.100",
+        "surface-raised":      "ink.50",
+        "surface-sunken":      "parchment.200",
+        "foreground":          "ink.900",
+        "foreground-muted":    "ink.500",
+        "foreground-subtle":   "ink.400",
+        "border":              "ink.200",
+        "border-strong":       "ink.300",
+        "primary":             "ink.900",
+        "primary-foreground":  "parchment.50",
+        "agentic":             "lavender.500",
+        "agentic-soft":        "lavender.100",
+        "agentic-foreground":  "lavender.700",
+        "authority":           "civic-gold.500",
+        "authority-soft":      "civic-gold.100",
+        "authority-foreground":"civic-gold.700",
+        "ring":                "lavender.400"
+      },
+      "dark": {
+        "background":          "ink.950",
+        "surface":             "ink.900",
+        "surface-raised":      "ink.800",
+        "surface-sunken":      "ink.950",
+        "foreground":          "parchment.100",
+        "foreground-muted":    "ink.300",
+        "foreground-subtle":   "ink.400",
+        "border":              "ink.700",
+        "border-strong":       "ink.600",
+        "primary":             "parchment.100",
+        "primary-foreground":  "ink.950",
+        "agentic":             "lavender.400",
+        "agentic-soft":        "ink.800",
+        "agentic-foreground":  "lavender.200",
+        "authority":           "civic-gold.400",
+        "authority-soft":      "ink.800",
+        "authority-foreground":"civic-gold.200",
+        "ring":                "lavender.400"
+      }
+    },
+
+    "provenance": {
+      "_note": "ALWAYS visible. Every artifact in the system carries a provenance ribbon.",
+      "agent":     { "token": "agentic",   "label-i18n-key": "provenance.agent",   "icon": "sparkles" },
+      "human":     { "token": "authority", "label-i18n-key": "provenance.human",   "icon": "stamp" },
+      "hybrid":    { "ribbon": "split-50-50", "tokens": ["agentic", "authority"],  "icon": "handshake" },
+      "system":    { "token": "foreground-muted", "label-i18n-key": "provenance.system", "icon": "cpu" },
+      "citizen":   { "token": "verdict.enacted",  "label-i18n-key": "provenance.citizen", "icon": "users" }
+    }
+  },
+
+  "typography": {
+    "_strategy": "Three-register stack: Serif (legal), Sans (UI), Mono (rules/code). Each register has multilingual + RTL coverage.",
+    "families": {
+      "serif": {
+        "primary": "Newsreader",
+        "fallback": ["Spectral", "Source Serif 4", "Georgia", "serif"],
+        "use": "Statute text, preamble, long-form policy reading, hero headlines",
+        "i18n": {
+          "ar": "Amiri",
+          "he": "Frank Ruhl Libre",
+          "zh-Hans": "Noto Serif SC",
+          "zh-Hant": "Noto Serif TC",
+          "ja": "Noto Serif JP",
+          "ko": "Noto Serif KR",
+          "hi": "Tiramisu / Noto Serif Devanagari",
+          "th": "Noto Serif Thai"
+        }
+      },
+      "sans": {
+        "primary": "Inter Variable",
+        "fallback": ["IBM Plex Sans", "system-ui", "sans-serif"],
+        "use": "All UI: buttons, labels, navigation, tables, forms",
+        "i18n_universal": "Noto Sans (covers 1000+ languages incl. RTL/CJK/Indic)",
+        "rationale": "Inter has wide Latin/Cyrillic/Greek coverage; fall back to Noto Sans subsets for everything else. Load per-locale via @font-face unicode-range."
+      },
+      "mono": {
+        "primary": "JetBrains Mono Variable",
+        "fallback": ["IBM Plex Mono", "ui-monospace", "monospace"],
+        "use": "Rule code, agent traces, IDs, citations (§ §123(4)(a)), diff views, tokens"
+      }
+    },
+    "scale": {
+      "_unit": "rem",
+      "_basis": "16px root, modular scale 1.250 (major third)",
+      "display-2xl": { "size": "4.768", "line-height": "1.05", "tracking": "-0.02em", "weight": 600, "family": "serif" },
+      "display-xl":  { "size": "3.815", "line-height": "1.08", "tracking": "-0.02em", "weight": 600, "family": "serif" },
+      "display-lg":  { "size": "3.052", "line-height": "1.10", "tracking": "-0.015em","weight": 600, "family": "serif" },
+      "h1":          { "size": "2.441", "line-height": "1.15", "tracking": "-0.01em", "weight": 600, "family": "serif" },
+      "h2":          { "size": "1.953", "line-height": "1.20", "tracking": "-0.01em", "weight": 600, "family": "serif" },
+      "h3":          { "size": "1.563", "line-height": "1.25", "tracking": "-0.005em","weight": 600, "family": "sans"  },
+      "h4":          { "size": "1.250", "line-height": "1.30", "tracking": "0",       "weight": 600, "family": "sans"  },
+      "body-lg":     { "size": "1.125", "line-height": "1.65", "tracking": "0",       "weight": 400, "family": "sans"  },
+      "body":        { "size": "1.000", "line-height": "1.60", "tracking": "0",       "weight": 400, "family": "sans"  },
+      "body-sm":     { "size": "0.875", "line-height": "1.55", "tracking": "0.005em", "weight": 400, "family": "sans"  },
+      "caption":     { "size": "0.750", "line-height": "1.45", "tracking": "0.02em",  "weight": 500, "family": "sans"  },
+      "overline":    { "size": "0.6875","line-height": "1.40", "tracking": "0.12em",  "weight": 600, "family": "sans", "transform": "uppercase" },
+      "code":        { "size": "0.875", "line-height": "1.55", "tracking": "0",       "weight": 450, "family": "mono"  },
+      "statute":     { "size": "1.0625","line-height": "1.75", "tracking": "0",       "weight": 400, "family": "serif", "_note": "Optimized for long-form law reading." }
+    },
+    "rules": [
+      "Serif headlines + sans body (never the inverse).",
+      "Statute body text uses the 'statute' size — generous leading, serif, max 65ch line length.",
+      "Rule code and citations always mono, never italicized.",
+      "RTL: keep numerals in Latin OR use locale-appropriate (Arabic-Indic) — decide per locale, document choice.",
+      "Never combine more than 2 weights of any one family on a single screen."
+    ]
+  },
+
+  "space": {
+    "_unit": "rem",
+    "_basis": "4px base grid (0.25rem)",
+    "0":  "0",
+    "1":  "0.25",
+    "2":  "0.5",
+    "3":  "0.75",
+    "4":  "1",
+    "5":  "1.25",
+    "6":  "1.5",
+    "8":  "2",
+    "10": "2.5",
+    "12": "3",
+    "16": "4",
+    "20": "5",
+    "24": "6",
+    "32": "8",
+    "40": "10",
+    "48": "12",
+    "64": "16",
+    "_rtl_note": "Always use logical properties: padding-inline-start NOT padding-left; margin-inline-end NOT margin-right; inset-inline; border-inline-start. Tailwind: ps-*, pe-*, ms-*, me-*, start-*, end-*."
+  },
+
+  "radius": {
+    "_unit": "rem",
+    "none": "0",
+    "sm":   "0.25",
+    "md":   "0.375",
+    "lg":   "0.5",
+    "xl":   "0.75",
+    "2xl":  "1",
+    "pill": "9999px",
+    "_note": "Use sm/md for civic feel. Avoid 2xl+ except for avatars and pills — over-rounded reads as consumer SaaS, not institution."
+  },
+
+  "shadow": {
+    "_strategy": "Subtle. Civic, not floaty. Most surfaces use border, not shadow.",
+    "none":  "none",
+    "xs":    "0 1px 2px 0 oklch(0.18 0.03 265 / 0.04)",
+    "sm":    "0 1px 3px 0 oklch(0.18 0.03 265 / 0.06), 0 1px 2px -1px oklch(0.18 0.03 265 / 0.06)",
+    "md":    "0 4px 8px -2px oklch(0.18 0.03 265 / 0.08), 0 2px 4px -2px oklch(0.18 0.03 265 / 0.06)",
+    "lg":    "0 12px 24px -6px oklch(0.18 0.03 265 / 0.10), 0 4px 8px -4px oklch(0.18 0.03 265 / 0.06)",
+    "ring-agent":     "0 0 0 3px oklch(0.72 0.13 290 / 0.25)",
+    "ring-authority": "0 0 0 3px oklch(0.75 0.14 75 / 0.25)",
+    "ring-focus":     "0 0 0 3px oklch(0.72 0.13 290 / 0.40)"
+  },
+
+  "motion": {
+    "_principle": "Deliberate, never decorative. Motion signals causation: agent acts → ribbon pulses; human ratifies → gold seal stamps.",
+    "duration": {
+      "instant":  "80ms",
+      "fast":     "160ms",
+      "base":     "240ms",
+      "slow":     "400ms",
+      "deliberate":"640ms"
+    },
+    "easing": {
+      "standard":  "cubic-bezier(0.2, 0.0, 0.0, 1.0)",
+      "decelerate":"cubic-bezier(0.0, 0.0, 0.2, 1.0)",
+      "accelerate":"cubic-bezier(0.4, 0.0, 1.0, 1.0)",
+      "civic":     "cubic-bezier(0.65, 0.0, 0.35, 1.0)"
+    },
+    "patterns": {
+      "agent-proposing":    { "duration": "base", "easing": "decelerate", "effect": "lavender ribbon fades in + types out content" },
+      "human-enacting":     { "duration": "deliberate", "easing": "civic", "effect": "gold seal scales 0.9→1, opacity 0→1, single thump" },
+      "diff-reveal":        { "duration": "slow", "easing": "standard", "effect": "old text strikes through, new text underlines in" },
+      "page-transition":    { "duration": "fast", "easing": "decelerate", "effect": "fade + 4px upward translate" }
+    },
+    "reduced-motion": "Honor prefers-reduced-motion: replace all transforms/scales with opacity-only crossfades at duration.fast."
+  },
+
+  "components": {
+    "button": {
+      "variants": {
+        "default":   { "bg": "primary", "fg": "primary-foreground", "border": "transparent" },
+        "secondary": { "bg": "surface-raised", "fg": "foreground", "border": "border" },
+        "ghost":     { "bg": "transparent", "fg": "foreground", "hover-bg": "surface-sunken" },
+        "agent":     { "bg": "agentic-soft", "fg": "agentic-foreground", "border": "agentic", "_use": "Triggers an agent action" },
+        "authority": { "bg": "authority-soft", "fg": "authority-foreground", "border": "authority", "_use": "Human enactment, ratification" },
+        "destructive":{ "bg": "verdict.rejected", "fg": "parchment.50" }
+      },
+      "sizes": { "sm": "h:32 px:12", "md": "h:40 px:16", "lg": "h:48 px:20" },
+      "radius": "md"
+    },
+    "card": {
+      "bg": "surface",
+      "border": "border",
+      "radius": "lg",
+      "padding": "6",
+      "shadow": "xs"
+    },
+    "provenance-ribbon": {
+      "_description": "Persistent vertical bar on the inline-start edge of any artifact card. 3px wide. Color from provenance token. Tooltip on hover shows author + timestamp.",
+      "width": "3px",
+      "position": "inline-start",
+      "states": {
+        "agent":   "background: agentic",
+        "human":   "background: authority",
+        "hybrid":  "background: linear-gradient(to bottom, agentic 50%, authority 50%)",
+        "system":  "background: foreground-muted",
+        "citizen": "background: verdict.enacted"
+      }
+    },
+    "diff-view": {
+      "_description": "Default rendering for ANY policy/rule change. Side-by-side on >=768px, stacked below.",
+      "removed": { "bg": "oklch(0.55 0.18 28 / 0.08)", "text-decoration": "line-through", "fg": "verdict.rejected" },
+      "added":   { "bg": "oklch(0.62 0.115 155 / 0.10)", "text-decoration": "underline", "fg": "verdict.enacted" },
+      "context": { "fg": "foreground-muted" }
+    },
+    "citation": {
+      "_description": "Inline reference to a statute, e.g. § 12(3)(a). Mono, civic-gold underline on hover, opens drawer with full text.",
+      "family": "mono",
+      "color": "foreground",
+      "hover": { "color": "authority-foreground", "border-bottom": "1px dotted authority" }
+    },
+    "agent-trace": {
+      "_description": "Collapsible reasoning log shown under any agent action. Mono. Lavender left rule. Token-by-token reveal during streaming.",
+      "family": "mono",
+      "size": "code",
+      "border-inline-start": "2px solid agentic",
+      "padding-inline-start": "4",
+      "bg": "agentic-soft"
+    },
+    "input": { "bg": "surface-raised", "border": "border", "focus-ring": "ring", "radius": "md", "h": "40" },
+    "badge": { "radius": "pill", "padding": "px:8 py:2", "size": "caption" }
+  },
+
+  "iconography": {
+    "library": "lucide-react",
+    "stroke-width": 1.75,
+    "size": { "sm": 14, "md": 16, "lg": 20, "xl": 24 },
+    "rtl_mirror": ["arrow-left","arrow-right","chevron-left","chevron-right","corner-up-left","reply","undo","redo"],
+    "rtl_dont_mirror": ["search","check","x","clock","calendar","user","cpu","sparkles","stamp"]
+  },
+
+  "i18n": {
+    "supported_locales_initial": ["en", "es", "fr", "ar", "he", "zh-Hans", "hi", "sw"],
+    "rtl_locales": ["ar", "he", "fa", "ur"],
+    "html_dir": "Set <html dir='rtl|ltr' lang='...'> at root from negotiated locale.",
+    "rules": [
+      "Use CSS logical properties everywhere — never left/right.",
+      "Mirror navigation, breadcrumbs, progress bars, sliders. Never mirror media, code blocks, charts axes, clock icons.",
+      "Plurals via ICU MessageFormat (not just one/other).",
+      "Numbers, dates, currency via Intl.* APIs with locale.",
+      "Statute citations remain in source script (an Arabic statute keeps Arabic-Indic § numbering).",
+      "Allow 30% text expansion budget on all UI containers.",
+      "Provide a language switcher in the masthead, persisted per user."
+    ],
+    "fonts_loading": "Use unicode-range subsetting + font-display:swap. Lazy-load CJK/Arabic subsets only when locale requires."
+  },
+
+  "accessibility": {
+    "target": "WCAG 2.2 AA, working toward AAA on statute reading surfaces",
+    "contrast": {
+      "body_text_on_background": "≥ 7:1 (AAA) — verified for both light and dark themes",
+      "ui_text_on_surface":      "≥ 4.5:1",
+      "non_text_ui":             "≥ 3:1",
+      "agentic_on_agentic_soft": "verified 4.7:1 light / 8.2:1 dark",
+      "authority_on_authority_soft": "verified 4.6:1 light / 7.9:1 dark"
+    },
+    "focus": {
+      "visible": "Always. 3px ring using ring-focus shadow, 2px offset from element.",
+      "never": "Do not remove outlines without replacement. Do not rely on color alone."
+    },
+    "color_independence": "Provenance is ALWAYS color + icon + label. Never color alone (colorblind, monochrome printing of statute).",
+    "motion": "prefers-reduced-motion respected globally; see motion.reduced-motion.",
+    "keyboard": "Every action reachable via keyboard. Skip-to-content link on every page. Modal focus trap mandatory.",
+    "aria": {
+      "agent_action_buttons": "aria-label must include 'proposed by agent' equivalent",
+      "diff_views": "role='region' aria-label='Proposed change to §X'",
+      "live_regions": "Agent streaming output uses aria-live='polite'"
+    },
+    "language": "Every page has correct lang attr. Inline language switches use lang on the element."
+  },
+
+  "voice": {
+    "principles": [
+      "Plain language first; legal precision second; jargon never.",
+      "Name the actor. 'The agent drafted…' / 'You ratified…' / 'The council enacted…'. Never passive 'was created'.",
+      "Show provenance in copy, not just color. 'Drafted by Agent · Awaiting your review.'",
+      "Past tense for enacted law. Present tense for active policy. Future conditional for proposals.",
+      "Numbers and dates: locale-formatted, always."
+    ],
+    "do":   ["The agent proposes.", "You decide.", "The record is public."],
+    "dont": ["Our AI will…", "Magically…", "Smart contracts that just work."]
+  },
+
+  "logo": {
+    "wordmark_file": "govops-wordmark.png",
+    "symbol_file": "govops-symbol.png",
+    "concept_notes": [
+      "Wordmark: serif 'Gov' meets mono/geometric 'Ops' on a single baseline. Variant: render the 'O' as a zero ('Gov0ps') to embed the law-as-code idea directly into the mark.",
+      "Symbol: § fused with { } as a single monoline glyph — statute and system as one form.",
+      "Clear-space: ½ × cap-height on all sides. Never place on busy photography without a solid plate.",
+      "Minimum sizes: wordmark 96px wide; symbol 24px square.",
+      "Color: ink on parchment (default), parchment on ink (dark), single-color print only (no gradients on the mark)."
+    ]
+  }
+}
