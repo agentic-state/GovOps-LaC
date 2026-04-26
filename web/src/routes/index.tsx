@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Link } from "@tanstack/react-router";
 import { useIntl, FormattedMessage } from "react-intl";
+import { Users, ScrollText, Building2 } from "lucide-react";
 import { Wordmark } from "@/components/govops/Wordmark";
 import { ProvenanceRibbon } from "@/components/govops/ProvenanceRibbon";
 import { MOCK_CONFIG_VALUES } from "@/lib/mock-config-values";
@@ -21,6 +22,205 @@ export const Route = createFileRoute("/")({
   }),
   component: Index,
 });
+
+type PersonaConfig = {
+  id: string;
+  anchor: string;
+  variant: "citizen" | "agent" | "human";
+  accent: "neutral" | "agentic" | "authority";
+  Icon: typeof Users;
+  primaryHref: string;
+  secondaryHref: string;
+};
+
+const PERSONAS = {
+  citizens: {
+    id: "citizens",
+    anchor: "citizens",
+    variant: "citizen",
+    accent: "neutral",
+    Icon: Users,
+    primaryHref: "/config",
+    secondaryHref: "/cases",
+  },
+  servants: {
+    id: "servants",
+    anchor: "servants",
+    variant: "agent",
+    accent: "agentic",
+    Icon: ScrollText,
+    primaryHref: "/config/approvals",
+    secondaryHref: "/encode",
+  },
+  leaders: {
+    id: "leaders",
+    anchor: "leaders",
+    variant: "human",
+    accent: "authority",
+    Icon: Building2,
+    primaryHref: "/authority",
+    secondaryHref: "/about",
+  },
+} satisfies Record<string, PersonaConfig>;
+
+function PersonaSection({
+  persona,
+  prefix,
+  showEngageBlock = false,
+}: {
+  persona: PersonaConfig;
+  prefix: string;
+  showEngageBlock?: boolean;
+}) {
+  const intl = useIntl();
+  const { Icon, accent, anchor, variant, primaryHref, secondaryHref } = persona;
+  const accentVar =
+    accent === "agentic"
+      ? "var(--agentic)"
+      : accent === "authority"
+      ? "var(--authority)"
+      : "var(--foreground-muted)";
+
+  return (
+    <section
+      id={anchor}
+      aria-labelledby={`${anchor}-heading`}
+      className="scroll-mt-24 flex items-stretch"
+    >
+      <ProvenanceRibbon variant={variant} />
+      <div className="w-full space-y-8">
+        <div className="space-y-4">
+          <div className="flex items-center gap-3">
+            <Icon className="size-5 shrink-0" style={{ color: accentVar }} aria-hidden />
+            <p
+              className="text-xs uppercase tracking-[0.22em] text-foreground-subtle"
+              style={{ fontFamily: "var(--font-mono)" }}
+            >
+              {intl.formatMessage({ id: `${prefix}.eyebrow` })}
+            </p>
+          </div>
+          <h2
+            id={`${anchor}-heading`}
+            className="text-3xl leading-tight tracking-tight text-foreground sm:text-4xl"
+            style={{ fontFamily: "var(--font-serif)", fontWeight: 600 }}
+          >
+            {intl.formatMessage({ id: `${prefix}.heading` })}
+          </h2>
+          <p className="max-w-3xl text-lg text-foreground-muted">
+            {intl.formatMessage({ id: `${prefix}.lead` })}
+          </p>
+        </div>
+
+        <div className="grid gap-4 md:grid-cols-3">
+          {([1, 2, 3] as const).map((n) => (
+            <article
+              key={n}
+              className="rounded-md border border-border bg-surface p-5"
+              style={{ borderTopWidth: "3px", borderTopColor: accentVar }}
+            >
+              <h3
+                className="text-base font-medium text-foreground"
+                style={{ fontFamily: "var(--font-serif)" }}
+              >
+                {intl.formatMessage({ id: `${prefix}.card${n}.title` })}
+              </h3>
+              <p className="mt-2 text-sm leading-relaxed text-foreground-muted">
+                {intl.formatMessage({ id: `${prefix}.card${n}.body` })}
+              </p>
+            </article>
+          ))}
+        </div>
+
+        {showEngageBlock ? (
+          <div className="rounded-md border border-border bg-surface-sunken p-6">
+            <h3
+              className="text-lg font-medium text-foreground"
+              style={{ fontFamily: "var(--font-serif)" }}
+            >
+              {intl.formatMessage({ id: `${prefix}.engage.heading` })}
+            </h3>
+            <ol className="mt-4 grid gap-4 md:grid-cols-3" role="list">
+              {([1, 2, 3] as const).map((n) => (
+                <li
+                  key={n}
+                  className="rounded-md border border-border bg-surface p-4"
+                >
+                  <p
+                    className="text-xs uppercase tracking-[0.18em] text-foreground-subtle"
+                    style={{ fontFamily: "var(--font-mono)" }}
+                  >
+                    {`0${n}`}
+                  </p>
+                  <p className="mt-2 text-sm font-medium text-foreground">
+                    {intl.formatMessage({
+                      id: `${prefix}.engage.option${n}.title`,
+                    })}
+                  </p>
+                  <p className="mt-1 text-sm leading-relaxed text-foreground-muted">
+                    {intl.formatMessage({
+                      id: `${prefix}.engage.option${n}.body`,
+                    })}
+                  </p>
+                </li>
+              ))}
+            </ol>
+          </div>
+        ) : null}
+
+        <div className="flex flex-wrap gap-3 pt-2">
+          <Link
+            to={primaryHref}
+            className="inline-flex h-11 items-center rounded-md bg-primary px-5 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
+          >
+            {intl.formatMessage({ id: `${prefix}.cta.primary` })}
+          </Link>
+          <Link
+            to={secondaryHref}
+            className="inline-flex h-11 items-center rounded-md border border-border bg-surface px-5 text-sm font-medium text-foreground transition-colors hover:bg-surface-sunken"
+          >
+            {intl.formatMessage({ id: `${prefix}.cta.secondary` })}
+          </Link>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function PersonasNav() {
+  const intl = useIntl();
+  const items = [
+    { href: "#citizens", id: "home.personas.nav.citizens", Icon: Users, accent: "var(--foreground-muted)" },
+    { href: "#servants", id: "home.personas.nav.servants", Icon: ScrollText, accent: "var(--agentic)" },
+    { href: "#leaders", id: "home.personas.nav.leaders", Icon: Building2, accent: "var(--authority)" },
+  ];
+  return (
+    <nav
+      aria-labelledby="personas-nav-heading"
+      className="rounded-md border border-border bg-surface p-5"
+    >
+      <p
+        id="personas-nav-heading"
+        className="text-xs uppercase tracking-[0.22em] text-foreground-subtle"
+        style={{ fontFamily: "var(--font-mono)" }}
+      >
+        {intl.formatMessage({ id: "home.personas.nav.heading" })}
+      </p>
+      <ul className="mt-3 flex flex-wrap gap-3" role="list">
+        {items.map(({ href, id, Icon, accent }) => (
+          <li key={href}>
+            <a
+              href={href}
+              className="inline-flex items-center gap-2 rounded-md border border-border bg-surface-sunken px-4 py-2 text-sm font-medium text-foreground transition-colors hover:border-foreground/40"
+            >
+              <Icon className="size-4" style={{ color: accent }} aria-hidden />
+              {intl.formatMessage({ id })}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+  );
+}
 
 function Index() {
   const intl = useIntl();
@@ -72,7 +272,7 @@ function Index() {
         </div>
       </section>
 
-      {/* Three pillars */}
+      {/* Three pillars (universal) */}
       <section aria-labelledby="pillars-heading" className="space-y-6">
         <h2
           id="pillars-heading"
@@ -103,6 +303,18 @@ function Index() {
           ))}
         </div>
       </section>
+
+      {/* Persona navigation pills */}
+      <PersonasNav />
+
+      {/* Persona sections */}
+      <PersonaSection persona={PERSONAS.citizens} prefix="home.personas.citizens" />
+      <PersonaSection persona={PERSONAS.servants} prefix="home.personas.servants" />
+      <PersonaSection
+        persona={PERSONAS.leaders}
+        prefix="home.personas.leaders"
+        showEngageBlock
+      />
 
       {/* Live registry preview */}
       <section aria-labelledby="preview-heading" className="flex items-stretch">

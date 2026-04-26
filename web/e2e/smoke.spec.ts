@@ -45,3 +45,35 @@ for (const route of PRIMARY_ROUTES) {
     expect(errors, `pageerror events on ${route.path}`).toEqual([]);
   });
 }
+
+test("home: persona sections (citizens / public servants / leaders) all render with anchors", async ({
+  page,
+}) => {
+  await page.goto("/");
+  await page.waitForLoadState("networkidle");
+
+  // Each persona has a heading inside an anchored section. Verify the
+  // anchor target exists AND a recognizable heading is visible.
+  for (const anchor of ["citizens", "servants", "leaders"]) {
+    await expect(page.locator(`section#${anchor}`)).toBeVisible();
+    await expect(page.locator(`section#${anchor} h2`)).toBeVisible();
+  }
+
+  // Persona-nav pills point at each anchor
+  for (const anchor of ["citizens", "servants", "leaders"]) {
+    await expect(page.locator(`a[href="#${anchor}"]`)).toBeVisible();
+  }
+
+  // Leaders engage block ("Three concrete ways to engage") renders 3 numbered options
+  const engageItems = page.locator("section#leaders ol > li");
+  await expect(engageItems).toHaveCount(3);
+
+  // Capture screenshots of each persona section for the visual record
+  for (const anchor of ["citizens", "servants", "leaders"]) {
+    const section = page.locator(`section#${anchor}`);
+    await section.scrollIntoViewIfNeeded();
+    await section.screenshot({
+      path: `test-results/screenshots/persona-${anchor}.png`,
+    });
+  }
+});
