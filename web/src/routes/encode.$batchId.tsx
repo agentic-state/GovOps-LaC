@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useIntl } from "react-intl";
-import { ChevronLeft, ChevronDown } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 import {
   bulkReviewProposals,
   commitBatch,
@@ -150,13 +150,6 @@ function BatchReviewPage() {
 
   return (
     <div className="space-y-6 pb-24">
-      <Link
-        to="/encode"
-        className="inline-flex items-center gap-1 text-sm text-foreground-muted hover:text-foreground"
-      >
-        <ChevronLeft className="size-4 rtl:rotate-180" aria-hidden />
-        {intl.formatMessage({ id: "encode.list.heading" })}
-      </Link>
 
       <header className="space-y-2">
         <h1

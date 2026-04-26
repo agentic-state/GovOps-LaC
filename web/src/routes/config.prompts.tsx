@@ -7,6 +7,7 @@ import { filterMockConfigValues } from "@/lib/mock-config-values";
 import type { ConfigValue, ListConfigValuesResponse } from "@/lib/types";
 import { ProvenanceRibbon } from "@/components/govops/ProvenanceRibbon";
 import { JurisdictionChip } from "@/components/govops/JurisdictionChip";
+import { Runbook } from "@/components/govops/Runbook";
 import { RouteError } from "@/components/govops/RouteError";
 import { RouteLoading } from "@/components/govops/RouteLoading";
 import {
@@ -101,6 +102,14 @@ function PromptsPage() {
 
   return (
     <section aria-labelledby="prompts-heading" className="space-y-8">
+      <Runbook
+        prefix="runbook.prompts"
+        scenarios={[
+          { id: "edit", steps: 4 },
+          { id: "test", steps: 3 },
+          { id: "approve", steps: 3 },
+        ]}
+      />
       <header className="flex items-stretch">
         <ProvenanceRibbon variant="hybrid" />
         <div className="space-y-3">

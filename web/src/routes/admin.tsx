@@ -22,6 +22,7 @@ import type {
 } from "@/lib/types";
 import type { FixtureBatchSummary } from "@/lib/api";
 import { buildActivityFeed, deriveStats, isRecent } from "@/lib/aggregations";
+import { Runbook } from "@/components/govops/Runbook";
 import { StatTile } from "@/components/govops/admin/StatTile";
 import { JurisdictionSwitcher } from "@/components/govops/admin/JurisdictionSwitcher";
 import { RefreshButton } from "@/components/govops/admin/RefreshButton";
@@ -288,6 +289,14 @@ function AdminPage() {
 
   return (
     <div className="space-y-6">
+      <Runbook
+        prefix="runbook.admin"
+        scenarios={[
+          { id: "switch", steps: 3 },
+          { id: "reseed", steps: 3 },
+          { id: "onboard", steps: 4 },
+        ]}
+      />
       <header className="flex flex-wrap items-center justify-between gap-3">
         <div className="space-y-1">
           <h1

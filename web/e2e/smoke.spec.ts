@@ -200,19 +200,32 @@ test("encoder: approving a proposal locks the Approve/Modify/Reject buttons; Reo
   await expect(lockedHint).toBeVisible();
 });
 
-test("runbook: cases page shows the operator runbook with collapsible scenarios", async ({
-  page,
-}) => {
-  await page.goto("/cases");
-  await page.waitForLoadState("networkidle");
-  // Runbook section heading + 3 scenario buttons
-  const scenarioButtons = page.locator('section[aria-labelledby="runbook.cases-heading"] button');
-  await expect(scenarioButtons).toHaveCount(3);
-  // Click the first scenario; its body should expand
-  const first = scenarioButtons.first();
-  await first.click();
-  await expect(first).toHaveAttribute("aria-expanded", "true");
-});
+// Every operator page renders a runbook with three collapsible scenarios.
+// Consistency principle: if a page is operator-action, it has a runbook.
+const RUNBOOK_ROUTES = [
+  { path: "/cases", prefix: "runbook.cases" },
+  { path: "/encode", prefix: "runbook.encode" },
+  { path: "/config", prefix: "runbook.config" },
+  { path: "/config/approvals", prefix: "runbook.approvals" },
+  { path: "/config/prompts", prefix: "runbook.prompts" },
+  { path: "/admin", prefix: "runbook.admin" },
+];
+
+for (const { path, prefix } of RUNBOOK_ROUTES) {
+  test(`runbook: ${path} shows the operator runbook with 3 collapsible scenarios`, async ({
+    page,
+  }) => {
+    await page.goto(path);
+    await page.waitForLoadState("networkidle");
+    const scenarioButtons = page.locator(
+      `section[aria-labelledby="${prefix}-heading"] > ul > li > button`,
+    );
+    await expect(scenarioButtons).toHaveCount(3);
+    const first = scenarioButtons.first();
+    await first.click();
+    await expect(first).toHaveAttribute("aria-expanded", "true");
+  });
+}
 
 test("walkthrough: 7-step paid-vacation scenario renders end to end", async ({ page }) => {
   await page.goto("/walkthrough");

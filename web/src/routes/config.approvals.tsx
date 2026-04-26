@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { FormattedMessage, useIntl } from "react-intl";
 
 import { ApprovalRow } from "@/components/govops/ApprovalRow";
+import { Runbook } from "@/components/govops/Runbook";
 import { ProvenanceRibbon } from "@/components/govops/ProvenanceRibbon";
 import { RouteError } from "@/components/govops/RouteError";
 import { RouteLoading } from "@/components/govops/RouteLoading";
@@ -122,6 +123,14 @@ function ApprovalsPage() {
 
   return (
     <section aria-labelledby="approvals-heading" className="space-y-8">
+      <Runbook
+        prefix="runbook.approvals"
+        scenarios={[
+          { id: "review", steps: 4 },
+          { id: "request", steps: 3 },
+          { id: "reject", steps: 3 },
+        ]}
+      />
       <header className="flex items-stretch">
         <ProvenanceRibbon variant="human" />
         <div className="space-y-3">

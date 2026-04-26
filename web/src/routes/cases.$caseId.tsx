@@ -1,7 +1,6 @@
 import { useState } from "react";
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useIntl } from "react-intl";
-import { ChevronLeft } from "lucide-react";
 import { evaluateCase, getCase, reviewCase } from "@/lib/api";
 import type {
   CaseDetail,
@@ -65,14 +64,7 @@ function CaseDetailPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between gap-3">
-        <Link
-          to="/cases"
-          className="inline-flex items-center gap-1 text-sm text-foreground-muted hover:text-foreground"
-        >
-          <ChevronLeft className="size-4 rtl:rotate-180" aria-hidden />
-          {intl.formatMessage({ id: "cases.list.heading" })}
-        </Link>
+      <div className="flex items-center justify-end gap-3">
         <AuditDrawer caseId={caseId} />
       </div>
 
