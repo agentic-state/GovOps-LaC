@@ -3,7 +3,9 @@
 **Status**: Active — single source of truth for the v2.0 build
 **Branch**: `feat/law-as-code-v2`
 **Source vision**: [docs/IDEA-GovOps-v2.0-LawAsCode.md](docs/IDEA-GovOps-v2.0-LawAsCode.md)
-**Baseline tag (to create at Phase 0)**: `pre-lawcode-v0.2.0`
+**SPRIND alignment**: [docs/design/LAW-AS-CODE.md](docs/design/LAW-AS-CODE.md)
+**Baseline tag**: `pre-lawcode-v0.2.0` (Phase 0 ✅)
+**Latest milestone tag**: `lawcode-v2-phase-6-progress`
 **License**: Apache 2.0 (preserved)
 
 > This document is the operational plan. The vision doc is the strategic argument; this doc is what gets executed and tracked. If the two ever conflict, this doc wins for execution and the vision doc wins for intent — open an ADR to reconcile.
@@ -27,13 +29,13 @@
 
 ### Doc gaps captured during baseline (carry into Phase 0)
 
-These were found during PLAN authoring; they are not v2.0 features but they distort the baseline. Fix them in Phase 0 alongside the rollback tag.
+These were found during PLAN authoring; they are not v2.0 features but they distort the baseline. Fixed in Phase 0 alongside the rollback tag. Test-count drift is a known recurring issue — the live count lives in §6 (currently 202), CLAUDE.md is updated phase-to-phase.
 
-- [ ] [CLAUDE.md](CLAUDE.md) says "45 tests passing" — actual is 65. **Update**.
-- [ ] CLAUDE.md does not mention `encoder.py` / `encoding_example.py` / `test_encoder.py` — a major surface. **Add**.
-- [ ] CLAUDE.md missing single-test commands, `--reload` flag, CI matrix, rule-type list, disclaimer rule. **Add** (proposal already drafted in conversation; apply to file).
-- [ ] CONTRIBUTING.md is the only place the `RuleType` table lives — **mirror** to CLAUDE.md.
-- [ ] No ADR index yet under `docs/design/ADRs/` is referenced from a top-level entry point — **add an ADR-000 index** as we start cutting v2.0 ADRs.
+- [x] [CLAUDE.md](CLAUDE.md) test count updated from "45 tests passing" — accuracy maintained per phase; live count in §6.
+- [x] CLAUDE.md mentions `encoder.py` / `encoding_example.py` / `test_encoder.py`.
+- [x] CLAUDE.md has single-test commands, `--reload` flag, CI matrix, rule-type list, disclaimer rule.
+- [x] CONTRIBUTING.md `RuleType` table mirrored to CLAUDE.md.
+- [x] ADR index published at [`docs/design/ADRs/README.md`](docs/design/ADRs/README.md).
 
 ---
 
@@ -48,9 +50,9 @@ Every value the system uses — thresholds, accepted statuses, evidence types, c
 | # | Gate | Recommendation | Lock by | Status |
 | --- | --- | --- | --- | --- |
 | 1 | YAML over JSON for artefacts | YAML (comments, editor round-trip) | End of Phase 0 | **LOCKED** — ADR-003 |
-| 2 | ConfigValue granularity | Per-parameter (`ca-oas.rule.age-65.min_age`) | End of Phase 1 | OPEN |
-| 3 | Storage model for Phases 1–10 | In-memory; storage migration is a separate track | End of Phase 1 | OPEN |
-| 4 | Prompt-as-config approval policy | Dual approval (domain expert + maintainer) | End of Phase 4 | OPEN |
+| 2 | ConfigValue granularity | Per-parameter (`ca-oas.rule.age-65.min_age`) | End of Phase 1 | **LOCKED** — ADR-006 |
+| 3 | Storage model for Phases 1–10 | In-memory through Phase 5; embedded SQLite from Phase 6 | End of Phase 1 | **LOCKED** — ADR-007 (in-memory) + ADR-010 (SQLite from Phase 6) |
+| 4 | Prompt-as-config approval policy | Dual approval (domain expert + maintainer) | End of Phase 4 | **LOCKED** — ADR-008 |
 | 5 | **(added)** Lovable code repo location | Same repo, `web/` folder; Lovable authors upstream, artefact brought in | End of Phase 0 | **LOCKED** — ADR-005 |
 | 6 | **(added)** Backwards-compat strategy during Phase 1–2 | `resolve()` falls back to current Python constants until Phase 2 cuts each domain over; tests stay green throughout | End of Phase 1 | **LOCKED** — ADR-004 |
 | 7 | **(added)** Federation trust model (Phase 8) | Signed manifests + checksum pinning in `lawcode/REGISTRY.yaml`; reject unsigned by default | End of Phase 7 | OPEN |
@@ -231,19 +233,24 @@ Sequenced; each sub-phase ships independently.
 
 ## 6. Test budget per phase (non-regression target)
 
-| Phase | Target test count | Notes |
-| ---: | ---: | --- |
-| 0 (start) | 65 | baseline |
-| 1 | ~80 | + ConfigStore tests |
-| 2 | ~80 | migration, no behaviour change |
-| 3 | ~85 | + YAML loader tests |
-| 4 | ~88 | + prompt reproducibility tests |
-| 5 | ~90 | + schema validation tests |
-| 6 | ~100 | + admin endpoint tests |
-| 7 | ~105 | + impact endpoint tests |
-| 8 | ~115 | + federation tests |
-| 9 | ~115 | docs only |
-| 10 | ~160 | + 4 extension surfaces (~10 tests each backend, more for E2E) |
+| Phase | Target test count | Status | Notes |
+| ---: | ---: | --- | --- |
+| 0 (start) | 65 | ✅ baseline | tag `pre-lawcode-v0.2.0` |
+| 1 | ~80 | ✅ | + ConfigStore tests |
+| 2 | ~80 | ✅ | migration, no behaviour change |
+| 3 | ~85 | ✅ | + YAML loader tests |
+| 4 | ~88 | ✅ | + prompt reproducibility tests |
+| 5 | ~90 | ✅ | + schema validation tests |
+| 6 | ~100 | 🟡 in progress | + admin endpoint tests; UI surfaces shipped, full E2E exit-line proof pending |
+| 7 | ~105 | 🟡 backend done | impact endpoint + 23 tests landed; Lovable surface tracked as `docs/govops-014-citation-impact.md` |
+| 8 | ~115 | ⬜ | + federation tests |
+| 9 | ✅ docs only | ✅ | `docs/design/LAW-AS-CODE.md` published |
+| 10A | ~110 | 🟡 backend done | self-screening endpoint + 18 tests landed; Lovable surface tracked as `docs/govops-015-self-screening.md` |
+| 10B | ~120 | ⬜ | calculation rule type + engine.calculate() |
+| 10C | ~130 | ⬜ | notification artefact templating |
+| 10D | ~145 | ⬜ | life-event reassessment |
+
+**Live count (2026-04-26)**: 202 backend tests passing (`pytest -q`).
 
 Tests must stay green at every phase exit. CI matrix stays at Python 3.10/3.11/3.12.
 
@@ -261,17 +268,17 @@ Tests must stay green at every phase exit. CI matrix stays at Python 3.10/3.11/3
 
 ## 8. Success criteria (the 11 from the vision doc, restated for tracking)
 
-- [ ] 1. Every value resolvable through effective-value substrate; no hardcoded business constants in Python
-- [ ] 2. Every jurisdiction contributable in YAML by a non-Python developer
-- [ ] 3. Schema published, versioned, validated in CI
-- [ ] 4. Statute changes are temporal, not destructive; historical evaluations reproducible
-- [ ] 5. Citation impact queryable across all 6 jurisdictions in one command
-- [ ] 6. Encoding pipeline produces commit-ready YAML, not Python
-- [ ] 7. Prompts are dated configuration; the prompt that ran on date D is reconstructable
-- [ ] 8. A second repository can federate its own jurisdiction into a GovOps deployment
-- [ ] 9. Lovable UI replaces all Jinja templates and adds the configure-without-deploy admin surface
-- [ ] 10. Pipeline runs end-to-end from self-screening through eligibility, calculation, notification, life-event reassessment, in all 6 jurisdictions
-- [ ] 11. Repo's public framing names "Law as Code" explicitly and maps to SPRIND's 5 foundational elements
+- [x] 1. Every value resolvable through effective-value substrate; no hardcoded business constants in Python *(Phase 2 + grep gate)*
+- [x] 2. Every jurisdiction contributable in YAML by a non-Python developer *(Phase 3 — `lawcode/{ca,br,es,fr,de,ua}/config/`)*
+- [x] 3. Schema published, versioned, validated in CI *(Phase 5 — `schema/configvalue-v1.0.json`, `schema/lawcode-v1.0.json`, CI gate)*
+- [x] 4. Statute changes are temporal, not destructive; historical evaluations reproducible *(`ConfigStore.resolve()` + supersession + tests)*
+- [x] 5. Citation impact queryable across all 6 jurisdictions in one command *(Phase 7 — `GET /api/impact?citation=…` + `govops impact-of`)*
+- [ ] 6. Encoding pipeline produces commit-ready YAML, not Python *(encoder commits to ConfigStore; YAML emission still pending)*
+- [x] 7. Prompts are dated configuration; the prompt that ran on date D is reconstructable *(Phase 4 — `lawcode/global/prompts.yaml`, ADR-008 dual approval)*
+- [ ] 8. A second repository can federate its own jurisdiction into a GovOps deployment *(Phase 8)*
+- [ ] 9. Lovable UI replaces all Jinja templates and adds the configure-without-deploy admin surface *(Phase 6 — surfaces shipped; full UI-driven exit-line E2E proof pending)*
+- [ ] 10. Pipeline runs end-to-end from self-screening through eligibility, calculation, notification, life-event reassessment, in all 6 jurisdictions *(10A backend done; 10B–10D pending)*
+- [x] 11. Repo's public framing names "Law as Code" explicitly and maps to SPRIND's 5 foundational elements *(Phase 9 — [`docs/design/LAW-AS-CODE.md`](docs/design/LAW-AS-CODE.md))*
 
 ---
 
@@ -308,3 +315,58 @@ Tests must stay green at every phase exit. CI matrix stays at Python 3.10/3.11/3
 - Real LLM provider integration in encoder (currently pluggable backend) — separate track
 - Production hardening (rate limits, observability, secrets management) — separate track
 - Cross-program rules within a jurisdiction (today: pension only) — defer until federation proves out
+
+---
+
+## 12. Accepted backlog — post-spec additions (in scope, awaiting follow-up)
+
+Items here were shipped beyond the originating spec, evaluated on merit, and **accepted** by the maintainer. They are in scope but tracked separately from the phase plan because most carry small follow-up work — typically backend plumbing to honour fields the UI now expects, or spec/doc reconciliation so the next reviewer doesn't read them as drift.
+
+### Phase 7 — Lovable extras accepted from `eva-foundry/user-insights-hub` (2026-04-26)
+
+Originating spec: [docs/govops-014-citation-impact.md](docs/govops-014-citation-impact.md). Accepted because the cost is near-zero, value shows up the moment a single statute affects more than ~25 records, and federation (Phase 8) will multiply hit counts.
+
+| # | Addition | Status | Follow-up |
+| --- | --- | --- | --- |
+| 7.x.1 | Client-side pagination on `/impact` (`limit` / `page` / `page_count` on `ImpactResponse`, `ImpactPaginationBar` top + bottom, page-size selector 10/25/50/100, URL-persisted, resets to page 1 on new query) | Shipped UI-side; backend currently ignores `limit` / `page` query params and returns the full set, which the UI tolerates via `??` defaults | **Backend**: extend `GET /api/impact` to honour `limit` (default e.g. 50, max 200) and `page` (1-indexed) query params, return `limit` / `page` / `page_count` in the response shape. **Spec**: amend govops-014 §"Out of scope" to remove the pagination defer-clause, or add a new govops-014a addendum recording the change. **Tests**: add ~3 cases covering page math, empty page, page-size change. |
+| 7.x.2 | Nav i18n key renamed `impact.nav` → `nav.impact` (matches sibling `nav.*` convention) | Shipped | Update govops-014 §i18n to record the actual key, so the next spec reviewer doesn't read this as a missing key. |
+| 7.x.3 | Inline row layout instead of importing `ConfigValueRow` from govops-003 | Refactor specced — see [docs/govops-014a-row-reuse.md](docs/govops-014a-row-reuse.md) | **Lovable**: extend `ConfigValueRow` with two optional props (`highlightQuery`, `showJurisdictionChip`) and refactor `ImpactSection` to import it. Queued behind Phase 10A. Spec includes reference TSX; no UX change, no copy change, no new tokens. |
+| 7.x.4 | Nav placement: order is Authority → Impact → Cases → Encode (Cases interposed) | Shipped | Decide whether to keep Cases between Impact and Encode, or move Impact to sit directly before Encode as the spec literal had it. Cosmetic. |
+| 7.x.5 | A11y polish: `aria-label` on `<mark>`, `role="alert"` on error banner, `aria-atomic="true"` + `role="region"` on count summary | Shipped | None — strict improvements over the spec's a11y minimum. Update the a11y section of govops-014 to record the upgraded baseline. |
+| 7.x.6 | `<form onSubmit>` wrapper around the search input (Enter-to-submit bypasses debounce) | Shipped | None — strict UX improvement. |
+| 7.x.7 | `ProvenanceRibbon` on the page header + per result row (hybrid provenance) | Shipped | None — consistent with the project's design-system rule that every authored surface declares provenance. |
+| 7.x.8 | TanStack Start `head()` meta (title + description) on `/impact` for SSR | Shipped | Apply the same pattern to other Phase 6 routes that lack it (config, authority, encode) — track separately as a small UI hygiene pass. |
+| 7.x.9 | `data-testid` attributes on Impact components for E2E hooks | Shipped | None — picked up automatically by the cross-browser Playwright harness landed in commit `3583002`. |
+
+**Cumulative test-budget impact**: ~3 additional backend tests (pagination math + edge cases) + ~5 additional Playwright cases (page-size change, URL persistence on pagination, empty-page guardrail). Roll into the Phase 7 line in §6 once landed.
+
+### Phase 10A — Lovable extras + post-flight findings from `eva-foundry/user-insights-hub` (2026-04-26)
+
+Originating spec: [docs/govops-015-self-screening.md](docs/govops-015-self-screening.md). Two Lovable post-flight passes shipped: the first added the bonuses listed below; the second introduced a privacy regression (10A.x.0) that must be corrected before the citizen-facing surface goes live.
+
+| # | Item | Status | Follow-up |
+| --- | --- | --- | --- |
+| 10A.x.0 | **Privacy regression**: `src/lib/screenDraft.ts` writes the full form state (DOB, residency, legal status, evidence) to `sessionStorage` on every keystroke; restored on mount. The `screen.lede` copy ("nothing is saved") is now factually false. Violates the load-bearing privacy invariant in govops-015 ("All state is in-memory React state. The only browser storage allowed is the existing locale cookie"). | **🚫 BLOCKING** — must ship before any SPRIND-facing surface | **Lovable**: see [docs/govops-015b-screen-privacy-fix.md](docs/govops-015b-screen-privacy-fix.md). Delete `screenDraft.ts` + the `useEffect` calls in `ScreenForm.tsx`; drop the `screen.draft.*` and `screen.reset.*` keys (or repurpose the dialog as in-memory clear). Keep the validation summary, dialog component, pure validator. |
+| 10A.x.1 | Polish gap: inline `role="alert"` validation messages with `aria-describedby` + `aria-invalid` + top-of-form summary with focus-jump links. Pure validator extracted to `src/lib/screenValidation.ts`. | ✅ closed (post-flight) | None |
+| 10A.x.2 | Polish gap: program name + lede still hardcoded in `PROGRAM_LABELS` table inside `screen.$jurisdictionId.tsx`. `fetchJurisdiction()` exists in `api.ts` but is not called by this route. Spec required live fetch from `/api/jurisdiction/{code}`. | 🟡 still open | **Lovable**: see [docs/govops-015a-self-screening-polish.md](docs/govops-015a-self-screening-polish.md). Wire `fetchJurisdiction()` into the route loader; fall back to the existing hardcoded labels on network failure (preview-mode parity). |
+| 10A.x.3 | Polish gap: mojibake in `en.json` (em-dash + middle-dot were `â€”` / `Â·`). Re-encoded to U+2014 / U+00B7. | ✅ closed (post-flight) | None |
+| 10A.x.4 | `LanguageSwitcher` in citizen shell header (`ScreenShell.tsx`) | Shipped | None |
+| 10A.x.5 | Esc on the result card returns focus to the first form field (`#screen-dob`) | Shipped | None |
+| 10A.x.6 | Backspace on empty country field deletes the residency row (`ResidencyPeriodRows.tsx`) | Shipped | None |
+| 10A.x.7 | "Rerun" button on the stale result card (instead of the spec's "rerun overlay") | Shipped | Update govops-015 §Acceptance to record the actual UX shape. |
+| 10A.x.8 | Translatable 404 copy via `screen.unknown_jurisdiction` for unknown jurisdiction codes | Shipped | None |
+| 10A.x.9 | Hardcoded `HOWTO_URLS` per jurisdiction (real government URLs in `ScreenResult.tsx`) | Shipped — spec-compliant | Future: move to backend ConfigValue (`jurisdiction.<code>.howto_url`) once Phase 10C notification artefacts land. Track here, no immediate action. |
+| 10A.x.10 | Per-rule `detail` text rendered above citation in result rows | Shipped | None — already in the contract |
+| 10A.x.11 | Per-row "Remove" button on residency periods with `aria-label` | Shipped — accessibility upgrade | None |
+| 10A.x.12 | Validation summary panel at form top (post-flight) — ICU plural heading (`screen.errors.summary.heading`), clickable links that scroll+focus the offending field, trims to 5 with "and N more" | Shipped (post-flight) | None — strict improvement |
+| 10A.x.13 | Reset confirmation `<Dialog>` with i18n keys `screen.reset.{title,body,keep,discard}` (post-flight) | Shipped, **but tied to draft persistence** | After 10A.x.0 fix: repurpose as plain in-memory clear (drop `screen.reset.*` if dialog goes too) |
+| 10A.x.14 | Versioned snapshot + migration pipeline in `screenDraft.ts` (v1→v2) with retry-on-quota-failure backoff (post-flight) | **🚫 will be deleted** as part of 10A.x.0 | Removed when `screenDraft.ts` is dropped |
+
+**Cumulative test-budget impact for Phase 10A**: backend already has 18 privacy + happy-path tests (landed in this session). Lovable post-flight pass added unit tests for the pure validator (count TBD). Once 10A.x.0 lands, the privacy invariants will need explicit Playwright cases asserting `sessionStorage.getItem("govops:screen-draft") === null` after a form submission.
+
+### Convention going forward
+
+When Lovable (or any contributor) ships beyond a spec and the addition is accepted on merit:
+1. The originating spec stays frozen as the historical contract.
+2. A new row goes here under `Phase <N> — extras accepted` listing what shipped, current status, and remaining follow-up.
+3. When the follow-up lands, mark the row `✅ closed` and leave the entry in place as provenance for the next reviewer.

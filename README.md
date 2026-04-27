@@ -270,11 +270,13 @@ Apache 2.0 -- an open public-good contribution for the global public sector.
 
 ## Origin and Lineage
 
-GovOps was inspired by the [Agentic State](https://agenticstate.org) framework (Ilves & Kilian, 2025), which maps 12 layers of government service delivery where intelligent systems can operate — from service design and workflows through governance, accountability, and public finance.
+GovOps was inspired by [The Agentic State — Vision Paper](https://agenticstate.org/paper.html) (Ilves, Kilian, Parazzoli, Peixoto & Velsberg, 2025; v1.0.1, launched at the Tallinn Digital Summit, 09 October 2025), which maps 12 layers of government service delivery where intelligent systems can operate — from service design and workflows through governance, accountability, and public finance.
 
-GovOps is a practical implementation of that vision, starting from Layer 3 (policy and rule making) and Layer 7 (governance and accountability): a working method that any government can adopt to make policy-driven services transparent, traceable, and auditable.
+GovOps is a practical implementation of that vision, starting from Layer 3 (Policy & Rule-Making) and Layer 7 (Agent Governance): a working method that any government can study and adapt to make policy-driven services transparent, traceable, and auditable.
 
-This project is an independent, nights-and-weekends open public-good contribution to support the Agentic State mission. It is not affiliated with or endorsed by the Agentic State authors — it is one builder's answer to the question they posed.
+The project also takes [SPRIND's Law as Code initiative](https://www.sprind.org/en/law-as-code) (Germany, headed by Dr. Hakke Hansen, LL.M. and Jörg Resch) seriously and tries to be a working open-source reference implementation against the five foundational elements SPRIND articulates. The element-by-element mapping with code references lives in [docs/design/LAW-AS-CODE.md](docs/design/LAW-AS-CODE.md).
+
+This project is an independent, nights-and-weekends open public-good contribution. It is not affiliated with, endorsed by, or representing the Agentic State authors, SPRIND, or any government — it is one builder's answer to the questions those initiatives pose.
 
 ---
 
