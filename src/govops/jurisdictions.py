@@ -684,7 +684,7 @@ GERMANY_AUTHORITY_CHAIN = [
         id="auth-de-grundgesetz",
         jurisdiction_id="jur-de-federal",
         layer="constitution",
-        title="Grundgesetz fur die Bundesrepublik Deutschland",
+        title="Grundgesetz für die Bundesrepublik Deutschland",
         citation="GG, Art. 20 Abs. 1 (Sozialstaatsprinzip)",
         effective_date=date(1949, 5, 23),
         url="https://www.gesetze-im-internet.de/gg/",
@@ -704,7 +704,7 @@ GERMANY_AUTHORITY_CHAIN = [
         jurisdiction_id="jur-de-federal",
         layer="program",
         title="Deutsche Rentenversicherung (DRV)",
-        citation="SGB VI, 12. Kapitel",
+        citation="SGB VI, §§ 125 ff. (Träger der Rentenversicherung)",
         parent_id="auth-de-sgb6",
     ),
     AuthorityReference(
@@ -733,7 +733,7 @@ GERMANY_LEGAL_DOCS = [
                 text=(
                     "Versicherte haben Anspruch auf Regelaltersrente, wenn sie die "
                     "Regelaltersgrenze erreicht und die allgemeine Wartezeit von "
-                    "funf Jahren erfullt haben."
+                    "fünf Jahren erfüllt haben."
                 ),
             ),
             LegalSection(
@@ -755,9 +755,12 @@ GERMANY_RULES = [
         source_document_id="doc-de-sgb6",
         source_section_ref="Para. 35, Para. 235",
         rule_type=RuleType.AGE_THRESHOLD,
-        description="Regelaltersgrenze: 67 Jahre (Jahrgang 1964 und spater)",
+        # Modelled at the 67-year endpoint. § 235 SGB VI prescribes a graduated
+        # transition for cohorts 1947–1963 (Regelaltersgrenze 65y1m–66y10m);
+        # the cohort-aware lookup is deferred to Phase 10B with RuleType.CALCULATION.
+        description="Regelaltersgrenze: 67 Jahre (Jahrgang 1964 und später)",
         formal_expression="age >= 67",
-        citation="SGB VI, Para. 35, Para. 235",
+        citation="SGB VI, § 35, § 235",
         parameters={"min_age": resolve_param("de.rule.age.min_age")},
     ),
     LegalRule(
@@ -767,7 +770,7 @@ GERMANY_RULES = [
         rule_type=RuleType.RESIDENCY_MINIMUM,
         description="Allgemeine Wartezeit: mindestens 5 Jahre Beitragszeit",
         formal_expression="contribution_years >= 5",
-        citation="SGB VI, Para. 35, Para. 50",
+        citation="SGB VI, § 35, § 50",
         parameters={
                 "min_years": resolve_param("de.rule.wartezeit.min_years"),
                 "home_countries": resolve_param("de.rule.wartezeit.home_countries"),
@@ -776,11 +779,18 @@ GERMANY_RULES = [
     LegalRule(
         id="rule-de-beitragszeit",
         source_document_id="doc-de-sgb6",
-        source_section_ref="Para. 35",
+        source_section_ref="§ 64",
         rule_type=RuleType.RESIDENCY_PARTIAL,
-        description="Volle Rente mit 45 Beitragsjahren; anteilig mit 5-44 Jahren",
+        # Modelled simplification: the pro-ration shape (45 → full, 5–44 → partial)
+        # is a coarse stand-in for the German Rentenformel — pension amount is
+        # actually the product of Entgeltpunkte × Zugangsfaktor × aktueller
+        # Rentenwert, cited in § 64 SGB VI. The 45-year threshold separately
+        # unlocks the *Altersrente für besonders langjährig Versicherte* under
+        # § 236b SGB VI (earlier retirement, not a higher percentage). The full
+        # formula lands in Phase 10B with RuleType.CALCULATION.
+        description="Anteilige Rente nach Rentenformel (vereinfacht: bis 45 Beitragsjahre)",
         formal_expression="pension_ratio = min(contribution_years, 45) / 45",
-        citation="SGB VI, Para. 66",
+        citation="SGB VI, § 64 (Rentenformel); vgl. § 236b (besonders langjährig Versicherte)",
         parameters={
             "full_years": resolve_param("de.rule.beitragszeit.full_years"),
             "min_years": resolve_param("de.rule.beitragszeit.min_years"),
@@ -789,21 +799,28 @@ GERMANY_RULES = [
     LegalRule(
         id="rule-de-status",
         source_document_id="doc-de-sgb6",
-        source_section_ref="Para. 35",
+        source_section_ref="§ 1",
         rule_type=RuleType.LEGAL_STATUS,
-        description="Versicherter der gesetzlichen Rentenversicherung",
+        # Modelled simplification: German pension entitlement under § 1 SGB VI
+        # is contribution-based (you must be/have been a *Versicherter* through
+        # employment or equivalent activity), not status-based. We use legal_status
+        # here as a coarse proxy across all six jurisdictions; for DE the
+        # accurate gate is a verified Versicherungsverlauf, which the engine
+        # reads from rule-de-evidence + rule-de-wartezeit. RuleType.INSURED_STATUS
+        # would replace this proxy if added in a later phase.
+        description="Versicherter der gesetzlichen Rentenversicherung (Proxy: legal_status)",
         formal_expression="legal_status in ['citizen', 'permanent_resident']",
-        citation="SGB VI, Para. 1",
+        citation="SGB VI, § 1 (Versicherungspflichtige Personen)",
         parameters={"accepted_statuses": resolve_param("de.rule.status.accepted_statuses")},
     ),
     LegalRule(
         id="rule-de-evidence",
         source_document_id="doc-de-sgb6",
-        source_section_ref="Para. 35",
+        source_section_ref="§ 99 SGB VI; §§ 60–65 SGB I",
         rule_type=RuleType.EVIDENCE_REQUIRED,
-        description="Personalausweis oder Reisepass, Geburtsurkunde",
+        description="Personalausweis oder Reisepass, Geburtsurkunde (Mitwirkungspflicht)",
         formal_expression="has_evidence('birth_certificate') or has_evidence('id_card')",
-        citation="SGB VI, Para. 151",
+        citation="SGB I, §§ 60–65 (Mitwirkungspflichten); SGB VI, § 99 (Beginn der Rente)",
         parameters={"required_types": resolve_param("de.rule.evidence.required_types")},
     ),
 ]
@@ -849,7 +866,7 @@ def _germany_demo_cases() -> list[CaseBundle]:
                 ResidencyPeriod(country="Germany", start_date=date(1985, 4, 1), verified=True),
             ],
             evidence_items=[
-                EvidenceItem(evidence_type="birth_certificate", description="Geburtsurkunde (ubersetzt)", provided=True, verified=True),
+                EvidenceItem(evidence_type="birth_certificate", description="Geburtsurkunde (übersetzt)", provided=True, verified=True),
                 EvidenceItem(evidence_type="tax_record", description="Versicherungsverlauf DRV 1985-2025", provided=True, verified=True),
                 EvidenceItem(evidence_type="residency_declaration", description="Aufenthaltstitel", provided=True),
             ],
@@ -863,7 +880,7 @@ def _germany_demo_cases() -> list[CaseBundle]:
             ),
             residency_periods=[ResidencyPeriod(country="Germany", start_date=date(1950, 8, 3))],
             evidence_items=[
-                EvidenceItem(evidence_type="tax_record", description="Versicherungsverlauf (unvollstandig)", provided=True),
+                EvidenceItem(evidence_type="tax_record", description="Versicherungsverlauf (unvollständig)", provided=True),
             ],
         ),
     ]

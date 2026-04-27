@@ -26,7 +26,7 @@ values:
   value: Профiль заявника
   value_type: string
 - key: ui.label.case.audit_trail.de
-  value: Prufpfad
+  value: Prüfpfad
   value_type: string
 - key: ui.label.case.audit_trail.en
   value: Audit Trail
@@ -62,7 +62,7 @@ values:
   value: Докази
   value_type: string
 - key: ui.label.case.full_audit.de
-  value: Vollstandiges Prufpaket
+  value: Vollständiges Prüfpaket
   value_type: string
 - key: ui.label.case.full_audit.en
   value: Full Audit Package
@@ -80,7 +80,7 @@ values:
   value: Повний аудиторський пакет
   value_type: string
 - key: ui.label.case.human_review.de
-  value: Menschliche Prufung
+  value: Menschliche Prüfung
   value_type: string
 - key: ui.label.case.human_review.en
   value: Human Review
@@ -152,7 +152,7 @@ values:
   value: Iсторiя проживання
   value_type: string
 - key: ui.label.case.rule_assessment.de
-  value: Regel-fur-Regel-Bewertung
+  value: Regel-für-Regel-Bewertung
   value_type: string
 - key: ui.label.case.rule_assessment.en
   value: Rule-by-Rule Assessment
@@ -170,7 +170,7 @@ values:
   value: Оцiнка за правилами
   value_type: string
 - key: ui.label.common.back_to_cases.de
-  value: Zuruck zu den Fallen
+  value: Zurück zu den Fällen
   value_type: string
 - key: ui.label.common.back_to_cases.en
   value: Back to cases
@@ -278,7 +278,7 @@ values:
   value: Дii
   value_type: string
 - key: ui.label.dashboard.active_cases.de
-  value: Aktive Falle
+  value: Aktive Fälle
   value_type: string
 - key: ui.label.dashboard.active_cases.en
   value: Active Cases
@@ -368,7 +368,7 @@ values:
   value: Правовий статус
   value_type: string
 - key: ui.label.dashboard.title.de
-  value: Fallubersicht
+  value: Fallübersicht
   value_type: string
 - key: ui.label.dashboard.title.en
   value: Case Dashboard
@@ -386,7 +386,7 @@ values:
   value: Панель справ
   value_type: string
 - key: ui.label.footer.license.de
-  value: Offenes offentliches Gut (Apache 2.0)
+  value: Offenes öffentliches Gut (Apache 2.0)
   value_type: string
 - key: ui.label.footer.license.en
   value: Open Public Good (Apache 2.0)
@@ -458,7 +458,7 @@ values:
   value: API
   value_type: string
 - key: ui.label.nav.authority.de
-  value: Autoritatskette
+  value: Autoritätskette
   value_type: string
 - key: ui.label.nav.authority.en
   value: Authority Chain
@@ -476,7 +476,7 @@ values:
   value: Ланцюг повноважень
   value_type: string
 - key: ui.label.nav.cases.de
-  value: Falle
+  value: Fälle
   value_type: string
 - key: ui.label.nav.cases.en
   value: Cases
@@ -674,7 +674,7 @@ values:
   value: Передати керiвнику
   value_type: string
 - key: ui.label.review.modify.de
-  value: Ergebnis andern
+  value: Ergebnis ändern
   value_type: string
 - key: ui.label.review.modify.en
   value: Modify outcome
@@ -692,7 +692,7 @@ values:
   value: Змiнити результат
   value_type: string
 - key: ui.label.review.rationale.de
-  value: Begrundung
+  value: Begründung
   value_type: string
 - key: ui.label.review.rationale.en
   value: Rationale
@@ -746,7 +746,7 @@ values:
   value: Запросити додаткову iнформацiю
   value_type: string
 - key: ui.label.review.submit.de
-  value: Prufung einreichen
+  value: Prüfung einreichen
   value_type: string
 - key: ui.label.review.submit.en
   value: Submit Review
