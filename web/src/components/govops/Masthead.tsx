@@ -30,6 +30,7 @@ const TOP_NAV: NavItem[] = [
 // Console group: the operational surfaces. Reachable from a single entry on
 // desktop (dropdown), and listed inline on the mobile sheet under a heading.
 const CONSOLE_NAV: NavItem[] = [
+  { to: "/impact", id: "nav.impact" },
   { to: "/cases", id: "nav.cases" },
   { to: "/encode", id: "nav.encode" },
   { to: "/config", id: "nav.config" },

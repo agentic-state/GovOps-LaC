@@ -1,4 +1,11 @@
-import { Outlet, Link, createRootRoute, HeadContent, Scripts } from "@tanstack/react-router";
+import {
+  Outlet,
+  Link,
+  createRootRoute,
+  HeadContent,
+  Scripts,
+  useRouterState,
+} from "@tanstack/react-router";
 
 import appCss from "../styles.css?url";
 import { I18nProvider } from "@/lib/i18n";
@@ -89,6 +96,21 @@ function RootShell({ children }: { children: React.ReactNode }) {
 
 function RootComponent() {
   const { initialLocale } = Route.useLoaderData();
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  // Citizen-facing /screen surface uses its own ScreenShell — no global
+  // Masthead, no admin/officer chrome (govops-015 cross-cutting requirement).
+  const isScreen = pathname === "/screen" || pathname.startsWith("/screen/");
+  if (isScreen) {
+    return (
+      <ThemeProvider>
+        <I18nProvider initialLocale={initialLocale}>
+          <SkipToContent />
+          <Outlet />
+          <Toaster />
+        </I18nProvider>
+      </ThemeProvider>
+    );
+  }
   return (
     <ThemeProvider>
       <I18nProvider initialLocale={initialLocale}>

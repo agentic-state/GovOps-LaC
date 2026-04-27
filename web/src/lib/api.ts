@@ -30,7 +30,9 @@ import type {
   CreateConfigValueRequest,
   HealthResponse,
   HumanReviewAction,
+  ImpactResponse,
   Jurisdiction,
+  JurisdictionResponse,
   LegalDocument,
   LegalRule,
   Recommendation,
@@ -378,6 +380,25 @@ export async function switchJurisdiction(
   }
 }
 
+/**
+ * Fetch the public jurisdiction metadata (program name + label) used by
+ * the citizen-facing /screen route. In `VITE_USE_MOCK_API=true` mode the
+ * deterministic fixture is returned without touching the network. On any
+ * network/HTTP failure the caller decides what to do (the /screen loader
+ * falls back to a hardcoded label table for preview parity).
+ */
+export async function fetchJurisdiction(code: string): Promise<JurisdictionResponse> {
+  if (isMockMode()) {
+    const { MOCK_JURISDICTIONS } = await import("./mock-jurisdiction");
+    const hit = MOCK_JURISDICTIONS[code];
+    if (!hit) throw new Error(`Unknown jurisdiction: ${code}`);
+    return hit;
+  }
+  return fetcher<JurisdictionResponse>(
+    `/api/jurisdiction/${encodeURIComponent(code)}`,
+  );
+}
+
 // ---- Encoding pipeline (govops-011) ---------------------------------------
 
 const loadEncodeMocks = () => import("./mock-encode");
@@ -472,5 +493,47 @@ export async function commitBatch(batchId: string): Promise<{ committed_rule_ids
     );
   } catch {
     return (await loadEncodeMocks()).mockCommitBatch(batchId);
+  }
+}
+
+// ---- Citation impact (govops-014) ------------------------------------------
+
+export interface ImpactQueryOpts {
+  limit?: number;
+  page?: number;
+}
+
+export async function impactByCitation(
+  citation: string,
+  opts: ImpactQueryOpts = {},
+): Promise<ImpactResponse> {
+  const trimmed = citation.trim();
+  if (!trimmed)
+    return { query: "", total: 0, jurisdiction_count: 0, results: [], limit: opts.limit, page: opts.page, page_count: 0 };
+  const params = new URLSearchParams({ citation: trimmed });
+  if (opts.limit) params.set("limit", String(opts.limit));
+  if (opts.page) params.set("page", String(opts.page));
+  const qs = params.toString();
+  try {
+    return await fetcher<ImpactResponse>(`/api/impact?${qs}`);
+  } catch {
+    const { MOCK_IMPACT_RESPONSE } = await import("./mock-impact");
+    return MOCK_IMPACT_RESPONSE(trimmed, opts);
+  }
+}
+
+// ---- Self-screening (govops-015) -------------------------------------------
+
+import type { ScreenRequest, ScreenResponse } from "./types";
+
+export async function submitScreen(req: ScreenRequest): Promise<ScreenResponse> {
+  try {
+    return await fetcher<ScreenResponse>("/api/screen", {
+      method: "POST",
+      body: JSON.stringify(req),
+    });
+  } catch {
+    const { mockScreen } = await import("./mock-screen");
+    return mockScreen(req);
   }
 }

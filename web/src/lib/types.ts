@@ -86,6 +86,18 @@ export interface Jurisdiction {
   language_regime: string;
 }
 
+/**
+ * Shape returned by `GET /api/jurisdiction/{code}` for the citizen-facing
+ * /screen route. Distinct from the richer admin `Jurisdiction` interface
+ * above — only the fields the public surface needs.
+ */
+export interface JurisdictionResponse {
+  id: string;
+  jurisdiction_label: string;
+  program_name: string;
+  default_language: string;
+}
+
 export interface AuthorityReference {
   id: string;
   jurisdiction_id: string;
@@ -324,4 +336,79 @@ export interface EncodingBatchSummary {
   method: EncodeMethod;
   counts: Record<ProposalStatus, number>;
   created_at: string;
+}
+
+// ── Citation impact (govops-014) ────────────────────────────────────────────
+
+export interface ImpactResult {
+  jurisdiction_id: string | null;
+  jurisdiction_label: string;
+  values: ConfigValue[];
+}
+
+export interface ImpactResponse {
+  query: string;
+  total: number;
+  jurisdiction_count: number;
+  results: ImpactResult[];
+  /** Page-level metadata (govops-014 pagination). Optional for backwards compat. */
+  limit?: number;
+  page?: number;
+  page_count?: number;
+}
+
+// ── Self-screening (govops-015) ─────────────────────────────────────────────
+
+export const SCREEN_JURISDICTIONS = ["ca", "br", "es", "fr", "de", "ua"] as const;
+export type ScreenJurisdictionId = (typeof SCREEN_JURISDICTIONS)[number];
+
+export type ScreenLegalStatus = "citizen" | "permanent_resident" | "other";
+
+export type ScreenOutcome =
+  | "eligible"
+  | "ineligible"
+  | "insufficient_evidence"
+  | "escalate";
+
+export type ScreenRuleOutcome =
+  | "satisfied"
+  | "not_satisfied"
+  | "insufficient_evidence"
+  | "not_applicable";
+
+export interface ScreenResidencyPeriod {
+  country: string;
+  start_date: string;
+  end_date: string | null;
+}
+
+export interface ScreenRequest {
+  jurisdiction_id: string;
+  date_of_birth: string;
+  legal_status: ScreenLegalStatus;
+  country_of_birth?: string;
+  residency_periods: ScreenResidencyPeriod[];
+  evidence_present: { dob: boolean; residency: boolean };
+  evaluation_date?: string;
+}
+
+export interface ScreenRuleResult {
+  rule_id: string;
+  description: string;
+  citation: string;
+  outcome: ScreenRuleOutcome;
+  detail: string;
+  effective_from?: string;
+}
+
+export interface ScreenResponse {
+  outcome: ScreenOutcome;
+  pension_type: "full" | "partial" | "";
+  partial_ratio?: string;
+  rule_results: ScreenRuleResult[];
+  missing_evidence: string[];
+  jurisdiction_label: string;
+  evaluation_date: string;
+  /** Set client-side when the mock fallback ran. Never sent by the server. */
+  _preview?: boolean;
 }
