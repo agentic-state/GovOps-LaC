@@ -1,0 +1,14 @@
+# yaml-language-server: $schema=../../../schema/lawcode-v1.0.json
+# jp/config/jurisdiction.yaml — see ca/config/jurisdiction.yaml for the
+# load-bearing comment. Substrate-resolved per govops-022.
+
+defaults:
+  domain: jurisdiction
+  jurisdiction_id: jp-koukinenkin
+  effective_from: '1900-01-01'
+values:
+- key: jurisdiction.jp.howto_url
+  value: 'https://www.nenkin.go.jp/'
+  value_type: string
+  citation: '日本年金機構 (Japan Pension Service) — official portal'
+  rationale: 'Primary citizen-facing landing for 厚生年金保険 / 老齢基礎年金. Substrate-resolved per govops-022.'
