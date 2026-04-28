@@ -781,6 +781,7 @@
  "admin.federation.empty_registry_cta": "Lire la documentation de fédération",
  "admin.federation.fetch.diff": "Différence vs {previous} : {delta} fichiers",
  "admin.federation.fetch.signing_changed": "La clé de signature a changé depuis le dernier import.",
+ "cases.description": "Parcourez les décisions au cas par cas avec une traçabilité complète.",
  "breadcrumb.home": "Accueil",
  "breadcrumb.label": "Fil d'Ariane",
  "config.diff.crumb": "Diff",

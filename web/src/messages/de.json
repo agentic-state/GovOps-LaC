@@ -781,6 +781,7 @@
  "admin.federation.empty_registry_cta": "Föderations-Einrichtungsdokumentation lesen",
  "admin.federation.fetch.diff": "Unterschied zu {previous}: {delta} Dateien",
  "admin.federation.fetch.signing_changed": "Der Signaturschlüssel hat sich seit dem letzten Import geändert.",
+ "cases.description": "Durchsuchen Sie Fall-für-Fall-Entscheidungen mit vollständiger Prüfprotokoll-Nachverfolgbarkeit.",
  "breadcrumb.home": "Start",
  "breadcrumb.label": "Brotkrumen-Navigation",
  "config.diff.crumb": "Diff",

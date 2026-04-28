@@ -23,8 +23,7 @@ export const Route = createFileRoute("/cases")({
       { title: "Cases — GovOps" },
       {
         name: "description",
-        content:
-          "Operational case log: applicants, evaluations, and human-review actions.",
+        content: "Operational case log: applicants, evaluations, and human-review actions.",
       },
     ],
   }),
@@ -139,10 +138,7 @@ function CasesListPage() {
 
       {filtered.length === 0 ? (
         <div className="rounded-md border border-dashed border-border bg-surface p-8 text-center">
-          <p
-            className="text-lg text-foreground"
-            style={{ fontFamily: "var(--font-serif)" }}
-          >
+          <p className="text-lg text-foreground" style={{ fontFamily: "var(--font-serif)" }}>
             {intl.formatMessage({ id: "cases.list.empty.title" })}
           </p>
           <p className="mt-1 text-sm text-foreground-muted">

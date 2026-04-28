@@ -1,4 +1,10 @@
-import { createFileRoute, Outlet, useChildMatches, useNavigate, useSearch } from "@tanstack/react-router";
+import {
+  createFileRoute,
+  Outlet,
+  useChildMatches,
+  useNavigate,
+  useSearch,
+} from "@tanstack/react-router";
 import { useCallback, useMemo } from "react";
 import { FormattedMessage, useIntl } from "react-intl";
 

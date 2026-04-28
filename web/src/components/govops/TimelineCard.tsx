@@ -51,6 +51,8 @@ export function TimelineCard({
         // Pass the already-constructed `from` Date and fall back to `now` if
         // the source string was unparseable (e.g. a record loaded from
         // lawcode/ where effective_from defaulted to time-immemorial).
+        // Re-applied after Lovable upstream reverted the fix during the
+        // 4d9af640 SSR-locale-wiring batch.
         {
           key: cv.key,
           date: !Number.isNaN(from.getTime()) ? from : now,

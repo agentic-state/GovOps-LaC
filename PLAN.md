@@ -425,6 +425,25 @@ The full re-import landed at commit `<TBD>` (this commit), bringing user-insight
 
 **Status of the affected §12 entries**: each row that previously claimed "Shipped (2026-04-28)" was a true statement about user-insights-hub state but a **false statement about this repo until this commit landed**. The rows are kept here as provenance for the next reviewer; the failure mode they encode (PLAN claim outpacing the import) is the one this entry exists to prevent.
 
+### Phase 12 — v0.4.0 follow-up specs queued for next Lovable batch (2026-04-28)
+
+Three Lovable specs landed in `docs/` to seed the next Lovable cycle. Two of the three (021 + 023) shipped in user-insights-hub@4d9af640 and were re-imported here. govops-022 ships in two halves (backend prelude here, Lovable side queued).
+
+| # | Spec | Backend | Lovable | Follow-up |
+| --- | --- | --- | --- | --- |
+| 12.1 | [docs/govops-021-mock-federation-cleanup.md](docs/govops-021-mock-federation-cleanup.md) — drop `mock-federation.ts` since the backend ships real `/api/admin/federation/*` endpoints | n/a (PLAN §12 8.x.3 backend already shipped) | ✅ Shipped (Lovable@4d9af640, imported) | None |
+| 12.2 | [docs/govops-022-howto-url-as-configvalue.md](docs/govops-022-howto-url-as-configvalue.md) — move `HOWTO_URLS` from a hardcoded map to per-jurisdiction ConfigValue records | ✅ Shipped at commit `eec2ce0` — `jurisdiction.<code>.howto_url` ConfigValue × 6 jurisdictions, `GET /api/jurisdiction/{code}.howto_url` field, +7 tests | ⬜ Queued for next Lovable batch — read from `JurisdictionResponse.howto_url`, fall back to renamed `HOWTO_URLS_FALLBACK` | None on backend; Lovable side stays as a spec for the next batch |
+| 12.3 | [docs/govops-023-ssr-head-coverage.md](docs/govops-023-ssr-head-coverage.md) — i18n the route `head()` hooks for SSR `<title>` + `<meta name="description">` | n/a | ⚠️ Partial (Lovable@4d9af640, imported) — see below | See 12.3.x.1 below |
+
+#### 12.3.x — known limitations on the imported govops-023 surface
+
+| # | Limitation | Status | Follow-up |
+| --- | --- | --- | --- |
+| 12.3.x.1 | **SSR locale wiring is partial**. `head()` hooks now resolve titles + descriptions through `head-i18n.ts` for all 8 Phase-6 routes (✅ verified by per-route `<title>` non-empty assertion in `web/e2e/ssr-head.spec.ts`). The govops-locale-cookie path through `getSsrLocaleSync` was rewritten via `createIsomorphicFn` after Lovable's first cut shipped a `.server.ts/.client.ts` swap that doesn't exist in this version of TanStack Start. The build is now clean, but the cookie-localized SSR title doesn't actually appear in the SSR HTML stream — `head()` runs synchronously in a route-match context that doesn't carry request cookies through `getCookie`/`getRequestHeader`. Net effect: search engines + social-share embeds see English-only titles regardless of the visitor's locale; human readers see the English title for one paint then a client-side flip. | ⚠️ Test marked `test.fixme` in `web/e2e/ssr-head.spec.ts:41` with a precise comment explaining why. Build/tsc/lint clean; per-route `<title>` non-empty assertion passes. The cookie-on-SSR assertion is the one true gap. | **v0.5.0 work**: replace `createIsomorphicFn` with a server-fn that wraps the request context; thread the resolved locale through the route-match `loaderData` chain so child `head()` hooks can read it from `ctx.matches[0].loaderData.initialLocale` synchronously. Re-enable the `test.fixme` test once the SSR path is fixed. |
+| 12.3.x.2 | TimelineCard date-arg bug pre-exists in Lovable upstream (passes string into ICU `{date, date, medium}` placeholder, throws `RangeError: Invalid time value` on every render of /config timeline). Re-fix re-applied at the same Lovable-import boundary that re-introduced it. | ✅ Re-fixed in this import (TimelineCard.tsx:48 — `from` Date object passed in, fallback to `now` for unparseable timestamps) | When this bug re-appears in a future Lovable batch (which it will until the spec author flags it upstream): same one-line fix. Or send a Lovable spec to fix it once at source. |
+
+**Cumulative test-budget impact for Phase 12**: backend +7 (`tests/test_api_jurisdiction_howto.py`); web vitest 51 → 53 (+2 new tests imported with the artefact); Playwright +9 SSR-head tests (8 per-route + 1 `fixme` for cookie wiring).
+
 ### Phase 8 — Lovable extras + admin federation surface (2026-04-28)
 
 Originating spec: [docs/govops-020-admin-federation.md](docs/govops-020-admin-federation.md). The admin federation route exposes registry + imported packs + fetch form. Trust-decision authoring stays as a YAML PR per ADR-009's stance.

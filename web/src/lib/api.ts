@@ -403,24 +403,14 @@ import type {
   FederationRegistryEntry,
 } from "./federation-types";
 
-const loadFederationMocks = () => import("./mock-federation");
-
 export async function listFederationRegistry(): Promise<{
   entries: FederationRegistryEntry[];
 }> {
-  try {
-    return await fetcher("/api/admin/federation/registry");
-  } catch {
-    return (await loadFederationMocks()).mockListRegistry();
-  }
+  return fetcher("/api/admin/federation/registry");
 }
 
 export async function listFederationPacks(): Promise<{ packs: FederationPack[] }> {
-  try {
-    return await fetcher("/api/admin/federation/packs");
-  } catch {
-    return (await loadFederationMocks()).mockListPacks();
-  }
+  return fetcher("/api/admin/federation/packs");
 }
 
 export async function fetchFederationPack(
@@ -431,17 +421,9 @@ export async function fetchFederationPack(
     dry_run: opts.dryRun ? "true" : "false",
     allow_unsigned: opts.allowUnsigned ? "true" : "false",
   }).toString();
-  try {
-    return await fetcher(`/api/admin/federation/fetch/${encodeURIComponent(publisherId)}?${qs}`, {
-      method: "POST",
-    });
-  } catch (e) {
-    if (e instanceof TypeError) {
-      return (await loadFederationMocks()).mockFetchPack(publisherId, opts);
-    }
-    // Try mock for any other failure path too (preview parity).
-    return (await loadFederationMocks()).mockFetchPack(publisherId, opts);
-  }
+  return fetcher(`/api/admin/federation/fetch/${encodeURIComponent(publisherId)}?${qs}`, {
+    method: "POST",
+  });
 }
 
 export async function setFederationPackEnabled(
@@ -449,13 +431,9 @@ export async function setFederationPackEnabled(
   enabled: boolean,
 ): Promise<FederationPack> {
   const op = enabled ? "enable" : "disable";
-  try {
-    return await fetcher(`/api/admin/federation/packs/${encodeURIComponent(publisherId)}/${op}`, {
-      method: "POST",
-    });
-  } catch {
-    return (await loadFederationMocks()).mockTogglePack(publisherId, enabled);
-  }
+  return fetcher(`/api/admin/federation/packs/${encodeURIComponent(publisherId)}/${op}`, {
+    method: "POST",
+  });
 }
 
 // ---- Decision notices (govops-018) ----------------------------------------

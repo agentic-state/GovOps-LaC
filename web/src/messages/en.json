@@ -781,6 +781,7 @@
  "admin.federation.empty_registry_cta": "Read federation setup docs",
  "admin.federation.fetch.diff": "Diff vs {previous}: {delta} files",
  "admin.federation.fetch.signing_changed": "Signing key changed since the previous import.",
+ "cases.description": "Browse case-by-case decisions with full audit traceability.",
  "breadcrumb.home": "Home",
  "breadcrumb.label": "Breadcrumb",
  "config.diff.crumb": "Diff",

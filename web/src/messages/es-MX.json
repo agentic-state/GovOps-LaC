@@ -781,6 +781,7 @@
  "admin.federation.empty_registry_cta": "Leer documentación de federación",
  "admin.federation.fetch.diff": "Diferencia vs {previous}: {delta} archivos",
  "admin.federation.fetch.signing_changed": "La clave de firma cambió desde la importación anterior.",
+ "cases.description": "Navega por las decisiones caso por caso con plena trazabilidad de auditoría.",
  "breadcrumb.home": "Inicio",
  "breadcrumb.label": "Migas de pan",
  "config.diff.crumb": "Diff",

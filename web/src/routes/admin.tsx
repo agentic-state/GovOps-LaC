@@ -88,7 +88,12 @@ async function loadBundle(): Promise<Bundle> {
       null as { jurisdiction: Jurisdiction; chain: AuthorityReference[] } | null,
       errors,
     ),
-    safe("documents", () => listLegalDocuments().then((r) => r.documents), [] as LegalDocument[], errors),
+    safe(
+      "documents",
+      () => listLegalDocuments().then((r) => r.documents),
+      [] as LegalDocument[],
+      errors,
+    ),
     safe("rules", () => listRules().then((r) => r.rules), [] as LegalRule[], errors),
     safe(
       "configValues",
@@ -137,9 +142,7 @@ function AdminPage() {
 
   const handleRefresh = useCallback(() => {
     setAnnouncement(intl.formatMessage({ id: "admin.refreshing" }));
-    void load("refresh").then(() =>
-      setAnnouncement(intl.formatMessage({ id: "admin.refresh" })),
-    );
+    void load("refresh").then(() => setAnnouncement(intl.formatMessage({ id: "admin.refresh" })));
   }, [load, intl]);
 
   const handleSwitch = useCallback(
@@ -353,7 +356,7 @@ function AdminPage() {
             provenance={t.provenance}
             recentActivity={t.recent}
             loading={loading}
-            errorMsg={t.errKey ? bundle.errors[t.errKey] ?? null : null}
+            errorMsg={t.errKey ? (bundle.errors[t.errKey] ?? null) : null}
           />
         ))}
       </section>

@@ -11,7 +11,7 @@ const RULE_CHIP_CLASS: Record<ScreenRuleOutcome, string> = {
   not_applicable: "bg-foreground-muted/15 text-foreground-muted border-foreground-muted/30",
 };
 
-const HOWTO_URLS: Record<string, string> = {
+const HOWTO_URLS_FALLBACK: Record<string, string> = {
   ca: "https://www.canada.ca/en/services/benefits/publicpensions/cpp/old-age-security.html",
   br: "https://www.gov.br/inss/pt-br",
   es: "https://www.seg-social.es/",
@@ -25,14 +25,20 @@ export function ScreenResult({
   stale,
   jurisdictionId,
   onRerun,
+  howto_url,
 }: {
   data: ScreenResponse;
   stale: boolean;
   jurisdictionId: string;
   onRerun: () => void;
+  howto_url?: string | null;
 }) {
   const intl = useIntl();
   const sectionRef = useRef<HTMLElement>(null);
+  const resolvedHowtoUrl =
+    typeof howto_url === "string" && howto_url.length > 0
+      ? howto_url
+      : (HOWTO_URLS_FALLBACK[jurisdictionId] ?? "#");
 
   // a11y: pressing Esc inside the result returns focus to the first form input.
   useEffect(() => {
@@ -145,7 +151,7 @@ export function ScreenResult({
             {
               program: (
                 <a
-                  href={HOWTO_URLS[jurisdictionId] ?? "#"}
+                  href={resolvedHowtoUrl}
                   target="_blank"
                   rel="noreferrer noopener"
                   className="underline underline-offset-2 hover:text-foreground"

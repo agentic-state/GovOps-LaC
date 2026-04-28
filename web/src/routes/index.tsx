@@ -178,9 +178,7 @@ function Index() {
                   {t(`home.modules.${id}.title`)}
                 </h3>
               </div>
-              <p className="mt-2 text-sm text-foreground-muted">
-                {t(`home.modules.${id}.body`)}
-              </p>
+              <p className="mt-2 text-sm text-foreground-muted">{t(`home.modules.${id}.body`)}</p>
             </li>
           ))}
         </ul>

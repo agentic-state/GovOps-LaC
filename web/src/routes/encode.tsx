@@ -76,10 +76,7 @@ function EncodeListPage() {
             backgroundColor: "var(--agentic-soft)",
           }}
         >
-          <p
-            className="text-lg text-foreground"
-            style={{ fontFamily: "var(--font-serif)" }}
-          >
+          <p className="text-lg text-foreground" style={{ fontFamily: "var(--font-serif)" }}>
             {intl.formatMessage({ id: "encode.list.empty.title" })}
           </p>
           <p className="mt-1 text-sm text-foreground-muted">

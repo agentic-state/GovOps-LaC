@@ -6,6 +6,7 @@ import { BrandingCheck } from "@/components/govops/BrandingCheck";
 import { ReferenceCard } from "@/components/govops/ReferenceCard";
 import { PipelineDiagram } from "@/components/govops/PipelineDiagram";
 import { AuthorityChainDiagram } from "@/components/govops/AuthorityChainDiagram";
+import { t, localeFromMatches } from "@/lib/head-i18n";
 
 /**
  * Repo base for in-repo doc links. Markdown files are not served by the SPA,
@@ -25,22 +26,17 @@ const PROJECT_HOME =
   "https://eva-foundry.github.io/61-GovOps/";
 
 export const Route = createFileRoute("/about")({
-  head: () => ({
-    meta: [
-      { title: "About — GovOps" },
-      {
-        name: "description",
-        content:
-          "GovOps is an independent open-source Law-as-Code reference implementation: legislation translated into deterministic, auditable, jurisdiction-aware software with full provenance from decision to source authority.",
-      },
-      { property: "og:title", content: "About — GovOps" },
-      {
-        property: "og:description",
-        content:
-          "Independent open-source Law-as-Code reference implementation. Six jurisdictions, six languages, deterministic engine, full audit trail.",
-      },
-    ],
-  }),
+  head: ({ matches }) => {
+    const l = localeFromMatches(matches);
+    return {
+      meta: [
+        { title: t("about.title", l) },
+        { name: "description", content: t("about.lede", l) },
+        { property: "og:title", content: t("about.title", l) },
+        { property: "og:description", content: t("about.lede", l) },
+      ],
+    };
+  },
   component: About,
 });
 

@@ -96,6 +96,13 @@ export interface JurisdictionResponse {
   jurisdiction_label: string;
   program_name: string;
   default_language: string;
+  /**
+   * Substrate-resolved external "How to apply" landing URL for the
+   * jurisdiction (`jurisdiction.<code>.howto_url` ConfigValue). May be
+   * `null` when the substrate has no record; callers fall back to a
+   * compiled-in table for preview parity.
+   */
+  howto_url: string | null;
 }
 
 export interface AuthorityReference {
