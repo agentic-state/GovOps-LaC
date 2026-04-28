@@ -31,6 +31,7 @@ dependencies = [
     "python-ulid>=2.0.0",
     "pyyaml>=6.0",
     "sqlmodel>=0.0.16",
+    "cryptography>=42.0.0",  # Phase 8 / ADR-009 — Ed25519 signing for lawcode federation
 ]
 
 [project.optional-dependencies]
