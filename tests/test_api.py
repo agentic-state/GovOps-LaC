@@ -19,7 +19,10 @@ class TestHealthAndMetadata:
         data = r.json()
         assert data["status"] == "healthy"
         assert "available_jurisdictions" in data
-        assert len(data["available_jurisdictions"]) == 6
+        # 7 jurisdictions: 6 originals + jp added 2026-04-28 (PLAN §11
+        # jurisdiction-freeze lift; substrate-as-truth proof for v2.0
+        # success criterion #2).
+        assert len(data["available_jurisdictions"]) == 7
 
     def test_authority_chain(self, client):
         r = client.get("/api/authority-chain")
@@ -221,6 +224,42 @@ class TestMultiJurisdiction:
         r = client.post("/api/cases/demo-de-002/evaluate")
         assert r.status_code == 200
         assert r.json()["recommendation"]["outcome"] == "ineligible"
+
+    def test_evaluate_japan_cases(self, client):
+        # 7th jurisdiction added 2026-04-28 (PLAN §11 freeze lift). Walk
+        # all four demo cases to prove the YAML-loaded substrate alone
+        # is enough to evaluate eligible-full / under-age / partial /
+        # insufficient-evidence outcomes against the engine.
+        client.post("/api/jurisdiction/jp")
+        # Case 1: eligible (full pension — 65+, 40+ years contribution)
+        r = client.post("/api/cases/demo-jp-001/evaluate")
+        assert r.status_code == 200
+        assert r.json()["recommendation"]["outcome"] == "eligible"
+        # Case 2: ineligible (under age threshold of 65)
+        r = client.post("/api/cases/demo-jp-002/evaluate")
+        assert r.status_code == 200
+        assert r.json()["recommendation"]["outcome"] == "ineligible"
+        # Case 3: eligible but partial pension (>10 years, <40 years
+        # contribution as a permanent resident)
+        r = client.post("/api/cases/demo-jp-003/evaluate")
+        assert r.status_code == 200
+        assert r.json()["recommendation"]["outcome"] == "eligible"
+        # Case 4: insufficient evidence (no birth_certificate /
+        # residence_card; only a partial tax record)
+        r = client.post("/api/cases/demo-jp-004/evaluate")
+        assert r.status_code == 200
+        assert r.json()["recommendation"]["outcome"] == "insufficient_evidence"
+
+    def test_japan_jurisdiction_metadata(self, client):
+        # GET /api/jurisdiction/jp must surface the program name + the
+        # substrate-resolved howto_url field shipped via govops-022.
+        r = client.get("/api/jurisdiction/jp")
+        assert r.status_code == 200
+        data = r.json()
+        assert data["id"] == "jur-jp-national"
+        assert "Kosei Nenkin Hoken" in data["program_name"]
+        assert isinstance(data["howto_url"], str)
+        assert "nenkin.go.jp" in data["howto_url"]
 
     def test_invalid_jurisdiction(self, client):
         r = client.post("/api/jurisdiction/xx")

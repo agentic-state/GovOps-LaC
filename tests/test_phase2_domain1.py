@@ -57,6 +57,13 @@ RULE_KEY_MAP = {
     "rule-ua-stazh-calc": ("ua", "stazh-calc"),
     "rule-ua-status": ("ua", "status"),
     "rule-ua-evidence": ("ua", "evidence"),
+    # jp (7th jurisdiction — PLAN §11 jurisdiction-freeze lifted via
+    # docs/jp-seventh-country.md after Phase 3 exit)
+    "rule-jp-age": ("jp", "age"),
+    "rule-jp-contribution": ("jp", "contribution"),
+    "rule-jp-contribution-calc": ("jp", "contribution-calc"),
+    "rule-jp-status": ("jp", "status"),
+    "rule-jp-evidence": ("jp", "evidence"),
 }
 
 
