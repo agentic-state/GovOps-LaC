@@ -1,0 +1,140 @@
+# yaml-language-server: $schema=../../schema/lawcode-v1.0.json
+# global/notices.yaml — citizen-facing decision-notice templates (Phase 10C / ADR-012).
+# Per ADR-008 + ADR-012, template records require dual approval (author ≠ approved_by).
+# Per ADR-006, granularity is one record per template.
+#
+# Templates are Jinja2 with the following bindings provided by `notices.render_html()`:
+#   case               — CaseBundle (or transient screen-case)
+#   recommendation     — Recommendation (with optional benefit_amount)
+#   jurisdiction       — Jurisdiction record
+#   program_name       — Localized program name
+#   evaluation_date    — ISO date string
+#   rendered_at_utc    — ISO datetime string (UTC, second precision)
+#   template_version   — ConfigValue id of the resolved template record
+#   t                  — i18n function: t(key, lang) → str
+#   lang               — Active locale code (en, fr, pt-BR, es-MX, de, uk)
+# Template authors should keep markup self-contained: no remote stylesheets,
+# no JS, no remote fonts. Inline CSS only. The notice is meant to survive
+# Save Page As / Print to PDF without external dependencies.
+
+defaults:
+  domain: template
+  jurisdiction_id: global
+  effective_from: '1900-01-01'
+  value_type: template
+values:
+  - key: global.template.notice.ca-oas-decision
+    citation: "GovOps notice template v1.0 — derived from OAS Act and the existing /api/cases/{id}/audit shape"
+    rationale: |
+      Citizen-facing decision notice for Canadian Old Age Security cases. Renders the
+      eligibility verdict, pension type, prorated amount with formula trace, the
+      rule-by-rule assessment (with citations), missing evidence list, and the
+      mandatory disclaimer. The notice is self-contained HTML so a citizen who saves
+      or prints it gets a portable, reproducible artefact whose sha256 hash is
+      recorded in the audit trail at render time.
+    author: govops-maintainers
+    approved_by: govops-reviewers
+    value: |-
+      <!DOCTYPE html>
+      <html lang="{{ lang }}">
+      <head>
+        <meta charset="utf-8">
+        <title>{{ t('notice.title', lang) }} — {{ program_name }}</title>
+        <style>
+          body { font-family: Georgia, 'Times New Roman', serif; max-width: 720px; margin: 2rem auto; padding: 0 1.5rem; color: #1a1a1a; line-height: 1.5; }
+          header { border-bottom: 2px solid #1a1a1a; padding-bottom: 1rem; margin-bottom: 1.5rem; }
+          header h1 { margin: 0 0 0.25rem 0; font-size: 1.5rem; }
+          header .subtitle { color: #555; font-size: 0.95rem; }
+          .meta { font-size: 0.85rem; color: #555; margin-bottom: 1.5rem; }
+          .meta dt { display: inline; font-weight: bold; }
+          .meta dd { display: inline; margin: 0 1rem 0 0.25rem; }
+          h2 { font-size: 1.1rem; border-bottom: 1px solid #ccc; padding-bottom: 0.25rem; margin-top: 2rem; }
+          .verdict { padding: 1rem 1.25rem; border-left: 4px solid #1a1a1a; background: #f7f7f5; margin: 1rem 0; }
+          .verdict.eligible { border-color: #2a6a3a; }
+          .verdict.ineligible { border-color: #8a2a2a; }
+          .verdict.insufficient { border-color: #8a6a2a; }
+          .verdict .headline { font-weight: bold; font-size: 1.1rem; margin: 0 0 0.5rem 0; }
+          .amount-figure { font-size: 1.5rem; font-weight: bold; }
+          .amount-caption { color: #555; font-size: 0.9rem; }
+          .formula-trace { font-family: 'Courier New', monospace; font-size: 0.85rem; background: #fafafa; padding: 0.75rem 1rem; border: 1px solid #e0e0e0; }
+          .formula-trace .step { padding: 0.15rem 0; }
+          .formula-trace .citation { color: #555; font-size: 0.8rem; padding-left: 1rem; }
+          ul.rules { list-style: none; padding-left: 0; }
+          ul.rules li { padding: 0.5rem 0; border-bottom: 1px dashed #ddd; }
+          ul.rules .outcome { font-weight: bold; padding-right: 0.5rem; }
+          ul.rules .outcome.satisfied { color: #2a6a3a; }
+          ul.rules .outcome.not_satisfied { color: #8a2a2a; }
+          ul.rules .outcome.insufficient_evidence { color: #8a6a2a; }
+          ul.rules .citation { display: block; color: #555; font-size: 0.85rem; padding-top: 0.15rem; }
+          .missing-evidence li { color: #8a6a2a; }
+          .disclaimer { margin-top: 2.5rem; padding: 1rem 1.25rem; border: 2px solid #8a6a2a; background: #fdf6e3; font-size: 0.9rem; }
+          footer { margin-top: 2.5rem; padding-top: 1rem; border-top: 1px solid #ddd; font-size: 0.8rem; color: #777; }
+          footer .hash-context { font-family: 'Courier New', monospace; font-size: 0.75rem; }
+        </style>
+      </head>
+      <body>
+        <header>
+          <h1>{{ program_name }}</h1>
+          <div class="subtitle">{{ jurisdiction.name }} — {{ t('notice.subtitle', lang) }}</div>
+        </header>
+
+        <dl class="meta">
+          <dt>{{ t('notice.case_id', lang) }}:</dt><dd>{{ case.id }}</dd>
+          <dt>{{ t('notice.evaluation_date', lang) }}:</dt><dd>{{ evaluation_date }}</dd>
+          <dt>{{ t('notice.template_version', lang) }}:</dt><dd>{{ template_version }}</dd>
+        </dl>
+
+        <section class="verdict {{ recommendation.outcome.value if recommendation.outcome.value != 'insufficient_evidence' else 'insufficient' }}">
+          <p class="headline">{{ t('notice.verdict.' + recommendation.outcome.value, lang) }}</p>
+          {% if recommendation.pension_type %}
+          <p>{{ t('notice.pension_type.' + recommendation.pension_type, lang) }}{% if recommendation.partial_ratio %} — {{ recommendation.partial_ratio }}{% endif %}</p>
+          {% endif %}
+        </section>
+
+        {% if recommendation.benefit_amount %}
+        <h2>{{ t('notice.amount_heading', lang) }}</h2>
+        <p class="amount-figure">{{ "%.2f"|format(recommendation.benefit_amount.value) }} {{ recommendation.benefit_amount.currency }} <span class="amount-caption">/ {{ t('notice.period.' + recommendation.benefit_amount.period, lang) }}</span></p>
+
+        <h2>{{ t('notice.formula_heading', lang) }}</h2>
+        <div class="formula-trace">
+          {% for step in recommendation.benefit_amount.formula_trace %}
+          <div class="step">
+            <strong>{{ t('notice.op.' + step.op, lang) }}</strong>
+            ({{ step.inputs|join(', ') }}) → {{ "%.4f"|format(step.output) }}
+            {% if step.note %} <em>— {{ step.note }}</em>{% endif %}
+            {% if step.citation %}<div class="citation">{{ step.citation }}</div>{% endif %}
+          </div>
+          {% endfor %}
+        </div>
+        {% endif %}
+
+        <h2>{{ t('notice.rules_heading', lang) }}</h2>
+        <ul class="rules">
+          {% for r in recommendation.rule_evaluations %}
+          <li>
+            <span class="outcome {{ r.outcome.value }}">[{{ t('notice.outcome.' + r.outcome.value, lang) }}]</span>
+            {{ r.rule_description }}
+            <span class="citation">{{ r.citation }}</span>
+            {% if r.detail %}<span class="citation">{{ r.detail }}</span>{% endif %}
+          </li>
+          {% endfor %}
+        </ul>
+
+        {% if recommendation.missing_evidence %}
+        <h2>{{ t('notice.missing_evidence_heading', lang) }}</h2>
+        <ul class="missing-evidence">
+          {% for m in recommendation.missing_evidence %}<li>{{ m }}</li>{% endfor %}
+        </ul>
+        {% endif %}
+
+        <section class="disclaimer">
+          <strong>{{ t('notice.disclaimer_heading', lang) }}</strong>
+          <p>{{ t('notice.disclaimer_body', lang) }}</p>
+        </section>
+
+        <footer>
+          <div>{{ t('notice.footer_generated', lang) }} {{ rendered_at_utc }} UTC.</div>
+          <div class="hash-context">{{ t('notice.footer_hash_note', lang) }}</div>
+        </footer>
+      </body>
+      </html>

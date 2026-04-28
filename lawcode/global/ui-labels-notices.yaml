@@ -1,0 +1,443 @@
+# yaml-language-server: $schema=../../schema/lawcode-v1.0.json
+# global/ui-labels-notices.yaml — citizen decision-notice strings (Phase 10C / ADR-012).
+# One record per (key, lang); 6 locales × ~30 strings = ~180 records.
+# pt/es/de/uk are best-effort initial translations. Translators welcome to PR refinements.
+
+defaults:
+  domain: ui
+  jurisdiction_id: global
+  effective_from: '1900-01-01'
+  value_type: string
+values:
+- key: ui.label.notice.amount_heading.de
+  value: 'Voraussichtlicher Betrag'
+- key: ui.label.notice.amount_heading.en
+  value: 'Projected amount'
+- key: ui.label.notice.amount_heading.es
+  value: 'Importe proyectado'
+- key: ui.label.notice.amount_heading.fr
+  value: 'Montant projeté'
+- key: ui.label.notice.amount_heading.pt
+  value: 'Valor projetado'
+- key: ui.label.notice.amount_heading.uk
+  value: 'Прогнозована сума'
+- key: ui.label.notice.case_id.de
+  value: 'Fall'
+- key: ui.label.notice.case_id.en
+  value: 'Case'
+- key: ui.label.notice.case_id.es
+  value: 'Caso'
+- key: ui.label.notice.case_id.fr
+  value: 'Dossier'
+- key: ui.label.notice.case_id.pt
+  value: 'Caso'
+- key: ui.label.notice.case_id.uk
+  value: 'Справа'
+- key: ui.label.notice.disclaimer_body.de
+  value: 'GovOps ist ein unabhängiger Open-Source-Prototyp. Diese Mitteilung ist keine amtliche Entscheidung. Beantragen Sie über das Programm eine maßgebliche Entscheidung.'
+- key: ui.label.notice.disclaimer_body.en
+  value: 'GovOps is an independent open-source prototype. This notice is not an official determination. Apply through the program for an authoritative decision.'
+- key: ui.label.notice.disclaimer_body.es
+  value: 'GovOps es un prototipo independiente de código abierto. Este aviso no es una determinación oficial. Solicite a través del programa para una decisión oficial.'
+- key: ui.label.notice.disclaimer_body.fr
+  value: 'GovOps est un prototype indépendant en source ouverte. Cet avis n''est pas une décision officielle. Demandez à travers le programme pour une décision faisant autorité.'
+- key: ui.label.notice.disclaimer_body.pt
+  value: 'GovOps é um protótipo independente de código aberto. Este aviso não é uma determinação oficial. Solicite através do programa para uma decisão oficial.'
+- key: ui.label.notice.disclaimer_body.uk
+  value: 'GovOps - незалежний прототип з вiдкритим кодом. Це повiдомлення не є офiцiйним рiшенням. Подайте заявку через програму для отримання офiцiйного рiшення.'
+- key: ui.label.notice.disclaimer_heading.de
+  value: 'Dies ist Entscheidungsunterstützung, keine Entscheidung.'
+- key: ui.label.notice.disclaimer_heading.en
+  value: 'This is decision support, not a determination.'
+- key: ui.label.notice.disclaimer_heading.es
+  value: 'Esto es apoyo a la decisión, no una determinación.'
+- key: ui.label.notice.disclaimer_heading.fr
+  value: 'Ceci est un soutien à la décision, pas une décision.'
+- key: ui.label.notice.disclaimer_heading.pt
+  value: 'Este é um apoio à decisão, não uma determinação.'
+- key: ui.label.notice.disclaimer_heading.uk
+  value: 'Це пiдтримка рiшення, а не саме рiшення.'
+- key: ui.label.notice.evaluation_date.de
+  value: 'Bewertungsdatum'
+- key: ui.label.notice.evaluation_date.en
+  value: 'Evaluation date'
+- key: ui.label.notice.evaluation_date.es
+  value: 'Fecha de evaluación'
+- key: ui.label.notice.evaluation_date.fr
+  value: 'Date d''évaluation'
+- key: ui.label.notice.evaluation_date.pt
+  value: 'Data da avaliação'
+- key: ui.label.notice.evaluation_date.uk
+  value: 'Дата оцiнки'
+- key: ui.label.notice.footer_generated.de
+  value: 'Erstellt am'
+- key: ui.label.notice.footer_generated.en
+  value: 'Generated at'
+- key: ui.label.notice.footer_generated.es
+  value: 'Generado en'
+- key: ui.label.notice.footer_generated.fr
+  value: 'Généré le'
+- key: ui.label.notice.footer_generated.pt
+  value: 'Gerado em'
+- key: ui.label.notice.footer_generated.uk
+  value: 'Створено'
+- key: ui.label.notice.footer_hash_note.de
+  value: 'Der sha256 dieser Mitteilung wird im Audit-Pfad des Falls aufgezeichnet. Zur Reproduktion: erneut mit der aufgezeichneten Vorlagenversion gegen den Fall in dem Zustand rendern, in dem er am Bewertungsdatum war.'
+- key: ui.label.notice.footer_hash_note.en
+  value: 'This notice''s sha256 is recorded in the case audit trail. To reproduce: re-render with the recorded template version against the case as it stood on the evaluation date.'
+- key: ui.label.notice.footer_hash_note.es
+  value: 'El sha256 de este aviso se registra en el rastro de auditoría del caso. Para reproducir: vuelva a renderizar con la versión de plantilla registrada contra el caso tal como estaba en la fecha de evaluación.'
+- key: ui.label.notice.footer_hash_note.fr
+  value: 'Le sha256 de cet avis est enregistré dans la piste d''audit du dossier. Pour reproduire : refaire le rendu avec la version du modèle enregistrée contre le dossier tel qu''il était à la date d''évaluation.'
+- key: ui.label.notice.footer_hash_note.pt
+  value: 'O sha256 deste aviso é registrado na trilha de auditoria do caso. Para reproduzir: renderize novamente com a versão do modelo registrada em relação ao caso como estava na data de avaliação.'
+- key: ui.label.notice.footer_hash_note.uk
+  value: 'Sha256 цього повiдомлення записано у журналi аудиту справи. Для вiдтворення: повторно згенерувати з записаною версiєю шаблону проти справи у станi на дату оцiнки.'
+- key: ui.label.notice.formula_heading.de
+  value: 'Wie dies berechnet wird'
+- key: ui.label.notice.formula_heading.en
+  value: 'How this is calculated'
+- key: ui.label.notice.formula_heading.es
+  value: 'Cómo se calcula esto'
+- key: ui.label.notice.formula_heading.fr
+  value: 'Comment ceci est calculé'
+- key: ui.label.notice.formula_heading.pt
+  value: 'Como isto é calculado'
+- key: ui.label.notice.formula_heading.uk
+  value: 'Як це розраховано'
+- key: ui.label.notice.missing_evidence_heading.de
+  value: 'Fehlende Nachweise'
+- key: ui.label.notice.missing_evidence_heading.en
+  value: 'Missing evidence'
+- key: ui.label.notice.missing_evidence_heading.es
+  value: 'Evidencia faltante'
+- key: ui.label.notice.missing_evidence_heading.fr
+  value: 'Preuves manquantes'
+- key: ui.label.notice.missing_evidence_heading.pt
+  value: 'Provas em falta'
+- key: ui.label.notice.missing_evidence_heading.uk
+  value: 'Бракуючi докази'
+- key: ui.label.notice.op.add.de
+  value: 'addieren'
+- key: ui.label.notice.op.add.en
+  value: 'add'
+- key: ui.label.notice.op.add.es
+  value: 'sumar'
+- key: ui.label.notice.op.add.fr
+  value: 'additionner'
+- key: ui.label.notice.op.add.pt
+  value: 'somar'
+- key: ui.label.notice.op.add.uk
+  value: 'додати'
+- key: ui.label.notice.op.clamp.de
+  value: 'begrenzen'
+- key: ui.label.notice.op.clamp.en
+  value: 'clamp'
+- key: ui.label.notice.op.clamp.es
+  value: 'limitar'
+- key: ui.label.notice.op.clamp.fr
+  value: 'borner'
+- key: ui.label.notice.op.clamp.pt
+  value: 'limitar'
+- key: ui.label.notice.op.clamp.uk
+  value: 'обмежити'
+- key: ui.label.notice.op.const.de
+  value: 'Konstante'
+- key: ui.label.notice.op.const.en
+  value: 'constant'
+- key: ui.label.notice.op.const.es
+  value: 'constante'
+- key: ui.label.notice.op.const.fr
+  value: 'constante'
+- key: ui.label.notice.op.const.pt
+  value: 'constante'
+- key: ui.label.notice.op.const.uk
+  value: 'константа'
+- key: ui.label.notice.op.divide.de
+  value: 'dividieren'
+- key: ui.label.notice.op.divide.en
+  value: 'divide'
+- key: ui.label.notice.op.divide.es
+  value: 'dividir'
+- key: ui.label.notice.op.divide.fr
+  value: 'diviser'
+- key: ui.label.notice.op.divide.pt
+  value: 'dividir'
+- key: ui.label.notice.op.divide.uk
+  value: 'подiлити'
+- key: ui.label.notice.op.field.de
+  value: 'Falleingabe'
+- key: ui.label.notice.op.field.en
+  value: 'case input'
+- key: ui.label.notice.op.field.es
+  value: 'dato del caso'
+- key: ui.label.notice.op.field.fr
+  value: 'donnée du cas'
+- key: ui.label.notice.op.field.pt
+  value: 'dado do caso'
+- key: ui.label.notice.op.field.uk
+  value: 'вхiд справи'
+- key: ui.label.notice.op.max.de
+  value: 'Maximum'
+- key: ui.label.notice.op.max.en
+  value: 'maximum'
+- key: ui.label.notice.op.max.es
+  value: 'máximo'
+- key: ui.label.notice.op.max.fr
+  value: 'maximum'
+- key: ui.label.notice.op.max.pt
+  value: 'máximo'
+- key: ui.label.notice.op.max.uk
+  value: 'максимум'
+- key: ui.label.notice.op.min.de
+  value: 'Minimum'
+- key: ui.label.notice.op.min.en
+  value: 'minimum'
+- key: ui.label.notice.op.min.es
+  value: 'mínimo'
+- key: ui.label.notice.op.min.fr
+  value: 'minimum'
+- key: ui.label.notice.op.min.pt
+  value: 'mínimo'
+- key: ui.label.notice.op.min.uk
+  value: 'мiнiмум'
+- key: ui.label.notice.op.multiply.de
+  value: 'multiplizieren'
+- key: ui.label.notice.op.multiply.en
+  value: 'multiply'
+- key: ui.label.notice.op.multiply.es
+  value: 'multiplicar'
+- key: ui.label.notice.op.multiply.fr
+  value: 'multiplier'
+- key: ui.label.notice.op.multiply.pt
+  value: 'multiplicar'
+- key: ui.label.notice.op.multiply.uk
+  value: 'помножити'
+- key: ui.label.notice.op.ref.de
+  value: 'Nachschlagewert'
+- key: ui.label.notice.op.ref.en
+  value: 'lookup'
+- key: ui.label.notice.op.ref.es
+  value: 'valor oficial'
+- key: ui.label.notice.op.ref.fr
+  value: 'valeur officielle'
+- key: ui.label.notice.op.ref.pt
+  value: 'valor oficial'
+- key: ui.label.notice.op.ref.uk
+  value: 'офiцiйне значення'
+- key: ui.label.notice.op.subtract.de
+  value: 'subtrahieren'
+- key: ui.label.notice.op.subtract.en
+  value: 'subtract'
+- key: ui.label.notice.op.subtract.es
+  value: 'restar'
+- key: ui.label.notice.op.subtract.fr
+  value: 'soustraire'
+- key: ui.label.notice.op.subtract.pt
+  value: 'subtrair'
+- key: ui.label.notice.op.subtract.uk
+  value: 'вiдняти'
+- key: ui.label.notice.outcome.insufficient_evidence.de
+  value: 'BENÖTIGT'
+- key: ui.label.notice.outcome.insufficient_evidence.en
+  value: 'NEED'
+- key: ui.label.notice.outcome.insufficient_evidence.es
+  value: 'FALTA'
+- key: ui.label.notice.outcome.insufficient_evidence.fr
+  value: 'MANQUE'
+- key: ui.label.notice.outcome.insufficient_evidence.pt
+  value: 'NECESSÁRIO'
+- key: ui.label.notice.outcome.insufficient_evidence.uk
+  value: 'ПОТРІБНО'
+- key: ui.label.notice.outcome.not_applicable.de
+  value: 'N/A'
+- key: ui.label.notice.outcome.not_applicable.en
+  value: 'N/A'
+- key: ui.label.notice.outcome.not_applicable.es
+  value: 'N/A'
+- key: ui.label.notice.outcome.not_applicable.fr
+  value: 'S.O.'
+- key: ui.label.notice.outcome.not_applicable.pt
+  value: 'N/A'
+- key: ui.label.notice.outcome.not_applicable.uk
+  value: 'Н/З'
+- key: ui.label.notice.outcome.not_satisfied.de
+  value: 'NICHT ERFÜLLT'
+- key: ui.label.notice.outcome.not_satisfied.en
+  value: 'FAIL'
+- key: ui.label.notice.outcome.not_satisfied.es
+  value: 'RECHAZADO'
+- key: ui.label.notice.outcome.not_satisfied.fr
+  value: 'ÉCHEC'
+- key: ui.label.notice.outcome.not_satisfied.pt
+  value: 'REPROVADO'
+- key: ui.label.notice.outcome.not_satisfied.uk
+  value: 'НЕ ВИКОНАНО'
+- key: ui.label.notice.outcome.satisfied.de
+  value: 'ERFÜLLT'
+- key: ui.label.notice.outcome.satisfied.en
+  value: 'PASS'
+- key: ui.label.notice.outcome.satisfied.es
+  value: 'APROBADO'
+- key: ui.label.notice.outcome.satisfied.fr
+  value: 'RÉUSSI'
+- key: ui.label.notice.outcome.satisfied.pt
+  value: 'APROVADO'
+- key: ui.label.notice.outcome.satisfied.uk
+  value: 'ВИКОНАНО'
+- key: ui.label.notice.pension_type.full.de
+  value: 'Volle Rente'
+- key: ui.label.notice.pension_type.full.en
+  value: 'Full pension'
+- key: ui.label.notice.pension_type.full.es
+  value: 'Pensión completa'
+- key: ui.label.notice.pension_type.full.fr
+  value: 'Pension complète'
+- key: ui.label.notice.pension_type.full.pt
+  value: 'Pensão integral'
+- key: ui.label.notice.pension_type.full.uk
+  value: 'Повна пенсiя'
+- key: ui.label.notice.pension_type.partial.de
+  value: 'Teilrente'
+- key: ui.label.notice.pension_type.partial.en
+  value: 'Partial pension'
+- key: ui.label.notice.pension_type.partial.es
+  value: 'Pensión parcial'
+- key: ui.label.notice.pension_type.partial.fr
+  value: 'Pension partielle'
+- key: ui.label.notice.pension_type.partial.pt
+  value: 'Pensão parcial'
+- key: ui.label.notice.pension_type.partial.uk
+  value: 'Часткова пенсiя'
+- key: ui.label.notice.period.annual.de
+  value: 'Jahr'
+- key: ui.label.notice.period.annual.en
+  value: 'year'
+- key: ui.label.notice.period.annual.es
+  value: 'año'
+- key: ui.label.notice.period.annual.fr
+  value: 'an'
+- key: ui.label.notice.period.annual.pt
+  value: 'ano'
+- key: ui.label.notice.period.annual.uk
+  value: 'рiк'
+- key: ui.label.notice.period.lump_sum.de
+  value: 'Einmalbetrag'
+- key: ui.label.notice.period.lump_sum.en
+  value: 'lump sum'
+- key: ui.label.notice.period.lump_sum.es
+  value: 'suma global'
+- key: ui.label.notice.period.lump_sum.fr
+  value: 'somme forfaitaire'
+- key: ui.label.notice.period.lump_sum.pt
+  value: 'soma única'
+- key: ui.label.notice.period.lump_sum.uk
+  value: 'одноразова виплата'
+- key: ui.label.notice.period.monthly.de
+  value: 'Monat'
+- key: ui.label.notice.period.monthly.en
+  value: 'month'
+- key: ui.label.notice.period.monthly.es
+  value: 'mes'
+- key: ui.label.notice.period.monthly.fr
+  value: 'mois'
+- key: ui.label.notice.period.monthly.pt
+  value: 'mês'
+- key: ui.label.notice.period.monthly.uk
+  value: 'мiсяць'
+- key: ui.label.notice.rules_heading.de
+  value: 'Regelbasierte Bewertung'
+- key: ui.label.notice.rules_heading.en
+  value: 'Rule-by-rule assessment'
+- key: ui.label.notice.rules_heading.es
+  value: 'Evaluación regla por regla'
+- key: ui.label.notice.rules_heading.fr
+  value: 'Évaluation règle par règle'
+- key: ui.label.notice.rules_heading.pt
+  value: 'Avaliação regra a regra'
+- key: ui.label.notice.rules_heading.uk
+  value: 'Оцiнка по правилах'
+- key: ui.label.notice.subtitle.de
+  value: 'Selbstprüfungs-Ergebnis'
+- key: ui.label.notice.subtitle.en
+  value: 'Self-screening result'
+- key: ui.label.notice.subtitle.es
+  value: 'Resultado de la auto-evaluación'
+- key: ui.label.notice.subtitle.fr
+  value: 'Résultat de l''auto-évaluation'
+- key: ui.label.notice.subtitle.pt
+  value: 'Resultado da auto-avaliação'
+- key: ui.label.notice.subtitle.uk
+  value: 'Результат самооцiнки'
+- key: ui.label.notice.template_version.de
+  value: 'Vorlagenversion'
+- key: ui.label.notice.template_version.en
+  value: 'Template version'
+- key: ui.label.notice.template_version.es
+  value: 'Versión de plantilla'
+- key: ui.label.notice.template_version.fr
+  value: 'Version du modèle'
+- key: ui.label.notice.template_version.pt
+  value: 'Versão do modelo'
+- key: ui.label.notice.template_version.uk
+  value: 'Версiя шаблону'
+- key: ui.label.notice.title.de
+  value: 'Entscheidungsmitteilung'
+- key: ui.label.notice.title.en
+  value: 'Decision Notice'
+- key: ui.label.notice.title.es
+  value: 'Notificación de Decisión'
+- key: ui.label.notice.title.fr
+  value: 'Avis de décision'
+- key: ui.label.notice.title.pt
+  value: 'Aviso de Decisão'
+- key: ui.label.notice.title.uk
+  value: 'Повiдомлення про рiшення'
+- key: ui.label.notice.verdict.eligible.de
+  value: 'Sie scheinen anspruchsberechtigt zu sein.'
+- key: ui.label.notice.verdict.eligible.en
+  value: 'You appear to be eligible.'
+- key: ui.label.notice.verdict.eligible.es
+  value: 'Parece ser elegible.'
+- key: ui.label.notice.verdict.eligible.fr
+  value: 'Vous semblez être admissible.'
+- key: ui.label.notice.verdict.eligible.pt
+  value: 'Você parece ser elegível.'
+- key: ui.label.notice.verdict.eligible.uk
+  value: 'Ви, ймовiрно, маєте право.'
+- key: ui.label.notice.verdict.escalate.de
+  value: 'Menschliche Prüfung erforderlich.'
+- key: ui.label.notice.verdict.escalate.en
+  value: 'Human review is required.'
+- key: ui.label.notice.verdict.escalate.es
+  value: 'Se requiere revisión humana.'
+- key: ui.label.notice.verdict.escalate.fr
+  value: 'Une révision humaine est requise.'
+- key: ui.label.notice.verdict.escalate.pt
+  value: 'É necessária revisão humana.'
+- key: ui.label.notice.verdict.escalate.uk
+  value: 'Потрiбен людський перегляд.'
+- key: ui.label.notice.verdict.ineligible.de
+  value: 'Sie scheinen nicht anspruchsberechtigt zu sein.'
+- key: ui.label.notice.verdict.ineligible.en
+  value: 'You do not appear to be eligible.'
+- key: ui.label.notice.verdict.ineligible.es
+  value: 'No parece ser elegible.'
+- key: ui.label.notice.verdict.ineligible.fr
+  value: 'Vous ne semblez pas être admissible.'
+- key: ui.label.notice.verdict.ineligible.pt
+  value: 'Você não parece ser elegível.'
+- key: ui.label.notice.verdict.ineligible.uk
+  value: 'Ви, ймовiрно, не маєте права.'
+- key: ui.label.notice.verdict.insufficient_evidence.de
+  value: 'Weitere Angaben erforderlich.'
+- key: ui.label.notice.verdict.insufficient_evidence.en
+  value: 'More information is needed.'
+- key: ui.label.notice.verdict.insufficient_evidence.es
+  value: 'Se necesita más información.'
+- key: ui.label.notice.verdict.insufficient_evidence.fr
+  value: 'Plus d''informations sont nécessaires.'
+- key: ui.label.notice.verdict.insufficient_evidence.pt
+  value: 'É necessário mais informação.'
+- key: ui.label.notice.verdict.insufficient_evidence.uk
+  value: 'Потрiбно бiльше iнформацiї.'

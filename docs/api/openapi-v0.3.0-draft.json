@@ -281,6 +281,54 @@
         }
       }
     },
+    "/api/cases/{case_id}/notice": {
+      "get": {
+        "summary": "Get Case Notice",
+        "description": "Render the citizen-facing decision notice for a case as HTML.\n\nThe case must already have a recommendation (POST /evaluate first).\nEach render appends a `notice_generated` audit event recording the\ntemplate version and the rendered HTML's sha256.",
+        "operationId": "get_case_notice_api_cases__case_id__notice_get",
+        "parameters": [
+          {
+            "name": "case_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Case Id"
+            }
+          },
+          {
+            "name": "lang",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "en",
+              "title": "Lang"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/config/values": {
       "get": {
         "summary": "List Config Values",
@@ -1762,7 +1810,8 @@
           "object",
           "enum",
           "prompt",
-          "formula"
+          "formula",
+          "template"
         ],
         "title": "ValueType"
       },

@@ -329,6 +329,93 @@ def get_audit(case_id: str):
 
 
 # ---------------------------------------------------------------------------
+# Decision notice (Phase 10C / ADR-012)
+# A notice is a derived artefact: deterministic function of (case,
+# recommendation, dated template, dated i18n). No persisted entity; the
+# audit event records template_version + sha256 so a leaked artefact can
+# be verified or refuted by re-rendering against the substrate as it stood.
+# ---------------------------------------------------------------------------
+
+@app.get("/api/cases/{case_id}/notice")
+def get_case_notice(case_id: str, lang: str = "en"):
+    """Render the citizen-facing decision notice for a case as HTML.
+
+    The case must already have a recommendation (POST /evaluate first).
+    Each render appends a `notice_generated` audit event recording the
+    template version and the rendered HTML's sha256.
+    """
+    from fastapi.responses import HTMLResponse
+
+    from govops.notices import NoticeRenderError, render_html
+
+    case = store.get_case(case_id)
+    if not case:
+        raise HTTPException(404, f"Case {case_id} not found")
+    rec = store.recommendations.get(case_id)
+    if not rec:
+        raise HTTPException(400, "Case has not been evaluated yet")
+    jur = store.jurisdictions.get(case.jurisdiction_id)
+    if not jur:
+        raise HTTPException(500, f"Jurisdiction {case.jurisdiction_id} missing from store")
+
+    # Per-jurisdiction template key. Today only CA-OAS has one; future
+    # jurisdictions follow the same pattern (`global.template.notice.<jur>-decision`).
+    template_key = f"global.template.notice.{_jurisdiction_slug(case.jurisdiction_id)}-decision"
+    program_name = _program_name_for(case.jurisdiction_id, lang)
+
+    try:
+        rendered = render_html(
+            case=case,
+            recommendation=rec,
+            jurisdiction=jur,
+            program_name=program_name,
+            template_key=template_key,
+            language=lang,
+        )
+    except NoticeRenderError as exc:
+        raise HTTPException(404, str(exc)) from exc
+
+    # Append the audit event so a future audit-package fetch reflects this
+    # render. Audit-of-record is the case + recommendation + dated state;
+    # this event is the tamper-detection primitive.
+    store.audit_trails.setdefault(case_id, []).append(rendered.audit_event)
+
+    return HTMLResponse(
+        content=rendered.html,
+        headers={
+            "X-Notice-Sha256": rendered.sha256,
+            "X-Notice-Template-Version": rendered.template_version,
+            "X-Notice-Language": rendered.language,
+        },
+    )
+
+
+def _jurisdiction_slug(jurisdiction_id: str) -> str:
+    """Map a jurisdiction id to the slug used in template keys.
+
+    `jur-ca-federal` -> `ca-oas`; future jurisdictions register their slug
+    here as their notice templates land. Centralizing the mapping keeps
+    template-key construction in one place.
+    """
+    mapping = {
+        "jur-ca-federal": "ca-oas",
+    }
+    return mapping.get(jurisdiction_id, jurisdiction_id)
+
+
+def _program_name_for(jurisdiction_id: str, lang: str) -> str:
+    """Localized program name for the notice header."""
+    slug = _jurisdiction_slug(jurisdiction_id)
+    # Existing UI label key pattern: `ui.label.program.<slug>.<lang>`.
+    # Falls back to a sensible default if the label is missing.
+    from govops.i18n import t as _t
+    label = _t(f"program.{slug}", lang)
+    if label.startswith("program."):  # i18n fell back to the key
+        return "Old Age Security" if slug == "ca-oas" else slug
+    return label
+
+
+# ---------------------------------------------------------------------------
 # ConfigValue API (Law-as-Code v2.0 Phase 1)
 # Read-only endpoints; write/approve land in Phase 6.
 # ---------------------------------------------------------------------------
