@@ -16,7 +16,7 @@
         "jurisdiction_id": { "type": ["string", "null"] },
         "value_type": {
           "type": "string",
-          "enum": ["number", "string", "bool", "list", "object", "enum", "prompt", "formula"]
+          "enum": ["number", "string", "bool", "list", "object", "enum", "prompt", "formula", "template"]
         },
         "effective_from": {
           "type": "string",
@@ -62,7 +62,7 @@
           "value": {},
           "value_type": {
             "type": "string",
-            "enum": ["number", "string", "bool", "list", "object", "enum", "prompt", "formula"]
+            "enum": ["number", "string", "bool", "list", "object", "enum", "prompt", "formula", "template"]
           },
           "effective_from": {
             "type": "string",

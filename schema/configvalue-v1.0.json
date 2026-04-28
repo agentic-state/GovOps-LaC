@@ -33,7 +33,7 @@
     "value_type": {
       "description": "Discriminator on the shape of `value`. The loader uses this for round-trip type fidelity.",
       "type": "string",
-      "enum": ["number", "string", "bool", "list", "object", "enum", "prompt", "formula"]
+      "enum": ["number", "string", "bool", "list", "object", "enum", "prompt", "formula", "template"]
     },
     "effective_from": {
       "description": "ISO-8601 date or datetime. Records with no effective_to remain in effect indefinitely.",
@@ -92,6 +92,20 @@
       "description": "Per ADR-008 Gate 4, prompt records carry both author and approved_by.",
       "if": {
         "properties": { "value_type": { "const": "prompt" } },
+        "required": ["value_type"]
+      },
+      "then": {
+        "required": ["author", "approved_by"],
+        "properties": {
+          "approved_by": { "type": "string", "minLength": 1 },
+          "author": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    {
+      "description": "Per ADR-012, template records require dual approval (same operating shape as prompts; reviewer competence pool differs).",
+      "if": {
+        "properties": { "value_type": { "const": "template" } },
         "required": ["value_type"]
       },
       "then": {

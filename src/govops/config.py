@@ -62,6 +62,7 @@ class ValueType(str, Enum):
     ENUM = "enum"
     PROMPT = "prompt"
     FORMULA = "formula"
+    TEMPLATE = "template"  # ADR-012 — citizen-facing notice templates
 
 
 class ApprovalStatus(str, Enum):
