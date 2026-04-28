@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/your-org/govops/schema/configvalue-v1.0.json",
+  "$id": "https://github.com/eva-foundry/61-GovOps/schema/configvalue-v1.0.json",
   "title": "ConfigValue v1.0",
   "description": "A single dated ConfigValue record. Mirrors the Pydantic model in src/govops/config.py. Per ADR-006, granularity is per-parameter (one record per leaf value). Per ADR-003, on-disk YAML omits id and created_at — those are assigned by the loader.",
   "type": "object",

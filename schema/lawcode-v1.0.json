@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/your-org/govops/schema/lawcode-v1.0.json",
+  "$id": "https://github.com/eva-foundry/61-GovOps/schema/lawcode-v1.0.json",
   "title": "lawcode/*.yaml file v1.0",
   "description": "Shape of an on-disk YAML file under lawcode/. Per ADR-003 each file is a `defaults` mapping (merged into every record below) and a `values` list. The merged record must satisfy the ConfigValue v1.0 schema.",
   "type": "object",

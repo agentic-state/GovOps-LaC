@@ -8,13 +8,15 @@ GovOps turns authoritative governance sources into coherent, traceable, executab
 
 This is an open public-good contribution for the global public sector: something governments can study, adapt, and use without vendor capture or hidden decision logic.
 
+**Project home**: [eva-foundry.github.io/61-GovOps](https://eva-foundry.github.io/61-GovOps/) · **Source**: [github.com/eva-foundry/61-GovOps](https://github.com/eva-foundry/61-GovOps)
+
 ---
 
 ## Quick Start
 
 ```bash
 # Clone and install
-git clone https://github.com/your-org/61-GovOps.git
+git clone https://github.com/eva-foundry/61-GovOps.git
 cd 61-GovOps
 pip install -e ".[dev]"
 
@@ -223,7 +225,7 @@ tests/
   test_api.py          # API, multi-jurisdiction, and HTML tests
   test_encoder.py      # Encoding pipeline tests
 docs/
-  index.html           # GitHub Pages landing page (your-org.github.io/61-GovOps)
+  index.html           # GitHub Pages landing page (eva-foundry.github.io/61-GovOps)
   screenshots/         # Static HTML snapshots of every screen
   ecosystem/           # Implementation guide, training, certification, RFP, use cases, partner program
   design/              # MVP spec, CDD, architecture baselines, ADRs, compliance

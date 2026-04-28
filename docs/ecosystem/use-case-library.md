@@ -140,4 +140,4 @@ The strongest GovOps candidates share these properties:
 
 ## Contributing Use Cases
 
-If your government program fits the GovOps model, submit a [New Jurisdiction issue](https://github.com/your-org/61-GovOps/issues/new?template=new_jurisdiction.md) with the program details. The community can help encode the rules.
+If your government program fits the GovOps model, submit a [New Jurisdiction issue](https://github.com/eva-foundry/61-GovOps/issues/new?template=new_jurisdiction.md) with the program details. The community can help encode the rules.
