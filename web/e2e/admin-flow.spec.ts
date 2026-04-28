@@ -58,8 +58,13 @@ test.describe("Phase 6 admin flow — configure-without-deploy", () => {
     await expect(page.getByText(SCENARIO_KEY).first()).toBeVisible({ timeout: 15_000 });
 
     // 3. Drill into the approval detail
-    await page.goto(`/config/approvals/${draft.id}`);
-    await expect(page.getByText(SCENARIO_KEY).first()).toBeVisible();
+    // webkit-specific: TanStack Start's client router occasionally races the
+    // SSR hydration on /config/approvals/$id, redirecting back to the parent
+    // /config/approvals while the page is still loading sub-resources.
+    // `waitUntil: "commit"` returns as soon as the URL is in place — the
+    // following getByText assertion's own timeout handles the rest.
+    await page.goto(`/config/approvals/${draft.id}`, { waitUntil: "commit" });
+    await expect(page.getByText(SCENARIO_KEY).first()).toBeVisible({ timeout: 15_000 });
     await page.screenshot({
       path: "test-results/screenshots/admin-flow-2-approval-detail.png",
       fullPage: true,
