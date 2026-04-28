@@ -1,0 +1,67 @@
+# yaml-language-server: $schema=../../../schema/lawcode-v1.0.json
+# jp/config/rules.yaml — substrate-resolved parameters for the Japanese
+# 厚生年金保険 (Kōsei Nenkin Hoken / Employees' Pension Insurance) +
+# 老齢基礎年金 (Old-age Basic Pension) eligibility surface.
+#
+# Statutory anchors (verified against e-Gov + 日本年金機構 / MHLW
+# publications, FY2026 / 令和8年度):
+#   - 国民年金法 (Kokumin Nenkin Hō, 1959 Act No. 141), Art. 26
+#     — minimum age 65 for 老齢基礎年金
+#   - 厚生年金保険法 (Kōsei Nenkin Hoken Hō, 1954 Act No. 115), Art. 42
+#     — minimum age 65 for 老齢厚生年金
+#   - Act No. 84, 2017 — reduced 受給資格期間 (qualifying period) from
+#     25 years to 10 years
+#   - 老齢基礎年金 満額 (full amount, FY2026 / post-1956 cohort):
+#     ¥70,608/month for 40 years (480 months) of contribution
+#
+# Per PLAN §11 the substrate is the truth; non-Python contributors edit
+# this file and the change ships without code edits. This file is the
+# load-bearing proof of v2.0 success criterion #2 ("every jurisdiction
+# contributable in YAML by a non-Python developer") for jp.
+
+defaults:
+  domain: rule
+  jurisdiction_id: jp-koukinenkin
+  effective_from: '1900-01-01'
+values:
+- key: jp.rule.age.min_age
+  value: 65
+  value_type: number
+  citation: '国民年金法 第26条; 厚生年金保険法 第42条'
+  rationale: 'Minimum age 65 for the 老齢基礎年金 (Old-age Basic Pension) and its remuneration-based companion 老齢厚生年金 (Old-age Employees Pension). Earlier-claim (繰上げ) and later-claim (繰下げ) options exist between 60 and 75 with adjusted multipliers; this record encodes the standard pensionable age, not the variants.'
+- key: jp.rule.contribution.min_years
+  value: 10
+  value_type: number
+  citation: '国民年金法 第26条; 受給資格期間短縮: 平成29年法律第84号 (Act No. 84, 2017)'
+  rationale: '受給資格期間 (minimum qualifying period). Reduced from 25 years to 10 years by Act No. 84 of 2017, effective 2017-08-01. Codes accept both 国民年金 (KN) and 厚生年金 (EPI) periods toward the qualifying total per the Act.'
+- key: jp.rule.contribution.home_countries
+  value:
+  - JP
+  - JAPAN
+  - JPN
+  value_type: list
+  citation: '厚生年金保険法 第6条; 国民年金法 第7条 (適用範囲)'
+  rationale: 'Country labels accepted as Japan in residency-period country fields. JPN is the ISO 3166-1 alpha-3 code; JAPAN is the canonical English label; JP is the alpha-2 ISO code matching the jurisdiction prefix.'
+- key: jp.rule.contribution-calc.full_years
+  value: 40
+  value_type: number
+  citation: '国民年金法 第27条 (老齢基礎年金の額); 480月 (40年) 満額'
+  rationale: '40 years (480 months) of contribution is the threshold for 満額 (full) 老齢基礎年金 — currently ¥70,608/month for the post-1956 cohort under the FY2026 indexation. Years between min_years (10) and full_years (40) yield a proportional benefit per Article 27.'
+- key: jp.rule.contribution-calc.min_years
+  value: 10
+  value_type: number
+  citation: '国民年金法 第26条; 平成29年法律第84号'
+  rationale: 'Minimum qualifying period for any benefit, mirrored from rule.contribution.min_years. Below this threshold no pension is paid; above it a proportional amount is paid up to 満額 at 40 years.'
+- key: jp.rule.status.accepted_statuses
+  value:
+  - citizen
+  - permanent_resident
+  value_type: list
+  citation: '国民年金法 第7条; 厚生年金保険法 第9条 (被保険者の範囲)'
+  rationale: 'Japanese citizenship or permanent residency satisfies the 被保険者 status check. Special-status residents (e.g. 特別永住者) are accepted in practice but mapped to permanent_resident here for the deterministic engine — refining that mapping would require a status-domain extension shared across jurisdictions, which is out of scope.'
+- key: jp.rule.evidence.required_types
+  value:
+  - birth_certificate
+  value_type: list
+  citation: '国民年金法施行規則 第16条; 厚生年金保険法施行規則 第30条 (添付書類)'
+  rationale: 'Birth certificate (戸籍謄本) is the deterministic-engine evidence threshold for identity-and-age. The substrate stores a single AND-required type per the engine semantics shared across all jurisdictions; the alternative residence card (在留カード / 住民票) is recognised in practice but mapped to the same slot here, mirroring the BR/ES/DE precedent of listing one canonical type per jurisdiction. Switching the threshold or adding a multi-option engine pass is a cross-jurisdiction concern, out of scope for the 7th-country drop.'

@@ -53,6 +53,7 @@ _JURISDICTION_PREFIX_TO_ID = {
     "fr": "fr-cnav",
     "de": "de-drv",
     "ua": "ua-pfu",
+    "jp": "jp-koukinenkin",
     # "global" and "ui" map to the global scope (None / "global" — equivalent).
 }
 

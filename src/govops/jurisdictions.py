@@ -15,6 +15,8 @@ Pension programs encoded:
   - France: Retraite de base - age 64, 2y minimum contribution
   - Germany: Gesetzliche Rente - age 67, 5y contribution
   - Ukraine: Pensiia za vikom - age 60, 25y contribution (men)
+  - Japan: Kosei Nenkin Hoken (Employees' Pension Insurance) - age 65,
+    10y contribution
 """
 
 from __future__ import annotations
@@ -1117,6 +1119,278 @@ def _ukraine_demo_cases() -> list[CaseBundle]:
 
 
 # ===================================================================
+# JAPAN
+# ===================================================================
+
+JAPAN = Jurisdiction(
+    id="jur-jp-national",
+    name="Nihon-koku (Japan)",
+    country="JP",
+    level="federal",
+    legal_tradition="Civil law (Japanese hybrid; German + French + post-war common-law influence)",
+    language_regime="Nihongo (Japanese)",
+)
+
+JAPAN_AUTHORITY_CHAIN = [
+    AuthorityReference(
+        id="auth-jp-constitution",
+        jurisdiction_id="jur-jp-national",
+        layer="constitution",
+        title="Nihon-koku Kenpo (Constitution of Japan)",
+        citation="Kenpo, Art. 25 (right to maintain minimum standards of living)",
+        effective_date=date(1947, 5, 3),
+        url="https://elaws.e-gov.go.jp/document?lawid=321CONSTITUTION",
+    ),
+    AuthorityReference(
+        id="auth-jp-kokumin-nenkin-ho",
+        jurisdiction_id="jur-jp-national",
+        layer="act",
+        title="Kokumin Nenkin Ho (National Pension Act)",
+        citation="Showa 34-nen Horitsu Dai 141-go (1959 Act No. 141)",
+        effective_date=date(1961, 4, 1),
+        url="https://elaws.e-gov.go.jp/document?lawid=334AC0000000141",
+        parent_id="auth-jp-constitution",
+    ),
+    AuthorityReference(
+        id="auth-jp-kosei-nenkin-ho",
+        jurisdiction_id="jur-jp-national",
+        layer="act",
+        title="Kosei Nenkin Hoken Ho (Employees' Pension Insurance Act)",
+        citation="Showa 29-nen Horitsu Dai 115-go (1954 Act No. 115)",
+        effective_date=date(1954, 5, 19),
+        url="https://elaws.e-gov.go.jp/document?lawid=329AC0000000115",
+        parent_id="auth-jp-constitution",
+    ),
+    AuthorityReference(
+        id="auth-jp-act-84-2017",
+        jurisdiction_id="jur-jp-national",
+        layer="act",
+        title="Heisei 29-nen Horitsu Dai 84-go (Act No. 84, 2017) — qualifying-period reduction",
+        citation="Heisei 29-nen Horitsu Dai 84-go",
+        effective_date=date(2017, 8, 1),
+        parent_id="auth-jp-constitution",
+    ),
+    AuthorityReference(
+        id="auth-jp-nenkin-kiko",
+        jurisdiction_id="jur-jp-national",
+        layer="program",
+        title="Nihon Nenkin Kiko (Japan Pension Service)",
+        citation="Nihon Nenkin Kiko Ho (2007 Act No. 109)",
+        parent_id="auth-jp-kosei-nenkin-ho",
+    ),
+    AuthorityReference(
+        id="auth-jp-rourei-kiso",
+        jurisdiction_id="jur-jp-national",
+        layer="service",
+        title="Rourei Kiso Nenkin / Rourei Kosei Nenkin (Old-age Basic + Employees' Pension)",
+        citation="Kokumin Nenkin Ho, Art. 26; Kosei Nenkin Hoken Ho, Art. 42",
+        parent_id="auth-jp-nenkin-kiko",
+    ),
+]
+
+JAPAN_LEGAL_DOCS = [
+    LegalDocument(
+        id="doc-jp-kokumin-nenkin",
+        jurisdiction_id="jur-jp-national",
+        document_type=DocumentType.STATUTE,
+        title="Kokumin Nenkin Ho (National Pension Act)",
+        citation="Showa 34-nen Horitsu Dai 141-go",
+        effective_date=date(1961, 4, 1),
+        sections=[
+            LegalSection(
+                id="sec-jp-kn-art26",
+                section_ref="Art. 26",
+                heading="Rourei kiso nenkin no shikyu yoken (Old-age Basic Pension eligibility)",
+                text=(
+                    "Rourei kiso nenkin wa, hokenryo nofu zumi kikan to hokenryo "
+                    "menjo kikan o gassan shita kikan ga 10-nen ijo de aru mono ga "
+                    "65-sai ni tasshita toki ni, sono mono ni shikyu suru. "
+                    "(Heisei 29-nen Horitsu Dai 84-go ni yori 25-nen kara 10-nen "
+                    "ni tanshuku.)"
+                ),
+            ),
+            LegalSection(
+                id="sec-jp-kn-art27",
+                section_ref="Art. 27",
+                heading="Rourei kiso nenkin no gaku (Old-age Basic Pension amount)",
+                text=(
+                    "Rourei kiso nenkin no gaku wa, hokenryo nofu kikan ga 480-getsu "
+                    "(40-nen) ni tassuru baai ni mangaku to shi, sore yori mijikai "
+                    "kikan ni tsuite wa kikan ni hirei shita gaku to suru. "
+                    "Reiwa 8-nendo no mangaku wa tsukigaku 70,608-en (Showa 31-nen "
+                    "4-gatsu 2-nichi iko umare no baai)."
+                ),
+            ),
+        ],
+    ),
+    LegalDocument(
+        id="doc-jp-kosei-nenkin",
+        jurisdiction_id="jur-jp-national",
+        document_type=DocumentType.STATUTE,
+        title="Kosei Nenkin Hoken Ho (Employees' Pension Insurance Act)",
+        citation="Showa 29-nen Horitsu Dai 115-go",
+        effective_date=date(1954, 5, 19),
+        sections=[
+            LegalSection(
+                id="sec-jp-kn-art42",
+                section_ref="Art. 42",
+                heading="Rourei kosei nenkin no shikyu yoken (Old-age Employees' Pension eligibility)",
+                text=(
+                    "Rourei kosei nenkin wa, hihokensha kikan o yusuru mono ga "
+                    "Kokumin Nenkin Ho no rourei kiso nenkin no jukyu shikaku o "
+                    "ete, 65-sai ni tasshita toki ni shikyu suru."
+                ),
+            ),
+        ],
+    ),
+]
+
+JAPAN_RULES = [
+    LegalRule(
+        id="rule-jp-age",
+        source_document_id="doc-jp-kokumin-nenkin",
+        source_section_ref="Art. 26",
+        rule_type=RuleType.AGE_THRESHOLD,
+        description="Standard pensionable age: 65",
+        formal_expression="age >= 65",
+        citation="Kokumin Nenkin Ho, Art. 26; Kosei Nenkin Hoken Ho, Art. 42",
+        param_key_prefix="jp.rule.age",
+        parameters={"min_age": resolve_param("jp.rule.age.min_age")},
+    ),
+    LegalRule(
+        id="rule-jp-contribution",
+        source_document_id="doc-jp-kokumin-nenkin",
+        source_section_ref="Art. 26",
+        rule_type=RuleType.RESIDENCY_MINIMUM,
+        description="Minimum qualifying period: 10 years (reduced from 25 by Act No. 84, 2017)",
+        formal_expression="contribution_years >= 10",
+        citation="Kokumin Nenkin Ho, Art. 26; Heisei 29-nen Horitsu Dai 84-go",
+        param_key_prefix="jp.rule.contribution",
+        parameters={
+            "min_years": resolve_param("jp.rule.contribution.min_years"),
+            "home_countries": resolve_param("jp.rule.contribution.home_countries"),
+        },
+    ),
+    LegalRule(
+        id="rule-jp-contribution-calc",
+        source_document_id="doc-jp-kokumin-nenkin",
+        source_section_ref="Art. 27",
+        rule_type=RuleType.RESIDENCY_PARTIAL,
+        description="Full pension at 40 years (480 months); proportional between 10 and 40 years",
+        formal_expression="pension_ratio = min(contribution_years, 40) / 40",
+        citation="Kokumin Nenkin Ho, Art. 27",
+        param_key_prefix="jp.rule.contribution-calc",
+        parameters={
+            "full_years": resolve_param("jp.rule.contribution-calc.full_years"),
+            "min_years": resolve_param("jp.rule.contribution-calc.min_years"),
+        },
+    ),
+    LegalRule(
+        id="rule-jp-status",
+        source_document_id="doc-jp-kosei-nenkin",
+        source_section_ref="Art. 9",
+        rule_type=RuleType.LEGAL_STATUS,
+        # Modelled simplification: Japanese pension entitlement under
+        # Kosei Nenkin Hoken Ho Art. 9 is contribution-based (you must
+        # be / have been a hihokensha through covered employment), not
+        # status-based. We use legal_status here as the same coarse proxy
+        # as Germany; the accurate gate is a verified hihokensha record,
+        # which the engine reads from rule-jp-evidence + rule-jp-contribution.
+        description="Hihokensha of the Japanese pension system (proxy: legal_status)",
+        formal_expression="legal_status in ['citizen', 'permanent_resident']",
+        citation="Kokumin Nenkin Ho, Art. 7; Kosei Nenkin Hoken Ho, Art. 9",
+        param_key_prefix="jp.rule.status",
+        parameters={"accepted_statuses": resolve_param("jp.rule.status.accepted_statuses")},
+    ),
+    LegalRule(
+        id="rule-jp-evidence",
+        source_document_id="doc-jp-kokumin-nenkin",
+        source_section_ref="Art. 16 (Sekorei kisoku) / Kosei Nenkin Hoken Ho Sekorei kisoku Art. 30",
+        rule_type=RuleType.EVIDENCE_REQUIRED,
+        # Modelled simplification matching BR/ES/DE: the engine enforces
+        # an AND-required-types check, so the substrate stores one
+        # canonical identity document. Residence card (zairyu card /
+        # juminhyo) is recognised in practice but maps to the same slot
+        # — see lawcode/jp/config/rules.yaml rationale.
+        description="Birth certificate (koseki tohon)",
+        formal_expression="has_evidence('birth_certificate')",
+        citation="Kokumin Nenkin Ho Sekorei kisoku, Art. 16; Kosei Nenkin Hoken Ho Sekorei kisoku, Art. 30",
+        param_key_prefix="jp.rule.evidence",
+        parameters={"required_types": resolve_param("jp.rule.evidence.required_types")},
+    ),
+]
+
+
+def _japan_demo_cases() -> list[CaseBundle]:
+    return [
+        # Eligible — full pension. 65y old, lifelong JP resident, complete
+        # contribution record from age 20 (45 years > 40-year threshold),
+        # full identity evidence.
+        CaseBundle(
+            id="demo-jp-001",
+            jurisdiction_id="jur-jp-national",
+            applicant=Applicant(
+                id="app-jp-001", date_of_birth=date(1958, 11, 4),
+                legal_name="Tanaka Hiroshi", legal_status="citizen", country_of_birth="JP",
+            ),
+            residency_periods=[ResidencyPeriod(country="Japan", start_date=date(1958, 11, 4), verified=True)],
+            evidence_items=[
+                EvidenceItem(evidence_type="birth_certificate", description="Koseki tohon", provided=True, verified=True),
+                EvidenceItem(evidence_type="tax_record", description="Nenkin teikibin (Nihon Nenkin Kiko) 1980-2025", provided=True, verified=True),
+            ],
+        ),
+        # Under age — ineligible. 45y old, full evidence, but age threshold not met.
+        CaseBundle(
+            id="demo-jp-002",
+            jurisdiction_id="jur-jp-national",
+            applicant=Applicant(
+                id="app-jp-002", date_of_birth=date(1981, 2, 19),
+                legal_name="Sato Yuki", legal_status="citizen", country_of_birth="JP",
+            ),
+            residency_periods=[ResidencyPeriod(country="Japan", start_date=date(1981, 2, 19), verified=True)],
+            evidence_items=[
+                EvidenceItem(evidence_type="birth_certificate", description="Koseki tohon", provided=True, verified=True),
+                EvidenceItem(evidence_type="tax_record", description="Nenkin teikibin", provided=True),
+            ],
+        ),
+        # Partial pension — 67y old, immigrated 2010, ~15 years of qualifying
+        # contribution period (>10 minimum, <40 full). Status: permanent
+        # resident. Full evidence including residence card.
+        CaseBundle(
+            id="demo-jp-003",
+            jurisdiction_id="jur-jp-national",
+            applicant=Applicant(
+                id="app-jp-003", date_of_birth=date(1957, 8, 12),
+                legal_name="Kim Min-jun", legal_status="permanent_resident", country_of_birth="KR",
+            ),
+            residency_periods=[
+                ResidencyPeriod(country="Korea", start_date=date(1957, 8, 12), end_date=date(2010, 4, 1)),
+                ResidencyPeriod(country="Japan", start_date=date(2010, 4, 1), verified=True),
+            ],
+            evidence_items=[
+                EvidenceItem(evidence_type="birth_certificate", description="Birth certificate (Korean, translated)", provided=True, verified=True),
+                EvidenceItem(evidence_type="residence_card", description="Zairyu card (special permanent resident)", provided=True, verified=True),
+                EvidenceItem(evidence_type="tax_record", description="Nenkin teikibin 2010-2025", provided=True, verified=True),
+            ],
+        ),
+        # Insufficient evidence — 68y old, citizen, but only a partial tax
+        # record provided; no birth certificate or residence card.
+        CaseBundle(
+            id="demo-jp-004",
+            jurisdiction_id="jur-jp-national",
+            applicant=Applicant(
+                id="app-jp-004", date_of_birth=date(1956, 5, 30),
+                legal_name="Watanabe Aiko", legal_status="citizen", country_of_birth="JP",
+            ),
+            residency_periods=[ResidencyPeriod(country="Japan", start_date=date(1956, 5, 30))],
+            evidence_items=[
+                EvidenceItem(evidence_type="tax_record", description="Nenkin teikibin (incomplete)", provided=True),
+            ],
+        ),
+    ]
+
+
+# ===================================================================
 # Registry
 # ===================================================================
 
@@ -1207,5 +1481,18 @@ JURISDICTION_REGISTRY: dict[str, JurisdictionPack] = {
         cases_factory=_ukraine_demo_cases,
         default_language="uk",
         program_name="Pensiia za vikom (PFU)",
+    ),
+    "jp": JurisdictionPack(
+        jurisdiction=JAPAN,
+        authority_chain=JAPAN_AUTHORITY_CHAIN,
+        legal_documents=JAPAN_LEGAL_DOCS,
+        rules=JAPAN_RULES,
+        cases_factory=_japan_demo_cases,
+        # PLAN §11 forbids new languages; jp falls back to en across the
+        # 6 supported locales. Native-script labels (e.g. program_name)
+        # stay in romaji here and are not translated, mirroring the BR
+        # / ES precedent of leaving program identifiers untranslated.
+        default_language="en",
+        program_name="Kosei Nenkin Hoken (Employees' Pension Insurance)",
     ),
 }
