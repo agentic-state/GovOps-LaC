@@ -889,6 +889,55 @@
         }
       }
     },
+    "/api/screen/notice": {
+      "post": {
+        "summary": "Screen Notice",
+        "description": "Render a portable decision notice from a screen request (Phase 10C).\n\nPrivacy posture identical to ``POST /api/screen``: no case row, no\naudit entry, no PII echoed. Returns ``text/html`` with the same\nsha256 / template-version headers as ``GET /api/cases/{id}/notice``\nso a downstream surface can hash-verify the artefact against any\nother render the citizen receives.\n\nThe notice is byte-identical to what an officer would see for the\nsame inputs evaluated on the same date — same engine, same dated\ntemplate, same i18n state. Citizens get the same evidence officers do.",
+        "operationId": "screen_notice_api_screen_notice_post",
+        "parameters": [
+          {
+            "name": "lang",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "en",
+              "title": "Lang"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ScreenRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/": {
       "get": {
         "summary": "Ui About",

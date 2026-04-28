@@ -243,6 +243,65 @@ class TestNoticeEndpoint:
         r = client.get("/api/cases/nonexistent-case/notice")
         assert r.status_code == 404
 
+    def test_post_screen_notice_returns_html_for_eligible_request(self, client):
+        """POST /api/screen/notice — privacy-equivalent path for citizens
+        who came through /screen rather than the officer flow."""
+        payload = {
+            "jurisdiction_id": "ca",
+            "date_of_birth": "1955-01-01",
+            "legal_status": "citizen",
+            "country_of_birth": "CA",
+            "residency_periods": [
+                {"country": "CA", "start_date": "1973-01-01", "end_date": None}
+            ],
+            "evidence_present": {"dob": True, "residency": True},
+            "evaluation_date": "2025-06-01",
+        }
+        r = client.post("/api/screen/notice", json=payload)
+        assert r.status_code == 200
+        assert r.headers["content-type"].startswith("text/html")
+        body = r.text
+        assert "<!DOCTYPE html>" in body
+        assert "727.67" in body
+        assert "X-Notice-Sha256".lower() in [h.lower() for h in r.headers.keys()]
+
+    def test_post_screen_notice_does_not_persist_case(self, client):
+        """The screen-notice path must not create case rows or audit events."""
+        from govops.api import store
+        before_cases = len(store.cases)
+        before_audits = sum(len(v) for v in store.audit_trails.values())
+        payload = {
+            "jurisdiction_id": "ca",
+            "date_of_birth": "1955-01-01",
+            "legal_status": "citizen",
+            "residency_periods": [{"country": "CA", "start_date": "1973-01-01"}],
+            "evidence_present": {"dob": True, "residency": True},
+            "evaluation_date": "2025-06-01",
+        }
+        client.post("/api/screen/notice", json=payload)
+        after_cases = len(store.cases)
+        after_audits = sum(len(v) for v in store.audit_trails.values())
+        assert before_cases == after_cases
+        assert before_audits == after_audits
+
+    def test_post_screen_notice_carries_no_pii_in_headers(self, client):
+        """No applicant-identifying data should leak into response headers."""
+        payload = {
+            "jurisdiction_id": "ca",
+            "date_of_birth": "1955-01-01",
+            "legal_status": "citizen",
+            "residency_periods": [{"country": "CA", "start_date": "1973-01-01"}],
+            "evidence_present": {"dob": True, "residency": True},
+        }
+        r = client.post("/api/screen/notice", json=payload)
+        # The body itself contains the case id — but it's the transient
+        # marker, not a uuid that could be cross-referenced.
+        assert "transient-screen-render" in r.text
+        # Response headers must not include any applicant-identifying field.
+        forbidden = {"x-applicant-id", "x-case-id", "x-applicant-name"}
+        for h in r.headers.keys():
+            assert h.lower() not in forbidden
+
     def test_notice_400_when_case_not_evaluated(self, client):
         # demo-case-004 is loaded but not evaluated by this fixture
         # We need to craft a case that has no recommendation. Use a fresh

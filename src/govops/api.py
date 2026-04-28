@@ -743,6 +743,46 @@ def screen(req: ScreenRequest) -> ScreenResponse:
         ) from exc
 
 
+@app.post("/api/screen/notice")
+def screen_notice(req: ScreenRequest, lang: str = "en"):
+    """Render a portable decision notice from a screen request (Phase 10C).
+
+    Privacy posture identical to ``POST /api/screen``: no case row, no
+    audit entry, no PII echoed. Returns ``text/html`` with the same
+    sha256 / template-version headers as ``GET /api/cases/{id}/notice``
+    so a downstream surface can hash-verify the artefact against any
+    other render the citizen receives.
+
+    The notice is byte-identical to what an officer would see for the
+    same inputs evaluated on the same date — same engine, same dated
+    template, same i18n state. Citizens get the same evidence officers do.
+    """
+    from fastapi.responses import HTMLResponse
+
+    from govops.notices import NoticeRenderError
+    from govops.screen import render_screen_notice_html
+
+    try:
+        html, sha256, template_version = render_screen_notice_html(req, language=lang)
+    except UnknownJurisdiction as exc:
+        raise HTTPException(
+            404,
+            f"Unknown jurisdiction '{exc.args[0]}'. "
+            f"Known: {sorted(JURISDICTION_REGISTRY)}",
+        ) from exc
+    except NoticeRenderError as exc:
+        raise HTTPException(404, str(exc)) from exc
+
+    return HTMLResponse(
+        content=html,
+        headers={
+            "X-Notice-Sha256": sha256,
+            "X-Notice-Template-Version": template_version,
+            "X-Notice-Language": lang,
+        },
+    )
+
+
 # ---------------------------------------------------------------------------
 # HTML UI routes
 # ---------------------------------------------------------------------------
