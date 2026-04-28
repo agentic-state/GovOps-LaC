@@ -18,7 +18,11 @@ export function IngestForm() {
   const [announcement, setAnnouncement] = useState("");
 
   const dirty =
-    title.length > 0 || citation.length > 0 || text.length > 0 || sourceUrl.length > 0 || apiKey.length > 0;
+    title.length > 0 ||
+    citation.length > 0 ||
+    text.length > 0 ||
+    sourceUrl.length > 0 ||
+    apiKey.length > 0;
 
   useEffect(() => {
     if (!dirty) return;

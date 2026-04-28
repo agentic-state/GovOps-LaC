@@ -44,9 +44,7 @@ export function LegalRuleList({
                 </div>
                 <CitationLink citation={rule.citation} />
                 <details className="text-xs">
-                  <summary
-                    className="cursor-pointer text-foreground-muted underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                  >
+                  <summary className="cursor-pointer text-foreground-muted underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
                     {intl.formatMessage({ id: "authority.rules.formal_expression" })}
                   </summary>
                   <pre

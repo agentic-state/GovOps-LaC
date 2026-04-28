@@ -19,14 +19,17 @@
 
 import { test, expect } from "@playwright/test";
 
+// Backend URL — Playwright's default baseURL is the frontend (Vite dev server);
+// the screen API lives on the FastAPI backend. Use the same env-var convention
+// as fixtures/api.ts so the backend port stays a single source of truth.
+const BACKEND = process.env.E2E_BACKEND_URL ?? "http://127.0.0.1:17765";
+
 const SCREEN_PAYLOAD_BASE = {
   jurisdiction_id: "ca",
   date_of_birth: "1955-01-01",
   legal_status: "citizen",
   country_of_birth: "CA",
-  residency_periods: [
-    { country: "CA", start_date: "1973-01-01", end_date: null },
-  ],
+  residency_periods: [{ country: "CA", start_date: "1973-01-01", end_date: null }],
   evidence_present: { dob: true, residency: true },
 };
 
@@ -34,7 +37,7 @@ test.describe("Configure-without-deploy — citizen surface honours dated supers
   test("/api/screen returns pre-supersession amount for 2025-06-01 evaluation", async ({
     request,
   }) => {
-    const r = await request.post("/api/screen", {
+    const r = await request.post(`${BACKEND}/api/screen`, {
       data: { ...SCREEN_PAYLOAD_BASE, evaluation_date: "2025-06-01" },
     });
     expect(r.ok()).toBeTruthy();
@@ -49,7 +52,7 @@ test.describe("Configure-without-deploy — citizen surface honours dated supers
   test("/api/screen returns post-supersession amount for 2026-06-01 evaluation", async ({
     request,
   }) => {
-    const r = await request.post("/api/screen", {
+    const r = await request.post(`${BACKEND}/api/screen`, {
       data: { ...SCREEN_PAYLOAD_BASE, evaluation_date: "2026-06-01" },
     });
     expect(r.ok()).toBeTruthy();
@@ -62,20 +65,18 @@ test.describe("Configure-without-deploy — citizen surface honours dated supers
     expect(body.benefit_amount.value).toBe(735.45);
   });
 
-  test("formula trace cites the correct OAS Act section across both dates", async ({
-    request,
-  }) => {
+  test("formula trace cites the correct OAS Act section across both dates", async ({ request }) => {
     // Both dates resolve through the same formula (multiply by base ÷ 40),
     // so the citation set is identical — the *coefficient* changes, not
     // the policy structure. Locks the invariant that supersession is a
     // data event, not a code event.
     const before = await (
-      await request.post("/api/screen", {
+      await request.post(`${BACKEND}/api/screen`, {
         data: { ...SCREEN_PAYLOAD_BASE, evaluation_date: "2025-06-01" },
       })
     ).json();
     const after = await (
-      await request.post("/api/screen", {
+      await request.post(`${BACKEND}/api/screen`, {
         data: { ...SCREEN_PAYLOAD_BASE, evaluation_date: "2026-06-01" },
       })
     ).json();
@@ -99,7 +100,7 @@ test.describe("Configure-without-deploy — citizen surface honours dated supers
     // pinned date so this test is robust against form-selector drift.
     // The UI assertion is on the rendered result — the citizen-facing
     // proof that a dated supersession changes what they see.
-    const r = await request.post("/api/screen/notice", {
+    const r = await request.post(`${BACKEND}/api/screen/notice`, {
       data: { ...SCREEN_PAYLOAD_BASE, evaluation_date: "2025-06-01" },
       headers: { "Content-Type": "application/json" },
     });
@@ -112,7 +113,7 @@ test.describe("Configure-without-deploy — citizen surface honours dated supers
   test("/screen UI renders the post-supersession amount when fed a 2026 date", async ({
     request,
   }) => {
-    const r = await request.post("/api/screen/notice", {
+    const r = await request.post(`${BACKEND}/api/screen/notice`, {
       data: { ...SCREEN_PAYLOAD_BASE, evaluation_date: "2026-06-01" },
       headers: { "Content-Type": "application/json" },
     });
@@ -124,9 +125,7 @@ test.describe("Configure-without-deploy — citizen surface honours dated supers
     // history if we ever surface that, but the headline must reflect
     // the post-2026 base.)
     // Headline figure check: the amount-figure span carries the value.
-    const headlineMatch = html.match(
-      /class="amount-figure">([\d.]+) CAD/,
-    );
+    const headlineMatch = html.match(/class="amount-figure">([\d.]+) CAD/);
     expect(headlineMatch?.[1]).toBe("735.45");
   });
 });

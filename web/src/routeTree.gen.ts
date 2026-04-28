@@ -28,6 +28,7 @@ import { Route as ConfigDraftRouteImport } from './routes/config.draft'
 import { Route as ConfigDiffRouteImport } from './routes/config.diff'
 import { Route as ConfigApprovalsRouteImport } from './routes/config.approvals'
 import { Route as CasesCaseIdRouteImport } from './routes/cases.$caseId'
+import { Route as AdminFederationRouteImport } from './routes/admin.federation'
 import { Route as ConfigApprovalsIdRouteImport } from './routes/config.approvals.$id'
 import { Route as ConfigKeyJurisdictionIdRouteImport } from './routes/config.$key.$jurisdictionId'
 import { Route as ConfigPromptsKeyJurisdictionIdEditRouteImport } from './routes/config.prompts.$key.$jurisdictionId.edit'
@@ -127,6 +128,11 @@ const CasesCaseIdRoute = CasesCaseIdRouteImport.update({
   path: '/$caseId',
   getParentRoute: () => CasesRoute,
 } as any)
+const AdminFederationRoute = AdminFederationRouteImport.update({
+  id: '/federation',
+  path: '/federation',
+  getParentRoute: () => AdminRoute,
+} as any)
 const ConfigApprovalsIdRoute = ConfigApprovalsIdRouteImport.update({
   id: '/$id',
   path: '/$id',
@@ -147,7 +153,7 @@ const ConfigPromptsKeyJurisdictionIdEditRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
-  '/admin': typeof AdminRoute
+  '/admin': typeof AdminRouteWithChildren
   '/authority': typeof AuthorityRoute
   '/cases': typeof CasesRouteWithChildren
   '/config': typeof ConfigRouteWithChildren
@@ -156,6 +162,7 @@ export interface FileRoutesByFullPath {
   '/policies': typeof PoliciesRoute
   '/screen': typeof ScreenRouteWithChildren
   '/walkthrough': typeof WalkthroughRoute
+  '/admin/federation': typeof AdminFederationRoute
   '/cases/$caseId': typeof CasesCaseIdRoute
   '/config/approvals': typeof ConfigApprovalsRouteWithChildren
   '/config/diff': typeof ConfigDiffRoute
@@ -171,7 +178,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
-  '/admin': typeof AdminRoute
+  '/admin': typeof AdminRouteWithChildren
   '/authority': typeof AuthorityRoute
   '/cases': typeof CasesRouteWithChildren
   '/config': typeof ConfigRouteWithChildren
@@ -180,6 +187,7 @@ export interface FileRoutesByTo {
   '/policies': typeof PoliciesRoute
   '/screen': typeof ScreenRouteWithChildren
   '/walkthrough': typeof WalkthroughRoute
+  '/admin/federation': typeof AdminFederationRoute
   '/cases/$caseId': typeof CasesCaseIdRoute
   '/config/approvals': typeof ConfigApprovalsRouteWithChildren
   '/config/diff': typeof ConfigDiffRoute
@@ -196,7 +204,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
-  '/admin': typeof AdminRoute
+  '/admin': typeof AdminRouteWithChildren
   '/authority': typeof AuthorityRoute
   '/cases': typeof CasesRouteWithChildren
   '/config': typeof ConfigRouteWithChildren
@@ -205,6 +213,7 @@ export interface FileRoutesById {
   '/policies': typeof PoliciesRoute
   '/screen': typeof ScreenRouteWithChildren
   '/walkthrough': typeof WalkthroughRoute
+  '/admin/federation': typeof AdminFederationRoute
   '/cases/$caseId': typeof CasesCaseIdRoute
   '/config/approvals': typeof ConfigApprovalsRouteWithChildren
   '/config/diff': typeof ConfigDiffRoute
@@ -231,6 +240,7 @@ export interface FileRouteTypes {
     | '/policies'
     | '/screen'
     | '/walkthrough'
+    | '/admin/federation'
     | '/cases/$caseId'
     | '/config/approvals'
     | '/config/diff'
@@ -255,6 +265,7 @@ export interface FileRouteTypes {
     | '/policies'
     | '/screen'
     | '/walkthrough'
+    | '/admin/federation'
     | '/cases/$caseId'
     | '/config/approvals'
     | '/config/diff'
@@ -279,6 +290,7 @@ export interface FileRouteTypes {
     | '/policies'
     | '/screen'
     | '/walkthrough'
+    | '/admin/federation'
     | '/cases/$caseId'
     | '/config/approvals'
     | '/config/diff'
@@ -295,7 +307,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
-  AdminRoute: typeof AdminRoute
+  AdminRoute: typeof AdminRouteWithChildren
   AuthorityRoute: typeof AuthorityRoute
   CasesRoute: typeof CasesRouteWithChildren
   ConfigRoute: typeof ConfigRouteWithChildren
@@ -441,6 +453,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CasesCaseIdRouteImport
       parentRoute: typeof CasesRoute
     }
+    '/admin/federation': {
+      id: '/admin/federation'
+      path: '/federation'
+      fullPath: '/admin/federation'
+      preLoaderRoute: typeof AdminFederationRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/config/approvals/$id': {
       id: '/config/approvals/$id'
       path: '/$id'
@@ -464,6 +483,16 @@ declare module '@tanstack/react-router' {
     }
   }
 }
+
+interface AdminRouteChildren {
+  AdminFederationRoute: typeof AdminFederationRoute
+}
+
+const AdminRouteChildren: AdminRouteChildren = {
+  AdminFederationRoute: AdminFederationRoute,
+}
+
+const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
 interface CasesRouteChildren {
   CasesCaseIdRoute: typeof CasesCaseIdRoute
@@ -546,7 +575,7 @@ const ScreenRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
-  AdminRoute: AdminRoute,
+  AdminRoute: AdminRouteWithChildren,
   AuthorityRoute: AuthorityRoute,
   CasesRoute: CasesRouteWithChildren,
   ConfigRoute: ConfigRouteWithChildren,

@@ -410,6 +410,21 @@ Originating spec: [docs/govops-019-case-event-timeline.md](docs/govops-019-case-
 | 10D.x.3 | Bonus: `PreviousDecisions` component renders the supersession chain as a stack of `<Collapsible>` sections — beyond the spec's "render the chip on each event" requirement. | ✅ closed (2026-04-28) — govops-019 §"Supersession chain rendering" now records the named component (`src/components/govops/cases/PreviousDecisions.tsx`) as part of the shipped surface, with the rationale that a named component keeps the case-detail route readable. | None |
 | 10D.x.4 | 14 new i18n keys × 6 locales (`events.heading`, `events.type.*`, `events.summary.*`, `events.history.previous_decision`, `events.form.*`). | Shipped (2026-04-28) | None |
 
+### Phase 6/7/8/9/10/11 — Lovable artefact import truthfully recorded (2026-04-28)
+
+Earlier §12 entries marking govops-016a / 017 / 018 / 019 / 020 as "Shipped (2026-04-28)" referred to user-insights-hub state — the Lovable repo where the artefacts were authored. The **import-into-`web/` step was skipped** for that whole batch and only surfaced when CI's E2E job started exercising `web/about.spec.ts` and `web/configure-without-deploy.spec.ts` (specs that assumed the post-016a state).
+
+The full re-import landed at commit `<TBD>` (this commit), bringing user-insights-hub@58c529c into `web/` with surgical preservation of local-only additions:
+
+- **Imported (229 files copied, 51 net diff after preservation)**: src/, scripts/, public/, brand/, components.json, eslint.config.js, tsconfig.json, vite.config.ts, vitest.config.ts, wrangler.jsonc, bunfig.toml, e2e/screen.spec.ts (upstream is strict superset adding govops-019 event-timeline test). All 6 locale files merged: 782 upstream keys + 304 local-only keys (walkthrough/help/runbook/dataflow/breadcrumb/home) = 843 keys per locale.
+- **Preserved (local versions kept verbatim)**: package.json (govops-web name + axe + e2e scripts), playwright.config.ts (Python backend orchestration), .gitignore / .prettierignore / .prettierrc (cosmetic), web/e2e/* (9 local specs + fixtures), web/src/components/govops/{Breadcrumb,DataFlowDiagram,HelpDrawer,PageBreadcrumb,Runbook}.tsx (local features), web/src/routes/walkthrough.tsx (local route), web/src/components/govops/Masthead.tsx (Console dropdown + HelpDrawer + Walkthrough nav), web/src/routes/__root.tsx (PageBreadcrumb), web/src/components/govops/encode/ProposalCard.tsx (lock-on-terminal-state), web/src/routes/{index,cases,encode,config,config.approvals,config.prompts,admin}.tsx (Runbook + modules-section integrations).
+- **Bug fixes shipped alongside**: TimelineCard date arg coerced to Date object (was passing string into `{date, date, medium}` ICU placeholder, causing RangeError on every render); about.spec.ts gotoAbout() now sets the `govops-locale` cookie before navigation (i18n provider reads cookie not query param); about.spec.ts:81 uses `.first()` on the Agentic State citation locator (page intentionally renders the citation in two places); configure-without-deploy.spec.ts uses the `BACKEND` env var (was hitting the frontend Vite dev server which doesn't have /api/screen).
+- **CI fix**: ConfigStore auto-creates the parent dir of `db_path` (prior commit 2257eb7 — needed for fresh CI runners where `var/` isn't tracked).
+
+**Verified locally before push**: Playwright chromium 76/76 green; pytest 343/343 green; OpenAPI drift gate green; Phase 2 regression guard green; schema validator clean (552 records).
+
+**Status of the affected §12 entries**: each row that previously claimed "Shipped (2026-04-28)" was a true statement about user-insights-hub state but a **false statement about this repo until this commit landed**. The rows are kept here as provenance for the next reviewer; the failure mode they encode (PLAN claim outpacing the import) is the one this entry exists to prevent.
+
 ### Phase 8 — Lovable extras + admin federation surface (2026-04-28)
 
 Originating spec: [docs/govops-020-admin-federation.md](docs/govops-020-admin-federation.md). The admin federation route exposes registry + imported packs + fetch form. Trust-decision authoring stays as a YAML PR per ADR-009's stance.

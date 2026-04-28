@@ -15,8 +15,7 @@ export const Route = createFileRoute("/walkthrough")({
   head: () => ({
     meta: [
       {
-        title:
-          "Walkthrough — How a brand-new statutory benefit becomes service · GovOps",
+        title: "Walkthrough — How a brand-new statutory benefit becomes service · GovOps",
       },
       {
         name: "description",
@@ -39,11 +38,29 @@ type StepDef = {
 const STEPS: StepDef[] = [
   { num: "01", prefix: "walkthrough.step1", Icon: Scale, variant: "human", accent: "authority" },
   { num: "02", prefix: "walkthrough.step2", Icon: ScrollText, variant: "agent", accent: "agentic" },
-  { num: "03", prefix: "walkthrough.step3", Icon: ClipboardCheck, variant: "human", accent: "authority" },
+  {
+    num: "03",
+    prefix: "walkthrough.step3",
+    Icon: ClipboardCheck,
+    variant: "human",
+    accent: "authority",
+  },
   { num: "04", prefix: "walkthrough.step4", Icon: Database, variant: "system", accent: "neutral" },
-  { num: "05", prefix: "walkthrough.step5", Icon: UserCheck, variant: "citizen", accent: "neutral" },
+  {
+    num: "05",
+    prefix: "walkthrough.step5",
+    Icon: UserCheck,
+    variant: "citizen",
+    accent: "neutral",
+  },
   { num: "06", prefix: "walkthrough.step6", Icon: UserX, variant: "citizen", accent: "neutral" },
-  { num: "07", prefix: "walkthrough.step7", Icon: ShieldCheck, variant: "hybrid", accent: "authority" },
+  {
+    num: "07",
+    prefix: "walkthrough.step7",
+    Icon: ShieldCheck,
+    variant: "hybrid",
+    accent: "authority",
+  },
 ];
 
 function accentVar(accent: StepDef["accent"]) {
@@ -217,8 +234,7 @@ function EncoderProposals() {
               </div>
               <div className="flex flex-wrap items-center gap-2 text-xs text-foreground-muted">
                 <span style={{ fontFamily: "var(--font-mono)" }}>
-                  ={" "}
-                  {Array.isArray(r.value) ? JSON.stringify(r.value) : String(r.value)}
+                  = {Array.isArray(r.value) ? JSON.stringify(r.value) : String(r.value)}
                 </span>
                 <span>·</span>
                 <span>{r.citation}</span>
@@ -296,8 +312,7 @@ function SubstrateRecords() {
               </code>
               <div className="flex items-center gap-2 text-xs text-foreground-muted">
                 <span style={{ fontFamily: "var(--font-mono)" }}>
-                  ={" "}
-                  {Array.isArray(r.value) ? JSON.stringify(r.value) : String(r.value)}
+                  = {Array.isArray(r.value) ? JSON.stringify(r.value) : String(r.value)}
                 </span>
                 <span
                   className="rounded-full border border-border bg-surface px-2 py-0.5"
@@ -331,14 +346,44 @@ function CaseEvaluation({
   const checks =
     outcome === "eligible"
       ? [
-          { rule: "ca-psv.rule.consecutive-employment.min_years", status: "pass", needs: 5, has: caseData.consecutiveYears },
-          { rule: "ca-psv.rule.employer.must_be_registered", status: "pass", needs: true, has: caseData.employerRegistered },
-          { rule: "ca-psv.evidence.pay_stubs.types", status: "pass", needs: 1, has: caseData.evidence.length },
+          {
+            rule: "ca-psv.rule.consecutive-employment.min_years",
+            status: "pass",
+            needs: 5,
+            has: caseData.consecutiveYears,
+          },
+          {
+            rule: "ca-psv.rule.employer.must_be_registered",
+            status: "pass",
+            needs: true,
+            has: caseData.employerRegistered,
+          },
+          {
+            rule: "ca-psv.evidence.pay_stubs.types",
+            status: "pass",
+            needs: 1,
+            has: caseData.evidence.length,
+          },
         ]
       : [
-          { rule: "ca-psv.rule.consecutive-employment.min_years", status: "fail", needs: 5, has: caseData.consecutiveYears },
-          { rule: "ca-psv.rule.employer.must_be_registered", status: "pass", needs: true, has: caseData.employerRegistered },
-          { rule: "ca-psv.evidence.pay_stubs.types", status: "pass", needs: 1, has: caseData.evidence.length },
+          {
+            rule: "ca-psv.rule.consecutive-employment.min_years",
+            status: "fail",
+            needs: 5,
+            has: caseData.consecutiveYears,
+          },
+          {
+            rule: "ca-psv.rule.employer.must_be_registered",
+            status: "pass",
+            needs: true,
+            has: caseData.employerRegistered,
+          },
+          {
+            rule: "ca-psv.evidence.pay_stubs.types",
+            status: "pass",
+            needs: 1,
+            has: caseData.evidence.length,
+          },
         ];
 
   return (
@@ -364,9 +409,7 @@ function CaseEvaluation({
             backgroundColor:
               outcome === "eligible" ? "var(--authority-soft)" : "var(--surface-sunken)",
             color:
-              outcome === "eligible"
-                ? "var(--authority-foreground)"
-                : "var(--foreground-muted)",
+              outcome === "eligible" ? "var(--authority-foreground)" : "var(--foreground-muted)",
             fontFamily: "var(--font-mono)",
           }}
         >
@@ -389,10 +432,7 @@ function CaseEvaluation({
 
       <ol role="list" className="mt-4 space-y-2 border-t border-border pt-4">
         {checks.map((c) => (
-          <li
-            key={c.rule}
-            className="flex items-start justify-between gap-3 text-sm"
-          >
+          <li key={c.rule} className="flex items-start justify-between gap-3 text-sm">
             <code
               className="flex-1 truncate text-foreground-muted"
               style={{ fontFamily: "var(--font-mono)" }}
@@ -406,13 +446,8 @@ function CaseEvaluation({
                 backgroundColor:
                   c.status === "pass" ? "var(--authority-soft)" : "var(--surface-sunken)",
                 color:
-                  c.status === "pass"
-                    ? "var(--authority-foreground)"
-                    : "var(--foreground-muted)",
-                border:
-                  c.status === "fail"
-                    ? "1px solid var(--border)"
-                    : "1px solid transparent",
+                  c.status === "pass" ? "var(--authority-foreground)" : "var(--foreground-muted)",
+                border: c.status === "fail" ? "1px solid var(--border)" : "1px solid transparent",
               }}
             >
               {c.status === "pass"
@@ -492,9 +527,7 @@ function Walkthrough() {
             <p className="font-medium text-foreground">
               {intl.formatMessage({ id: "walkthrough.scenario.title" })}
             </p>
-            <p className="mt-1">
-              {intl.formatMessage({ id: "walkthrough.scenario.body" })}
-            </p>
+            <p className="mt-1">{intl.formatMessage({ id: "walkthrough.scenario.body" })}</p>
           </div>
         </div>
       </section>

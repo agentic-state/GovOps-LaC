@@ -26,14 +26,15 @@ export function RuleEvaluationItem({ rule }: { rule: RuleEvaluation }) {
             fontFamily: "var(--font-mono)",
           }}
         >
-          <span aria-hidden className="inline-block size-1.5 rounded-full" style={{ backgroundColor: c }} />
+          <span
+            aria-hidden
+            className="inline-block size-1.5 rounded-full"
+            style={{ backgroundColor: c }}
+          />
           {intl.formatMessage({ id: `rule_outcome.${rule.outcome}` })}
         </span>
         <div className="flex-1 space-y-1">
-          <p
-            className="text-sm text-foreground"
-            style={{ fontFamily: "var(--font-serif)" }}
-          >
+          <p className="text-sm text-foreground" style={{ fontFamily: "var(--font-serif)" }}>
             {rule.rule_description}
           </p>
           <CitationLink citation={rule.citation} />
@@ -45,7 +46,10 @@ export function RuleEvaluationItem({ rule }: { rule: RuleEvaluation }) {
           className="inline-flex h-7 w-7 items-center justify-center rounded-md text-foreground-muted hover:bg-surface-sunken"
           aria-label="Toggle detail"
         >
-          <ChevronDown className={`size-4 transition-transform ${open ? "rotate-180" : ""}`} aria-hidden />
+          <ChevronDown
+            className={`size-4 transition-transform ${open ? "rotate-180" : ""}`}
+            aria-hidden
+          />
         </button>
       </div>
       {open && (

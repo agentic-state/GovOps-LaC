@@ -22,10 +22,7 @@ export function BulkActionBar({
       aria-label="Bulk actions"
       className="sticky top-16 z-10 flex flex-wrap items-center gap-3 rounded-md border border-border bg-surface-raised p-3 shadow-sm"
     >
-      <span
-        className="text-sm text-foreground"
-        style={{ fontFamily: "var(--font-mono)" }}
-      >
+      <span className="text-sm text-foreground" style={{ fontFamily: "var(--font-mono)" }}>
         {intl.formatMessage({ id: "encode.review.bulk.heading" }, { count })}
       </span>
       <div className="ms-auto flex flex-wrap gap-2">

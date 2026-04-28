@@ -3,8 +3,23 @@ import { Plus, X } from "lucide-react";
 import type { ScreenResidencyPeriod } from "@/lib/types";
 
 const COUNTRIES = [
-  "ca", "br", "es", "fr", "de", "ua",
-  "us", "uk", "mx", "pt", "ar", "it", "pl", "in", "ph", "cn", "other",
+  "ca",
+  "br",
+  "es",
+  "fr",
+  "de",
+  "ua",
+  "us",
+  "uk",
+  "mx",
+  "pt",
+  "ar",
+  "it",
+  "pl",
+  "in",
+  "ph",
+  "cn",
+  "other",
 ];
 
 export function ResidencyPeriodRows({
@@ -29,11 +44,7 @@ export function ResidencyPeriodRows({
 
   const remove = (i: number) => onChange(periods.filter((_, idx) => idx !== i));
 
-  const add = () =>
-    onChange([
-      ...periods,
-      { country: "", start_date: "", end_date: null },
-    ]);
+  const add = () => onChange([...periods, { country: "", start_date: "", end_date: null }]);
 
   return (
     <fieldset className="space-y-3">
@@ -77,11 +88,17 @@ export function ResidencyPeriodRows({
               >
                 <option value="">—</option>
                 {COUNTRIES.map((c) => (
-                  <option key={c} value={c}>{c.toUpperCase()}</option>
+                  <option key={c} value={c}>
+                    {c.toUpperCase()}
+                  </option>
                 ))}
               </select>
               {eCountry && (
-                <p id={`err-residency-${i}-country`} role="alert" className="mt-1 text-xs text-destructive">
+                <p
+                  id={`err-residency-${i}-country`}
+                  role="alert"
+                  className="mt-1 text-xs text-destructive"
+                >
                   {intl.formatMessage({ id: eCountry })}
                 </p>
               )}
@@ -102,7 +119,11 @@ export function ResidencyPeriodRows({
                 aria-describedby={eStart ? `err-residency-${i}-start` : undefined}
               />
               {eStart && (
-                <p id={`err-residency-${i}-start`} role="alert" className="mt-1 text-xs text-destructive">
+                <p
+                  id={`err-residency-${i}-start`}
+                  role="alert"
+                  className="mt-1 text-xs text-destructive"
+                >
                   {intl.formatMessage({ id: eStart })}
                 </p>
               )}
@@ -133,7 +154,11 @@ export function ResidencyPeriodRows({
                 </label>
               </div>
               {eEnd && (
-                <p id={`err-residency-${i}-end`} role="alert" className="mt-1 text-xs text-destructive">
+                <p
+                  id={`err-residency-${i}-end`}
+                  role="alert"
+                  className="mt-1 text-xs text-destructive"
+                >
                   {intl.formatMessage({ id: eEnd })}
                 </p>
               )}

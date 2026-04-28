@@ -56,6 +56,8 @@ import {
   mockGetAudit,
   mockGetCase,
   mockReviewCase,
+  mockListCaseEvents,
+  mockPostCaseEvent,
 } from "./mock-cases";
 
 /**
@@ -313,9 +315,7 @@ export async function getCase(caseId: string): Promise<CaseDetail | null> {
   }
 }
 
-export async function evaluateCase(
-  caseId: string,
-): Promise<{ recommendation: Recommendation }> {
+export async function evaluateCase(caseId: string): Promise<{ recommendation: Recommendation }> {
   try {
     return await fetcher(`/api/cases/${encodeURIComponent(caseId)}/evaluate`, {
       method: "POST",
@@ -350,6 +350,231 @@ export async function getCaseAudit(caseId: string): Promise<AuditPackage> {
     return await fetcher<AuditPackage>(`/api/cases/${encodeURIComponent(caseId)}/audit`);
   } catch {
     return mockGetAudit(caseId);
+  }
+}
+
+// ---- Case events / reassessment (govops-019) ------------------------------
+
+export async function listCaseEvents(caseId: string): Promise<import("./types").GetEventsResponse> {
+  try {
+    return await fetcher(`/api/cases/${encodeURIComponent(caseId)}/events`);
+  } catch {
+    return mockListCaseEvents(caseId);
+  }
+}
+
+export async function postCaseEvent(
+  caseId: string,
+  body: import("./types").CaseEventRequest,
+  reevaluate = true,
+): Promise<import("./types").PostEventResponse> {
+  const qs = `?reevaluate=${reevaluate ? "true" : "false"}`;
+  try {
+    const res = await fetch(`${BASE}/api/cases/${encodeURIComponent(caseId)}/events${qs}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+    if (!res.ok) {
+      let detail = res.statusText;
+      try {
+        const j = await res.json();
+        detail = (j as { detail?: string }).detail ?? detail;
+      } catch {
+        /* ignore */
+      }
+      throw new Error(detail);
+    }
+    return (await res.json()) as import("./types").PostEventResponse;
+  } catch (e) {
+    if (e instanceof TypeError) {
+      // Network error → fall back to mock so preview works.
+      return mockPostCaseEvent(caseId, body, reevaluate);
+    }
+    throw e;
+  }
+}
+
+// ---- Federation (govops-020) ----------------------------------------------
+
+import type {
+  FederationFetchResult,
+  FederationPack,
+  FederationRegistryEntry,
+} from "./federation-types";
+
+const loadFederationMocks = () => import("./mock-federation");
+
+export async function listFederationRegistry(): Promise<{
+  entries: FederationRegistryEntry[];
+}> {
+  try {
+    return await fetcher("/api/admin/federation/registry");
+  } catch {
+    return (await loadFederationMocks()).mockListRegistry();
+  }
+}
+
+export async function listFederationPacks(): Promise<{ packs: FederationPack[] }> {
+  try {
+    return await fetcher("/api/admin/federation/packs");
+  } catch {
+    return (await loadFederationMocks()).mockListPacks();
+  }
+}
+
+export async function fetchFederationPack(
+  publisherId: string,
+  opts: { dryRun: boolean; allowUnsigned: boolean },
+): Promise<FederationFetchResult> {
+  const qs = new URLSearchParams({
+    dry_run: opts.dryRun ? "true" : "false",
+    allow_unsigned: opts.allowUnsigned ? "true" : "false",
+  }).toString();
+  try {
+    return await fetcher(`/api/admin/federation/fetch/${encodeURIComponent(publisherId)}?${qs}`, {
+      method: "POST",
+    });
+  } catch (e) {
+    if (e instanceof TypeError) {
+      return (await loadFederationMocks()).mockFetchPack(publisherId, opts);
+    }
+    // Try mock for any other failure path too (preview parity).
+    return (await loadFederationMocks()).mockFetchPack(publisherId, opts);
+  }
+}
+
+export async function setFederationPackEnabled(
+  publisherId: string,
+  enabled: boolean,
+): Promise<FederationPack> {
+  const op = enabled ? "enable" : "disable";
+  try {
+    return await fetcher(`/api/admin/federation/packs/${encodeURIComponent(publisherId)}/${op}`, {
+      method: "POST",
+    });
+  } catch {
+    return (await loadFederationMocks()).mockTogglePack(publisherId, enabled);
+  }
+}
+
+// ---- Decision notices (govops-018) ----------------------------------------
+
+import type { ScreenRequest as NoticeScreenRequest } from "./types";
+
+export interface NoticeResult {
+  /** Rendered HTML body (already a complete document). */
+  html: string;
+  /** SHA-256 the backend (or mock) computed over the html bytes. */
+  sha256: string | null;
+  /** True when produced by the local mock fallback. */
+  preview: boolean;
+}
+
+/**
+ * Compute SHA-256 hex over a UTF-8 string in the browser. Used by the mock
+ * notice path so previews still surface a working integrity hash.
+ */
+async function sha256Hex(text: string): Promise<string | null> {
+  try {
+    const buf = new TextEncoder().encode(text);
+    const digest = await crypto.subtle.digest("SHA-256", buf);
+    return Array.from(new Uint8Array(digest))
+      .map((b) => b.toString(16).padStart(2, "0"))
+      .join("");
+  } catch {
+    return null;
+  }
+}
+
+function mockNoticeHtml(opts: {
+  title: string;
+  jurisdiction: string;
+  body: string;
+  generatedAt: string;
+}): string {
+  // Self-contained, sandbox-friendly. No remote assets, no scripts.
+  return `<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>${opts.title}</title>
+  <meta name="generator" content="GovOps preview-mode notice" />
+  <style>
+    body{font:14px/1.5 ui-serif,Georgia,serif;max-width:42rem;margin:2rem auto;color:#0f172a;padding:0 1rem}
+    h1{font-size:1.6rem;margin:0 0 .25rem 0}
+    .meta{font:12px ui-monospace,monospace;color:#475569;margin-bottom:1.25rem}
+    .preview{display:inline-block;background:#fef3c7;color:#854d0e;border:1px solid #fde68a;padding:.15rem .5rem;border-radius:.25rem;font-size:11px;text-transform:uppercase;letter-spacing:.08em;margin-bottom:1rem}
+    pre{white-space:pre-wrap;background:#f8fafc;border:1px solid #e2e8f0;padding:.75rem;border-radius:.25rem;font:12px ui-monospace,monospace}
+  </style>
+</head>
+<body>
+  <span class="preview">Preview-mode notice</span>
+  <h1>${opts.title}</h1>
+  <p class="meta">${opts.jurisdiction} · generated ${opts.generatedAt}</p>
+  <pre>${opts.body.replace(/[<>&]/g, (c) => ({ "<": "&lt;", ">": "&gt;", "&": "&amp;" })[c]!)}</pre>
+  <p class="meta">This document was produced by the local preview engine because the GovOps backend was unreachable. It is not an official decision.</p>
+</body>
+</html>`;
+}
+
+/**
+ * Fetch a rendered decision notice. Returns the HTML body + the integrity
+ * hash from `X-Notice-Sha256`. Falls back to a self-contained mock so that
+ * previews and offline reviews always produce something the citizen can
+ * download. The HTML is treated as an opaque document — UIs render it via
+ * Blob/object URL, never `document.write`.
+ */
+export async function fetchDecisionNotice(
+  args:
+    | { mode: "case"; caseId: string; language?: string; signal?: AbortSignal }
+    | {
+        mode: "screen";
+        screenRequest: NoticeScreenRequest;
+        language?: string;
+        signal?: AbortSignal;
+      },
+): Promise<NoticeResult> {
+  const language = args.language ?? "en";
+  const url =
+    args.mode === "case"
+      ? `${BASE}/api/cases/${encodeURIComponent(args.caseId)}/notice?lang=${encodeURIComponent(language)}`
+      : `${BASE}/api/screen/notice?lang=${encodeURIComponent(language)}`;
+  const init: RequestInit =
+    args.mode === "case"
+      ? { method: "GET", signal: args.signal }
+      : {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(args.screenRequest),
+          signal: args.signal,
+        };
+  try {
+    const res = await fetch(url, init);
+    if (!res.ok) throw new Error(`Notice request failed: ${res.status}`);
+    const html = await res.text();
+    const sha = res.headers.get("X-Notice-Sha256");
+    return { html, sha256: sha, preview: false };
+  } catch (e) {
+    if (e instanceof DOMException && e.name === "AbortError") throw e;
+    // Preview fallback — mock a notice so users can still download something.
+    const generatedAt = new Date().toISOString();
+    const html =
+      args.mode === "case"
+        ? mockNoticeHtml({
+            title: `Decision notice — case ${args.caseId}`,
+            jurisdiction: "Preview jurisdiction",
+            body: JSON.stringify({ case_id: args.caseId, language }, null, 2),
+            generatedAt,
+          })
+        : mockNoticeHtml({
+            title: "Self-screen notice",
+            jurisdiction: args.screenRequest.jurisdiction_id,
+            body: JSON.stringify(args.screenRequest, null, 2),
+            generatedAt,
+          });
+    const sha256 = await sha256Hex(html);
+    return { html, sha256, preview: true };
   }
 }
 
@@ -394,9 +619,7 @@ export async function fetchJurisdiction(code: string): Promise<JurisdictionRespo
     if (!hit) throw new Error(`Unknown jurisdiction: ${code}`);
     return hit;
   }
-  return fetcher<JurisdictionResponse>(
-    `/api/jurisdiction/${encodeURIComponent(code)}`,
-  );
+  return fetcher<JurisdictionResponse>(`/api/jurisdiction/${encodeURIComponent(code)}`);
 }
 
 // ---- Encoding pipeline (govops-011) ---------------------------------------
@@ -457,8 +680,7 @@ export async function reviewProposal(
   proposalId: string,
   body: ReviewProposalBody,
 ): Promise<RuleProposal> {
-  if (isMockMode())
-    return (await loadEncodeMocks()).mockReviewProposal(batchId, proposalId, body);
+  if (isMockMode()) return (await loadEncodeMocks()).mockReviewProposal(batchId, proposalId, body);
   try {
     return await fetcher<RuleProposal>(
       `/api/encode/batches/${encodeURIComponent(batchId)}/proposals/${encodeURIComponent(proposalId)}/review`,
@@ -475,10 +697,10 @@ export async function bulkReviewProposals(
 ): Promise<{ updated: RuleProposal[] }> {
   if (isMockMode()) return (await loadEncodeMocks()).mockBulkReviewProposals(batchId, body);
   try {
-    return await fetcher(
-      `/api/encode/batches/${encodeURIComponent(batchId)}/bulk-review`,
-      { method: "POST", body: JSON.stringify(body) },
-    );
+    return await fetcher(`/api/encode/batches/${encodeURIComponent(batchId)}/bulk-review`, {
+      method: "POST",
+      body: JSON.stringify(body),
+    });
   } catch {
     return (await loadEncodeMocks()).mockBulkReviewProposals(batchId, body);
   }
@@ -487,10 +709,9 @@ export async function bulkReviewProposals(
 export async function commitBatch(batchId: string): Promise<{ committed_rule_ids: string[] }> {
   if (isMockMode()) return (await loadEncodeMocks()).mockCommitBatch(batchId);
   try {
-    return await fetcher(
-      `/api/encode/batches/${encodeURIComponent(batchId)}/commit`,
-      { method: "POST" },
-    );
+    return await fetcher(`/api/encode/batches/${encodeURIComponent(batchId)}/commit`, {
+      method: "POST",
+    });
   } catch {
     return (await loadEncodeMocks()).mockCommitBatch(batchId);
   }
@@ -509,7 +730,15 @@ export async function impactByCitation(
 ): Promise<ImpactResponse> {
   const trimmed = citation.trim();
   if (!trimmed)
-    return { query: "", total: 0, jurisdiction_count: 0, results: [], limit: opts.limit, page: opts.page, page_count: 0 };
+    return {
+      query: "",
+      total: 0,
+      jurisdiction_count: 0,
+      results: [],
+      limit: opts.limit,
+      page: opts.page,
+      page_count: 0,
+    };
   const params = new URLSearchParams({ citation: trimmed });
   if (opts.limit) params.set("limit", String(opts.limit));
   if (opts.page) params.set("page", String(opts.page));

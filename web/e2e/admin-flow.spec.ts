@@ -66,9 +66,7 @@ test.describe("Phase 6 admin flow — configure-without-deploy", () => {
     });
 
     // 4. Visit the per-key view — diff between current and proposed
-    await page.goto(
-      `/config/${encodeURIComponent(SCENARIO_KEY)}/${SCENARIO_JUR}`,
-    );
+    await page.goto(`/config/${encodeURIComponent(SCENARIO_KEY)}/${SCENARIO_JUR}`);
     await page.screenshot({
       path: "test-results/screenshots/admin-flow-3-key-view.png",
       fullPage: true,
@@ -81,19 +79,11 @@ test.describe("Phase 6 admin flow — configure-without-deploy", () => {
 
     // 6. Resolve before the boundary returns null (no in-effect record
     //    for this scenario key in 2026 — only the 2027 entry exists).
-    const before = await api.resolve(
-      SCENARIO_KEY,
-      "2026-12-31T00:00:00+00:00",
-      SCENARIO_JUR,
-    );
+    const before = await api.resolve(SCENARIO_KEY, "2026-12-31T00:00:00+00:00", SCENARIO_JUR);
     expect(before, "no record in effect on 2026-12-31").toBeNull();
 
     // 7. Resolve after the boundary returns 67 — the exit-line proof.
-    const after = await api.resolve(
-      SCENARIO_KEY,
-      "2027-01-02T00:00:00+00:00",
-      SCENARIO_JUR,
-    );
+    const after = await api.resolve(SCENARIO_KEY, "2027-01-02T00:00:00+00:00", SCENARIO_JUR);
     expect(after, "record in effect on 2027-01-02").not.toBeNull();
     expect((after as { value: number }).value).toBe(67);
 

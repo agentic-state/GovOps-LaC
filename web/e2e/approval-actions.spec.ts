@@ -50,9 +50,7 @@ test.describe("Phase 6 approval actions — reject + request-changes", () => {
     expect(r.status()).toBe(409);
   });
 
-  test("request-changes returns a pending draft to the author", async ({
-    request,
-  }) => {
+  test("request-changes returns a pending draft to the author", async ({ request }) => {
     const api = await backend(request);
     const draft = await api.createDraft({
       domain: "rule",
@@ -65,11 +63,7 @@ test.describe("Phase 6 approval actions — reject + request-changes", () => {
       rationale: "request-changes scenario",
     });
 
-    const after = await api.requestChanges(
-      draft.id,
-      "e2e-reviewer",
-      "needs more citation context",
-    );
+    const after = await api.requestChanges(draft.id, "e2e-reviewer", "needs more citation context");
     expect(after.status).toBe("draft"); // back to author for further edits
   });
 });

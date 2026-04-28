@@ -1,5 +1,13 @@
 import { useIntl } from "react-intl";
-import { Scale, ScrollText, ClipboardCheck, Database, Cog, UserCheck, ShieldCheck } from "lucide-react";
+import {
+  Scale,
+  ScrollText,
+  ClipboardCheck,
+  Database,
+  Cog,
+  UserCheck,
+  ShieldCheck,
+} from "lucide-react";
 
 /**
  * The pipeline visualised. Showing the path a single law takes from

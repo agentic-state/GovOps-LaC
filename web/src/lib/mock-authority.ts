@@ -1,9 +1,4 @@
-import type {
-  AuthorityReference,
-  Jurisdiction,
-  LegalDocument,
-  LegalRule,
-} from "./types";
+import type { AuthorityReference, Jurisdiction, LegalDocument, LegalRule } from "./types";
 
 /**
  * Mock fixture for the /authority surface, used as a fallback when the
@@ -56,7 +51,7 @@ export const MOCK_AUTHORITY_CHAIN: AuthorityReference[] = [
     jurisdiction_id: "ca-oas",
     layer: "policy",
     title: "OAS Eligibility Policy Manual",
-    citation: "OAS Policy Manual, ch. 4",
+    citation: "ESDC Policy Manual, ch. 4",
     effective_date: "2020-01-15",
     url: "https://www.canada.ca/en/services/benefits/publicpensions/cpp/old-age-security.html",
     parent_id: "auth.regulation",
@@ -66,7 +61,7 @@ export const MOCK_AUTHORITY_CHAIN: AuthorityReference[] = [
     jurisdiction_id: "ca-oas",
     layer: "program",
     title: "Old Age Security Program",
-    citation: "OAS Program 5004",
+    citation: "ESDC Program 5004",
     effective_date: "1952-01-01",
     url: "https://www.canada.ca/en/services/benefits/publicpensions/cpp/old-age-security.html",
     parent_id: "auth.policy",
@@ -127,7 +122,7 @@ export const MOCK_LEGAL_DOCUMENTS: LegalDocument[] = [
     jurisdiction_id: "ca-oas",
     document_type: "policy_manual",
     title: "OAS Eligibility Policy Manual",
-    citation: "OAS Policy Manual, ch. 4",
+    citation: "ESDC Policy Manual, ch. 4",
     effective_date: "2020-01-15",
     sections: [
       {
@@ -166,7 +161,8 @@ export const MOCK_LEGAL_RULES: LegalRule[] = [
     source_document_id: "doc.oas-act",
     source_section_ref: "s. 3(2)",
     rule_type: "residency_partial",
-    description: "Ten years of residence after age 18 required for partial pension; ratio = years/40.",
+    description:
+      "Ten years of residence after age 18 required for partial pension; ratio = years/40.",
     formal_expression: "residency_years(applicant, since_age=18) >= 10",
     citation: "OAS Act, s. 3(2)",
     parameters: { partial_min_years: 10, ratio_denominator: 40 },

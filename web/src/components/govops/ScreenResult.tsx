@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import { useIntl } from "react-intl";
 import { ProvenanceRibbon } from "./ProvenanceRibbon";
+import { BenefitAmountCard } from "./screen/BenefitAmountCard";
 import type { ScreenResponse, ScreenRuleOutcome } from "@/lib/types";
 
 const RULE_CHIP_CLASS: Record<ScreenRuleOutcome, string> = {
@@ -71,10 +72,7 @@ export function ScreenResult({
           </p>
           {data.partial_ratio && (
             <p className="text-foreground-muted text-sm mt-1">
-              {intl.formatMessage(
-                { id: "screen.partial" },
-                { ratio: data.partial_ratio },
-              )}
+              {intl.formatMessage({ id: "screen.partial" }, { ratio: data.partial_ratio })}
             </p>
           )}
         </div>
@@ -121,8 +119,20 @@ export function ScreenResult({
             {intl.formatMessage({ id: "screen.missing.heading" })}
           </h3>
           <ul role="list" className="list-disc list-inside text-sm text-foreground-muted space-y-1">
-            {data.missing_evidence.map((e) => <li key={e}>{e}</li>)}
+            {data.missing_evidence.map((e) => (
+              <li key={e}>{e}</li>
+            ))}
           </ul>
+        </section>
+      )}
+      {data.benefit_amount && (
+        <section className="px-5 py-4 border-t border-border">
+          <BenefitAmountCard
+            benefitAmount={data.benefit_amount}
+            jurisdictionLabel={data.jurisdiction_label}
+            pensionType={data.pension_type}
+            partialRatio={data.partial_ratio ?? null}
+          />
         </section>
       )}
       <section className="px-5 py-4 border-t border-border">

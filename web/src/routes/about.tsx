@@ -1,10 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useIntl } from "react-intl";
 import { ExternalLink } from "lucide-react";
-import {
-  ProvenanceRibbon,
-  type ProvenanceVariant,
-} from "@/components/govops/ProvenanceRibbon";
+import { ProvenanceRibbon, type ProvenanceVariant } from "@/components/govops/ProvenanceRibbon";
 import { BrandingCheck } from "@/components/govops/BrandingCheck";
 import { ReferenceCard } from "@/components/govops/ReferenceCard";
 import { PipelineDiagram } from "@/components/govops/PipelineDiagram";
@@ -17,7 +14,15 @@ import { AuthorityChainDiagram } from "@/components/govops/AuthorityChainDiagram
  */
 const REPO_BASE =
   (import.meta.env.VITE_REPO_BASE_URL as string | undefined) ??
-  "https://github.com/your-org/61-GovOps/blob/main";
+  "https://github.com/eva-foundry/61-GovOps/blob/main";
+
+/**
+ * Canonical project home (GitHub Pages landing). Override at build time via
+ * `VITE_PROJECT_HOME_URL`.
+ */
+const PROJECT_HOME =
+  (import.meta.env.VITE_PROJECT_HOME_URL as string | undefined) ??
+  "https://eva-foundry.github.io/61-GovOps/";
 
 export const Route = createFileRoute("/about")({
   head: () => ({
@@ -69,13 +74,7 @@ const SERIF: React.CSSProperties = {
 };
 const MONO: React.CSSProperties = { fontFamily: "var(--font-mono)" };
 
-function ExternalAnchor({
-  href,
-  children,
-}: {
-  href: string;
-  children: React.ReactNode;
-}) {
+function ExternalAnchor({ href, children }: { href: string; children: React.ReactNode }) {
   return (
     <a
       href={href}
@@ -89,13 +88,7 @@ function ExternalAnchor({
   );
 }
 
-function InRepoAnchor({
-  href,
-  children,
-}: {
-  href: string;
-  children: React.ReactNode;
-}) {
+function InRepoAnchor({ href, children }: { href: string; children: React.ReactNode }) {
   return (
     <a
       href={href}
@@ -119,21 +112,19 @@ function About() {
         <div className="flex items-stretch">
           <ProvenanceRibbon variant="human" />
           <div className="space-y-4">
-            <p
-              className="text-xs uppercase tracking-[0.2em] text-foreground-subtle"
-              style={MONO}
-            >
+            <p className="text-xs uppercase tracking-[0.2em] text-foreground-subtle" style={MONO}>
               about · govops
             </p>
-            <h1
-              className="text-4xl tracking-tight text-foreground sm:text-5xl"
-              style={SERIF}
-            >
+            <h1 className="text-4xl tracking-tight text-foreground sm:text-5xl" style={SERIF}>
               {t("about.title")}
             </h1>
-            <p className="max-w-2xl text-lg text-foreground-muted">
-              {t("about.lede")}
-            </p>
+            <p className="max-w-2xl text-lg text-foreground-muted">{t("about.lede")}</p>
+            <div className="flex flex-wrap items-center gap-3 pt-1">
+              <ExternalAnchor href="https://github.com/eva-foundry/61-GovOps">
+                {t("about.cta.github")}
+              </ExternalAnchor>
+              <ExternalAnchor href={PROJECT_HOME}>{t("about.cta.project_home")}</ExternalAnchor>
+            </div>
           </div>
         </div>
         <aside
@@ -149,9 +140,7 @@ function About() {
             >
               {t("about.disclaimer.title")}
             </h2>
-            <p className="text-sm text-foreground">
-              {t("about.disclaimer.body")}
-            </p>
+            <p className="text-sm text-foreground">{t("about.disclaimer.body")}</p>
           </div>
         </aside>
       </header>
@@ -177,16 +166,10 @@ function About() {
       {/* §4 Two frameworks ----------------------------------------------- */}
       <section aria-labelledby="about-frameworks-heading" className="space-y-6">
         <div className="space-y-2">
-          <h2
-            id="about-frameworks-heading"
-            className="text-2xl text-foreground"
-            style={SERIF}
-          >
+          <h2 id="about-frameworks-heading" className="text-2xl text-foreground" style={SERIF}>
             {t("about.frameworks.heading")}
           </h2>
-          <p className="max-w-3xl text-sm text-foreground-muted">
-            {t("about.frameworks.caption")}
-          </p>
+          <p className="max-w-3xl text-sm text-foreground-muted">{t("about.frameworks.caption")}</p>
         </div>
         <div className="grid gap-6 md:grid-cols-2">
           <ReferenceCard
@@ -221,11 +204,7 @@ function About() {
 
       {/* §6 Operating principles ----------------------------------------- */}
       <section aria-labelledby="about-principles-heading" className="space-y-4">
-        <h2
-          id="about-principles-heading"
-          className="text-2xl text-foreground"
-          style={SERIF}
-        >
+        <h2 id="about-principles-heading" className="text-2xl text-foreground" style={SERIF}>
           {t("about.principles.title")}
         </h2>
         <ul className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -249,11 +228,7 @@ function About() {
         <div className="flex items-stretch">
           <ProvenanceRibbon variant="hybrid" />
           <div>
-            <h2
-              id="about-philosophy-heading"
-              className="text-2xl text-foreground"
-              style={SERIF}
-            >
+            <h2 id="about-philosophy-heading" className="text-2xl text-foreground" style={SERIF}>
               {t("about.philosophy.title")}
             </h2>
             <p
@@ -264,23 +239,15 @@ function About() {
             </p>
           </div>
         </div>
-        <p className="text-base leading-relaxed text-foreground">
-          {t("about.philosophy.body")}
-        </p>
+        <p className="text-base leading-relaxed text-foreground">{t("about.philosophy.body")}</p>
       </section>
 
       {/* §8 Provenance ribbons (KEPT) ------------------------------------ */}
       <section aria-labelledby="about-ribbons-heading">
-        <h2
-          id="about-ribbons-heading"
-          className="text-2xl text-foreground"
-          style={SERIF}
-        >
+        <h2 id="about-ribbons-heading" className="text-2xl text-foreground" style={SERIF}>
           {t("about.ribbons.title")}
         </h2>
-        <p className="mt-2 max-w-2xl text-sm text-foreground-muted">
-          {t("about.ribbons.caption")}
-        </p>
+        <p className="mt-2 max-w-2xl text-sm text-foreground-muted">{t("about.ribbons.caption")}</p>
         <ul className="mt-6 divide-y divide-border overflow-hidden rounded-lg border border-border bg-surface">
           {RIBBON_EXAMPLES.map((ex) => (
             <li key={ex.variant} className="flex items-stretch">
@@ -292,9 +259,7 @@ function About() {
                 >
                   {ex.variant}
                 </span>
-                <span className="text-sm text-foreground sm:text-end">
-                  {t(ex.key)}
-                </span>
+                <span className="text-sm text-foreground sm:text-end">{t(ex.key)}</span>
               </div>
             </li>
           ))}
@@ -308,10 +273,7 @@ function About() {
         </h2>
         <ul className="divide-y divide-border overflow-hidden rounded-lg border border-border bg-surface">
           {NOT_ITEMS.map((id) => (
-            <li
-              key={id}
-              className="flex flex-col gap-1 p-4 sm:flex-row sm:items-center sm:gap-4"
-            >
+            <li key={id} className="flex flex-col gap-1 p-4 sm:flex-row sm:items-center sm:gap-4">
               <span
                 className="text-xs uppercase tracking-[0.18em] text-foreground-subtle line-through"
                 style={MONO}
@@ -332,14 +294,16 @@ function About() {
         </h2>
         <div className="grid gap-8 md:grid-cols-2">
           <div>
-            <h3
-              className="text-xs uppercase tracking-[0.18em] text-foreground-subtle"
-              style={MONO}
-            >
+            <h3 className="text-xs uppercase tracking-[0.18em] text-foreground-subtle" style={MONO}>
               {t("about.deeper.in_repo_label")}
             </h3>
             <ul className="mt-3 space-y-2">
               {[
+                {
+                  key: "about.references.project_home",
+                  href: PROJECT_HOME,
+                  external: true,
+                },
                 { key: "about.deeper.plan", path: "PLAN.md" },
                 { key: "about.deeper.idea", path: "IDEA-GovOps-v2.0-LawAsCode.md" },
                 { key: "about.deeper.lawcode_mapping", path: "docs/design/LAW-AS-CODE.md" },
@@ -347,20 +311,28 @@ function About() {
                 { key: "about.deeper.lawcode_artefacts", path: "lawcode/" },
                 { key: "about.deeper.schema", path: "schema/configvalue-v1.0.json" },
                 { key: "about.deeper.aligned", path: "docs/aligned-initiatives.md" },
-              ].map((l) => (
-                <li key={l.key}>
-                  <InRepoAnchor href={`${REPO_BASE}/${l.path}`}>
-                    {t(l.key)}
-                  </InRepoAnchor>
-                </li>
-              ))}
+              ].map((l) => {
+                const isExternal = "external" in l && l.external;
+                const href = isExternal ? l.href! : `${REPO_BASE}/${l.path}`;
+                return (
+                  <li key={l.key}>
+                    {isExternal ? (
+                      <div className="space-y-1">
+                        <ExternalAnchor href={href}>{t(l.key)}</ExternalAnchor>
+                        <p className="text-xs text-foreground-muted">
+                          {t("about.references.project_home_desc")}
+                        </p>
+                      </div>
+                    ) : (
+                      <InRepoAnchor href={href}>{t(l.key)}</InRepoAnchor>
+                    )}
+                  </li>
+                );
+              })}
             </ul>
           </div>
           <div>
-            <h3
-              className="text-xs uppercase tracking-[0.18em] text-foreground-subtle"
-              style={MONO}
-            >
+            <h3 className="text-xs uppercase tracking-[0.18em] text-foreground-subtle" style={MONO}>
               {t("about.deeper.external_label")}
             </h3>
             <ul className="mt-3 space-y-2">

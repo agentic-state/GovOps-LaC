@@ -18,30 +18,21 @@ export function SystemHealthStrip({ health }: { health: HealthResponse | null })
       >
         <div>
           <dt className="sr-only">status</dt>
-          <dd>
-            {intl.formatMessage({ id: "admin.health.status" }, { status: health.status })}
-          </dd>
+          <dd>{intl.formatMessage({ id: "admin.health.status" }, { status: health.status })}</dd>
         </div>
         <div>
           <dt className="sr-only">version</dt>
-          <dd>
-            {intl.formatMessage({ id: "admin.health.version" }, { version: health.version })}
-          </dd>
+          <dd>{intl.formatMessage({ id: "admin.health.version" }, { version: health.version })}</dd>
         </div>
         <div>
           <dt className="sr-only">jurisdiction</dt>
           <dd>
-            {intl.formatMessage(
-              { id: "admin.health.jurisdiction" },
-              { code: health.jurisdiction },
-            )}
+            {intl.formatMessage({ id: "admin.health.jurisdiction" }, { code: health.jurisdiction })}
           </dd>
         </div>
         <div>
           <dt className="sr-only">program</dt>
-          <dd>
-            {intl.formatMessage({ id: "admin.health.program" }, { program: health.program })}
-          </dd>
+          <dd>{intl.formatMessage({ id: "admin.health.program" }, { program: health.program })}</dd>
         </div>
       </dl>
     </footer>

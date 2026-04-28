@@ -7,7 +7,8 @@ import { StatusPill } from "./StatusPill";
 
 export function CaseRow({ item }: { item: CaseListItem }) {
   const intl = useIntl();
-  const provenance = item.status === "decided" ? "human" : item.has_recommendation ? "agent" : "system";
+  const provenance =
+    item.status === "decided" ? "human" : item.has_recommendation ? "agent" : "system";
   return (
     <li>
       <Link
@@ -20,10 +21,7 @@ export function CaseRow({ item }: { item: CaseListItem }) {
           <p className="text-base text-foreground" style={{ fontFamily: "var(--font-serif)" }}>
             {item.applicant_name}
           </p>
-          <p
-            className="text-xs text-foreground-muted"
-            style={{ fontFamily: "var(--font-mono)" }}
-          >
+          <p className="text-xs text-foreground-muted" style={{ fontFamily: "var(--font-mono)" }}>
             {item.id}
           </p>
         </div>

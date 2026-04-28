@@ -27,7 +27,10 @@ export function ResidencyTimeline({ periods }: { periods: ResidencyPeriod[] }) {
               : intl.formatMessage({ id: "cases.residency.ongoing" })}
           </span>
           {p.verified ? (
-            <span className="inline-flex items-center gap-1 text-xs" style={{ color: "var(--verdict-enacted)" }}>
+            <span
+              className="inline-flex items-center gap-1 text-xs"
+              style={{ color: "var(--verdict-enacted)" }}
+            >
               <Check className="size-3.5" aria-hidden />
               {intl.formatMessage({ id: "cases.residency.verified" })}
             </span>

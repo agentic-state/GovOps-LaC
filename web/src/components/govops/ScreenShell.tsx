@@ -10,18 +10,15 @@ import { LanguageSwitcher } from "./LanguageSwitcher";
  * The only chrome is the wordmark, the language switcher, an optional Back
  * link, and the open-source attribution footer.
  */
-export function ScreenShell({
-  children,
-  showBack,
-}: {
-  children: ReactNode;
-  showBack?: boolean;
-}) {
+export function ScreenShell({ children, showBack }: { children: ReactNode; showBack?: boolean }) {
   const intl = useIntl();
   return (
     <div className="min-h-screen flex flex-col bg-surface text-foreground screen-shell">
       <header className="px-6 py-4 border-b border-border flex items-center justify-between gap-4">
-        <Link to="/" className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded">
+        <Link
+          to="/"
+          className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded"
+        >
           <Wordmark className="text-xl" />
         </Link>
         <div className="flex items-center gap-4">

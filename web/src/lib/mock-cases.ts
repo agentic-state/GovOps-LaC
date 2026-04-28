@@ -2,6 +2,10 @@ import type {
   AuditPackage,
   CaseDetail,
   CaseListItem,
+  CaseEvent,
+  CaseEventRequest,
+  GetEventsResponse,
+  PostEventResponse,
   HumanReviewAction,
   Recommendation,
 } from "./types";
@@ -75,18 +79,34 @@ const REC_142: Recommendation = {
     },
     {
       rule_id: "rule-legal-status",
-      rule_description: "Applicant must be a Canadian citizen or legal resident on the day preceding application.",
+      rule_description:
+        "Applicant must be a Canadian citizen or legal resident on the day preceding application.",
       citation: "Old Age Security Act, s. 3(1)(c)",
       outcome: "satisfied",
       detail: "Citizenship verified.",
       evidence_used: ["ev-passport"],
     },
   ],
-  explanation: "All three eligibility rules are satisfied with verified evidence. Recommend full pension.",
+  explanation:
+    "All three eligibility rules are satisfied with verified evidence. Recommend full pension.",
   pension_type: "full",
   partial_ratio: null,
   missing_evidence: [],
   flags: [],
+  benefit_amount: {
+    value: 727.67,
+    currency: "CAD",
+    period: "monthly",
+    formula_trace: [
+      { op: "ref", inputs: ["oas.base.monthly"], output: 727.67, citation: "OAS Act, s. 7(1)" },
+      { op: "field", inputs: ["residency_years"], output: 42 },
+      { op: "const", inputs: [40], output: 40, note: "full-pension threshold" },
+      { op: "min", inputs: [42, 40], output: 40 },
+      { op: "divide", inputs: [40, 40], output: 1 },
+      { op: "multiply", inputs: [727.67, 1], output: 727.67, citation: "OAS Act, s. 7(2)" },
+    ],
+    citations: ["OAS Act, s. 7(1)", "OAS Act, s. 7(2)"],
+  },
 };
 
 const REC_143: Recommendation = {
@@ -99,6 +119,19 @@ const REC_143: Recommendation = {
   pension_type: "partial",
   partial_ratio: "25/40",
   explanation: "Eligible for partial pension based on 25 years of post-18 residency.",
+  benefit_amount: {
+    value: 454.79,
+    currency: "CAD",
+    period: "monthly",
+    formula_trace: [
+      { op: "ref", inputs: ["oas.base.monthly"], output: 727.67, citation: "OAS Act, s. 7(1)" },
+      { op: "field", inputs: ["residency_years"], output: 25 },
+      { op: "const", inputs: [40], output: 40 },
+      { op: "divide", inputs: [25, 40], output: 0.625 },
+      { op: "multiply", inputs: [727.67, 0.625], output: 454.79, citation: "OAS Act, s. 7(2)" },
+    ],
+    citations: ["OAS Act, s. 7(1)", "OAS Act, s. 7(2)"],
+  },
 };
 
 const REC_145: Recommendation = {
@@ -444,4 +477,150 @@ export function mockGetAudit(caseId: string): AuditPackage {
         verified: e.verified,
       })) ?? [],
   };
+}
+
+// ── Case events (govops-019) ────────────────────────────────────────────────
+
+const eventsByCase: Record<string, CaseEvent[]> = {
+  "case-2025-0142": [
+    {
+      id: "evt-142-001",
+      case_id: "case-2025-0142",
+      event_type: "re_evaluate",
+      effective_date: "2025-04-20",
+      recorded_at: "2025-04-20T14:30:00Z",
+      actor: "system",
+      payload: {},
+      note: "Initial evaluation.",
+      triggered_recommendation_id: "rec-142",
+    },
+  ],
+  "case-2025-0143": [
+    {
+      id: "evt-143-001",
+      case_id: "case-2025-0143",
+      event_type: "re_evaluate",
+      effective_date: "2025-04-18",
+      recorded_at: "2025-04-18T10:10:00Z",
+      actor: "system",
+      payload: {},
+      triggered_recommendation_id: "rec-143",
+    },
+  ],
+  "demo-case-001": [
+    {
+      id: "evt-demo-001",
+      case_id: "demo-case-001",
+      event_type: "re_evaluate",
+      effective_date: "2025-01-15",
+      recorded_at: "2025-01-15T09:00:00Z",
+      actor: "system",
+      payload: {},
+      triggered_recommendation_id: "rec-142",
+    },
+  ],
+};
+
+const recommendationsByCase: Record<string, Recommendation[]> = {
+  "case-2025-0142": [REC_142],
+  "case-2025-0143": [REC_143],
+  "demo-case-001": [REC_142],
+};
+
+function uid(prefix: string): string {
+  return `${prefix}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`;
+}
+
+export async function mockListCaseEvents(caseId: string): Promise<GetEventsResponse> {
+  await new Promise((r) => setTimeout(r, 120));
+  const events = (eventsByCase[caseId] ?? []).slice().sort((a, b) => {
+    const cmp = a.effective_date.localeCompare(b.effective_date);
+    return cmp !== 0 ? cmp : a.recorded_at.localeCompare(b.recorded_at);
+  });
+  const recommendations = (recommendationsByCase[caseId] ?? [])
+    .slice()
+    .sort((a, b) => a.timestamp.localeCompare(b.timestamp));
+  return { events, recommendations };
+}
+
+function validatePayload(body: CaseEventRequest): string | null {
+  switch (body.event_type) {
+    case "move_country":
+      if (!body.payload.to_country) return "to_country required";
+      return null;
+    case "change_legal_status":
+      if (!body.payload.to_status) return "to_status required";
+      return null;
+    case "add_evidence":
+      if (!body.payload.evidence_type) return "evidence_type required";
+      return null;
+    case "re_evaluate":
+      return null;
+    default:
+      return "unknown event_type";
+  }
+}
+
+export async function mockPostCaseEvent(
+  caseId: string,
+  body: CaseEventRequest,
+  reevaluate: boolean,
+): Promise<PostEventResponse> {
+  await new Promise((r) => setTimeout(r, 350));
+  const err = validatePayload(body);
+  if (err) throw new Error(err);
+
+  const event: CaseEvent = {
+    id: uid("evt"),
+    case_id: caseId,
+    event_type: body.event_type,
+    effective_date: body.effective_date,
+    recorded_at: new Date().toISOString(),
+    actor: body.actor ?? "citizen",
+    payload: body.payload,
+    note: body.note ?? null,
+    triggered_recommendation_id: null,
+  };
+
+  if (!eventsByCase[caseId]) eventsByCase[caseId] = [];
+  eventsByCase[caseId].push(event);
+
+  if (!reevaluate) return { event };
+
+  // Synthesize a new recommendation that supersedes the most recent one.
+  const prior = (recommendationsByCase[caseId] ?? []).slice(-1)[0] ?? null;
+  const base: Recommendation = prior ?? {
+    id: uid("rec"),
+    case_id: caseId,
+    timestamp: new Date().toISOString(),
+    outcome: "insufficient_evidence",
+    confidence: 0.5,
+    rule_evaluations: [],
+    explanation: "Re-evaluation requested.",
+    pension_type: "",
+    partial_ratio: null,
+    missing_evidence: [],
+    flags: [],
+  };
+  const newRec: Recommendation = {
+    ...base,
+    id: uid("rec"),
+    case_id: caseId,
+    timestamp: new Date().toISOString(),
+    supersedes: prior?.id ?? null,
+    triggered_by_event_id: event.id,
+    explanation:
+      body.event_type === "move_country"
+        ? `Re-evaluated after move to ${String(body.payload.to_country)}.`
+        : body.event_type === "change_legal_status"
+          ? `Re-evaluated after legal status change to ${String(body.payload.to_status)}.`
+          : body.event_type === "add_evidence"
+            ? `Re-evaluated after adding evidence: ${String(body.payload.evidence_type)}.`
+            : "Reassessment requested by caseworker.",
+  };
+  if (!recommendationsByCase[caseId]) recommendationsByCase[caseId] = [];
+  recommendationsByCase[caseId].push(newRec);
+  event.triggered_recommendation_id = newRec.id;
+
+  return { event, recommendation: newRec };
 }

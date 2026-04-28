@@ -96,9 +96,7 @@ export function ReviewActionForm({
           minLength={20}
           className="w-full rounded-md border border-border bg-surface px-3 py-2 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         />
-        <span className="block text-xs text-foreground-muted">
-          {rationale.trim().length} / 20+
-        </span>
+        <span className="block text-xs text-foreground-muted">{rationale.trim().length} / 20+</span>
       </label>
       <div className="flex items-center justify-between gap-2">
         {errorMsg ? (

@@ -39,10 +39,7 @@ export function ChainNode({
         >
           {node.title}
         </p>
-        <p
-          className="text-xs text-foreground-muted"
-          style={{ fontFamily: "var(--font-mono)" }}
-        >
+        <p className="text-xs text-foreground-muted" style={{ fontFamily: "var(--font-mono)" }}>
           {node.citation}
           {node.effective_date && (
             <>

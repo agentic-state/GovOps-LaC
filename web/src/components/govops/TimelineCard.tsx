@@ -47,7 +47,14 @@ export function TimelineCard({
     <article
       aria-label={intl.formatMessage(
         { id: "timeline.card.aria" },
-        { key: cv.key, date: cv.effective_from },
+        // ICU `{date, date, medium}` wants a Date or number, not a string.
+        // Pass the already-constructed `from` Date and fall back to `now` if
+        // the source string was unparseable (e.g. a record loaded from
+        // lawcode/ where effective_from defaulted to time-immemorial).
+        {
+          key: cv.key,
+          date: !Number.isNaN(from.getTime()) ? from : now,
+        },
       )}
       className={`flex items-stretch rounded-md border border-border bg-surface transition-opacity ${
         isApproved ? "" : "opacity-50"

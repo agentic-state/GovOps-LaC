@@ -17,7 +17,8 @@ export const Route = createFileRoute("/impact")({
       { title: "Citation impact — GovOps" },
       {
         name: "description",
-        content: "Find every ConfigValue that references a given citation, across all jurisdictions.",
+        content:
+          "Find every ConfigValue that references a given citation, across all jurisdictions.",
       },
     ],
   }),
@@ -26,7 +27,8 @@ export const Route = createFileRoute("/impact")({
     limit:
       typeof s.limit === "number" && (ALLOWED_LIMITS as readonly number[]).includes(s.limit)
         ? s.limit
-        : typeof s.limit === "string" && (ALLOWED_LIMITS as readonly number[]).includes(Number(s.limit))
+        : typeof s.limit === "string" &&
+            (ALLOWED_LIMITS as readonly number[]).includes(Number(s.limit))
           ? Number(s.limit)
           : undefined,
     page:
@@ -237,11 +239,7 @@ function ImpactPage() {
               onPageChange={gotoPage}
             />
             {data.results.map((r) => (
-              <ImpactSection
-                key={r.jurisdiction_id ?? "global"}
-                result={r}
-                query={data.query}
-              />
+              <ImpactSection key={r.jurisdiction_id ?? "global"} result={r} query={data.query} />
             ))}
             <ImpactPaginationBar
               limit={data.limit ?? limit}
@@ -323,10 +321,7 @@ function ImpactPaginationBar({
           {intl.formatMessage({ id: "impact.pagination.prev" })}
         </button>
         <span aria-live="off" data-testid="impact-page-status">
-          <FormattedMessage
-            id="impact.pagination.status"
-            values={{ page, pageCount }}
-          />
+          <FormattedMessage id="impact.pagination.status" values={{ page, pageCount }} />
         </span>
         <button
           type="button"
@@ -348,7 +343,10 @@ function ImpactSkeleton() {
       <div className="h-5 w-48 animate-pulse rounded bg-surface-sunken" />
       <div className="space-y-2">
         {[0, 1, 2].map((i) => (
-          <div key={i} className="h-16 animate-pulse rounded-md border border-border bg-surface-sunken" />
+          <div
+            key={i}
+            className="h-16 animate-pulse rounded-md border border-border bg-surface-sunken"
+          />
         ))}
       </div>
     </div>

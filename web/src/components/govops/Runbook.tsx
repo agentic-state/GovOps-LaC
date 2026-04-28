@@ -22,13 +22,7 @@ export type RunbookScenario = {
   steps: number;
 };
 
-export function Runbook({
-  prefix,
-  scenarios,
-}: {
-  prefix: string;
-  scenarios: RunbookScenario[];
-}) {
+export function Runbook({ prefix, scenarios }: { prefix: string; scenarios: RunbookScenario[] }) {
   const intl = useIntl();
   const [openId, setOpenId] = useState<string | null>(null);
   const t = (id: string) => intl.formatMessage({ id });
@@ -66,10 +60,7 @@ export function Runbook({
         {scenarios.map((sc) => {
           const isOpen = openId === sc.id;
           return (
-            <li
-              key={sc.id}
-              className="rounded-md border border-border bg-surface"
-            >
+            <li key={sc.id} className="rounded-md border border-border bg-surface">
               <button
                 type="button"
                 aria-expanded={isOpen}

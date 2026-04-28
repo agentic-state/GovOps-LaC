@@ -100,7 +100,7 @@ function DiffPage() {
   return (
     <section aria-labelledby="diff-heading" className="space-y-6 print:space-y-3">
       {/* Back link — hidden in print */}
-      <nav aria-label="Breadcrumb back-link" className="text-sm print:hidden">
+      <nav aria-label="Breadcrumb" className="text-sm print:hidden">
         {sameRecord ? (
           <Link
             to="/config/$key/$jurisdictionId"
