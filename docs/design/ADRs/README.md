@@ -26,7 +26,7 @@ Each ADR follows this structure:
 | 006 | [Per-parameter ConfigValue granularity](ADR-006-per-parameter-granularity.md) | Accepted | v2.0 / Gate 2 |
 | 007 | [In-memory storage through Phase 10](ADR-007-in-memory-storage.md) | Accepted | v2.0 / Gate 3 |
 | 008 | [Prompt-as-config dual approval](ADR-008-prompt-as-config-dual-approval.md) | Accepted | v2.0 / Gate 4 |
-| 009 | Federation trust model | Pending Phase 7 | v2.0 / Gate 7 |
+| 009 | [Federation trust model: signed lawcode packs with Ed25519 + publisher allowlist](ADR-009-federation-trust-model.md) | Accepted | v2.0 / Gate 7 |
 | 010 | [SQLite-backed ConfigStore from Phase 6](ADR-010-sqlite-from-phase-6.md) | Accepted | v2.0 / Gate 3 (revised) |
 | 011 | [Calculation rules as typed AST in YAML](ADR-011-calculation-rules-as-typed-ast.md) | Accepted | v2.0 / Phase 10B |
 | 012 | [Notice rendering: derived artefact, template-as-ConfigValue](ADR-012-notice-rendering.md) | Accepted | v2.0 / Phase 10C |
