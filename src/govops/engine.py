@@ -20,9 +20,13 @@ from __future__ import annotations
 
 from datetime import date
 
+from typing import Callable, Optional
+
+from govops.formula import FormulaError, FormulaNode, evaluate_formula
 from govops.legacy_constants import resolve_param  # populates LEGACY_CONSTANTS
 from govops.models import (
     AuditEntry,
+    BenefitAmount,
     CaseBundle,
     DecisionOutcome,
     LegalRule,
@@ -72,10 +76,20 @@ def _home_residency_years_after_18(
 class OASEngine:
     """Deterministic OAS initial eligibility engine."""
 
-    def __init__(self, rules: list[LegalRule], evaluation_date: date | None = None):
+    def __init__(
+        self,
+        rules: list[LegalRule],
+        evaluation_date: date | None = None,
+        ref_resolver: Optional[Callable[[str], float | int]] = None,
+    ):
         self.rules = {r.id: r for r in rules}
         self.evaluation_date = evaluation_date or date.today()
         self._audit: list[AuditEntry] = []
+        # ConfigValue resolver for formula `ref` nodes (ADR-011). Defaults to
+        # the substrate's resolve_param so coefficients flow through the same
+        # path as every other LEGACY_CONSTANTS lookup; tests can inject a
+        # callable for hermetic formula coverage.
+        self._ref_resolver = ref_resolver or resolve_param
 
     def _log(self, event_type: str, detail: str, data: dict | None = None):
         self._audit.append(AuditEntry(
@@ -125,6 +139,18 @@ class OASEngine:
 
         explanation = self._build_explanation(outcome, evals, pension_type, partial_ratio, missing_evidence)
 
+        # Compute benefit amount for eligible cases via formula AST (ADR-011).
+        # Failures during calculation don't invalidate eligibility — they
+        # surface as a flag and a None amount, so the citizen sees the
+        # eligibility decision even if the dollar figure can't be rendered.
+        benefit_amount: Optional[BenefitAmount] = None
+        if outcome == DecisionOutcome.ELIGIBLE:
+            try:
+                benefit_amount = self.calculate(case)
+            except FormulaError as exc:
+                flags.append(f"benefit_amount_unavailable: {exc}")
+                self._log("calculation_error", str(exc), {})
+
         rec = Recommendation(
             case_id=case.id,
             outcome=outcome,
@@ -134,11 +160,13 @@ class OASEngine:
             partial_ratio=partial_ratio,
             missing_evidence=missing_evidence,
             flags=flags,
+            benefit_amount=benefit_amount,
         )
 
         self._log("recommendation_produced", f"Outcome: {outcome.value}", {
             "outcome": outcome.value,
             "pension_type": pension_type,
+            "benefit_amount": benefit_amount.value if benefit_amount else None,
         })
 
         return rec, list(self._audit)
@@ -160,6 +188,8 @@ class OASEngine:
             return self._eval_legal_status(rule, case, flags)
         elif rule.rule_type == RuleType.EVIDENCE_REQUIRED:
             return self._eval_evidence(rule, case, missing_evidence)
+        elif rule.rule_type == RuleType.CALCULATION:
+            return self._eval_calculation(rule)
         else:
             return RuleEvaluation(
                 rule_id=rule.id,
@@ -168,6 +198,23 @@ class OASEngine:
                 outcome=RuleOutcome.NOT_APPLICABLE,
                 detail=f"Rule type {rule.rule_type} not handled by this engine version",
             )
+
+    def _eval_calculation(self, rule: LegalRule) -> RuleEvaluation:
+        """Calculation rules don't gate eligibility (ADR-011).
+
+        They produce an amount when the case is eligible. The gating loop
+        records them as NOT_APPLICABLE so they appear in the audit trail but
+        don't push the outcome to INELIGIBLE / INSUFFICIENT_EVIDENCE. The
+        actual amount is computed in calculate() after _determine_outcome
+        returns ELIGIBLE.
+        """
+        return RuleEvaluation(
+            rule_id=rule.id,
+            rule_description=rule.description,
+            citation=rule.citation,
+            outcome=RuleOutcome.NOT_APPLICABLE,
+            detail="Calculation rule — see benefit_amount on recommendation",
+        )
 
     def _eval_age(self, rule: LegalRule, case: CaseBundle) -> RuleEvaluation:
         min_age = rule.parameters.get("min_age", 65)
@@ -330,22 +377,98 @@ class OASEngine:
             return DecisionOutcome.INSUFFICIENT_EVIDENCE, "", None
 
         # All rules satisfied — determine pension type
-        # Find the full_years from the partial-pension rule
-        full_years = 40
+        full_years = self._partial_full_years()
+        qualified = self._qualified_years(case, full_years)
+        if qualified >= full_years:
+            return DecisionOutcome.ELIGIBLE, "full", f"{full_years}/{full_years}"
+        else:
+            return DecisionOutcome.ELIGIBLE, "partial", f"{qualified}/{full_years}"
+
+    def _partial_full_years(self) -> int:
+        """Full-pension years threshold from the residency-partial rule.
+
+        Defaults to 40 (the OAS canonical) when no partial rule is present.
+        """
         for rule in self.rules.values():
             if rule.rule_type == RuleType.RESIDENCY_PARTIAL:
-                full_years = rule.parameters.get("full_years", 40)
-                break
+                return rule.parameters.get("full_years", 40)
+        return 40
+
+    def _qualified_years(self, case: CaseBundle, full_years: int) -> int:
+        """Years of home-country residency after 18, integer-floored and capped at full_years.
+
+        This is the value used both for the partial-pension ratio and for
+        formula `field("eligible_years_oas")` lookups. Keeping it in one
+        helper guarantees the displayed ratio (e.g. "33/40") and the dollar
+        amount stay in lockstep — they cite the same statutory clause.
+        """
         home = self._get_home_countries()
         years = _home_residency_years_after_18(
             case.applicant.date_of_birth, case.residency_periods, self.evaluation_date,
             home_countries=home,
         )
-        qualified = min(int(years), full_years)
-        if qualified >= full_years:
-            return DecisionOutcome.ELIGIBLE, "full", f"{full_years}/{full_years}"
-        else:
-            return DecisionOutcome.ELIGIBLE, "partial", f"{qualified}/{full_years}"
+        return min(int(years), full_years)
+
+    def calculate(self, case: CaseBundle) -> Optional[BenefitAmount]:
+        """Compute the benefit amount for an eligible case via formula AST.
+
+        Per ADR-011, a calculation rule's `parameters['formula']` is a typed
+        AST tree. We resolve `ref` nodes through the substrate (default) and
+        `field` nodes from a context map populated for this case. The walk
+        produces a flat trace; every render of "you would receive $X/month"
+        must be reproducible from the trace alone.
+
+        Returns None when no calculation rule is present (older
+        jurisdictions that haven't adopted CALCULATION yet) or when the
+        formula is missing.
+        """
+        calc_rules = [r for r in self.rules.values() if r.rule_type == RuleType.CALCULATION]
+        if not calc_rules:
+            return None
+        # One calc rule per jurisdiction in v1; if a jurisdiction needs
+        # several (e.g. base + supplement), we'll iterate and aggregate.
+        rule = calc_rules[0]
+        formula_dict = rule.parameters.get("formula")
+        if not formula_dict:
+            return None
+
+        formula = FormulaNode.model_validate(formula_dict)
+
+        # Field map — values derived from the case at evaluation time. Keep
+        # this small and explicit; new fields land alongside new formulas.
+        full_years = self._partial_full_years()
+        fields = {
+            "eligible_years_oas": float(self._qualified_years(case, full_years)),
+            "full_years_oas": float(full_years),
+        }
+
+        def resolve_field(name: str) -> float:
+            if name not in fields:
+                raise FormulaError(f"unknown formula field: {name}")
+            return fields[name]
+
+        value, trace = evaluate_formula(
+            formula,
+            resolve_ref=self._ref_resolver,
+            resolve_field=resolve_field,
+        )
+
+        # Deduplicate citations in walk order so the audit surface lists the
+        # statutory sources without repetition.
+        citations: list[str] = []
+        seen: set[str] = set()
+        for step in trace:
+            if step.citation and step.citation not in seen:
+                citations.append(step.citation)
+                seen.add(step.citation)
+
+        return BenefitAmount(
+            value=round(value, 2),
+            currency=rule.parameters.get("currency", "CAD"),
+            period=rule.parameters.get("period", "monthly"),
+            formula_trace=[s.model_dump() for s in trace],
+            citations=citations,
+        )
 
     def _build_explanation(
         self,

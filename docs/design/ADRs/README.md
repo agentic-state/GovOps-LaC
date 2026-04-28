@@ -28,6 +28,7 @@ Each ADR follows this structure:
 | 008 | [Prompt-as-config dual approval](ADR-008-prompt-as-config-dual-approval.md) | Accepted | v2.0 / Gate 4 |
 | 009 | Federation trust model | Pending Phase 7 | v2.0 / Gate 7 |
 | 010 | [SQLite-backed ConfigStore from Phase 6](ADR-010-sqlite-from-phase-6.md) | Accepted | v2.0 / Gate 3 (revised) |
+| 011 | [Calculation rules as typed AST in YAML](ADR-011-calculation-rules-as-typed-ast.md) | Accepted | v2.0 / Phase 10B |
 
 ## Contributing ADRs
 

@@ -85,6 +85,7 @@ class RuleType(str, Enum):
     LEGAL_STATUS = "legal_status"
     EVIDENCE_REQUIRED = "evidence_required"
     EXCLUSION = "exclusion"
+    CALCULATION = "calculation"  # ADR-011 — typed-AST formula for benefit amount
 
 
 class LegalRule(BaseModel):
@@ -174,6 +175,20 @@ class DecisionOutcome(str, Enum):
     ESCALATE = "escalate"
 
 
+class BenefitAmount(BaseModel):
+    """Result of a `RuleType.CALCULATION` evaluation.
+
+    Per ADR-011, every render of an entitlement amount must be reproducible
+    from `formula_trace` alone. The trace is the audit primitive — each
+    entry is one node visit during AST evaluation.
+    """
+    value: float
+    currency: str = "CAD"
+    period: str = "monthly"  # "monthly", "annual", "lump_sum"
+    formula_trace: list[dict] = []  # ordered FormulaTraceStep dicts
+    citations: list[str] = []  # deduplicated, in walk order
+
+
 class Recommendation(BaseModel):
     id: str = Field(default_factory=_new_id)
     case_id: str
@@ -186,6 +201,7 @@ class Recommendation(BaseModel):
     partial_ratio: Optional[str] = None  # e.g. "25/40"
     missing_evidence: list[str] = []
     flags: list[str] = []
+    benefit_amount: Optional[BenefitAmount] = None  # populated when ELIGIBLE + calc rule present
 
 
 # ---------------------------------------------------------------------------
