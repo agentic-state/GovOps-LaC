@@ -20,8 +20,9 @@ from __future__ import annotations
 
 from datetime import date, datetime, timezone
 
-from typing import Callable, Optional
+from typing import Any, Callable, Optional
 
+from govops.config import ConfigKeyNotMigrated
 from govops.formula import FormulaError, FormulaNode, evaluate_formula
 from govops.legacy_constants import resolve_param  # populates LEGACY_CONSTANTS
 from govops.models import (
@@ -98,6 +99,49 @@ class OASEngine:
             detail=detail,
             data=data or {},
         ))
+
+    def _eval_dt(self) -> Optional[datetime]:
+        """The case's evaluation_date as a UTC-midnight datetime, for substrate lookups.
+
+        Returns None when evaluation_date is unset, signalling the substrate
+        resolver to use "now" — same behaviour as before the seam closed.
+        """
+        if self.evaluation_date is None:
+            return None
+        return datetime(
+            self.evaluation_date.year,
+            self.evaluation_date.month,
+            self.evaluation_date.day,
+            tzinfo=timezone.utc,
+        )
+
+    def _param(self, rule: LegalRule, name: str, default: Any = None) -> Any:
+        """Resolve a scalar rule parameter, substrate-first, honouring evaluation_date.
+
+        Closes ADR-013's named seam: a dated supersession of e.g.
+        ``ca.rule.age-65.min_age`` (65 → 67 effective 2027-01-01) takes effect
+        on its date for any case evaluated against the same code. Cases dated
+        before the supersession see the prior value; cases dated after see the
+        new one. Same engine, same rule object, different ``evaluation_date``,
+        different threshold — the substrate is the source of truth.
+
+        Falls back to ``rule.parameters[name]`` when the rule has no
+        ``param_key_prefix`` (ad-hoc rules in tests) or when the substrate
+        raises ``ConfigKeyNotMigrated`` (the substrate is silent for that key).
+        Frozen-dict fallback preserves backwards-compat for the 65→340 test
+        suite that pre-dates this refactor.
+        """
+        frozen = rule.parameters.get(name, default)
+        if not rule.param_key_prefix:
+            return frozen
+        try:
+            return resolve_param(
+                f"{rule.param_key_prefix}.{name}",
+                default=frozen,
+                evaluation_date=self._eval_dt(),
+            )
+        except ConfigKeyNotMigrated:
+            return frozen
 
     def evaluate(self, case: CaseBundle) -> tuple[Recommendation, list[AuditEntry]]:
         """Run all rules against the case and produce a recommendation."""
@@ -217,7 +261,7 @@ class OASEngine:
         )
 
     def _eval_age(self, rule: LegalRule, case: CaseBundle) -> RuleEvaluation:
-        min_age = rule.parameters.get("min_age", 65)
+        min_age = self._param(rule, "min_age", 65)
         age = _age_at(case.applicant.date_of_birth, self.evaluation_date)
         satisfied = age >= min_age
         return RuleEvaluation(
@@ -238,13 +282,13 @@ class OASEngine:
         state that the residency evaluators handle as missing evidence.
         """
         for rule in self.rules.values():
-            hc = rule.parameters.get("home_countries")
+            hc = self._param(rule, "home_countries")
             if hc:
                 return tuple(c.upper() for c in hc)
         return ()
 
     def _eval_residency_minimum(self, rule: LegalRule, case: CaseBundle) -> RuleEvaluation:
-        min_years = rule.parameters.get("min_years", 10)
+        min_years = self._param(rule, "min_years", 10)
         home = self._get_home_countries()
         if not case.residency_periods:
             return RuleEvaluation(
@@ -268,8 +312,8 @@ class OASEngine:
         )
 
     def _eval_residency_partial(self, rule: LegalRule, case: CaseBundle) -> RuleEvaluation:
-        full_years = rule.parameters.get("full_years", 40)
-        min_years = rule.parameters.get("min_years", 10)
+        full_years = self._param(rule, "full_years", 40)
+        min_years = self._param(rule, "min_years", 10)
         home = self._get_home_countries()
         if not case.residency_periods:
             return RuleEvaluation(
@@ -302,7 +346,7 @@ class OASEngine:
     def _eval_legal_status(
         self, rule: LegalRule, case: CaseBundle, flags: list[str],
     ) -> RuleEvaluation:
-        accepted = rule.parameters.get("accepted_statuses", ["citizen", "permanent_resident"])
+        accepted = self._param(rule, "accepted_statuses", ["citizen", "permanent_resident"])
         status = case.applicant.legal_status.lower()
         if status in accepted:
             return RuleEvaluation(
@@ -333,7 +377,7 @@ class OASEngine:
     def _eval_evidence(
         self, rule: LegalRule, case: CaseBundle, missing_evidence: list[str],
     ) -> RuleEvaluation:
-        required_types = rule.parameters.get("required_types", [])
+        required_types = self._param(rule, "required_types", [])
         provided_types = {e.evidence_type for e in case.evidence_items if e.provided}
         missing = [t for t in required_types if t not in provided_types]
         if missing:
@@ -391,7 +435,7 @@ class OASEngine:
         """
         for rule in self.rules.values():
             if rule.rule_type == RuleType.RESIDENCY_PARTIAL:
-                return rule.parameters.get("full_years", 40)
+                return self._param(rule, "full_years", 40)
         return 40
 
     def _qualified_years(self, case: CaseBundle, full_years: int) -> int:
@@ -453,15 +497,7 @@ class OASEngine:
         # in 2026 still picks up 2025's coefficient. Tests can inject a
         # callable directly via the constructor's `ref_resolver` for hermetic
         # coverage; the default path threads the date through resolve_param.
-        eval_dt: Any = None
-        if self.evaluation_date is not None:
-            eval_dt = datetime(
-                self.evaluation_date.year,
-                self.evaluation_date.month,
-                self.evaluation_date.day,
-                tzinfo=timezone.utc,
-            )
-
+        eval_dt = self._eval_dt()
         if self._ref_resolver is resolve_param:
             def resolve_ref(key: str) -> float | int:
                 return resolve_param(key, evaluation_date=eval_dt)

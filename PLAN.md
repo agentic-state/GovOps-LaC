@@ -250,7 +250,7 @@ Sequenced; each sub-phase ships independently.
 | 10C | ~130 | ⬜ | notification artefact templating |
 | 10D | ~145 | ⬜ | life-event reassessment |
 
-**Live count (2026-04-28)**: 340 backend tests passing (`pytest -q`).
+**Live count (2026-04-28)**: 343 backend tests passing (`pytest -q`).
 
 Tests must stay green at every phase exit. CI matrix stays at Python 3.10/3.11/3.12.
 
@@ -271,7 +271,7 @@ Tests must stay green at every phase exit. CI matrix stays at Python 3.10/3.11/3
 - [x] 1. Every value resolvable through effective-value substrate; no hardcoded business constants in Python *(Phase 2 + grep gate)*
 - [x] 2. Every jurisdiction contributable in YAML by a non-Python developer *(Phase 3 — `lawcode/{ca,br,es,fr,de,ua}/config/`)*
 - [x] 3. Schema published, versioned, validated in CI *(Phase 5 — `schema/configvalue-v1.0.json`, `schema/lawcode-v1.0.json`, CI gate)*
-- [x] 4. Statute changes are temporal, not destructive; historical evaluations reproducible *(`ConfigStore.resolve()` + supersession + tests)*
+- [x] 4. Statute changes are temporal, not destructive; historical evaluations reproducible *(`ConfigStore.resolve()` + supersession + tests; **scalar seam closed 2026-04-28** — `LegalRule.param_key_prefix` + `OASEngine._param()` re-resolve every scalar parameter through the substrate at the case's `evaluation_date`. See ADR-013 *Addendum (2026-04-28): scalar seam closed*. Proven by `tests/test_engine.py::TestScalarParameterDatedSupersession`.)*
 - [x] 5. Citation impact queryable across all 6 jurisdictions in one command *(Phase 7 — `GET /api/impact?citation=…` + `govops impact-of`)*
 - [x] 6. Encoding pipeline produces commit-ready YAML, not Python *(closed 2026-04-28 — `src/govops/yaml_emitter.py` + `POST /api/encode/batches/{id}/emit-yaml`. Approved batches emit `lawcode/.proposed/<batch_id>/<prefix>-rules.yaml` that passes the schema gate and round-trips through `ConfigStore.load_from_yaml`.)*
 - [x] 7. Prompts are dated configuration; the prompt that ran on date D is reconstructable *(Phase 4 — `lawcode/global/prompts.yaml`, ADR-008 dual approval)*

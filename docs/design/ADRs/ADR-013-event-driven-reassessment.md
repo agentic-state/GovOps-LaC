@@ -48,6 +48,8 @@ Reading the chain backwards reconstructs every prior decision. Reading it forwar
 
 ### "Rules in effect on date D" applies to derived facts, not seed-time config (yet)
 
+> **Status (2026-04-28)**: the gap described in this section is now closed. See the *Addendum (2026-04-28): scalar seam closed* below for what shipped. The original framing is preserved verbatim because it documents the boundary that v2.0 originally drew, and ADR archaeology depends on the historical record being readable.
+
 The engine's existing `evaluation_date` parameter already gates **derived facts**: age computation, residency-years aggregation, formula `field` resolution. A reassessment with `evaluation_date = 2024-09-01` against a 2026 case correctly sees the case as it stood on that date *if events have been applied chronologically*.
 
 What it does **not** today gate is **seed-time-resolved scalar parameters** like `min_age=65` or `full_years=40`. These are baked into `LegalRule.parameters` at module import via `resolve_param()`, which always queries the substrate at "now". If `ca.rule.age-65.min_age` were to change from 65 to 67 effective 2027-01-01, a reassessment of a 2025 case would still see 65 (correct), but only because the supersession hasn't happened yet — a 2030 reassessment of the same 2025 case would (incorrectly) see 67 unless the engine re-resolves at the case's evaluation date.
@@ -59,6 +61,30 @@ The boundary stated:
 > Phase 10D reassessment is fact-time-travel. A future ADR + refactor introduces config-time-travel.
 
 For the calc rule (ADR-011), the formula's `ref` nodes already resolve through `_ref_resolver` at evaluate time; making *that* path date-aware is a one-line change when needed (pass `evaluation_date` through `_ref_resolver`). This is the seam where config-time-travel will first land.
+
+### Addendum (2026-04-28): scalar seam closed
+
+The "future ADR + refactor" alluded to above landed without needing a new ADR — the path turned out narrower than feared. Recording it here as an addendum so the original ADR's seam terminology stays intact and a single read tells the whole story.
+
+**What shipped**:
+
+- `LegalRule` gained an optional `param_key_prefix: str | None` field. When set (e.g. `"ca.rule.age-65"`), the engine treats it as the substrate path for that rule's scalar parameters. When absent, the engine reads from the frozen `parameters` dict — preserving backwards-compat for ad-hoc rules constructed in tests.
+- `OASEngine` gained `_param(rule, name, default)` which resolves substrate-first through `resolve_param(f"{rule.param_key_prefix}.{name}", evaluation_date=self._eval_dt())` and falls back to the frozen-dict value on `ConfigKeyNotMigrated`.
+- `_eval_age` / `_eval_residency_minimum` / `_eval_residency_partial` / `_eval_legal_status` / `_eval_evidence` / `_get_home_countries` / `_partial_full_years` all swapped `rule.parameters.get(...)` for `self._param(rule, ...)`. Nine read-sites total.
+- All 30 seeded rules (5 in `seed.py`, 25 in `jurisdictions.py`) populate `param_key_prefix` at construction.
+- Three new tests in `tests/test_engine.py::TestScalarParameterDatedSupersession` prove the seam: a 65 → 67 supersession of `ca.rule.age-65.min_age` effective 2027-01-01 takes effect for cases evaluated against 2028 dates while leaving 2026-dated evaluations seeing the original threshold. The third test pins the backwards-compat fallback path.
+
+**Why it didn't need its own ADR**:
+
+The original concern was that closing this would require a `ConfigContext` abstraction the engine carried alongside `evaluation_date`. In practice the substrate's `resolve_param(key, evaluation_date=...)` was already date-aware (added during 10B's formula-`ref` work), so closing the scalar seam was just plumbing — every read site already had access to the case's evaluation_date via `self.evaluation_date`. No new architectural decision.
+
+**What this means for PLAN.md §8 #4**:
+
+Success criterion #4 ("statute changes are temporal, not destructive; historical evaluations reproducible") was already marked closed against the formula-`ref` half. With the scalar seam now closed, the claim is fully truthful — every parameter the engine reads honours the case's `evaluation_date`. The same reassessment of the same case dated 2025-06-01 will produce the same answer in 2030 as it did in 2026, regardless of how many supersessions intervene.
+
+**What's still deferred to Phase 11**:
+
+The substrate's `resolve_value` only honours `effective_from`/`effective_to` windows on the ConfigValue records. There's no mechanism for "the rule's parameters dict became invalid as of date X" — that level of structural-shape supersession (e.g. adding a new required parameter) still requires a code change. ADR-011's formula AST already handles this for calc rules; for the other rule types, structural change remains a Phase 11 concern when the first real one shows up.
 
 ## Consequences
 

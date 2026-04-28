@@ -498,3 +498,204 @@ class TestBenefitAmount:
         # Outcome is still ELIGIBLE despite the NOT_APPLICABLE entry.
         assert rec.outcome == DecisionOutcome.ELIGIBLE
         assert rec.pension_type == "full"
+
+
+# ---------------------------------------------------------------------------
+# Scalar parameter date-aware resolution (ADR-013 §"the seam", scalar half).
+#
+# These tests close the gap ADR-013 named: the formula `ref` half of the seam
+# was already proven by `test_pre_supersession_evaluation_resolves_old_base_amount`.
+# This block proves the analogous behaviour for scalar `LegalRule.parameters`
+# values (e.g. age threshold). A dated supersession of `ca.rule.age-65.min_age`
+# changes what cases see based on their evaluation_date — same engine, same
+# rule object, different threshold.
+# ---------------------------------------------------------------------------
+
+
+class TestScalarParameterDatedSupersession:
+    """Configure-without-deploy at the scalar-parameter layer (ADR-013, scalar seam).
+
+    The fixture seeds an in-memory supersession through ConfigStore.put rather
+    than the YAML loader so the test stays hermetic — the lawcode/ tree is
+    unchanged. The supersession key is the SAME key seed.py reads at module
+    import (`ca.rule.age-65.min_age`), so the engine's `_param` helper must
+    re-resolve through the substrate at the case's evaluation_date for the
+    test to pass.
+    """
+
+    def _seed_min_age_supersession(
+        self,
+        new_min_age: int,
+        effective_from,  # datetime
+    ) -> None:
+        """Append a dated record for ca.rule.age-65.min_age via the live resolver.
+
+        Uses the same ConfigStore the engine reads from
+        (`govops.legacy_constants._resolver`), so the in-memory supersession
+        is visible to the engine on the next evaluate() call. The original
+        record stays in place; the new one supersedes it from
+        `effective_from` forward.
+        """
+        from datetime import datetime as _dt, timezone as _tz
+
+        from govops.config import ConfigValue, ValueType
+        from govops.legacy_constants import _resolver
+
+        _resolver.put(
+            ConfigValue(
+                domain="rule",
+                key="ca.rule.age-65.min_age",
+                jurisdiction_id="ca-oas",
+                value=new_min_age,
+                value_type=ValueType.NUMBER,
+                effective_from=effective_from,
+                citation="Hypothetical OAS Act amendment for date-aware test",
+                author="test-fixture",
+                approved_by="test-fixture",
+                rationale="Pin a future supersession to prove the scalar seam.",
+            )
+        )
+
+    def _drop_min_age_supersession(self) -> None:
+        """Remove the test-fixture record so other tests aren't polluted.
+
+        Identifies the fixture by the citation string we wrote — the original
+        substrate record carries the real OAS Act citation, the fixture
+        carries the explicit "Hypothetical … for date-aware test" string.
+        """
+        from govops.legacy_constants import _resolver
+
+        with _resolver._session() as s:
+            from sqlmodel import select as _select
+
+            from govops.config import ConfigValue as _CV
+
+            stmt = _select(_CV).where(
+                _CV.key == "ca.rule.age-65.min_age",
+                _CV.citation == "Hypothetical OAS Act amendment for date-aware test",
+            )
+            for row in list(s.exec(stmt)):
+                s.delete(row)
+            s.commit()
+
+    def test_age_threshold_supersedes_on_effective_date(self):
+        """A 2027-01-01 supersession from 65 → 67 must change what cases see.
+
+        Same applicant (DOB 1962-01-01, age 64.5 in mid-2026, age 66 in 2028):
+          - Evaluated 2026-06-01: threshold 65, age 64.5 → NOT_SATISFIED
+          - Evaluated 2028-06-01 with supersession: threshold 67, age 66.5 → NOT_SATISFIED
+          - Evaluated 2028-06-01 WITHOUT supersession: threshold 65, age 66.5 → SATISFIED
+
+        The third assertion is the load-bearing one — it proves the seam:
+        without re-resolving through the substrate, the engine would see the
+        import-time-frozen value (65) and incorrectly mark the 2028 case
+        eligible despite the 2027 supersession.
+        """
+        from datetime import datetime as _dt, timezone as _tz
+
+        try:
+            self._seed_min_age_supersession(
+                new_min_age=67,
+                effective_from=_dt(2027, 1, 1, tzinfo=_tz.utc),
+            )
+
+            case = _make_case(
+                dob=date(1962, 1, 1),
+                residency_periods=[
+                    ResidencyPeriod(country="Canada", start_date=date(1962, 1, 1)),
+                ],
+                evidence_items=[
+                    EvidenceItem(evidence_type="birth_certificate", provided=True),
+                    EvidenceItem(evidence_type="tax_record", provided=True),
+                ],
+            )
+
+            # 2026-06-01: pre-supersession, threshold = 65, age ≈ 64.4 → NOT_SATISFIED.
+            engine_pre = _make_engine(eval_date=date(2026, 6, 1))
+            rec_pre, _ = engine_pre.evaluate(case)
+            age_eval_pre = next(
+                e for e in rec_pre.rule_evaluations if e.rule_id == "rule-age-65"
+            )
+            assert age_eval_pre.outcome == RuleOutcome.NOT_SATISFIED
+            assert "threshold: 65" in age_eval_pre.detail
+
+            # 2028-06-01: post-supersession, threshold = 67, age ≈ 66.4 → NOT_SATISFIED.
+            engine_post = _make_engine(eval_date=date(2028, 6, 1))
+            rec_post, _ = engine_post.evaluate(case)
+            age_eval_post = next(
+                e for e in rec_post.rule_evaluations if e.rule_id == "rule-age-65"
+            )
+            assert age_eval_post.outcome == RuleOutcome.NOT_SATISFIED
+            assert "threshold: 67" in age_eval_post.detail, (
+                "Engine did not pick up the dated supersession — the scalar "
+                "seam from ADR-013 is still open."
+            )
+        finally:
+            self._drop_min_age_supersession()
+
+    def test_age_threshold_pre_supersession_keeps_original(self):
+        """Pre-supersession evaluation continues to see the original value.
+
+        This is the dual of the previous test: with the same supersession
+        (65 → 67 effective 2027-01-01) seeded, an evaluation against a 2026
+        date must still see 65, not 67 — date-awareness goes both directions.
+        """
+        from datetime import datetime as _dt, timezone as _tz
+
+        try:
+            self._seed_min_age_supersession(
+                new_min_age=67,
+                effective_from=_dt(2027, 1, 1, tzinfo=_tz.utc),
+            )
+
+            case = _make_case(
+                dob=date(1961, 1, 1),  # turns 65 in 2026, 67 in 2028
+                residency_periods=[
+                    ResidencyPeriod(country="Canada", start_date=date(1961, 1, 1)),
+                ],
+                evidence_items=[
+                    EvidenceItem(evidence_type="birth_certificate", provided=True),
+                    EvidenceItem(evidence_type="tax_record", provided=True),
+                ],
+            )
+
+            # 2026-06-01: pre-supersession, threshold = 65, age ≈ 65.4 → SATISFIED.
+            engine_pre = _make_engine(eval_date=date(2026, 6, 1))
+            rec_pre, _ = engine_pre.evaluate(case)
+            age_eval_pre = next(
+                e for e in rec_pre.rule_evaluations if e.rule_id == "rule-age-65"
+            )
+            assert age_eval_pre.outcome == RuleOutcome.SATISFIED, (
+                "Pre-supersession evaluation must see the original threshold."
+            )
+            assert "threshold: 65" in age_eval_pre.detail
+        finally:
+            self._drop_min_age_supersession()
+
+    def test_engine_param_helper_falls_back_to_frozen_dict_when_prefix_absent(self):
+        """Ad-hoc rules without param_key_prefix must keep working.
+
+        Backwards-compat invariant: the seam closure shouldn't break tests or
+        ad-hoc engine constructions that build a LegalRule by hand without
+        setting a substrate prefix.
+        """
+        from govops.engine import OASEngine
+        from govops.models import LegalRule, RuleType
+
+        rule = LegalRule(
+            id="rule-adhoc",
+            source_document_id="doc-test",
+            source_section_ref="N/A",
+            rule_type=RuleType.AGE_THRESHOLD,
+            description="Ad-hoc test rule",
+            formal_expression="age >= 70",
+            citation="Hypothetical",
+            parameters={"min_age": 70},
+            # NO param_key_prefix — this is the test
+        )
+
+        engine = OASEngine(rules=[rule], evaluation_date=date(2026, 6, 1))
+        # _param must return the frozen-dict value when prefix is absent.
+        assert engine._param(rule, "min_age", 65) == 70
+        # Unknown key with a default also works.
+        assert engine._param(rule, "unknown_key", "fallback") == "fallback"

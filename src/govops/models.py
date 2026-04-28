@@ -98,6 +98,13 @@ class LegalRule(BaseModel):
     formal_expression: str  # human-readable logical expression
     citation: str
     parameters: dict = {}  # e.g. {"min_age": 65, "min_years": 10}
+    # Substrate key prefix for this rule's parameters, e.g. "ca.rule.age-65".
+    # When set, the engine re-resolves each parameter through the substrate at
+    # the case's evaluation_date — closing ADR-013's seam for scalar values.
+    # Module-import callers (seed.py / jurisdictions.py) populate it; absence
+    # falls back to the frozen parameters dict, preserving backwards-compat
+    # for ad-hoc rules constructed in tests.
+    param_key_prefix: Optional[str] = None
 
 
 # ---------------------------------------------------------------------------
