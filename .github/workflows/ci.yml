@@ -23,6 +23,12 @@ jobs:
       # schema/lawcode-v1.0.json + schema/configvalue-v1.0.json.
       - name: Validate lawcode/ against JSON Schema
         run: python scripts/validate_lawcode.py
+      # Phase 6+ contract gate (PLAN §9 risk register row 2): the live
+      # FastAPI OpenAPI document must match the committed snapshot at
+      # docs/api/openapi-v0.3.0-draft.json. Lovable consumes the snapshot;
+      # silent drift breaks the contract.
+      - name: OpenAPI snapshot drift check
+        run: python scripts/check_openapi_drift.py
       - run: pytest -v
       # Phase 3 strict-mode gate (per ADR-004 §3): every resolve must hit the
       # substrate (YAML) — never fall through to LEGACY_CONSTANTS.

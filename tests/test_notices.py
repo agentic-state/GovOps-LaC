@@ -72,7 +72,7 @@ class TestRenderHtmlDirectly:
         # Verdict section reflects ELIGIBLE
         assert "eligible" in html.lower()
         # Amount section present + base monthly figure
-        assert "727.67" in html
+        assert "735.45" in html
         assert "CAD" in html
         # Formula trace rendered — operator labels are i18n-translated, so
         # check for their EN values (not the raw op enum strings).
@@ -124,7 +124,7 @@ class TestRenderHtmlDirectly:
         # (the base figure 727.67 may still appear in the trace's ref step,
         # but the headline figure must reflect the prorated amount).
         prorated = f"{rec.benefit_amount.value:.2f}"
-        assert prorated != "727.67"
+        assert prorated != "735.45"
         assert prorated in html
         assert "Projected amount" in html
 
@@ -211,7 +211,7 @@ class TestNoticeEndpoint:
         assert r.headers["content-type"].startswith("text/html")
         body = r.text
         assert "<!DOCTYPE html>" in body
-        assert "727.67" in body  # full pension figure
+        assert "735.45" in body  # full pension figure
 
     def test_get_notice_carries_sha256_header(self, client, fresh_demo_state):
         r = client.get(f"/api/cases/{fresh_demo_state}/notice")
@@ -243,6 +243,31 @@ class TestNoticeEndpoint:
         r = client.get("/api/cases/nonexistent-case/notice")
         assert r.status_code == 404
 
+    def test_post_screen_notice_renders_for_non_ca_jurisdiction(self, client):
+        """The notice template is keyed per jurisdiction slug — BR / ES /
+        FR / DE / UA all need rendering paths that don't 404. Generic
+        Jinja body shared with CA-OAS at v1.0; the test exercises one
+        non-CA jurisdiction to lock the template-key construction."""
+        payload = {
+            "jurisdiction_id": "br",
+            "date_of_birth": "1955-01-01",
+            "legal_status": "citizen",
+            "country_of_birth": "BR",
+            "residency_periods": [
+                {"country": "BR", "start_date": "1980-01-01"}
+            ],
+            "evidence_present": {"dob": True, "residency": True},
+            "evaluation_date": "2025-06-01",
+        }
+        r = client.post("/api/screen/notice", json=payload)
+        # Must NOT be 404 (template missing) — must render real HTML.
+        assert r.status_code == 200
+        body = r.text
+        assert "<!DOCTYPE html>" in body
+        # Brazilian program name should surface (either via i18n label or
+        # the EN fallback in JURISDICTION_REGISTRY).
+        assert "INSS" in body or "Aposentadoria" in body or "Brazil" in body
+
     def test_post_screen_notice_returns_html_for_eligible_request(self, client):
         """POST /api/screen/notice — privacy-equivalent path for citizens
         who came through /screen rather than the officer flow."""
@@ -262,7 +287,7 @@ class TestNoticeEndpoint:
         assert r.headers["content-type"].startswith("text/html")
         body = r.text
         assert "<!DOCTYPE html>" in body
-        assert "727.67" in body
+        assert "735.45" in body
         assert "X-Notice-Sha256".lower() in [h.lower() for h in r.headers.keys()]
 
     def test_post_screen_notice_does_not_persist_case(self, client):

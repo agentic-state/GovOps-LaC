@@ -380,12 +380,40 @@
         "summary": "Admin Federation Registry",
         "description": "List registered publishers + their trust state.\n\nReturns one entry per publisher in ``lawcode/REGISTRY.yaml`` with a\n``trust_state`` field derived from whether a public key is on file in\n``lawcode/global/trusted_keys.yaml``: ``trusted`` if a key exists,\n``unsigned_only`` if not.",
         "operationId": "admin_federation_registry_api_admin_federation_registry_get",
+        "parameters": [
+          {
+            "name": "X-Govops-Admin-Token",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Govops-Admin-Token"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Successful Response",
             "content": {
               "application/json": {
                 "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
               }
             }
           }
@@ -397,12 +425,40 @@
         "summary": "Admin Federation Packs",
         "description": "List imported federated packs with their provenance + enabled state.",
         "operationId": "admin_federation_packs_api_admin_federation_packs_get",
+        "parameters": [
+          {
+            "name": "X-Govops-Admin-Token",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Govops-Admin-Token"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Successful Response",
             "content": {
               "application/json": {
                 "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
               }
             }
           }
@@ -443,6 +499,22 @@
               "default": false,
               "title": "Allow Unsigned"
             }
+          },
+          {
+            "name": "X-Govops-Admin-Token",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Govops-Admin-Token"
+            }
           }
         ],
         "responses": {
@@ -467,11 +539,11 @@
         }
       }
     },
-    "/api/admin/federation/packs/{publisher_id}/enabled": {
+    "/api/admin/federation/packs/{publisher_id}/enable": {
       "post": {
-        "summary": "Admin Federation Set Enabled",
-        "description": "Toggle a pack's enabled state via the ``.disabled`` sentinel.\n\nA disabled pack stays on disk (so re-enabling is a single click) but\nis signaled to substrate hydration via the sentinel — a future\nhydrator pass will skip directories carrying ``.disabled``. For now\nthe sentinel is informational.",
-        "operationId": "admin_federation_set_enabled_api_admin_federation_packs__publisher_id__enabled_post",
+        "summary": "Admin Federation Enable",
+        "description": "Re-enable a previously-disabled federated pack.\n\nRemoves the ``.disabled`` sentinel; on next process restart the\nsubstrate hydrator picks the pack back up. Idempotent — calling\ntwice on an already-enabled pack returns ``changed=false``.",
+        "operationId": "admin_federation_enable_api_admin_federation_packs__publisher_id__enable_post",
         "parameters": [
           {
             "name": "publisher_id",
@@ -481,18 +553,78 @@
               "type": "string",
               "title": "Publisher Id"
             }
+          },
+          {
+            "name": "X-Govops-Admin-Token",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Govops-Admin-Token"
+            }
           }
         ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/FederationPackEnabledRequest"
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
               }
             }
           }
-        },
+        }
+      }
+    },
+    "/api/admin/federation/packs/{publisher_id}/disable": {
+      "post": {
+        "summary": "Admin Federation Disable",
+        "description": "Disable a federated pack without deleting it.\n\nWrites a ``.disabled`` sentinel that ``ConfigStore.load_from_yaml``\nhonours: every YAML inside the pack directory is skipped at next\nhydration. Re-enable via ``/enable`` to restore.",
+        "operationId": "admin_federation_disable_api_admin_federation_packs__publisher_id__disable_post",
+        "parameters": [
+          {
+            "name": "publisher_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Publisher Id"
+            }
+          },
+          {
+            "name": "X-Govops-Admin-Token",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Govops-Admin-Token"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -1807,19 +1939,6 @@
           "re_evaluate"
         ],
         "title": "EventType"
-      },
-      "FederationPackEnabledRequest": {
-        "properties": {
-          "enabled": {
-            "type": "boolean",
-            "title": "Enabled"
-          }
-        },
-        "type": "object",
-        "required": [
-          "enabled"
-        ],
-        "title": "FederationPackEnabledRequest"
       },
       "HTTPValidationError": {
         "properties": {

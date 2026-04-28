@@ -554,11 +554,22 @@ class ConfigStore:
         if not target.exists():
             raise FileNotFoundError(f"lawcode path does not exist: {target}")
 
-        files = (
-            sorted(target.rglob("*.yaml")) + sorted(target.rglob("*.yml"))
-            if target.is_dir()
-            else [target]
-        )
+        if target.is_dir():
+            # Phase 8 — federated packs under .federated/<publisher_id>/ that
+            # carry a `.disabled` sentinel are skipped at hydration. The
+            # admin-side toggle in /api/admin/federation/packs/{id}/enabled
+            # writes the sentinel; this loader honours it.
+            disabled_pack_dirs = {
+                p.parent for p in target.rglob(".disabled") if p.is_file()
+            }
+            files = []
+            for fp in sorted(target.rglob("*.yaml")) + sorted(target.rglob("*.yml")):
+                # If any ancestor is a disabled pack directory, skip the file.
+                if any(parent in disabled_pack_dirs for parent in fp.parents):
+                    continue
+                files.append(fp)
+        else:
+            files = [target]
 
         inserted = 0
         for fp in files:

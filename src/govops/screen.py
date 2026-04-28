@@ -39,6 +39,19 @@ SCREENING_DISCLAIMER = (
 )
 
 
+# Prefix code → template slug (mirrors `lawcode/global/notices.yaml`
+# keys `global.template.notice.<slug>-decision`). The screen API uses
+# 2-letter prefixes; full jurisdiction ids are used by the case API.
+_PREFIX_TO_TEMPLATE_SLUG = {
+    "ca": "ca-oas",
+    "br": "br-inss",
+    "es": "es-jub",
+    "fr": "fr-cnav",
+    "de": "de-drv",
+    "ua": "ua-pfu",
+}
+
+
 # ---------------------------------------------------------------------------
 # Request / response models
 # ---------------------------------------------------------------------------
@@ -217,9 +230,11 @@ def render_screen_notice_html(
     engine = OASEngine(rules=list(pack.rules), evaluation_date=eval_date)
     recommendation, _audit_entries = engine.evaluate(transient_case)
 
-    template_key = f"global.template.notice.{req.jurisdiction_id}-oas-decision" \
-        if req.jurisdiction_id == "ca" \
-        else f"global.template.notice.{req.jurisdiction_id}-decision"
+    # Map the screen-side prefix (`ca`, `br`, …) to the template slug
+    # (`ca-oas`, `br-inss`, …) used in `lawcode/global/notices.yaml`.
+    # Mirrors `api._jurisdiction_slug` but keyed by prefix not full id —
+    # the screen surface trades id for prefix to keep payloads small.
+    template_key = f"global.template.notice.{_PREFIX_TO_TEMPLATE_SLUG[req.jurisdiction_id]}-decision"
     program_name = _label(pack).split(" — ")[0]
 
     rendered = render_html(

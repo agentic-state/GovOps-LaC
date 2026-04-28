@@ -37,5 +37,13 @@ values:
 - key: ca.calc.oas.base_monthly_amount
   value: 727.67
   value_type: number
+  effective_to: '2026-01-01'
   citation: 'Old Age Security Act, R.S.C. 1985, c. O-9, s. 7'
-  rationale: 'Basic OAS amount for ages 65-74, expressed in CAD per month. The Act establishes the base under s. 7; quarterly indexation under s. 7.1 adjusts the value to CPI. This single open-window record stands in for the indexation history; when a quarterly adjustment is needed in the demo, a follow-up dated record supersedes this one and the substrate picks up the change without code edits.'
+  rationale: 'Basic OAS amount for ages 65-74, in effect from time-immemorial-default through 2025-Q4. Closed at 2026-01-01 by the Q1-2026 indexation supersession below. Disciplined supersession per schema/README.md §Supersession: close the prior record, insert a new record with the new value and effective_from.'
+- key: ca.calc.oas.base_monthly_amount
+  value: 735.45
+  value_type: number
+  effective_from: '2026-01-01'
+  supersedes: 'ca.calc.oas.base_monthly_amount@1900-01-01'
+  citation: 'Old Age Security Act, R.S.C. 1985, c. O-9, s. 7.1 (CPI indexation)'
+  rationale: 'Quarterly cost-of-living adjustment effective 2026-01-01. Approximate +1.07% lift over 2025-Q4 reflecting CPI movement; the exact figure is illustrative — the load-bearing point is that the formula structure does not change, only the coefficient. A case evaluated 2025-12-31 sees 727.67; the same case re-evaluated 2026-01-01 (or later) sees 735.45. Configure-without-deploy in action.'

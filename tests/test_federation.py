@@ -357,6 +357,47 @@ class TestLoadProvenance:
         assert record.fetched_at is not None
         assert record.source_repo == "https://example.org/packs/jp/manifest.yaml"
 
+    def test_disabled_pack_is_skipped_by_loader(self, tmp_path):
+        """A .disabled sentinel inside a federated pack causes load_from_yaml
+        to skip every YAML inside that pack — closes the gap where the
+        admin toggle wrote the sentinel but the loader ignored it.
+        """
+        # Two pack-shaped dirs: alice (enabled) + bob (disabled).
+        for pid, disabled in [("alice", False), ("bob", True)]:
+            pack_dir = tmp_path / pid
+            pack_dir.mkdir()
+            (pack_dir / "rules.yaml").write_text(
+                "defaults:\n"
+                f"  domain: rule\n"
+                f"  jurisdiction_id: {pid}-test\n"
+                f"  effective_from: '1900-01-01'\n"
+                f"values:\n"
+                f"- key: {pid}.rule.x\n"
+                f"  value: 1\n"
+                f"  value_type: number\n",
+                encoding="utf-8",
+            )
+            if disabled:
+                (pack_dir / ".disabled").write_text("disabled\n", encoding="utf-8")
+
+        store = ConfigStore()
+        n = store.load_from_yaml(tmp_path)
+        assert n == 1  # only alice loaded
+
+        from datetime import datetime, timezone
+        # alice resolves
+        assert store.resolve(
+            "alice.rule.x",
+            evaluation_date=datetime.now(timezone.utc),
+            jurisdiction_id="alice-test",
+        ) is not None
+        # bob does not — its directory was skipped
+        assert store.resolve(
+            "bob.rule.x",
+            evaluation_date=datetime.now(timezone.utc),
+            jurisdiction_id="bob-test",
+        ) is None
+
     def test_local_load_leaves_provenance_none(self, tmp_path):
         pack = tmp_path / "rules.yaml"
         pack.write_text(

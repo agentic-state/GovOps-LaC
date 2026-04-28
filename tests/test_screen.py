@@ -252,7 +252,7 @@ class TestScreenBenefitAmount:
         """50 years CA residency exceeds the 40-year cap → full base monthly."""
         resp = run_screen(_full_eligible_ca_request())
         assert resp.benefit_amount is not None
-        assert resp.benefit_amount.value == 727.67
+        assert resp.benefit_amount.value == 735.45
 
     def test_partial_pension_prorates_amount(self):
         """A 33-year CA resident sees ~33/40 of base, not zero, not full."""
@@ -271,7 +271,7 @@ class TestScreenBenefitAmount:
         assert resp.partial_ratio == "33/40"
         assert resp.benefit_amount is not None
         # Same arithmetic the engine does (round to 2dp).
-        assert resp.benefit_amount.value == round(727.67 * (33.0 / 40.0), 2)
+        assert resp.benefit_amount.value == round(735.45 * (33.0 / 40.0), 2)
 
     def test_formula_trace_is_reproducible(self):
         """The trace must let a citizen-facing surface render every step."""
@@ -298,7 +298,7 @@ class TestScreenBenefitAmount:
         assert "benefit_amount" in body
         assert body["benefit_amount"] is not None
         ba = body["benefit_amount"]
-        assert ba["value"] == 727.67
+        assert ba["value"] == 735.45
         assert ba["currency"] == "CAD"
         assert ba["period"] == "monthly"
         assert isinstance(ba["formula_trace"], list)

@@ -371,7 +371,7 @@ class TestBenefitAmount:
         assert rec.outcome == DecisionOutcome.ELIGIBLE
         assert rec.pension_type == "full"
         assert rec.benefit_amount is not None
-        assert rec.benefit_amount.value == 727.67
+        assert rec.benefit_amount.value == 735.45
         assert rec.benefit_amount.currency == "CAD"
         assert rec.benefit_amount.period == "monthly"
 
@@ -395,7 +395,7 @@ class TestBenefitAmount:
         assert rec.partial_ratio == "33/40"
         assert rec.benefit_amount is not None
         # Floats — round to 2dp the same way engine.calculate does.
-        assert rec.benefit_amount.value == round(727.67 * (33.0 / 40.0), 2)
+        assert rec.benefit_amount.value == round(735.45 * (33.0 / 40.0), 2)
 
     def test_ineligible_case_has_no_benefit_amount(self):
         """Under-65 applicant is INELIGIBLE; no benefit_amount should appear."""

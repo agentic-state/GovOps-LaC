@@ -90,7 +90,7 @@ class TestCaseWorkflow:
         rec = r.json()["recommendation"]
         assert rec["benefit_amount"] is not None
         ba = rec["benefit_amount"]
-        assert ba["value"] == 727.67
+        assert ba["value"] == 735.45
         assert ba["currency"] == "CAD"
         assert ba["period"] == "monthly"
         assert isinstance(ba["formula_trace"], list)
@@ -105,7 +105,7 @@ class TestCaseWorkflow:
         assert rec["pension_type"] == "partial"
         assert rec["benefit_amount"] is not None
         # Partial cases pay strictly less than the full base.
-        assert rec["benefit_amount"]["value"] < 727.67
+        assert rec["benefit_amount"]["value"] < 735.45
         assert rec["benefit_amount"]["value"] > 0
 
     def test_evaluate_ineligible_has_null_benefit_amount(self, client):
@@ -124,7 +124,7 @@ class TestCaseWorkflow:
         pkg = r.json()
         rec = pkg["recommendation"]
         assert rec["benefit_amount"] is not None
-        assert rec["benefit_amount"]["value"] == 727.67
+        assert rec["benefit_amount"]["value"] == 735.45
 
     def test_review_case(self, client):
         client.post("/api/cases/demo-case-001/evaluate")

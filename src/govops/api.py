@@ -11,7 +11,7 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Any
 
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import Depends, FastAPI, Header, HTTPException, Request
 from starlette.datastructures import FormData, UploadFile as StarletteUploadFile
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
@@ -432,6 +432,28 @@ def get_audit(case_id: str):
 # ---------------------------------------------------------------------------
 
 
+def require_admin_token(
+    x_govops_admin_token: str | None = Header(default=None, alias="X-Govops-Admin-Token"),
+) -> None:
+    """Minimal admin gate (PLAN.md §11 auth-track placeholder).
+
+    If the ``GOVOPS_ADMIN_TOKEN`` env var is unset, this dependency is a
+    no-op — current open behaviour is preserved for the demo. If the env
+    var IS set, requests must carry an ``X-Govops-Admin-Token`` header
+    whose value matches; missing or wrong returns 401.
+
+    This is intentionally simple — not real auth, not user-aware, no
+    rotation, no scopes. It exists to close the wide-open admin surface
+    on deployed instances where federation traffic flows. The full
+    AuthN/AuthZ track per PLAN §11 supersedes this.
+    """
+    expected = os.environ.get("GOVOPS_ADMIN_TOKEN")
+    if not expected:
+        return  # gate disabled
+    if not x_govops_admin_token or x_govops_admin_token != expected:
+        raise HTTPException(401, "admin token required")
+
+
 def _federation_paths() -> tuple[Path, Path, Path]:
     """Resolve the three paths the federation admin endpoints read.
 
@@ -447,7 +469,7 @@ def _federation_paths() -> tuple[Path, Path, Path]:
     )
 
 
-@app.get("/api/admin/federation/registry")
+@app.get("/api/admin/federation/registry", dependencies=[Depends(require_admin_token)])
 def admin_federation_registry():
     """List registered publishers + their trust state.
 
@@ -470,7 +492,7 @@ def admin_federation_registry():
     return {"publishers": entries}
 
 
-@app.get("/api/admin/federation/packs")
+@app.get("/api/admin/federation/packs", dependencies=[Depends(require_admin_token)])
 def admin_federation_packs():
     """List imported federated packs with their provenance + enabled state."""
     from govops.federation import list_imported_packs
@@ -479,7 +501,7 @@ def admin_federation_packs():
     return {"packs": list_imported_packs(federated_dir)}
 
 
-@app.post("/api/admin/federation/fetch/{publisher_id}")
+@app.post("/api/admin/federation/fetch/{publisher_id}", dependencies=[Depends(require_admin_token)])
 def admin_federation_fetch(
     publisher_id: str,
     dry_run: bool = False,
@@ -528,27 +550,37 @@ def admin_federation_fetch(
     return {"result": result}
 
 
-class FederationPackEnabledRequest(BaseModel):
-    enabled: bool
+@app.post("/api/admin/federation/packs/{publisher_id}/enable", dependencies=[Depends(require_admin_token)])
+def admin_federation_enable(publisher_id: str):
+    """Re-enable a previously-disabled federated pack.
 
-
-@app.post("/api/admin/federation/packs/{publisher_id}/enabled")
-def admin_federation_set_enabled(publisher_id: str, body: FederationPackEnabledRequest):
-    """Toggle a pack's enabled state via the ``.disabled`` sentinel.
-
-    A disabled pack stays on disk (so re-enabling is a single click) but
-    is signaled to substrate hydration via the sentinel — a future
-    hydrator pass will skip directories carrying ``.disabled``. For now
-    the sentinel is informational.
+    Removes the ``.disabled`` sentinel; on next process restart the
+    substrate hydrator picks the pack back up. Idempotent — calling
+    twice on an already-enabled pack returns ``changed=false``.
     """
+    return _set_pack_enabled_response(publisher_id, enabled=True)
+
+
+@app.post("/api/admin/federation/packs/{publisher_id}/disable", dependencies=[Depends(require_admin_token)])
+def admin_federation_disable(publisher_id: str):
+    """Disable a federated pack without deleting it.
+
+    Writes a ``.disabled`` sentinel that ``ConfigStore.load_from_yaml``
+    honours: every YAML inside the pack directory is skipped at next
+    hydration. Re-enable via ``/enable`` to restore.
+    """
+    return _set_pack_enabled_response(publisher_id, enabled=False)
+
+
+def _set_pack_enabled_response(publisher_id: str, *, enabled: bool) -> dict:
     from govops.federation import set_pack_enabled
 
     _, _, federated_dir = _federation_paths()
     try:
-        changed = set_pack_enabled(federated_dir, publisher_id, body.enabled)
+        changed = set_pack_enabled(federated_dir, publisher_id, enabled)
     except FileNotFoundError as exc:
         raise HTTPException(404, str(exc)) from exc
-    return {"publisher_id": publisher_id, "enabled": body.enabled, "changed": changed}
+    return {"publisher_id": publisher_id, "enabled": enabled, "changed": changed}
 
 
 # ---------------------------------------------------------------------------
@@ -616,14 +648,35 @@ def get_case_notice(case_id: str, lang: str = "en"):
 def _jurisdiction_slug(jurisdiction_id: str) -> str:
     """Map a jurisdiction id to the slug used in template keys.
 
-    `jur-ca-federal` -> `ca-oas`; future jurisdictions register their slug
-    here as their notice templates land. Centralizing the mapping keeps
-    template-key construction in one place.
+    Each entry corresponds to a notice template in
+    ``lawcode/global/notices.yaml`` keyed
+    ``global.template.notice.<slug>-decision``. Adding a new jurisdiction
+    that needs a notice means: (1) seed the template record in YAML,
+    (2) add the mapping here, (3) extend ``_PROGRAM_NAME_FALLBACKS``
+    below if the i18n fallback wants a custom default.
     """
     mapping = {
         "jur-ca-federal": "ca-oas",
+        "jur-br-federal": "br-inss",
+        "jur-es-national": "es-jub",
+        "jur-fr-national": "fr-cnav",
+        "jur-de-federal": "de-drv",
+        "jur-uk-national": "ua-pfu",
     }
     return mapping.get(jurisdiction_id, jurisdiction_id)
+
+
+# English-language fallback names for the program header. Used by
+# `_program_name_for` only when the i18n key `program.<slug>` has no
+# matching ConfigValue. Localized values still flow through the substrate.
+_PROGRAM_NAME_FALLBACKS = {
+    "ca-oas": "Old Age Security",
+    "br-inss": "Aposentadoria por Idade (INSS)",
+    "es-jub": "Jubilación contributiva",
+    "fr-cnav": "Retraite de base (CNAV)",
+    "de-drv": "Altersrente (Deutsche Rentenversicherung)",
+    "ua-pfu": "Пенсія за віком",
+}
 
 
 def _program_name_for(jurisdiction_id: str, lang: str) -> str:
@@ -634,7 +687,7 @@ def _program_name_for(jurisdiction_id: str, lang: str) -> str:
     from govops.i18n import t as _t
     label = _t(f"program.{slug}", lang)
     if label.startswith("program."):  # i18n fell back to the key
-        return "Old Age Security" if slug == "ca-oas" else slug
+        return _PROGRAM_NAME_FALLBACKS.get(slug, slug)
     return label
 
 

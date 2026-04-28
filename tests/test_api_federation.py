@@ -291,13 +291,13 @@ class TestFetchEndpoint:
 # ---------------------------------------------------------------------------
 
 
-class TestEnabledEndpoint:
+class TestEnableDisableEndpoints:
+    """Path-style endpoints (per govops-020 spec): POST .../packs/{id}/enable
+    or .../disable, no body. Aligns with the Lovable client wiring."""
+
     def test_disable_an_enabled_pack(self, client, lawcode_sandbox):
         _write_pack(lawcode_sandbox, "alice")
-        r = client.post(
-            "/api/admin/federation/packs/alice/enabled",
-            json={"enabled": False},
-        )
+        r = client.post("/api/admin/federation/packs/alice/disable")
         assert r.status_code == 200
         assert r.json() == {"publisher_id": "alice", "enabled": False, "changed": True}
         assert (lawcode_sandbox / ".federated" / "alice" / ".disabled").exists()
@@ -306,25 +306,75 @@ class TestEnabledEndpoint:
         _write_pack(lawcode_sandbox, "alice")
         sentinel = lawcode_sandbox / ".federated" / "alice" / ".disabled"
         sentinel.write_text("disabled\n")
-        r = client.post(
-            "/api/admin/federation/packs/alice/enabled",
-            json={"enabled": True},
-        )
+        r = client.post("/api/admin/federation/packs/alice/enable")
         assert r.status_code == 200
         assert r.json()["enabled"] is True
         assert not sentinel.exists()
 
-    def test_no_change_when_already_in_state(self, client, lawcode_sandbox):
+    def test_enable_no_change_when_already_enabled(self, client, lawcode_sandbox):
         _write_pack(lawcode_sandbox, "alice")
-        r = client.post(
-            "/api/admin/federation/packs/alice/enabled",
-            json={"enabled": True},
-        )
+        r = client.post("/api/admin/federation/packs/alice/enable")
         assert r.json() == {"publisher_id": "alice", "enabled": True, "changed": False}
 
-    def test_unknown_pack_returns_404(self, client):
-        r = client.post(
-            "/api/admin/federation/packs/nonexistent/enabled",
-            json={"enabled": False},
-        )
+    def test_disable_unknown_pack_returns_404(self, client):
+        r = client.post("/api/admin/federation/packs/nonexistent/disable")
         assert r.status_code == 404
+
+    def test_enable_unknown_pack_returns_404(self, client):
+        r = client.post("/api/admin/federation/packs/nonexistent/enable")
+        assert r.status_code == 404
+
+
+# ---------------------------------------------------------------------------
+# Admin token gate (env-var driven). When GOVOPS_ADMIN_TOKEN is unset
+# (default in the demo / test environment), the endpoints are open. When
+# set, every /api/admin/* request must carry the matching
+# X-Govops-Admin-Token header. This is the placeholder closure for the
+# wide-open admin surface; the real auth track per PLAN §11 supersedes it.
+# ---------------------------------------------------------------------------
+
+
+class TestAdminTokenGate:
+    def test_default_unset_token_leaves_endpoints_open(self, client, lawcode_sandbox, monkeypatch):
+        monkeypatch.delenv("GOVOPS_ADMIN_TOKEN", raising=False)
+        _write_registry(lawcode_sandbox, [])
+        r = client.get("/api/admin/federation/registry")
+        assert r.status_code == 200
+
+    def test_token_set_without_header_returns_401(self, client, lawcode_sandbox, monkeypatch):
+        monkeypatch.setenv("GOVOPS_ADMIN_TOKEN", "s3cret")
+        _write_registry(lawcode_sandbox, [])
+        r = client.get("/api/admin/federation/registry")
+        assert r.status_code == 401
+        assert "admin token required" in r.json()["detail"]
+
+    def test_token_set_with_wrong_header_returns_401(self, client, lawcode_sandbox, monkeypatch):
+        monkeypatch.setenv("GOVOPS_ADMIN_TOKEN", "s3cret")
+        _write_registry(lawcode_sandbox, [])
+        r = client.get(
+            "/api/admin/federation/registry",
+            headers={"X-Govops-Admin-Token": "wrong"},
+        )
+        assert r.status_code == 401
+
+    def test_token_set_with_correct_header_returns_200(self, client, lawcode_sandbox, monkeypatch):
+        monkeypatch.setenv("GOVOPS_ADMIN_TOKEN", "s3cret")
+        _write_registry(lawcode_sandbox, [])
+        r = client.get(
+            "/api/admin/federation/registry",
+            headers={"X-Govops-Admin-Token": "s3cret"},
+        )
+        assert r.status_code == 200
+
+    def test_token_gate_applies_to_disable_endpoint(self, client, lawcode_sandbox, monkeypatch):
+        monkeypatch.setenv("GOVOPS_ADMIN_TOKEN", "s3cret")
+        _write_pack(lawcode_sandbox, "alice")
+        # Without header → 401 even on a path that would otherwise return 200.
+        r = client.post("/api/admin/federation/packs/alice/disable")
+        assert r.status_code == 401
+        # With header → 200.
+        r = client.post(
+            "/api/admin/federation/packs/alice/disable",
+            headers={"X-Govops-Admin-Token": "s3cret"},
+        )
+        assert r.status_code == 200
