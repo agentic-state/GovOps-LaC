@@ -425,6 +425,133 @@ def get_audit(case_id: str):
 
 
 # ---------------------------------------------------------------------------
+# Admin federation surface (Phase 8 / ADR-009)
+# Read-mostly endpoints powering /admin/federation per govops-020. The
+# trust-decision authoring stays as a YAML PR per ADR-009; these endpoints
+# expose state and trigger fetches, not editorial flows.
+# ---------------------------------------------------------------------------
+
+
+def _federation_paths() -> tuple[Path, Path, Path]:
+    """Resolve the three paths the federation admin endpoints read.
+
+    Override-able via env so tests can point at a tmp_path without
+    monkeypatching globals: ``GOVOPS_LAWCODE_DIR`` overrides the lawcode
+    root; the other two derive from it.
+    """
+    lawcode_root = Path(os.environ.get("GOVOPS_LAWCODE_DIR") or LAWCODE_DIR)
+    return (
+        lawcode_root / "REGISTRY.yaml",
+        lawcode_root / "global" / "trusted_keys.yaml",
+        lawcode_root / ".federated",
+    )
+
+
+@app.get("/api/admin/federation/registry")
+def admin_federation_registry():
+    """List registered publishers + their trust state.
+
+    Returns one entry per publisher in ``lawcode/REGISTRY.yaml`` with a
+    ``trust_state`` field derived from whether a public key is on file in
+    ``lawcode/global/trusted_keys.yaml``: ``trusted`` if a key exists,
+    ``unsigned_only`` if not.
+    """
+    from govops.federation import load_registry, load_trusted_keys
+
+    reg_path, keys_path, _ = _federation_paths()
+    registry = load_registry(reg_path)
+    trusted_keys = load_trusted_keys(keys_path)
+    entries = []
+    for publisher_id, entry in registry.items():
+        merged = dict(entry)
+        merged["trust_state"] = "trusted" if publisher_id in trusted_keys else "unsigned_only"
+        entries.append(merged)
+    entries.sort(key=lambda e: e.get("publisher_id", ""))
+    return {"publishers": entries}
+
+
+@app.get("/api/admin/federation/packs")
+def admin_federation_packs():
+    """List imported federated packs with their provenance + enabled state."""
+    from govops.federation import list_imported_packs
+
+    _, _, federated_dir = _federation_paths()
+    return {"packs": list_imported_packs(federated_dir)}
+
+
+@app.post("/api/admin/federation/fetch/{publisher_id}")
+def admin_federation_fetch(
+    publisher_id: str,
+    dry_run: bool = False,
+    allow_unsigned: bool = False,
+):
+    """Trigger ``govops.federation.fetch_pack`` for a registered publisher.
+
+    Maps every fail-closed federation error to a 4xx HTTP status so the
+    UI surfaces actionable feedback rather than a generic 500.
+    """
+    from govops.federation import (
+        FederationError,
+        ManifestHashMismatch,
+        MissingSignature,
+        SignatureMismatch,
+        UntrustedPublisher,
+        fetch_pack,
+        http_file_loader,
+        http_manifest_loader,
+        load_registry,
+        load_trusted_keys,
+    )
+
+    reg_path, keys_path, federated_dir = _federation_paths()
+    registry = load_registry(reg_path)
+    trusted_keys = load_trusted_keys(keys_path)
+
+    try:
+        result = fetch_pack(
+            publisher_id,
+            registry=registry,
+            trusted_keys=trusted_keys,
+            manifest_loader=http_manifest_loader,
+            file_loader=http_file_loader,
+            target_dir=federated_dir,
+            allow_unsigned=allow_unsigned,
+            dry_run=dry_run,
+        )
+    except UntrustedPublisher as exc:
+        raise HTTPException(403, str(exc)) from exc
+    except (MissingSignature, SignatureMismatch, ManifestHashMismatch) as exc:
+        raise HTTPException(400, str(exc)) from exc
+    except FederationError as exc:
+        raise HTTPException(400, str(exc)) from exc
+
+    return {"result": result}
+
+
+class FederationPackEnabledRequest(BaseModel):
+    enabled: bool
+
+
+@app.post("/api/admin/federation/packs/{publisher_id}/enabled")
+def admin_federation_set_enabled(publisher_id: str, body: FederationPackEnabledRequest):
+    """Toggle a pack's enabled state via the ``.disabled`` sentinel.
+
+    A disabled pack stays on disk (so re-enabling is a single click) but
+    is signaled to substrate hydration via the sentinel — a future
+    hydrator pass will skip directories carrying ``.disabled``. For now
+    the sentinel is informational.
+    """
+    from govops.federation import set_pack_enabled
+
+    _, _, federated_dir = _federation_paths()
+    try:
+        changed = set_pack_enabled(federated_dir, publisher_id, body.enabled)
+    except FileNotFoundError as exc:
+        raise HTTPException(404, str(exc)) from exc
+    return {"publisher_id": publisher_id, "enabled": body.enabled, "changed": changed}
+
+
+# ---------------------------------------------------------------------------
 # Decision notice (Phase 10C / ADR-012)
 # A notice is a derived artefact: deterministic function of (case,
 # recommendation, dated template, dated i18n). No persisted entity; the

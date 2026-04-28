@@ -329,6 +329,103 @@ def _derive_file_base(manifest_url: str) -> str:
 # ---------------------------------------------------------------------------
 
 
+# ---------------------------------------------------------------------------
+# Registry / trusted-keys / pack helpers (used by CLI + admin API)
+# ---------------------------------------------------------------------------
+
+
+def load_registry(path: Path) -> dict[str, dict[str, Any]]:
+    """Parse ``lawcode/REGISTRY.yaml`` into a publisher_id → entry dict.
+
+    Empty / missing file returns an empty dict (the operator hasn't
+    registered any publishers yet — not an error).
+    """
+    import yaml
+
+    if not path.exists():
+        return {}
+    doc = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+    return {
+        e["publisher_id"]: e
+        for e in (doc.get("values") or [])
+        if isinstance(e, dict) and "publisher_id" in e
+    }
+
+
+def load_trusted_keys(path: Path) -> dict[str, str]:
+    """Parse ``lawcode/global/trusted_keys.yaml`` into publisher_id → public_key_b64.
+
+    The trusted-keys file uses ConfigValue shape with key prefix
+    ``global.federation.trusted_key.<publisher_id>``; the value is an
+    object carrying ``public_key_b64``. Missing file returns empty dict.
+    """
+    import yaml
+
+    if not path.exists():
+        return {}
+    doc = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+    defaults = doc.get("defaults") or {}
+    out: dict[str, str] = {}
+    for entry in doc.get("values") or []:
+        merged = {**defaults, **entry}
+        key_field = merged.get("key", "")
+        value = merged.get("value") or {}
+        if not key_field.startswith("global.federation.trusted_key."):
+            continue
+        pid = key_field.rsplit(".", 1)[-1]
+        if isinstance(value, dict) and value.get("public_key_b64"):
+            out[pid] = value["public_key_b64"]
+    return out
+
+
+def list_imported_packs(federated_dir: Path) -> list[dict[str, Any]]:
+    """Scan ``lawcode/.federated/`` and return one summary per imported pack.
+
+    Each summary merges the provenance json with the on-disk enabled state
+    (a ``.disabled`` sentinel file means the pack is disabled but not
+    deleted). Ordered by ``fetched_at`` descending so the most recent
+    fetch lands first.
+    """
+    if not federated_dir.exists():
+        return []
+    out: list[dict[str, Any]] = []
+    for pack_dir in sorted(federated_dir.iterdir()):
+        if not pack_dir.is_dir() or pack_dir.name.startswith("."):
+            continue
+        prov_path = pack_dir / ".provenance.json"
+        if not prov_path.exists():
+            continue
+        prov = json.loads(prov_path.read_text(encoding="utf-8"))
+        prov["enabled"] = not (pack_dir / ".disabled").exists()
+        out.append(prov)
+    out.sort(key=lambda p: p.get("fetched_at", ""), reverse=True)
+    return out
+
+
+def set_pack_enabled(federated_dir: Path, publisher_id: str, enabled: bool) -> bool:
+    """Toggle a pack's enabled state via the ``.disabled`` sentinel.
+
+    Returns True if the state changed; False if it was already in the
+    requested state. Raises ``FileNotFoundError`` if the pack doesn't
+    exist (the caller should map this to a 404).
+    """
+    pack_dir = federated_dir / publisher_id
+    if not pack_dir.exists() or not pack_dir.is_dir():
+        raise FileNotFoundError(f"pack {publisher_id!r} not found in {federated_dir}")
+    sentinel = pack_dir / ".disabled"
+    currently_enabled = not sentinel.exists()
+    if currently_enabled == enabled:
+        return False
+    if enabled:
+        sentinel.unlink()
+    else:
+        sentinel.write_text(
+            f"disabled at {datetime.now(timezone.utc).isoformat()}\n",
+            encoding="utf-8",
+        )
+    return True
+
+
 def http_manifest_loader(url: str) -> dict[str, Any]:
     """Fetch and parse a YAML manifest over HTTP(S)."""
     import urllib.request

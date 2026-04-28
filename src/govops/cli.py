@@ -222,13 +222,13 @@ def _run_fetch(
     """Handler for ``govops fetch <publisher_id>``."""
     from pathlib import Path
 
-    import yaml
-
     from govops.federation import (
         FederationError,
         fetch_pack,
         http_file_loader,
         http_manifest_loader,
+        load_registry,
+        load_trusted_keys,
     )
 
     repo_root = Path(__file__).resolve().parent.parent.parent
@@ -242,27 +242,8 @@ def _run_fetch(
     if not reg_path.exists():
         print(f"error: registry not found at {reg_path}", file=sys.stderr)
         return 2
-    registry_doc = yaml.safe_load(reg_path.read_text(encoding="utf-8")) or {}
-    registry = {
-        e["publisher_id"]: e
-        for e in registry_doc.get("values", [])
-        if isinstance(e, dict) and "publisher_id" in e
-    }
-
-    trusted_keys: dict[str, str] = {}
-    if keys_path.exists():
-        keys_doc = yaml.safe_load(keys_path.read_text(encoding="utf-8")) or {}
-        defaults = keys_doc.get("defaults") or {}
-        for entry in keys_doc.get("values", []) or []:
-            merged = {**defaults, **entry}
-            key_field = merged.get("key", "")
-            value = merged.get("value") or {}
-            # Trust key shape: global.federation.trusted_key.<publisher_id>
-            if key_field.startswith("global.federation.trusted_key."):
-                pid = key_field.rsplit(".", 1)[-1]
-                pk = value.get("public_key_b64") if isinstance(value, dict) else None
-                if pk:
-                    trusted_keys[pid] = pk
+    registry = load_registry(reg_path)
+    trusted_keys = load_trusted_keys(keys_path)
 
     try:
         result = fetch_pack(

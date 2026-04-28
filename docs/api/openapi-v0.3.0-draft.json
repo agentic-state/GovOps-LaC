@@ -375,6 +375,146 @@
         }
       }
     },
+    "/api/admin/federation/registry": {
+      "get": {
+        "summary": "Admin Federation Registry",
+        "description": "List registered publishers + their trust state.\n\nReturns one entry per publisher in ``lawcode/REGISTRY.yaml`` with a\n``trust_state`` field derived from whether a public key is on file in\n``lawcode/global/trusted_keys.yaml``: ``trusted`` if a key exists,\n``unsigned_only`` if not.",
+        "operationId": "admin_federation_registry_api_admin_federation_registry_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/federation/packs": {
+      "get": {
+        "summary": "Admin Federation Packs",
+        "description": "List imported federated packs with their provenance + enabled state.",
+        "operationId": "admin_federation_packs_api_admin_federation_packs_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/federation/fetch/{publisher_id}": {
+      "post": {
+        "summary": "Admin Federation Fetch",
+        "description": "Trigger ``govops.federation.fetch_pack`` for a registered publisher.\n\nMaps every fail-closed federation error to a 4xx HTTP status so the\nUI surfaces actionable feedback rather than a generic 500.",
+        "operationId": "admin_federation_fetch_api_admin_federation_fetch__publisher_id__post",
+        "parameters": [
+          {
+            "name": "publisher_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Publisher Id"
+            }
+          },
+          {
+            "name": "dry_run",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false,
+              "title": "Dry Run"
+            }
+          },
+          {
+            "name": "allow_unsigned",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false,
+              "title": "Allow Unsigned"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/federation/packs/{publisher_id}/enabled": {
+      "post": {
+        "summary": "Admin Federation Set Enabled",
+        "description": "Toggle a pack's enabled state via the ``.disabled`` sentinel.\n\nA disabled pack stays on disk (so re-enabling is a single click) but\nis signaled to substrate hydration via the sentinel — a future\nhydrator pass will skip directories carrying ``.disabled``. For now\nthe sentinel is informational.",
+        "operationId": "admin_federation_set_enabled_api_admin_federation_packs__publisher_id__enabled_post",
+        "parameters": [
+          {
+            "name": "publisher_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Publisher Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FederationPackEnabledRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/cases/{case_id}/notice": {
       "get": {
         "summary": "Get Case Notice",
@@ -1667,6 +1807,19 @@
           "re_evaluate"
         ],
         "title": "EventType"
+      },
+      "FederationPackEnabledRequest": {
+        "properties": {
+          "enabled": {
+            "type": "boolean",
+            "title": "Enabled"
+          }
+        },
+        "type": "object",
+        "required": [
+          "enabled"
+        ],
+        "title": "FederationPackEnabledRequest"
       },
       "HTTPValidationError": {
         "properties": {
