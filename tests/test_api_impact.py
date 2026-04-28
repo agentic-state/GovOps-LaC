@@ -257,7 +257,15 @@ def test_impact_response_shape(client):
     r = client.get("/api/impact", params={"citation": "OAS Act"})
     assert r.status_code == 200
     data = r.json()
-    assert set(data.keys()) == {"query", "total", "jurisdiction_count", "results"}
+    assert set(data.keys()) == {
+        "query",
+        "total",
+        "jurisdiction_count",
+        "limit",
+        "page",
+        "page_count",
+        "results",
+    }
     for section in data["results"]:
         assert set(section.keys()) == {"jurisdiction_id", "jurisdiction_label", "values"}
         for v in section["values"]:
@@ -267,3 +275,167 @@ def test_impact_response_shape(client):
             assert "citation" in v
             assert "effective_from" in v
             assert "status" in v
+
+
+# ---------------------------------------------------------------------------
+# Pagination (PLAN.md §12 7.x.1) — backend honours `limit` / `page`
+# query params and returns `limit` / `page` / `page_count` in the body so the
+# Lovable UI's `ImpactPaginationBar` no longer falls back to `??` defaults.
+# ---------------------------------------------------------------------------
+
+
+def _seed_n_records(n: int, *, citation: str = "Bulk citation X.1") -> None:
+    """Seed `n` ca-oas records that all share `citation`. Used to drive
+    pagination math without fighting the alphabetic grouping order.
+    """
+    for i in range(n):
+        config_store.put(
+            ConfigValue(
+                domain="rule",
+                key=f"ca-oas.rule.bulk.item-{i:04d}",
+                jurisdiction_id="ca-oas",
+                value=i,
+                value_type=ValueType.NUMBER,
+                effective_from=datetime(2024, 1, 1, tzinfo=UTC),
+                citation=citation,
+                author="seed",
+                approved_by="seed",
+                rationale="Pagination test fixture.",
+            )
+        )
+
+
+class TestImpactPagination:
+    def test_default_limit_is_50_and_page_is_1(self, client):
+        r = client.get("/api/impact", params={"citation": "OAS Act"})
+        data = r.json()
+        assert data["limit"] == 50
+        assert data["page"] == 1
+        # 2 matches in the seed fixture → single page.
+        assert data["page_count"] == 1
+
+    def test_page_count_is_zero_when_no_matches(self, client):
+        r = client.get("/api/impact", params={"citation": "nothing references this"})
+        data = r.json()
+        assert data["total"] == 0
+        assert data["page_count"] == 0
+        # Defaults still echoed.
+        assert data["limit"] == 50
+        assert data["page"] == 1
+
+    def test_explicit_limit_and_page_slices_results(self, client):
+        _seed_n_records(75, citation="Bulk Act, s. 1")
+        r = client.get(
+            "/api/impact",
+            params={"citation": "Bulk Act", "limit": 25, "page": 2},
+        )
+        data = r.json()
+        assert data["total"] == 75
+        assert data["limit"] == 25
+        assert data["page"] == 2
+        assert data["page_count"] == 3
+        # Page 2 = items 25..49 of the bulk seed (alphabetically by key).
+        keys = [v["key"] for s in data["results"] for v in s["values"]]
+        assert len(keys) == 25
+        assert keys[0] == "ca-oas.rule.bulk.item-0025"
+        assert keys[-1] == "ca-oas.rule.bulk.item-0049"
+
+    def test_last_page_returns_remainder(self, client):
+        _seed_n_records(75, citation="Bulk Act, s. 1")
+        r = client.get(
+            "/api/impact",
+            params={"citation": "Bulk Act", "limit": 25, "page": 3},
+        )
+        data = r.json()
+        keys = [v["key"] for s in data["results"] for v in s["values"]]
+        assert len(keys) == 25
+        assert keys[-1] == "ca-oas.rule.bulk.item-0074"
+
+    def test_out_of_range_page_returns_empty_results(self, client):
+        _seed_n_records(10, citation="Bulk Act, s. 1")
+        r = client.get(
+            "/api/impact",
+            params={"citation": "Bulk Act", "limit": 25, "page": 99},
+        )
+        # No 404 — pagination overshoot is recoverable; the UI uses page_count
+        # to redirect back. total/page_count are still authoritative.
+        assert r.status_code == 200
+        data = r.json()
+        assert data["total"] == 10
+        assert data["page_count"] == 1
+        assert data["page"] == 99
+        assert data["results"] == []
+
+    def test_limit_caps_at_200(self, client):
+        r = client.get(
+            "/api/impact",
+            params={"citation": "OAS Act", "limit": 9999},
+        )
+        # Cap is enforced server-side; the echoed `limit` reflects the cap, not
+        # the raw input, so a runaway client can't ask for more than the budget.
+        assert r.json()["limit"] == 200
+
+    def test_limit_floors_at_1(self, client):
+        r = client.get(
+            "/api/impact",
+            params={"citation": "OAS Act", "limit": 0},
+        )
+        assert r.json()["limit"] == 1
+
+    def test_page_floors_at_1(self, client):
+        r = client.get(
+            "/api/impact",
+            params={"citation": "OAS Act", "page": 0},
+        )
+        assert r.json()["page"] == 1
+
+    def test_jurisdiction_count_is_stable_across_pages(self, client):
+        # Spread 30 matches across 2 jurisdictions; pageize at 10 so a page
+        # can contain values from only one section. jurisdiction_count must
+        # reflect the FULL match set, not just what's on this page — that's
+        # what the UI summary "{n} records across {m} jurisdictions" needs.
+        _seed_n_records(20, citation="Cross Act, s. 1")
+        for i in range(10):
+            config_store.put(
+                ConfigValue(
+                    domain="rule",
+                    key=f"fr-cnav.rule.bulk.item-{i:04d}",
+                    jurisdiction_id="fr-cnav",
+                    value=i,
+                    value_type=ValueType.NUMBER,
+                    effective_from=datetime(2024, 1, 1, tzinfo=UTC),
+                    citation="Cross Act, s. 1",
+                    author="seed",
+                    approved_by="seed",
+                    rationale="Cross-jurisdiction fixture.",
+                )
+            )
+        # Page 1 — only ca-oas section (10 values, alphabetically first).
+        page1 = client.get(
+            "/api/impact",
+            params={"citation": "Cross Act", "limit": 10, "page": 1},
+        ).json()
+        assert page1["jurisdiction_count"] == 2
+        assert len(page1["results"]) == 1
+        assert page1["results"][0]["jurisdiction_id"] == "ca-oas"
+        # Page 3 — only fr-cnav section.
+        page3 = client.get(
+            "/api/impact",
+            params={"citation": "Cross Act", "limit": 10, "page": 3},
+        ).json()
+        assert page3["jurisdiction_count"] == 2  # unchanged
+        assert len(page3["results"]) == 1
+        assert page3["results"][0]["jurisdiction_id"] == "fr-cnav"
+
+    def test_page_size_change_recomputes_page_count(self, client):
+        _seed_n_records(40, citation="Resize Act, s. 1")
+        small = client.get(
+            "/api/impact",
+            params={"citation": "Resize Act", "limit": 10, "page": 1},
+        ).json()
+        assert small["page_count"] == 4
+        large = client.get(
+            "/api/impact",
+            params={"citation": "Resize Act", "limit": 25, "page": 1},
+        ).json()
+        assert large["page_count"] == 2

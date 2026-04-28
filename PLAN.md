@@ -250,7 +250,7 @@ Sequenced; each sub-phase ships independently.
 | 10C | ~130 | ⬜ | notification artefact templating |
 | 10D | ~145 | ⬜ | life-event reassessment |
 
-**Live count (2026-04-26)**: 202 backend tests passing (`pytest -q`).
+**Live count (2026-04-28)**: 340 backend tests passing (`pytest -q`).
 
 Tests must stay green at every phase exit. CI matrix stays at Python 3.10/3.11/3.12.
 
@@ -328,17 +328,17 @@ Originating spec: [docs/govops-014-citation-impact.md](docs/govops-014-citation-
 
 | # | Addition | Status | Follow-up |
 | --- | --- | --- | --- |
-| 7.x.1 | Client-side pagination on `/impact` (`limit` / `page` / `page_count` on `ImpactResponse`, `ImpactPaginationBar` top + bottom, page-size selector 10/25/50/100, URL-persisted, resets to page 1 on new query) | Shipped UI-side; backend currently ignores `limit` / `page` query params and returns the full set, which the UI tolerates via `??` defaults | **Backend**: extend `GET /api/impact` to honour `limit` (default e.g. 50, max 200) and `page` (1-indexed) query params, return `limit` / `page` / `page_count` in the response shape. **Spec**: amend govops-014 §"Out of scope" to remove the pagination defer-clause, or add a new govops-014a addendum recording the change. **Tests**: add ~3 cases covering page math, empty page, page-size change. |
-| 7.x.2 | Nav i18n key renamed `impact.nav` → `nav.impact` (matches sibling `nav.*` convention) | Shipped | Update govops-014 §i18n to record the actual key, so the next spec reviewer doesn't read this as a missing key. |
+| 7.x.1 | Client-side pagination on `/impact` (`limit` / `page` / `page_count` on `ImpactResponse`, `ImpactPaginationBar` top + bottom, page-size selector 10/25/50/100, URL-persisted, resets to page 1 on new query) | ✅ closed (2026-04-28) — backend now honours `limit` (default 50, floor 1, cap 200) and `page` (1-indexed, floor 1) on `GET /api/impact`. Response shape extended with `limit` / `page` / `page_count`; `total` and `jurisdiction_count` describe the FULL match set so the summary copy stays meaningful across pages; `results` carries only sections containing values on the requested page; out-of-range pages return `results=[]` (not 404). 9 new tests landed in `tests/test_api_impact.py` (page math, last-page remainder, out-of-range guard, limit cap, limit/page floors, stable jurisdiction_count, page-size resize). govops-014 §"Out of scope" amended to remove the defer-clause; §"Tokens / data" `ImpactResponse` interface updated. OpenAPI snapshot regenerated. | None |
+| 7.x.2 | Nav i18n key renamed `impact.nav` → `nav.impact` (matches sibling `nav.*` convention) | ✅ closed (2026-04-28) — govops-014 §i18n updated; the actual shipped key (`nav.impact`) is now recorded in the spec with a brief rationale so the next reviewer doesn't read it as missing. | None |
 | 7.x.3 | Inline row layout instead of importing `ConfigValueRow` from govops-003 | Refactor specced — see [docs/govops-014a-row-reuse.md](docs/govops-014a-row-reuse.md) | **Lovable**: extend `ConfigValueRow` with two optional props (`highlightQuery`, `showJurisdictionChip`) and refactor `ImpactSection` to import it. Queued behind Phase 10A. Spec includes reference TSX; no UX change, no copy change, no new tokens. |
 | 7.x.4 | Nav placement: order is Authority → Impact → Cases → Encode (Cases interposed) | Shipped | Decide whether to keep Cases between Impact and Encode, or move Impact to sit directly before Encode as the spec literal had it. Cosmetic. |
-| 7.x.5 | A11y polish: `aria-label` on `<mark>`, `role="alert"` on error banner, `aria-atomic="true"` + `role="region"` on count summary | Shipped | None — strict improvements over the spec's a11y minimum. Update the a11y section of govops-014 to record the upgraded baseline. |
+| 7.x.5 | A11y polish: `aria-label` on `<mark>`, `role="alert"` on error banner, `aria-atomic="true"` + `role="region"` on count summary | ✅ closed (2026-04-28) — govops-014 §a11y now records the upgraded baseline (`aria_live_atomic: true`, `role='region'` on the count summary, `role='alert'` on the error banner, per-`<mark>` `aria-label`). | None |
 | 7.x.6 | `<form onSubmit>` wrapper around the search input (Enter-to-submit bypasses debounce) | Shipped | None — strict UX improvement. |
 | 7.x.7 | `ProvenanceRibbon` on the page header + per result row (hybrid provenance) | Shipped | None — consistent with the project's design-system rule that every authored surface declares provenance. |
 | 7.x.8 | TanStack Start `head()` meta (title + description) on `/impact` for SSR | Shipped | Apply the same pattern to other Phase 6 routes that lack it (config, authority, encode) — track separately as a small UI hygiene pass. |
 | 7.x.9 | `data-testid` attributes on Impact components for E2E hooks | Shipped | None — picked up automatically by the cross-browser Playwright harness landed in commit `3583002`. |
 
-**Cumulative test-budget impact**: ~3 additional backend tests (pagination math + edge cases) + ~5 additional Playwright cases (page-size change, URL persistence on pagination, empty-page guardrail). Roll into the Phase 7 line in §6 once landed.
+**Cumulative test-budget impact**: 9 additional backend tests landed (pagination math, last-page remainder, out-of-range guard, limit cap, limit/page floors, stable jurisdiction_count, page-size resize). The Lovable-side Playwright cases (page-size change, URL persistence, empty-page guardrail) remain a follow-up on the UI side and are tracked separately. Backend test count rolled into §6 (340 total post-7.x.1).
 
 ### Phase 10A — Lovable extras + post-flight findings from `eva-foundry/user-insights-hub` (2026-04-26)
 
@@ -353,7 +353,7 @@ Originating spec: [docs/govops-015-self-screening.md](docs/govops-015-self-scree
 | 10A.x.4 | `LanguageSwitcher` in citizen shell header (`ScreenShell.tsx`) | Shipped | None |
 | 10A.x.5 | Esc on the result card returns focus to the first form field (`#screen-dob`) | Shipped | None |
 | 10A.x.6 | Backspace on empty country field deletes the residency row (`ResidencyPeriodRows.tsx`) | Shipped | None |
-| 10A.x.7 | "Rerun" button on the stale result card (instead of the spec's "rerun overlay") | Shipped | Update govops-015 §Acceptance to record the actual UX shape. |
+| 10A.x.7 | "Rerun" button on the stale result card (instead of the spec's "rerun overlay") | ✅ closed (2026-04-28) — govops-015 §Acceptance now records the inline-button UX shape with the rationale (keyboard-reachable in tab order, no absolute-positioning math). | None |
 | 10A.x.8 | Translatable 404 copy via `screen.unknown_jurisdiction` for unknown jurisdiction codes | Shipped | None |
 | 10A.x.9 | Hardcoded `HOWTO_URLS` per jurisdiction (real government URLs in `ScreenResult.tsx`) | Shipped — spec-compliant | Future: move to backend ConfigValue (`jurisdiction.<code>.howto_url`) once Phase 10C notification artefacts land. Track here, no immediate action. |
 | 10A.x.10 | Per-rule `detail` text rendered above citation in result rows | Shipped | None — already in the contract |
@@ -407,7 +407,7 @@ Originating spec: [docs/govops-019-case-event-timeline.md](docs/govops-019-case-
 | --- | --- | --- | --- |
 | 10D.x.1 | `EventTimeline` component renders one row per event in chronological order with type badge, payload summary, and a chip linking to the recommendation it triggered. | Shipped (2026-04-28) — present in `src/components/govops/cases/EventTimeline.tsx`, wired into `cases.$caseId.tsx`. | None |
 | 10D.x.2 | `NewEventForm` component (admin-gated `<Dialog>` with field set varying by `event_type`, react-hook-form + zod validation, error toasts on `4xx` / `5xx`). | Shipped (2026-04-28) — present in `src/components/govops/cases/NewEventForm.tsx`, wired into `cases.$caseId.tsx` via `<NewEventForm caseId={caseId} onCreated={handleEventCreated} />`. | None |
-| 10D.x.3 | Bonus: `PreviousDecisions` component renders the supersession chain as a stack of `<Collapsible>` sections — beyond the spec's "render the chip on each event" requirement. | Shipped (2026-04-28) — accepted on merit. The supersession chain is exactly the kind of audit-of-record affordance officers need; the collapsible stack is the right shape for it. | Update govops-019 §Acceptance to record `PreviousDecisions` as part of the shipped surface. |
+| 10D.x.3 | Bonus: `PreviousDecisions` component renders the supersession chain as a stack of `<Collapsible>` sections — beyond the spec's "render the chip on each event" requirement. | ✅ closed (2026-04-28) — govops-019 §"Supersession chain rendering" now records the named component (`src/components/govops/cases/PreviousDecisions.tsx`) as part of the shipped surface, with the rationale that a named component keeps the case-detail route readable. | None |
 | 10D.x.4 | 14 new i18n keys × 6 locales (`events.heading`, `events.type.*`, `events.summary.*`, `events.history.previous_decision`, `events.form.*`). | Shipped (2026-04-28) | None |
 
 ### Phase 8 — Lovable extras + admin federation surface (2026-04-28)

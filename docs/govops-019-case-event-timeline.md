@@ -131,6 +131,15 @@ type EventTimelineProps = {
       the chip scrolls to that event in the timeline (smooth scroll,
       respects `prefers-reduced-motion`).
 
+**Shipped (PLAN §12 10D.x.3)**: the supersession-chain affordance landed
+as a dedicated named component
+`src/components/govops/cases/PreviousDecisions.tsx` rather than being
+inlined in `cases.$caseId.tsx`. This is beyond the spec's "render the
+chip on each event" wording and was accepted on merit — the
+collapsible stack is the shape officers need for an audit-of-record
+view, and a named component keeps the case-detail route readable. The
+chip-back-to-event interaction works as specified above.
+
 ### `<NewEventForm>` component (new, admin-gated)
 
 Path: `src/components/govops/cases/NewEventForm.tsx`

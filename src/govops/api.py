@@ -991,46 +991,93 @@ def _jurisdiction_label(jurisdiction_id: str | None) -> str:
     return f"{pack.program_name} — {pack.jurisdiction.name}"
 
 
+_IMPACT_LIMIT_DEFAULT = 50
+_IMPACT_LIMIT_MAX = 200
+
+
 @app.get("/api/impact")
-def impact_by_citation(citation: str = ""):
+def impact_by_citation(
+    citation: str = "",
+    limit: int = _IMPACT_LIMIT_DEFAULT,
+    page: int = 1,
+):
     """Return ConfigValues referencing ``citation``, grouped by jurisdiction.
 
-    Phase 7 reverse-index endpoint. Empty / whitespace ``citation`` rejects with
-    400 so clients always send a meaningful query. Normalization (whitespace
-    collapse + case-insensitive match) lives in ``ConfigStore.find_by_citation``.
+    Phase 7 reverse-index endpoint with §12 7.x.1 pagination. Empty / whitespace
+    ``citation`` rejects with 400 so clients always send a meaningful query.
+    Normalization (whitespace collapse + case-insensitive match) lives in
+    ``ConfigStore.find_by_citation``.
+
+    Pagination contract:
+      - ``limit`` defaults to 50, floors at 1, caps at 200.
+      - ``page`` is 1-indexed, floors at 1.
+      - ``total`` and ``jurisdiction_count`` describe the full match set (so the
+        UI summary stays meaningful regardless of which page is shown).
+      - ``results`` only carries the sections that have values on this page;
+        sections with zero values on the page are omitted.
+      - ``page_count`` is ``ceil(total / limit)``, or ``0`` when ``total == 0``.
+      - Out-of-range pages return ``results=[]`` (not 404) so the UI can recover.
     """
     if not citation or not citation.strip():
         raise HTTPException(400, "citation query parameter is required and must be non-empty")
     normalized = " ".join(citation.split())
-    matches = config_store.find_by_citation(normalized)
 
+    effective_limit = max(1, min(_IMPACT_LIMIT_MAX, limit))
+    effective_page = max(1, page)
+
+    matches = config_store.find_by_citation(normalized)
+    total = len(matches)
+
+    # Group the FULL match set first so jurisdiction_count is stable across pages.
     groups: dict[str | None, list[ConfigValue]] = {}
     for cv in matches:
         scope: str | None = None if cv.jurisdiction_id in (None, "global") else cv.jurisdiction_id
         groups.setdefault(scope, []).append(cv)
 
-    results: list[dict[str, Any]] = []
+    jurisdiction_count = len(groups)
+    page_count = (total + effective_limit - 1) // effective_limit if total else 0
+
+    # Display order: Global first, then jurisdictions alphabetically. Build a
+    # flat list in display order, slice the page, then re-group preserving the
+    # same order so section ordering is stable.
+    ordered_jids: list[str | None] = []
     if None in groups:
-        results.append(
-            {
-                "jurisdiction_id": None,
-                "jurisdiction_label": _jurisdiction_label(None),
-                "values": groups[None],
-            }
-        )
-    for jid in sorted(k for k in groups if k is not None):
-        results.append(
-            {
-                "jurisdiction_id": jid,
-                "jurisdiction_label": _jurisdiction_label(jid),
-                "values": groups[jid],
-            }
-        )
+        ordered_jids.append(None)
+    ordered_jids.extend(sorted(k for k in groups if k is not None))
+
+    flat: list[tuple[str | None, ConfigValue]] = []
+    for jid in ordered_jids:
+        for cv in groups[jid]:
+            flat.append((jid, cv))
+
+    start = (effective_page - 1) * effective_limit
+    end = start + effective_limit
+    page_slice = flat[start:end]
+
+    page_groups: dict[str | None, list[ConfigValue]] = {}
+    page_order: list[str | None] = []
+    for jid, cv in page_slice:
+        if jid not in page_groups:
+            page_groups[jid] = []
+            page_order.append(jid)
+        page_groups[jid].append(cv)
+
+    results: list[dict[str, Any]] = [
+        {
+            "jurisdiction_id": jid,
+            "jurisdiction_label": _jurisdiction_label(jid),
+            "values": page_groups[jid],
+        }
+        for jid in page_order
+    ]
 
     return {
         "query": normalized,
-        "total": len(matches),
-        "jurisdiction_count": len(results),
+        "total": total,
+        "jurisdiction_count": jurisdiction_count,
+        "limit": effective_limit,
+        "page": effective_page,
+        "page_count": page_count,
         "results": results,
     }
 

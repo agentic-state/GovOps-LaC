@@ -49,7 +49,7 @@ transparency about which rules and citations were checked.
   - Missing-evidence list (if any), with friendly copy "Before applying you'll want to gather…"
   - "How to apply" panel — placeholder copy linking to a hypothetical program URL (driven by jurisdiction config; for now hardcoded per-jurisdiction)
   - Repeat-the-disclaimer block at the bottom: "This is decision support, not a decision."
-- [ ] Edit-and-resubmit: changing any form field invalidates the result card (greyed with a "rerun" overlay) until resubmitted; result is never silently stale
+- [ ] Edit-and-resubmit: changing any form field invalidates the result card; result is never silently stale. **Shipped UX (PLAN §12 10A.x.7, accepted on merit)**: the stale card greys out (`opacity-50`) and renders a "Rerun" button inline at the top-right of the card, instead of an absolutely-positioned overlay. The button issues the same `POST /api/screen` with the current form state. The overlay shape was specced first; the inline button is what landed because it's keyboard-reachable in tab order without focus-trapping a layered element, and easier to test without absolute-positioning math.
 - [ ] No `localStorage` / `sessionStorage` writes containing PII; all state is in-memory React state. The only browser storage allowed is the existing locale cookie
 - [ ] No analytics events that include any form-field values
 - [ ] The page works fully offline once loaded if the API is unreachable: the existing mock-fallback pattern in `src/lib/api.ts` returns a deterministic mock screen result so previews still demonstrate the UX (the mock result is clearly labelled as such with a "preview mode" badge)

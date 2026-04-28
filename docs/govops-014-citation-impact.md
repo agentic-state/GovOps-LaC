@@ -72,9 +72,12 @@ export interface ImpactResult {
 
 export interface ImpactResponse {
   query: string;                         // echoed back, normalized (trimmed, single-spaced)
-  total: number;                         // sum of values[].length across all sections
-  jurisdiction_count: number;
-  results: ImpactResult[];               // sorted: global first, then by jurisdiction_label asc
+  total: number;                         // total matches across the FULL set (not page-scoped)
+  jurisdiction_count: number;            // distinct jurisdictions across the FULL set (not page-scoped)
+  limit: number;                         // effective page size (default 50, floor 1, cap 200) — see PLAN §12 7.x.1
+  page: number;                          // 1-indexed page number, echoed back (floor 1)
+  page_count: number;                    // ceil(total / limit), or 0 when total === 0
+  results: ImpactResult[];               // sections containing values on THIS page; sorted: global first, then by jurisdiction_label asc
 }
 ```
 
@@ -219,7 +222,7 @@ function ImpactPage() {
 locales_required: [en, fr, pt-BR, es-MX, de, uk]
 rtl_mirroring: not_applicable
 copy_keys:
-  - impact.nav                          # nav label "Impact"
+  - nav.impact                          # nav label "Impact" — shipped under nav.* prefix to match sibling nav keys (was specced as impact.nav; renamed during 014 implementation, see PLAN §12 7.x.2)
   - impact.heading                      # "Citation impact"
   - impact.lede                         # one-line description
   - impact.search.placeholder           # "Paste a citation (e.g. OAS Act, s. 3(1))"
@@ -245,14 +248,21 @@ keyboard:
   - "Enter on a row navigates to /config/$key/$jurisdictionId"
   - "/ from anywhere on the page focuses the search input (only when not already in a text field)"
 aria_live: polite                       # for result-count summary
+aria_live_atomic: true                  # count summary re-announces in full on each query (PLAN §12 7.x.5 — shipped baseline above the spec minimum)
 reduced_motion: respect                 # skeleton shimmer respects prefers-reduced-motion
 landmarks:
   - "<section aria-labelledby='impact-heading'> wraps the page"
+  - "Result-count summary carries role='region' (PLAN §12 7.x.5)"
 list_semantics:
   - "Each ImpactSection is a <section aria-labelledby='impact-section-{id}'> with its own list of result rows"
   - "Result rows reuse govops-003's row semantics (Link inside <li>)"
 mark_element:
   - "<mark> highlights the matched citation substring; default browser styling overridden to use --surface-sunken"
+  - "Each <mark> carries an aria-label naming the matched substring (PLAN §12 7.x.5 — strict accessibility upgrade over the spec minimum)"
+error_banner:
+  - "role='alert' on the error banner so screen readers announce errors as they appear (PLAN §12 7.x.5)"
+form_submission:
+  - "<form onSubmit> wrapper around the search input bypasses the 250 ms debounce when the user presses Enter (PLAN §12 7.x.6)"
 ```
 
 provenance: hybrid
@@ -264,7 +274,7 @@ provenance: hybrid
 
 - Writing / editing values from this surface (use existing draft form)
 - CLI integration (`govops impact-of` ships in the same backend PR but is not a Lovable concern)
-- Server-side pagination — Phase 1 returns the full match set; revisit if a single citation matches >500 records
+- ~~Server-side pagination — Phase 1 returns the full match set; revisit if a single citation matches >500 records~~ **AMENDED 2026-04-28**: server-side pagination shipped via PLAN §12 7.x.1. `GET /api/impact` now accepts `limit` (default 50, floor 1, cap 200) and `page` (1-indexed, default 1), returns `limit` / `page` / `page_count` in `ImpactResponse`. `total` and `jurisdiction_count` describe the FULL match set so the summary string stays meaningful across pages; `results` carries only the sections containing values on the requested page; out-of-range pages return `results=[]` (not 404).
 - Saved / shareable impact reports (exportable view) — defer
 - Filtering by domain or value_type within the impact view (open-ended scope creep)
 - Cross-citation comparison (two queries side by side)
