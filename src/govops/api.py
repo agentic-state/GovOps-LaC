@@ -247,6 +247,7 @@ _JUR_PREFIX_TO_SUBSTRATE_ID = {
     "fr": "fr-cnav",
     "de": "de-drv",
     "ua": "ua-pfu",
+    "jp": "jp-koukinenkin",
 }
 
 
