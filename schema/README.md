@@ -103,16 +103,50 @@ values:
       ...
 ```
 
-## Resolution semantics
+## Resolution semantics — derived backwards from the end render
 
-A record is in effect for `(key, evaluation_date, jurisdiction_id, language?)` when:
+The cleanest way to understand what's needed is to start at the end (a citizen reads a rendered page) and trace backwards to the inputs that produced the result.
 
-- `effective_from <= evaluation_date`, AND
-- `effective_to is null` OR `evaluation_date < effective_to`, AND
-- `status == "approved"`, AND
-- the jurisdiction matches (or, for global records, the resolver falls back from a jurisdictional miss)
+**Step 1 — The end**: a citizen viewing a French page sees the string `"Profil du demandeur"`.
 
-Multiple records for the same key with overlapping windows resolve to the latest `effective_from`. Disciplined supersession (closing the prior record's `effective_to` to the new record's `effective_from`) keeps the windows non-overlapping.
+**Step 2 — How that string got there**: at SSR/render time, the i18n layer (`web/src/lib/i18n.ts` on the frontend, `src/govops/i18n.py` on the backend) was asked for the string for `ui.label.case.applicant_profile` in French.
+
+**Step 3 — What the i18n layer asked the substrate**: by convention, language is encoded as a **suffix in the key** for `domain="ui"` records. The i18n layer issues `resolve(key="ui.label.case.applicant_profile.fr", evaluation_date=now, jurisdiction_id="global")` and reads the returned record's `value`.
+
+**Step 4 — What the substrate did to answer**: the resolver scans approved records matching the key + jurisdiction, filters by the in-effect window, and returns the latest by `effective_from`.
+
+A record is **in effect** for `(key, evaluation_date, jurisdiction_id)` when all four hold:
+
+- `status == "approved"` — drafts, pending, and rejected records do not resolve
+- `effective_from <= evaluation_date`
+- `effective_to is null` OR `evaluation_date < effective_to`
+- jurisdiction matches — exact match wins; a jurisdictional miss falls back to global (`jurisdiction_id == null` or `"global"`). **No fallback in the other direction**: a global record won't be returned to a jurisdiction-specific query unless no jurisdictional record matches.
+
+If multiple records satisfy the window (overlapping supersession), the resolver returns the latest by `effective_from`.
+
+### What the substrate does **not** do
+
+These responsibilities live in the *caller*, not the resolver:
+
+| Concern | Where it lives | Why |
+| --- | --- | --- |
+| Language fallback (`fr` → `en` if FR missing) | i18n layer ([`src/govops/i18n.py`](../src/govops/i18n.py), [`web/src/lib/i18n.ts`](../web/src/lib/i18n.ts)) | Language is a *key suffix* convention for UI labels; the resolver treats `ui.label.foo.fr` and `ui.label.foo.en` as completely different keys |
+| Default-language preference per request | i18n layer | The user's locale is a request-level concern, not a substrate-level one |
+| Citation back-trace | Caller renders the citation field; substrate just stores it | Provenance is data, not behaviour |
+| Reverse impact (which rules cite this section?) | Phase 7 reverse-index endpoint | Different access pattern; substrate's primary index is by key |
+
+This separation is deliberate: the substrate is dumb-on-purpose. A small, predictable resolver beats a clever one when audit-reproducibility is the contract.
+
+### Disciplined supersession
+
+Adding a new value for an existing key:
+
+1. **Close the prior record** by setting its `effective_to` to the new record's `effective_from`.
+2. **Insert a new record** with the new value, citation, rationale, and `effective_from`. Use `supersedes` to point at the prior id.
+
+This keeps the in-effect windows non-overlapping — only one record is in effect for a given `(key, jurisdiction_id, evaluation_date)` tuple. The `ConfigStore.supersede()` method automates the close+insert atomically.
+
+**Don't edit the prior record's `value` in place.** The substrate keeps both records so a case evaluated last year remains reproducible against the rules in force then.
 
 ## Versioning policy
 
