@@ -161,13 +161,135 @@ def dispatch(argv: list[str] | None = None) -> int:
         help="Emit JSON instead of human-readable output",
     )
 
+    fetch_p = sub.add_parser(
+        "fetch",
+        help="Fetch a federated lawcode pack (Phase 8 / ADR-009)",
+    )
+    fetch_p.add_argument("publisher_id", help="Publisher id from lawcode/REGISTRY.yaml")
+    fetch_p.add_argument(
+        "--registry",
+        default=None,
+        help="Override path to REGISTRY.yaml (default: lawcode/REGISTRY.yaml)",
+    )
+    fetch_p.add_argument(
+        "--trusted-keys",
+        default=None,
+        help="Override path to trusted_keys.yaml (default: lawcode/global/trusted_keys.yaml)",
+    )
+    fetch_p.add_argument(
+        "--target-dir",
+        default=None,
+        help="Where to write the pack (default: lawcode/.federated)",
+    )
+    fetch_p.add_argument(
+        "--allow-unsigned",
+        action="store_true",
+        help="Accept unsigned manifests; records will be stamped source_signed=False",
+    )
+    fetch_p.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Verify the fetch would succeed; do not write any files",
+    )
+
     args = parser.parse_args(argv)
     if args.command == "demo":
         return _run_demo(args.host, args.port, args.reload)
     if args.command == "impact-of":
         return _run_impact(args.citation, args.db, args.json_out)
+    if args.command == "fetch":
+        return _run_fetch(
+            publisher_id=args.publisher_id,
+            registry_path=args.registry,
+            trusted_keys_path=args.trusted_keys,
+            target_dir=args.target_dir,
+            allow_unsigned=args.allow_unsigned,
+            dry_run=args.dry_run,
+        )
     parser.error(f"unknown command: {args.command}")
     return 2
+
+
+def _run_fetch(
+    *,
+    publisher_id: str,
+    registry_path: str | None,
+    trusted_keys_path: str | None,
+    target_dir: str | None,
+    allow_unsigned: bool,
+    dry_run: bool,
+) -> int:
+    """Handler for ``govops fetch <publisher_id>``."""
+    from pathlib import Path
+
+    import yaml
+
+    from govops.federation import (
+        FederationError,
+        fetch_pack,
+        http_file_loader,
+        http_manifest_loader,
+    )
+
+    repo_root = Path(__file__).resolve().parent.parent.parent
+    reg_path = Path(registry_path) if registry_path else repo_root / "lawcode" / "REGISTRY.yaml"
+    keys_path = (
+        Path(trusted_keys_path) if trusted_keys_path
+        else repo_root / "lawcode" / "global" / "trusted_keys.yaml"
+    )
+    out_dir = Path(target_dir) if target_dir else repo_root / "lawcode" / ".federated"
+
+    if not reg_path.exists():
+        print(f"error: registry not found at {reg_path}", file=sys.stderr)
+        return 2
+    registry_doc = yaml.safe_load(reg_path.read_text(encoding="utf-8")) or {}
+    registry = {
+        e["publisher_id"]: e
+        for e in registry_doc.get("values", [])
+        if isinstance(e, dict) and "publisher_id" in e
+    }
+
+    trusted_keys: dict[str, str] = {}
+    if keys_path.exists():
+        keys_doc = yaml.safe_load(keys_path.read_text(encoding="utf-8")) or {}
+        defaults = keys_doc.get("defaults") or {}
+        for entry in keys_doc.get("values", []) or []:
+            merged = {**defaults, **entry}
+            key_field = merged.get("key", "")
+            value = merged.get("value") or {}
+            # Trust key shape: global.federation.trusted_key.<publisher_id>
+            if key_field.startswith("global.federation.trusted_key."):
+                pid = key_field.rsplit(".", 1)[-1]
+                pk = value.get("public_key_b64") if isinstance(value, dict) else None
+                if pk:
+                    trusted_keys[pid] = pk
+
+    try:
+        result = fetch_pack(
+            publisher_id,
+            registry=registry,
+            trusted_keys=trusted_keys,
+            manifest_loader=http_manifest_loader,
+            file_loader=http_file_loader,
+            target_dir=out_dir,
+            allow_unsigned=allow_unsigned,
+            dry_run=dry_run,
+        )
+    except FederationError as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        return 1
+
+    print()
+    print(f"  Fetched: {result.publisher_id} / {result.pack_name} v{result.version}")
+    print(f"  Signed:  {result.signed}")
+    print(f"  Files:   {len(result.files_written)}")
+    if dry_run:
+        print(f"  (dry-run; no files written)")
+    else:
+        for f in result.files_written:
+            print(f"    {f}")
+    print()
+    return 0
 
 
 if __name__ == "__main__":

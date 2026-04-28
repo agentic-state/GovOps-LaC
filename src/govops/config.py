@@ -144,6 +144,17 @@ class ConfigValue(SQLModel, table=True):
         default_factory=_utcnow,
         sa_column=Column(DateTime(timezone=True), nullable=False),
     )
+    # Phase 8 / ADR-009 — federation provenance. All four are loader-set;
+    # `None` everywhere means the record originated from local YAML.
+    source_publisher: Optional[str] = Field(default=None, index=True)
+    source_repo: Optional[str] = None
+    source_commit: Optional[str] = None
+    fetched_at: Optional[datetime] = Field(
+        default=None, sa_column=Column(DateTime(timezone=True), nullable=True)
+    )
+    # Tri-state: True = signed manifest verified; False = --allow-unsigned;
+    # None = local origin (never went through federation).
+    source_signed: Optional[bool] = None
 
 
 class ApprovalAuditEntry(SQLModel, table=True):
@@ -516,13 +527,24 @@ class ConfigStore:
 
     # --- YAML loader (Phase 3 / ADR-003 / ADR-010 hydration) ---
 
-    def load_from_yaml(self, path: "str | os.PathLike[str]") -> int:
+    def load_from_yaml(
+        self,
+        path: "str | os.PathLike[str]",
+        *,
+        provenance: Optional[dict] = None,
+    ) -> int:
         """Load ConfigValue records from a YAML file or directory tree.
 
         Per ADR-010 the loader is **idempotent**: a record is identified by
         ``(key, jurisdiction_id, effective_from, language)`` and is skipped if
         a row with the same natural key already exists. This means YAML never
         silently overwrites a runtime-edited row.
+
+        Per ADR-009, ``provenance`` (when supplied) stamps every loaded
+        record with federation metadata: ``source_publisher``,
+        ``source_repo``, ``source_commit``, ``fetched_at``,
+        ``source_signed``. ``provenance=None`` (the default) means
+        local-origin records — all five fields stay None.
 
         Returns the count of records inserted (skipped duplicates do not count).
         """
@@ -554,6 +576,12 @@ class ConfigStore:
                     )
                 merged = {**defaults, **raw}
                 cv = self._build_config_value(merged, source_file=fp)
+                if provenance is not None:
+                    cv.source_publisher = provenance.get("source_publisher")
+                    cv.source_repo = provenance.get("source_repo")
+                    cv.source_commit = provenance.get("source_commit")
+                    cv.fetched_at = provenance.get("fetched_at")
+                    cv.source_signed = provenance.get("source_signed")
                 if self._exists_natural_key(cv):
                     continue
                 self.put(cv)

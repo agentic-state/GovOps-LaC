@@ -180,7 +180,15 @@ def _resolve_files(arg_file: str | None) -> list[Path]:
         if not path.exists():
             raise FileNotFoundError(f"file not found: {path}")
         return [path]
-    return sorted(LAWCODE_DIR.rglob("*.yaml")) + sorted(LAWCODE_DIR.rglob("*.yml"))
+    # Phase 8 / ADR-009 — REGISTRY.yaml has its own shape (federation
+    # registry entries, not ConfigValue records) so it's excluded from
+    # the substrate validator. The CLI parses it directly.
+    excluded_names = {"REGISTRY.yaml"}
+    return [
+        p
+        for p in (sorted(LAWCODE_DIR.rglob("*.yaml")) + sorted(LAWCODE_DIR.rglob("*.yml")))
+        if p.name not in excluded_names
+    ]
 
 
 def _heartbeat(
