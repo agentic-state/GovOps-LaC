@@ -24,7 +24,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 from govops.api import app, config_store
-from govops.config import ApprovalStatus, ConfigValue, ValueType
+from govops.config import ApprovalStatus
 
 
 @pytest.fixture
