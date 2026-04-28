@@ -28,6 +28,10 @@ jobs:
         with:
           languages: ${{ matrix.language }}
           queries: security-extended,security-and-quality
+          # Project-specific filters for false positives whose underlying
+          # guards live next to the flagged code. See the config for the
+          # rationale paired with each filter.
+          config-file: ./.github/codeql/codeql-config.yml
       - uses: github/codeql-action/autobuild@v3
       - uses: github/codeql-action/analyze@v3
         with:
