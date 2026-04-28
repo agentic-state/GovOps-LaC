@@ -47,3 +47,13 @@ values:
   supersedes: 'ca.calc.oas.base_monthly_amount@1900-01-01'
   citation: 'Old Age Security Act, R.S.C. 1985, c. O-9, s. 7.1 (CPI indexation)'
   rationale: 'Quarterly cost-of-living adjustment effective 2026-01-01. Approximate +1.07% lift over 2025-Q4 reflecting CPI movement; the exact figure is illustrative — the load-bearing point is that the formula structure does not change, only the coefficient. A case evaluated 2025-12-31 sees 727.67; the same case re-evaluated 2026-01-01 (or later) sees 735.45. Configure-without-deploy in action.'
+- key: ca.calc.oas.currency
+  value: 'CAD'
+  value_type: string
+  citation: 'Old Age Security Act, R.S.C. 1985, c. O-9, s. 7 (currency)'
+  rationale: 'Currency label for OAS benefit amount rendering. Lives in the substrate (not as an inline literal in seed.py) so the Phase 2 regression gate stays honest: every value the engine surfaces lives in lawcode/.'
+- key: ca.calc.oas.period
+  value: 'monthly'
+  value_type: string
+  citation: 'Old Age Security Act, R.S.C. 1985, c. O-9, s. 7 (monthly cadence)'
+  rationale: 'Period label for OAS benefit amount rendering. Same reasoning as currency: structural labels also live in the substrate.'
