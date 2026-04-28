@@ -273,11 +273,11 @@ Tests must stay green at every phase exit. CI matrix stays at Python 3.10/3.11/3
 - [x] 3. Schema published, versioned, validated in CI *(Phase 5 — `schema/configvalue-v1.0.json`, `schema/lawcode-v1.0.json`, CI gate)*
 - [x] 4. Statute changes are temporal, not destructive; historical evaluations reproducible *(`ConfigStore.resolve()` + supersession + tests)*
 - [x] 5. Citation impact queryable across all 6 jurisdictions in one command *(Phase 7 — `GET /api/impact?citation=…` + `govops impact-of`)*
-- [ ] 6. Encoding pipeline produces commit-ready YAML, not Python *(encoder commits to ConfigStore; YAML emission still pending)*
+- [x] 6. Encoding pipeline produces commit-ready YAML, not Python *(closed 2026-04-28 — `src/govops/yaml_emitter.py` + `POST /api/encode/batches/{id}/emit-yaml`. Approved batches emit `lawcode/.proposed/<batch_id>/<prefix>-rules.yaml` that passes the schema gate and round-trips through `ConfigStore.load_from_yaml`.)*
 - [x] 7. Prompts are dated configuration; the prompt that ran on date D is reconstructable *(Phase 4 — `lawcode/global/prompts.yaml`, ADR-008 dual approval)*
-- [ ] 8. A second repository can federate its own jurisdiction into a GovOps deployment *(Phase 8)*
-- [ ] 9. Lovable UI replaces all Jinja templates and adds the configure-without-deploy admin surface *(Phase 6 — surfaces shipped; full UI-driven exit-line E2E proof pending)*
-- [ ] 10. Pipeline runs end-to-end from self-screening through eligibility, calculation, notification, life-event reassessment, in all 6 jurisdictions *(10A backend done; 10B–10D pending)*
+- [x] 8. A second repository can federate its own jurisdiction into a GovOps deployment *(Phase 8 — ADR-009, `src/govops/federation.py`, `govops fetch <publisher>` CLI, admin federation HTTP surface, signed-pack pipeline with Ed25519)*
+- [x] 9. Lovable UI replaces all Jinja templates and adds the configure-without-deploy admin surface *(closed 2026-04-28 — surfaces shipped in user-insights-hub; admin-flow E2E proves substrate boundary; configure-without-deploy E2E proves citizen-side temporal correctness via the dated `ca.calc.oas.base_monthly_amount` supersession; engine's formula `ref` resolution is date-aware per ADR-013 §"the seam".)*
+- [x] 10. Pipeline runs end-to-end from self-screening through eligibility, calculation, notification, life-event reassessment, in all 6 jurisdictions *(closed 2026-04-28 — 10A self-screening, 10B benefit_amount via formula AST, 10C decision notice with sha256 audit, 10D event-driven reassessment with supersession chain. CA-OAS fully wired; the other 5 share the same generic notice template via per-jurisdiction supersession when translators need divergent copy.)*
 - [x] 11. Repo's public framing names "Law as Code" explicitly and maps to SPRIND's 5 foundational elements *(Phase 9 — [`docs/design/LAW-AS-CODE.md`](docs/design/LAW-AS-CODE.md))*
 
 ---

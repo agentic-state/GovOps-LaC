@@ -18,7 +18,7 @@ Four possible outcomes:
 
 from __future__ import annotations
 
-from datetime import date
+from datetime import date, datetime, timezone
 
 from typing import Callable, Optional
 
@@ -447,9 +447,31 @@ class OASEngine:
                 raise FormulaError(f"unknown formula field: {name}")
             return fields[name]
 
+        # Date-aware ref resolution (ADR-013 §"the seam"): when the case's
+        # evaluation_date is set, the formula's `ref` lookups resolve against
+        # the substrate as it stood on that date — so a 2025 case re-evaluated
+        # in 2026 still picks up 2025's coefficient. Tests can inject a
+        # callable directly via the constructor's `ref_resolver` for hermetic
+        # coverage; the default path threads the date through resolve_param.
+        eval_dt: Any = None
+        if self.evaluation_date is not None:
+            eval_dt = datetime(
+                self.evaluation_date.year,
+                self.evaluation_date.month,
+                self.evaluation_date.day,
+                tzinfo=timezone.utc,
+            )
+
+        if self._ref_resolver is resolve_param:
+            def resolve_ref(key: str) -> float | int:
+                return resolve_param(key, evaluation_date=eval_dt)
+        else:
+            # Test-injected resolver: pass through unchanged.
+            resolve_ref = self._ref_resolver
+
         value, trace = evaluate_formula(
             formula,
-            resolve_ref=self._ref_resolver,
+            resolve_ref=resolve_ref,
             resolve_field=resolve_field,
         )
 

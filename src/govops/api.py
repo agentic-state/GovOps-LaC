@@ -425,6 +425,46 @@ def get_audit(case_id: str):
 
 
 # ---------------------------------------------------------------------------
+# Encoder: commit-ready YAML emission (PLAN §8 success criterion #6)
+# Closes the loop the encoder pipeline opened in Phase 4: an approval
+# becomes a YAML file under lawcode/.proposed/<batch_id>/ that a
+# contributor reviews and PRs to the canonical lawcode/<jur>/config/.
+# ---------------------------------------------------------------------------
+
+
+@app.post("/api/encode/batches/{batch_id}/emit-yaml")
+def encode_emit_yaml(batch_id: str):
+    """Emit approved rules from an encoding batch as commit-ready YAML.
+
+    Returns the relative path under ``lawcode/.proposed/<batch_id>/``
+    plus the rendered file contents — so the caller can show a diff
+    preview without re-reading the file.
+
+    Errors:
+      - 404 if the batch doesn't exist
+      - 400 if the batch has no approved rules, or the jurisdiction is
+        unknown (``EmissionError`` from the emitter)
+    """
+    from govops.yaml_emitter import EmissionError, emit_yaml_for_batch
+
+    batch = encoding_store.batches.get(batch_id)
+    if not batch:
+        raise HTTPException(404, f"batch {batch_id!r} not found")
+
+    target_root = LAWCODE_DIR.parent  # repo root — emitter writes lawcode/.proposed/
+    try:
+        out_path = emit_yaml_for_batch(batch, target_root)
+    except EmissionError as exc:
+        raise HTTPException(400, str(exc)) from exc
+
+    return {
+        "batch_id": batch_id,
+        "path": str(out_path.relative_to(target_root).as_posix()),
+        "content": out_path.read_text(encoding="utf-8"),
+    }
+
+
+# ---------------------------------------------------------------------------
 # Admin federation surface (Phase 8 / ADR-009)
 # Read-mostly endpoints powering /admin/federation per govops-020. The
 # trust-decision authoring stays as a YAML PR per ADR-009; these endpoints

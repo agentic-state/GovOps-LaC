@@ -249,10 +249,16 @@ class TestScreenBenefitAmount:
         assert resp.benefit_amount is None
 
     def test_full_pension_pays_full_base_amount(self):
-        """50 years CA residency exceeds the 40-year cap → full base monthly."""
+        """50 years CA residency exceeds the 40-year cap → full base monthly.
+
+        Pinned evaluation_date 2025-06-01 — pre-supersession resolves to
+        the original 2025-Q4 base ($727.67), demonstrating that the
+        engine honours the case's evaluation_date when resolving formula
+        coefficients (per ADR-013's named seam).
+        """
         resp = run_screen(_full_eligible_ca_request())
         assert resp.benefit_amount is not None
-        assert resp.benefit_amount.value == 735.45
+        assert resp.benefit_amount.value == 727.67
 
     def test_partial_pension_prorates_amount(self):
         """A 33-year CA resident sees ~33/40 of base, not zero, not full."""
@@ -291,6 +297,7 @@ class TestScreenBenefitAmount:
         assert "s. 3(2)(b)" in joined
 
     def test_benefit_amount_serializes_in_api_response(self, client):
+        # Same fixture (2025-06-01) — pre-supersession value applies.
         payload = _full_eligible_ca_request().model_dump(mode="json")
         r = client.post("/api/screen", json=payload)
         assert r.status_code == 200
@@ -298,7 +305,7 @@ class TestScreenBenefitAmount:
         assert "benefit_amount" in body
         assert body["benefit_amount"] is not None
         ba = body["benefit_amount"]
-        assert ba["value"] == 735.45
+        assert ba["value"] == 727.67
         assert ba["currency"] == "CAD"
         assert ba["period"] == "monthly"
         assert isinstance(ba["formula_trace"], list)

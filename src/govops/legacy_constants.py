@@ -59,7 +59,12 @@ _JURISDICTION_PREFIX_TO_ID = {
 _RP_MISSING: Any = object()
 
 
-def resolve_param(key: str, default: Any = _RP_MISSING) -> Any:
+def resolve_param(
+    key: str,
+    default: Any = _RP_MISSING,
+    *,
+    evaluation_date: Any = None,
+) -> Any:
     """Resolve a parameter from the substrate.
 
     Extracts the jurisdiction code from the first dotted segment of the key
@@ -70,11 +75,20 @@ def resolve_param(key: str, default: Any = _RP_MISSING) -> Any:
     raises ``ConfigKeyNotMigrated`` in strict mode if the key is unknown.
     With an explicit ``default``, returns it instead — useful for optional
     lookups (e.g. translation fallbacks) that should never raise.
+
+    Optional ``evaluation_date`` (datetime) is propagated to the substrate's
+    date-aware resolver — this is the seam ADR-013 named for config-time-
+    travel: a calc-rule formula evaluated against a 2025 case can pick up
+    the 2025 coefficient even when 2026 has superseded it. Module-import
+    callers (seed.py, jurisdictions.py) keep passing ``None`` and resolve
+    against "now"; the engine's calculate path threads the case's
+    evaluation_date through.
     """
     prefix = key.split(".", 1)[0]
     jurisdiction_id = _JURISDICTION_PREFIX_TO_ID.get(prefix)
+    kwargs: dict[str, Any] = {"jurisdiction_id": jurisdiction_id}
+    if evaluation_date is not None:
+        kwargs["evaluation_date"] = evaluation_date
     if default is _RP_MISSING:
-        return _resolver.resolve_value(key, jurisdiction_id=jurisdiction_id).value
-    return _resolver.resolve_value(
-        key, jurisdiction_id=jurisdiction_id, default=default
-    ).value
+        return _resolver.resolve_value(key, **kwargs).value
+    return _resolver.resolve_value(key, default=default, **kwargs).value

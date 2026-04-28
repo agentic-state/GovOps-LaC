@@ -443,6 +443,39 @@ class TestBenefitAmount:
         assert "s. 7" in joined
         assert "s. 3(2)(b)" in joined
 
+    def test_pre_supersession_evaluation_resolves_old_base_amount(self):
+        """Configure-without-deploy E2E proof at the unit level (PLAN §8 #9).
+
+        With the 2026-01-01 supersession of ``ca.calc.oas.base_monthly_amount``
+        (727.67 → 735.45) in lawcode/, evaluating the same case twice with
+        different evaluation_dates must produce the two different dollar
+        amounts. The engine's formula `ref` resolution is date-aware as of
+        ADR-013 §"the seam".
+        """
+        case = _make_case(
+            dob=date(1955, 1, 1),
+            residency_periods=[
+                ResidencyPeriod(country="Canada", start_date=date(1955, 1, 1)),
+            ],
+            evidence_items=[
+                EvidenceItem(evidence_type="birth_certificate", provided=True),
+                EvidenceItem(evidence_type="tax_record", provided=True),
+            ],
+        )
+        engine_pre = _make_engine(eval_date=date(2025, 6, 1))
+        rec_pre, _ = engine_pre.evaluate(case)
+        assert rec_pre.benefit_amount is not None
+        assert rec_pre.benefit_amount.value == 727.67
+
+        engine_post = _make_engine(eval_date=date(2026, 6, 1))
+        rec_post, _ = engine_post.evaluate(case)
+        assert rec_post.benefit_amount is not None
+        assert rec_post.benefit_amount.value == 735.45
+
+        # Same case object, same engine logic, different dollar figures —
+        # because the substrate's dated supersession is honoured.
+        assert rec_pre.benefit_amount.value != rec_post.benefit_amount.value
+
     def test_calc_rule_does_not_gate_eligibility(self):
         """Adding a CALCULATION rule must not flip an eligible case to NOT_APPLICABLE."""
         case = _make_case(

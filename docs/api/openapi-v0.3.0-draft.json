@@ -375,6 +375,44 @@
         }
       }
     },
+    "/api/encode/batches/{batch_id}/emit-yaml": {
+      "post": {
+        "summary": "Encode Emit Yaml",
+        "description": "Emit approved rules from an encoding batch as commit-ready YAML.\n\nReturns the relative path under ``lawcode/.proposed/<batch_id>/``\nplus the rendered file contents — so the caller can show a diff\npreview without re-reading the file.\n\nErrors:\n  - 404 if the batch doesn't exist\n  - 400 if the batch has no approved rules, or the jurisdiction is\n    unknown (``EmissionError`` from the emitter)",
+        "operationId": "encode_emit_yaml_api_encode_batches__batch_id__emit_yaml_post",
+        "parameters": [
+          {
+            "name": "batch_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Batch Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/admin/federation/registry": {
       "get": {
         "summary": "Admin Federation Registry",

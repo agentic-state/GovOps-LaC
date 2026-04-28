@@ -287,7 +287,10 @@ class TestNoticeEndpoint:
         assert r.headers["content-type"].startswith("text/html")
         body = r.text
         assert "<!DOCTYPE html>" in body
-        assert "735.45" in body
+        # evaluation_date 2025-06-01 → pre-supersession base ($727.67),
+        # demonstrating ADR-013 §"the seam" — formula coefficients
+        # resolve against the substrate as it stood on the case date.
+        assert "727.67" in body
         assert "X-Notice-Sha256".lower() in [h.lower() for h in r.headers.keys()]
 
     def test_post_screen_notice_does_not_persist_case(self, client):
