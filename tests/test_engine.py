@@ -337,4 +337,131 @@ class TestResidencyCalculation:
         rec, _ = engine.evaluate(case)
         # 15 years (1980-1995) + 26 years (2000-2026) = ~41 years -> full pension
         assert rec.outcome == DecisionOutcome.ELIGIBLE
+
+
+# ---------------------------------------------------------------------------
+# Calculation rule (Phase 10B / ADR-011) — benefit_amount on the recommendation
+# ---------------------------------------------------------------------------
+
+class TestBenefitAmount:
+    """End-to-end coverage that the calc rule fires for ELIGIBLE cases.
+
+    The formula in seed.py is:
+        base_monthly_amount × (eligible_years_oas / 40)
+    where ``base_monthly_amount`` resolves to a YAML ConfigValue
+    (727.67 today) and ``eligible_years_oas`` is the same integer-floored,
+    bounded value the partial-ratio uses. The displayed ratio (e.g.
+    "33/40") and the dollar amount must always agree about the same
+    statutory clause.
+    """
+
+    def test_full_pension_pays_full_base(self):
+        case = _make_case(
+            dob=date(1955, 1, 1),
+            residency_periods=[
+                ResidencyPeriod(country="Canada", start_date=date(1955, 1, 1)),
+            ],
+            evidence_items=[
+                EvidenceItem(evidence_type="birth_certificate", provided=True),
+                EvidenceItem(evidence_type="tax_record", provided=True),
+            ],
+        )
+        engine = _make_engine()
+        rec, _ = engine.evaluate(case)
+        assert rec.outcome == DecisionOutcome.ELIGIBLE
+        assert rec.pension_type == "full"
+        assert rec.benefit_amount is not None
+        assert rec.benefit_amount.value == 727.67
+        assert rec.benefit_amount.currency == "CAD"
+        assert rec.benefit_amount.period == "monthly"
+
+    def test_partial_pension_prorates(self):
+        """33 years residency → 33/40 ratio → 33/40 of base."""
+        case = _make_case(
+            dob=date(1958, 1, 1),
+            legal_status="permanent_resident",
+            residency_periods=[
+                ResidencyPeriod(country="Canada", start_date=date(1993, 1, 1)),
+            ],
+            evidence_items=[
+                EvidenceItem(evidence_type="birth_certificate", provided=True),
+                EvidenceItem(evidence_type="tax_record", provided=True),
+            ],
+        )
+        engine = _make_engine()
+        rec, _ = engine.evaluate(case)
+        assert rec.outcome == DecisionOutcome.ELIGIBLE
+        assert rec.pension_type == "partial"
+        assert rec.partial_ratio == "33/40"
+        assert rec.benefit_amount is not None
+        # Floats — round to 2dp the same way engine.calculate does.
+        assert rec.benefit_amount.value == round(727.67 * (33.0 / 40.0), 2)
+
+    def test_ineligible_case_has_no_benefit_amount(self):
+        """Under-65 applicant is INELIGIBLE; no benefit_amount should appear."""
+        case = _make_case(
+            dob=date(2000, 1, 1),
+            residency_periods=[
+                ResidencyPeriod(country="Canada", start_date=date(2018, 1, 1)),
+            ],
+            evidence_items=[
+                EvidenceItem(evidence_type="birth_certificate", provided=True),
+                EvidenceItem(evidence_type="tax_record", provided=True),
+            ],
+        )
+        engine = _make_engine()
+        rec, _ = engine.evaluate(case)
+        assert rec.outcome == DecisionOutcome.INELIGIBLE
+        assert rec.benefit_amount is None
+
+    def test_formula_trace_carries_per_node_citations(self):
+        """The trace must let an auditor reproduce the dollar amount step by step."""
+        case = _make_case(
+            dob=date(1958, 1, 1),
+            legal_status="permanent_resident",
+            residency_periods=[
+                ResidencyPeriod(country="Canada", start_date=date(1993, 1, 1)),
+            ],
+            evidence_items=[
+                EvidenceItem(evidence_type="birth_certificate", provided=True),
+                EvidenceItem(evidence_type="tax_record", provided=True),
+            ],
+        )
+        engine = _make_engine()
+        rec, _ = engine.evaluate(case)
+        ba = rec.benefit_amount
+        assert ba is not None
+        # The trace records every node visited in walk order.
+        ops = [step["op"] for step in ba.formula_trace]
+        assert "ref" in ops          # base_monthly_amount lookup
+        assert "field" in ops        # eligible_years_oas
+        assert "const" in ops        # the 40 divisor
+        assert "divide" in ops
+        assert "multiply" in ops
+        # Each citation surfaces at least once in the dedup'd list.
+        joined = " | ".join(ba.citations)
+        assert "s. 7" in joined
+        assert "s. 3(2)(b)" in joined
+
+    def test_calc_rule_does_not_gate_eligibility(self):
+        """Adding a CALCULATION rule must not flip an eligible case to NOT_APPLICABLE."""
+        case = _make_case(
+            dob=date(1955, 1, 1),
+            residency_periods=[
+                ResidencyPeriod(country="Canada", start_date=date(1955, 1, 1)),
+            ],
+            evidence_items=[
+                EvidenceItem(evidence_type="birth_certificate", provided=True),
+                EvidenceItem(evidence_type="tax_record", provided=True),
+            ],
+        )
+        engine = _make_engine()
+        rec, _ = engine.evaluate(case)
+        # The calc rule appears in evaluations as NOT_APPLICABLE — recorded
+        # in the audit trail, not gating the outcome.
+        calc_evals = [e for e in rec.rule_evaluations if e.rule_id == "rule-calc-oas-amount"]
+        assert len(calc_evals) == 1
+        assert calc_evals[0].outcome == RuleOutcome.NOT_APPLICABLE
+        # Outcome is still ELIGIBLE despite the NOT_APPLICABLE entry.
+        assert rec.outcome == DecisionOutcome.ELIGIBLE
         assert rec.pension_type == "full"

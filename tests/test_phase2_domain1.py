@@ -14,6 +14,7 @@ import pytest
 from govops.config import LEGACY_CONSTANTS, ConfigKeyNotMigrated, ResolutionSource
 from govops.jurisdictions import JURISDICTION_REGISTRY
 from govops.legacy_constants import _JURISDICTION_PREFIX_TO_ID, _resolver
+from govops.models import RuleType
 
 
 # Every rule.id maps to a (jurisdiction, slug) used to compute its key path.
@@ -25,6 +26,7 @@ RULE_KEY_MAP = {
     "rule-residency-pension-type": ("ca", "residency-pension-type"),
     "rule-legal-status": ("ca", "legal-status"),
     "rule-evidence-age": ("ca", "evidence-age"),
+    "rule-calc-oas-amount": ("ca", "calc-oas-amount"),  # Phase 10B calc rule
     # br
     "rule-br-age": ("br", "age"),
     "rule-br-contribution": ("br", "contribution"),
@@ -74,10 +76,19 @@ def test_every_seeded_rule_id_is_in_the_key_map():
 
 def test_every_rule_parameter_resolves_from_substrate():
     """Walk every (rule, parameter) pair across every jurisdiction and confirm
-    the substrate (loaded from lawcode/) holds it."""
+    the substrate (loaded from lawcode/) holds it.
+
+    CALCULATION rules (ADR-011) carry structural parameters — a formula AST,
+    a currency label, a period label — not flat coefficients. Their
+    substrate-resolved values live inside the formula's ``ref`` nodes (e.g.
+    ``ca.calc.oas.base_monthly_amount``), exercised by the formula walker
+    tests, not by this flat-key sweep.
+    """
     seen = 0
     for pack in JURISDICTION_REGISTRY.values():
         for rule in pack.rules:
+            if rule.rule_type == RuleType.CALCULATION:
+                continue
             jur, slug = RULE_KEY_MAP[rule.id]
             for param_name in rule.parameters.keys():
                 key = f"{jur}.rule.{slug}.{param_name}"
@@ -92,13 +103,18 @@ def test_every_rule_parameter_resolves_from_substrate():
 
 def test_strict_mode_passes_for_seeded_rules(monkeypatch):
     """With AIA_CONFIG_STRICT=1, re-resolving every key via the configured
-    registry must not raise — proves Domain 1 migration left no holes."""
+    registry must not raise — proves Domain 1 migration left no holes.
+
+    CALCULATION rules are skipped: see ``test_every_rule_parameter_resolves_from_substrate``.
+    """
     monkeypatch.setenv("AIA_CONFIG_STRICT", "1")
     from govops.config import ConfigStore
 
     store = ConfigStore()
     for pack in JURISDICTION_REGISTRY.values():
         for rule in pack.rules:
+            if rule.rule_type == RuleType.CALCULATION:
+                continue
             jur, slug = RULE_KEY_MAP[rule.id]
             for param_name in rule.parameters.keys():
                 key = f"{jur}.rule.{slug}.{param_name}"
@@ -113,9 +129,14 @@ def test_strict_mode_passes_for_seeded_rules(monkeypatch):
 def test_seeded_parameter_values_match_substrate():
     """The runtime LegalRule.parameters dict must contain the same value the
     substrate holds — proves resolve_param() actually wired through the YAML
-    rather than baking inline literals at import time."""
+    rather than baking inline literals at import time.
+
+    CALCULATION rules are skipped: see ``test_every_rule_parameter_resolves_from_substrate``.
+    """
     for pack in JURISDICTION_REGISTRY.values():
         for rule in pack.rules:
+            if rule.rule_type == RuleType.CALCULATION:
+                continue
             jur, slug = RULE_KEY_MAP[rule.id]
             jurisdiction_id = _JURISDICTION_PREFIX_TO_ID[jur]
             for param_name, runtime_value in rule.parameters.items():
@@ -244,13 +265,18 @@ def test_t_returns_key_for_unknown_key():
 
 
 def test_substrate_serves_seeded_rule_keys():
-    """Every key the engine consumes resolves from substrate, not LEGACY."""
+    """Every key the engine consumes resolves from substrate, not LEGACY.
+
+    CALCULATION rules are skipped: see ``test_every_rule_parameter_resolves_from_substrate``.
+    """
     from govops.config import ResolutionSource
     from govops.legacy_constants import _resolver
 
     seen_substrate = 0
     for pack in JURISDICTION_REGISTRY.values():
         for rule in pack.rules:
+            if rule.rule_type == RuleType.CALCULATION:
+                continue
             jur, slug = RULE_KEY_MAP[rule.id]
             for param_name in rule.parameters.keys():
                 key = f"{jur}.rule.{slug}.{param_name}"

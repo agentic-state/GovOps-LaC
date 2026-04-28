@@ -91,10 +91,27 @@ class ScreenRuleResult(BaseModel):
     effective_from: Optional[str] = None  # ISO date when the rule's parameter resolved a ConfigValue
 
 
+class ScreenBenefitAmount(BaseModel):
+    """Citizen-facing projection of the entitlement amount (Phase 10B / ADR-011).
+
+    Mirrors ``models.BenefitAmount`` but stays its own type so the screen
+    contract can evolve independently of the officer/audit shape. The
+    ``formula_trace`` is preserved verbatim so the citizen-facing surface
+    can render the same per-step trace the audit package shows officers —
+    same evidence, different audience.
+    """
+    value: float
+    currency: str = "CAD"
+    period: str = "monthly"  # "monthly", "annual", "lump_sum"
+    formula_trace: list[dict] = Field(default_factory=list)
+    citations: list[str] = Field(default_factory=list)
+
+
 class ScreenResponse(BaseModel):
     outcome: str  # mirrors DecisionOutcome.value
     pension_type: str = ""
     partial_ratio: Optional[str] = None
+    benefit_amount: Optional[ScreenBenefitAmount] = None  # populated when ELIGIBLE + calc rule present
     rule_results: list[ScreenRuleResult] = Field(default_factory=list)
     missing_evidence: list[str] = Field(default_factory=list)
     jurisdiction_label: str
@@ -190,10 +207,21 @@ def run_screen(
         for r in recommendation.rule_evaluations
     ]
 
+    benefit_amount: Optional[ScreenBenefitAmount] = None
+    if recommendation.benefit_amount is not None:
+        benefit_amount = ScreenBenefitAmount(
+            value=recommendation.benefit_amount.value,
+            currency=recommendation.benefit_amount.currency,
+            period=recommendation.benefit_amount.period,
+            formula_trace=list(recommendation.benefit_amount.formula_trace),
+            citations=list(recommendation.benefit_amount.citations),
+        )
+
     return ScreenResponse(
         outcome=recommendation.outcome.value,
         pension_type=recommendation.pension_type,
         partial_ratio=recommendation.partial_ratio,
+        benefit_amount=benefit_amount,
         rule_results=rule_results,
         missing_evidence=list(recommendation.missing_evidence),
         jurisdiction_label=_label(pack),

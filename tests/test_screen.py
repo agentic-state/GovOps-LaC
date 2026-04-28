@@ -225,3 +225,90 @@ class TestScreenAPI:
         body = r.json()
         assert "disclaimer" in body
         assert "decision support" in body["disclaimer"].lower()
+
+
+# ---------------------------------------------------------------------------
+# Benefit amount surfacing (Phase 10B / ADR-011) — citizen sees the dollar
+# figure with a reproducible per-step formula trace, not just yes/no.
+# ---------------------------------------------------------------------------
+
+
+class TestScreenBenefitAmount:
+    def test_eligible_screen_includes_benefit_amount(self):
+        resp = run_screen(_full_eligible_ca_request())
+        assert resp.outcome == "eligible"
+        assert resp.benefit_amount is not None
+        ba = resp.benefit_amount
+        assert ba.value > 0
+        assert ba.currency == "CAD"
+        assert ba.period == "monthly"
+
+    def test_ineligible_screen_has_no_benefit_amount(self):
+        resp = run_screen(_young_ineligible_ca_request())
+        assert resp.outcome == "ineligible"
+        assert resp.benefit_amount is None
+
+    def test_full_pension_pays_full_base_amount(self):
+        """50 years CA residency exceeds the 40-year cap → full base monthly."""
+        resp = run_screen(_full_eligible_ca_request())
+        assert resp.benefit_amount is not None
+        assert resp.benefit_amount.value == 727.67
+
+    def test_partial_pension_prorates_amount(self):
+        """A 33-year CA resident sees ~33/40 of base, not zero, not full."""
+        partial = ScreenRequest(
+            jurisdiction_id="ca",
+            date_of_birth=date(1958, 1, 1),
+            legal_status="permanent_resident",
+            residency_periods=[
+                ScreenResidencyPeriod(country="CA", start_date=date(1993, 1, 1))
+            ],
+            evidence_present=ScreenEvidence(dob=True, residency=True),
+            evaluation_date=date(2026, 4, 13),
+        )
+        resp = run_screen(partial)
+        assert resp.outcome == "eligible"
+        assert resp.partial_ratio == "33/40"
+        assert resp.benefit_amount is not None
+        # Same arithmetic the engine does (round to 2dp).
+        assert resp.benefit_amount.value == round(727.67 * (33.0 / 40.0), 2)
+
+    def test_formula_trace_is_reproducible(self):
+        """The trace must let a citizen-facing surface render every step."""
+        resp = run_screen(_full_eligible_ca_request())
+        ba = resp.benefit_amount
+        assert ba is not None
+        ops = [step["op"] for step in ba.formula_trace]
+        # Every operator the OAS formula uses must appear at least once.
+        assert "ref" in ops
+        assert "field" in ops
+        assert "const" in ops
+        assert "divide" in ops
+        assert "multiply" in ops
+        # Citations dedupe in walk order; both load-bearing sections present.
+        joined = " | ".join(ba.citations)
+        assert "s. 7" in joined
+        assert "s. 3(2)(b)" in joined
+
+    def test_benefit_amount_serializes_in_api_response(self, client):
+        payload = _full_eligible_ca_request().model_dump(mode="json")
+        r = client.post("/api/screen", json=payload)
+        assert r.status_code == 200
+        body = r.json()
+        assert "benefit_amount" in body
+        assert body["benefit_amount"] is not None
+        ba = body["benefit_amount"]
+        assert ba["value"] == 727.67
+        assert ba["currency"] == "CAD"
+        assert ba["period"] == "monthly"
+        assert isinstance(ba["formula_trace"], list)
+        assert isinstance(ba["citations"], list)
+
+    def test_benefit_amount_is_null_in_api_for_ineligible(self, client):
+        payload = _young_ineligible_ca_request().model_dump(mode="json")
+        r = client.post("/api/screen", json=payload)
+        assert r.status_code == 200
+        body = r.json()
+        # Field is present but null — the contract is explicit, not absent.
+        assert "benefit_amount" in body
+        assert body["benefit_amount"] is None

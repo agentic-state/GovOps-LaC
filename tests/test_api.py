@@ -84,6 +84,48 @@ class TestCaseWorkflow:
         rec = r.json()["recommendation"]
         assert rec["outcome"] == "insufficient_evidence"
 
+    def test_evaluate_full_pension_includes_benefit_amount(self, client):
+        """Phase 10B: full-pension cases surface a benefit_amount + formula trace."""
+        r = client.post("/api/cases/demo-case-001/evaluate")
+        rec = r.json()["recommendation"]
+        assert rec["benefit_amount"] is not None
+        ba = rec["benefit_amount"]
+        assert ba["value"] == 727.67
+        assert ba["currency"] == "CAD"
+        assert ba["period"] == "monthly"
+        assert isinstance(ba["formula_trace"], list)
+        assert len(ba["formula_trace"]) >= 5  # ref, field, const, divide, multiply
+        # Citations dedupe in walk order.
+        assert any("s. 7" in c for c in ba["citations"])
+        assert any("s. 3(2)(b)" in c for c in ba["citations"])
+
+    def test_evaluate_partial_pension_prorates_benefit_amount(self, client):
+        r = client.post("/api/cases/demo-case-003/evaluate")
+        rec = r.json()["recommendation"]
+        assert rec["pension_type"] == "partial"
+        assert rec["benefit_amount"] is not None
+        # Partial cases pay strictly less than the full base.
+        assert rec["benefit_amount"]["value"] < 727.67
+        assert rec["benefit_amount"]["value"] > 0
+
+    def test_evaluate_ineligible_has_null_benefit_amount(self, client):
+        r = client.post("/api/cases/demo-case-002/evaluate")
+        rec = r.json()["recommendation"]
+        assert rec["outcome"] == "ineligible"
+        # Field is present, value is null — explicit contract for the citizen surface.
+        assert "benefit_amount" in rec
+        assert rec["benefit_amount"] is None
+
+    def test_audit_package_carries_benefit_amount(self, client):
+        """Auditors must see the dollar figure + formula trace alongside the recommendation."""
+        client.post("/api/cases/demo-case-001/evaluate")
+        r = client.get("/api/cases/demo-case-001/audit")
+        assert r.status_code == 200
+        pkg = r.json()
+        rec = pkg["recommendation"]
+        assert rec["benefit_amount"] is not None
+        assert rec["benefit_amount"]["value"] == 727.67
+
     def test_review_case(self, client):
         client.post("/api/cases/demo-case-001/evaluate")
         r = client.post("/api/cases/demo-case-001/review", json={

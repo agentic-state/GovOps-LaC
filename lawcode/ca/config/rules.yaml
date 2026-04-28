@@ -34,3 +34,8 @@ values:
 - key: ca.rule.residency-pension-type.min_years
   value: 10
   value_type: number
+- key: ca.calc.oas.base_monthly_amount
+  value: 727.67
+  value_type: number
+  citation: 'Old Age Security Act, R.S.C. 1985, c. O-9, s. 7'
+  rationale: 'Basic OAS amount for ages 65-74, expressed in CAD per month. The Act establishes the base under s. 7; quarterly indexation under s. 7.1 adjusts the value to CPI. This single open-window record stands in for the indexation history; when a quarterly adjustment is needed in the demo, a follow-up dated record supersedes this one and the substrate picks up the change without code edits.'
