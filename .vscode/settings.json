@@ -33,8 +33,11 @@
     "editor.quickSuggestions": { "comments": "off", "strings": "off", "other": "off" }
   },
 
-  // File nesting: pair source with its tests
-  "explorer.fileNesting.enabled": true,
+  // File nesting: disabled. Maintainer preference is a flat explorer so every
+  // file is discoverable at its directory level. Pattern config preserved
+  // below (harmless while disabled) so future contributors can re-enable
+  // selectively if a directory grows enough to warrant it.
+  "explorer.fileNesting.enabled": false,
   "explorer.fileNesting.expand": false,
   "explorer.fileNesting.patterns": {
     "engine.py": "test_engine.py",
