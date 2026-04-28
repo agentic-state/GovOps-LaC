@@ -20,7 +20,8 @@ export async function backend(request: APIRequestContext) {
 
     createDraft: async (body: Record<string, unknown>) => {
       const r = await request.post(`${BACKEND}/api/config/values`, { data: body });
-      if (r.status() !== 201) throw new Error(`createDraft failed: ${r.status()} ${await r.text()}`);
+      if (r.status() !== 201)
+        throw new Error(`createDraft failed: ${r.status()} ${await r.text()}`);
       return (await r.json()) as { id: string; status: string };
     },
 

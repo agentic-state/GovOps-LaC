@@ -1,10 +1,6 @@
 import { useMemo, useRef, useState } from "react";
 import { useIntl } from "react-intl";
-import type {
-  ScreenLegalStatus,
-  ScreenRequest,
-  ScreenResidencyPeriod,
-} from "@/lib/types";
+import type { ScreenLegalStatus, ScreenRequest, ScreenResidencyPeriod } from "@/lib/types";
 import { ResidencyPeriodRows } from "./ResidencyPeriodRows";
 import {
   Dialog,
@@ -163,10 +159,7 @@ export function ScreenForm({
           aria-labelledby="screen-summary-heading"
           className="rounded border border-destructive/60 bg-destructive/5 p-3 text-sm focus:outline-none focus:ring-2 focus:ring-destructive"
         >
-          <p
-            id="screen-summary-heading"
-            className="font-medium text-destructive"
-          >
+          <p id="screen-summary-heading" className="font-medium text-destructive">
             {intl.formatMessage(
               { id: "screen.errors.summary.heading" },
               { count: Object.keys(errors).length },
@@ -205,7 +198,9 @@ export function ScreenForm({
       <div>
         <label htmlFor="screen-dob" className="block text-sm font-medium">
           {intl.formatMessage({ id: "screen.form.dob.label" })}{" "}
-          <span aria-hidden className="text-destructive">*</span>
+          <span aria-hidden className="text-destructive">
+            *
+          </span>
         </label>
         <input
           id="screen-dob"
@@ -233,9 +228,14 @@ export function ScreenForm({
       <fieldset>
         <legend className="text-sm font-medium">
           {intl.formatMessage({ id: "screen.form.legal_status.label" })}{" "}
-          <span aria-hidden className="text-destructive">*</span>
+          <span aria-hidden className="text-destructive">
+            *
+          </span>
         </legend>
-        <div className="mt-2 grid gap-2" aria-describedby={showError("legal_status") ? "err-screen-legal" : undefined}>
+        <div
+          className="mt-2 grid gap-2"
+          aria-describedby={showError("legal_status") ? "err-screen-legal" : undefined}
+        >
           {(["citizen", "permanent_resident", "other"] as const).map((opt, i) => (
             <label key={opt} className="inline-flex items-center gap-2 text-sm">
               <input
@@ -330,12 +330,8 @@ export function ScreenForm({
       <Dialog open={resetOpen} onOpenChange={setResetOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>
-              {intl.formatMessage({ id: "screen.reset.title" })}
-            </DialogTitle>
-            <DialogDescription>
-              {intl.formatMessage({ id: "screen.reset.body" })}
-            </DialogDescription>
+            <DialogTitle>{intl.formatMessage({ id: "screen.reset.title" })}</DialogTitle>
+            <DialogDescription>{intl.formatMessage({ id: "screen.reset.body" })}</DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <Button variant="outline" onClick={() => setResetOpen(false)}>

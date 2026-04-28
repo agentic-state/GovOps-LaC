@@ -21,7 +21,11 @@ export function ProposalStatusPill({ status }: { status: ProposalStatus }) {
         fontFamily: "var(--font-mono)",
       }}
     >
-      <span aria-hidden className="inline-block size-1.5 rounded-full" style={{ backgroundColor: c }} />
+      <span
+        aria-hidden
+        className="inline-block size-1.5 rounded-full"
+        style={{ backgroundColor: c }}
+      />
       {intl.formatMessage({ id: `proposal_status.${status}` })}
     </span>
   );

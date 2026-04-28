@@ -4,6 +4,7 @@ import { Sparkles } from "lucide-react";
 import type { Recommendation } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { ProvenanceRibbon } from "../ProvenanceRibbon";
+import { BenefitAmountCard } from "../screen/BenefitAmountCard";
 import { ConfidenceRing } from "./ConfidenceRing";
 import { OutcomePill } from "./OutcomePill";
 import { RuleEvaluationItem } from "./RuleEvaluationItem";
@@ -11,9 +12,13 @@ import { RuleEvaluationItem } from "./RuleEvaluationItem";
 export function RecommendationPane({
   recommendation,
   onEvaluate,
+  jurisdictionLabel,
+  downloadSlot,
 }: {
   recommendation: Recommendation | null;
   onEvaluate: () => Promise<void>;
+  jurisdictionLabel?: string;
+  downloadSlot?: React.ReactNode;
 }) {
   const intl = useIntl();
   const [running, setRunning] = useState(false);
@@ -51,26 +56,16 @@ export function RecommendationPane({
 
         {!recommendation ? (
           <div className="rounded-md border border-dashed border-border bg-surface p-6 text-center">
-            <p
-              className="text-base text-foreground"
-              style={{ fontFamily: "var(--font-serif)" }}
-            >
+            <p className="text-base text-foreground" style={{ fontFamily: "var(--font-serif)" }}>
               {intl.formatMessage({ id: "cases.recommendation.empty.title" })}
             </p>
             <p className="mt-1 text-sm text-foreground-muted">
               {intl.formatMessage({ id: "cases.recommendation.empty.body" })}
             </p>
-            <Button
-              variant="agent"
-              className="mt-4"
-              onClick={handle}
-              disabled={running}
-            >
+            <Button variant="agent" className="mt-4" onClick={handle} disabled={running}>
               <Sparkles className="size-4" aria-hidden />
               {intl.formatMessage({
-                id: running
-                  ? "cases.recommendation.evaluating"
-                  : "cases.recommendation.evaluate",
+                id: running ? "cases.recommendation.evaluating" : "cases.recommendation.evaluate",
               })}
             </Button>
             {errorMsg && (
@@ -130,6 +125,20 @@ export function RecommendationPane({
               </div>
             )}
 
+            {recommendation.benefit_amount && (
+              <BenefitAmountCard
+                benefitAmount={recommendation.benefit_amount}
+                jurisdictionLabel={jurisdictionLabel ?? ""}
+                pensionType={
+                  recommendation.pension_type === "full" ||
+                  recommendation.pension_type === "partial"
+                    ? recommendation.pension_type
+                    : ""
+                }
+                partialRatio={recommendation.partial_ratio}
+              />
+            )}
+
             {recommendation.missing_evidence.length > 0 && (
               <div className="space-y-2">
                 <h3 className="text-sm font-medium text-foreground">
@@ -153,7 +162,8 @@ export function RecommendationPane({
                     key={f}
                     className="rounded-full px-2 py-0.5 text-xs"
                     style={{
-                      backgroundColor: "color-mix(in oklab, var(--verdict-pending) 18%, transparent)",
+                      backgroundColor:
+                        "color-mix(in oklab, var(--verdict-pending) 18%, transparent)",
                       color: "var(--verdict-pending)",
                       fontFamily: "var(--font-mono)",
                     }}
@@ -163,6 +173,7 @@ export function RecommendationPane({
                 ))}
               </div>
             )}
+            {downloadSlot && <div className="flex justify-end">{downloadSlot}</div>}
           </>
         )}
       </div>

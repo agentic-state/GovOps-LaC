@@ -67,8 +67,8 @@ describe("TanStack file routes", () => {
       const parentPath = resolve(ROUTES_DIR, `${base}.tsx`);
       if (!existsSync(parentPath)) continue;
       const src = readFileSync(parentPath, "utf8");
-      const importsOutlet = /from\s+["']@tanstack\/react-router["']/.test(src) &&
-        /\bOutlet\b/.test(src);
+      const importsOutlet =
+        /from\s+["']@tanstack\/react-router["']/.test(src) && /\bOutlet\b/.test(src);
       const rendersOutlet = /<\s*Outlet\b/.test(src);
       expect(
         importsOutlet && rendersOutlet,

@@ -219,6 +219,23 @@
   }
 }
 
+/* Self-screening print stylesheet (govops-015): strip form chrome, keep
+   the result card and citations clean for a citizen's printed copy. */
+@media print {
+  .screen-shell > header,
+  .screen-shell > footer,
+  .screen-form,
+  .screen-result button {
+    display: none !important;
+  }
+  .screen-result {
+    border: 1px solid #000 !important;
+    background: #fff !important;
+    color: #000 !important;
+    page-break-inside: avoid;
+  }
+}
+
 @layer base {
   * {
     border-color: var(--color-border);

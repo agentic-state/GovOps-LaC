@@ -3,6 +3,7 @@ import type {
   ScreenResponse,
   ScreenRuleResult,
   ScreenOutcome,
+  BenefitAmount,
 } from "./types";
 
 const JURISDICTION_LABELS: Record<string, string> = {
@@ -91,16 +92,37 @@ export function mockScreen(req: ScreenRequest): ScreenResponse {
 
   let outcome: ScreenOutcome;
   if (rules.some((r) => r.outcome === "not_satisfied")) outcome = "ineligible";
-  else if (rules.some((r) => r.outcome === "insufficient_evidence")) outcome = "insufficient_evidence";
+  else if (rules.some((r) => r.outcome === "insufficient_evidence"))
+    outcome = "insufficient_evidence";
   else outcome = "eligible";
 
   let pensionType: ScreenResponse["pension_type"] = "";
   let partialRatio: string | undefined;
+  let benefitAmount: BenefitAmount | null = null;
   if (outcome === "eligible") {
     if (totalResidencyYears >= FULL_RESIDENCY_YEARS) pensionType = "full";
     else {
       pensionType = "partial";
       partialRatio = `${Math.floor(totalResidencyYears)}/${FULL_RESIDENCY_YEARS}`;
+    }
+    if (req.jurisdiction_id.toLowerCase() === "ca") {
+      const base = 727.67; // illustrative OAS base
+      const years = Math.min(Math.floor(totalResidencyYears), FULL_RESIDENCY_YEARS);
+      const ratio = years / FULL_RESIDENCY_YEARS;
+      const value = Math.round(base * ratio * 100) / 100;
+      benefitAmount = {
+        value,
+        currency: "CAD",
+        period: "monthly",
+        formula_trace: [
+          { op: "ref", inputs: ["oas.base.monthly"], output: base, citation: "OAS Act, s. 7(1)" },
+          { op: "field", inputs: ["residency_years"], output: years, note: "capped at 40" },
+          { op: "const", inputs: [FULL_RESIDENCY_YEARS], output: FULL_RESIDENCY_YEARS },
+          { op: "divide", inputs: [years, FULL_RESIDENCY_YEARS], output: ratio },
+          { op: "multiply", inputs: [base, ratio], output: value, citation: "OAS Act, s. 7(2)" },
+        ],
+        citations: ["OAS Act, s. 7(1)", "OAS Act, s. 7(2)"],
+      };
     }
   }
 
@@ -112,6 +134,7 @@ export function mockScreen(req: ScreenRequest): ScreenResponse {
     missing_evidence: missing,
     jurisdiction_label: JURISDICTION_LABELS[req.jurisdiction_id] ?? req.jurisdiction_id,
     evaluation_date: evalDate,
+    benefit_amount: benefitAmount,
     _preview: true,
   };
 }

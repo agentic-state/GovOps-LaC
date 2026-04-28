@@ -17,7 +17,17 @@ import AxeBuilder from "@axe-core/playwright";
 const STRICT_A11Y = process.env.E2E_A11Y_STRICT === "1";
 
 async function gotoAbout(page: Page, lang: "en" | "fr" = "en"): Promise<void> {
-  await page.goto(`/about?lang=${lang}`);
+  // I18nProvider reads the `govops-locale` cookie at SSR boot, not a ?lang=
+  // query param. Set the cookie before navigating so the FR variant actually
+  // renders FR. Cookie domain is the test frontend host.
+  await page.context().addCookies([
+    {
+      name: "govops-locale",
+      value: lang,
+      url: "http://127.0.0.1:17081/",
+    },
+  ]);
+  await page.goto(`/about`);
   // Hero h1 is always rendered SSR; waiting for it confirms hydration is done.
   await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
 }
@@ -54,16 +64,10 @@ test.describe("About — hero + disclaimer", () => {
     const repoLink = page.getByRole("link", {
       name: /github|view on github/i,
     });
-    await expect(repoLink.first()).toHaveAttribute(
-      "href",
-      /github\.com\/eva-foundry\/61-GovOps/,
-    );
+    await expect(repoLink.first()).toHaveAttribute("href", /github\.com\/eva-foundry\/61-GovOps/);
     // Pages link (PROJECT_HOME) — distinct from the repo link
     const pagesLink = page.getByRole("link", { name: /github pages/i });
-    await expect(pagesLink.first()).toHaveAttribute(
-      "href",
-      /eva-foundry\.github\.io\/61-GovOps/,
-    );
+    await expect(pagesLink.first()).toHaveAttribute("href", /eva-foundry\.github\.io\/61-GovOps/);
   });
 });
 
@@ -72,28 +76,29 @@ test.describe("About — hero + disclaimer", () => {
 // ---------------------------------------------------------------------------
 
 test.describe("About — reference cards", () => {
-  test("SPRIND reference card shows the verbatim definition + correct attribution", async ({ page }) => {
+  test("SPRIND reference card shows the verbatim definition + correct attribution", async ({
+    page,
+  }) => {
     await gotoAbout(page);
     // SPRIND attribution must be exactly "Dr. Hakke Hansen, LL.M. and Jörg Resch"
     // — anything else is a regression worth catching.
     await expect(page.getByText(/Hakke Hansen.+Jörg Resch/)).toBeVisible();
     // External SPRIND URL
     const sprindLink = page.getByRole("link", { name: /sprind/i });
-    await expect(sprindLink.first()).toHaveAttribute(
-      "href",
-      /sprind\.org\/en\/law-as-code/,
-    );
+    await expect(sprindLink.first()).toHaveAttribute("href", /sprind\.org\/en\/law-as-code/);
   });
 
   test("Agentic State reference card carries the full 5-author citation", async ({ page }) => {
     await gotoAbout(page);
-    // Per the prior session's audit: full citation, no "et al."
-    await expect(page.getByText(/Ilves.+Kilian.+Parazzoli.+Peixoto.+Velsberg/)).toBeVisible();
+    // Per the prior session's audit: full citation, no "et al." Use .first()
+    // because the page intentionally renders the citation in two places
+    // (reference card + body paragraph) — both must be visible; we just need
+    // a non-strict match so the assertion doesn't fail on the multiplicity.
+    await expect(
+      page.getByText(/Ilves.+Kilian.+Parazzoli.+Peixoto.+Velsberg/).first(),
+    ).toBeVisible();
     const agenticLink = page.getByRole("link", { name: /agentic state/i });
-    await expect(agenticLink.first()).toHaveAttribute(
-      "href",
-      /agenticstate\.org/,
-    );
+    await expect(agenticLink.first()).toHaveAttribute("href", /agenticstate\.org/);
   });
 });
 
@@ -107,10 +112,7 @@ test.describe("About — §10 references", () => {
     // The "Project home" row is the new govops-016a addition; the link
     // opens in a new tab.
     const link = page.getByRole("link", { name: /project home/i }).first();
-    await expect(link).toHaveAttribute(
-      "href",
-      /eva-foundry\.github\.io\/61-GovOps/,
-    );
+    await expect(link).toHaveAttribute("href", /eva-foundry\.github\.io\/61-GovOps/);
     await expect(link).toHaveAttribute("target", "_blank");
   });
 
@@ -118,9 +120,9 @@ test.describe("About — §10 references", () => {
     await gotoAbout(page);
     // Collect every `<a href>` whose host is github.com/eva-foundry/61-GovOps
     // and assert none uses the placeholder `your-org`.
-    const hrefs = await page.locator("a").evaluateAll((nodes) =>
-      nodes.map((n) => (n as HTMLAnchorElement).href),
-    );
+    const hrefs = await page
+      .locator("a")
+      .evaluateAll((nodes) => nodes.map((n) => (n as HTMLAnchorElement).href));
     const placeholders = hrefs.filter((h) => h.includes("your-org"));
     expect(
       placeholders,
@@ -160,9 +162,7 @@ test.describe("About — accessibility", () => {
     );
 
     if (blocking.length > 0) {
-      const summary = blocking
-        .map((v) => `  - [${v.impact}] ${v.id}: ${v.help}`)
-        .join("\n");
+      const summary = blocking.map((v) => `  - [${v.impact}] ${v.id}: ${v.help}`).join("\n");
       console.error(`About a11y blockers:\n${summary}`);
     }
 

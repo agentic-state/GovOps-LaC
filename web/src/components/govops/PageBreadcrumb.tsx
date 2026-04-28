@@ -44,9 +44,7 @@ export function PageBreadcrumb() {
   if (pathname === "/" || pathname === "") return null;
 
   // Drop the root match and the index match; keep only routes we have specs for.
-  const visibleMatches = matches.filter(
-    (m) => m.routeId !== "__root__" && ROUTE_CRUMBS[m.routeId],
-  );
+  const visibleMatches = matches.filter((m) => m.routeId !== "__root__" && ROUTE_CRUMBS[m.routeId]);
   if (visibleMatches.length === 0) return null;
 
   const items: BreadcrumbItem[] = visibleMatches.map((m, idx, arr) => {

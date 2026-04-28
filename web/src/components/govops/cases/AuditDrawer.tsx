@@ -1,13 +1,7 @@
 import { useEffect, useState } from "react";
 import { useIntl } from "react-intl";
 import { Download, FileText } from "lucide-react";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { getCaseAudit } from "@/lib/api";
@@ -74,7 +68,8 @@ export function AuditDrawer({ caseId }: { caseId: string }) {
                 className="text-xs text-foreground-muted"
                 style={{ fontFamily: "var(--font-mono)" }}
               >
-                generated {intl.formatDate(pkg.generated_at, { dateStyle: "medium", timeStyle: "short" })}
+                generated{" "}
+                {intl.formatDate(pkg.generated_at, { dateStyle: "medium", timeStyle: "short" })}
               </span>
               <Button variant="outline" size="sm" onClick={exportJson}>
                 <Download className="size-3.5" aria-hidden />
@@ -107,7 +102,10 @@ export function AuditDrawer({ caseId }: { caseId: string }) {
                 ) : (
                   <ol className="space-y-2">
                     {pkg.audit_trail.map((e, i) => (
-                      <li key={i} className="rounded-md border border-border bg-surface p-3 text-sm">
+                      <li
+                        key={i}
+                        className="rounded-md border border-border bg-surface p-3 text-sm"
+                      >
                         <div className="flex flex-wrap items-center gap-2 text-xs text-foreground-muted">
                           <span style={{ fontFamily: "var(--font-mono)" }}>{e.event_type}</span>
                           <span>·</span>
@@ -130,10 +128,7 @@ export function AuditDrawer({ caseId }: { caseId: string }) {
                 {pkg.recommendation ? (
                   <div className="space-y-2 text-sm">
                     <OutcomePill outcome={pkg.recommendation.outcome} />
-                    <p
-                      className="text-foreground"
-                      style={{ fontFamily: "var(--font-serif)" }}
-                    >
+                    <p className="text-foreground" style={{ fontFamily: "var(--font-serif)" }}>
                       {pkg.recommendation.explanation}
                     </p>
                   </div>
@@ -147,7 +142,10 @@ export function AuditDrawer({ caseId }: { caseId: string }) {
                   <p className="text-sm text-foreground-muted">—</p>
                 ) : (
                   pkg.review_actions.map((r) => (
-                    <div key={r.id} className="rounded-md border border-border bg-surface p-3 text-sm">
+                    <div
+                      key={r.id}
+                      className="rounded-md border border-border bg-surface p-3 text-sm"
+                    >
                       <div className="flex flex-wrap items-center gap-2">
                         <ActionPill action={r.action} />
                         {r.final_outcome && <OutcomePill outcome={r.final_outcome} />}
@@ -188,7 +186,10 @@ export function AuditDrawer({ caseId }: { caseId: string }) {
                 )}
                 <ol className="space-y-2">
                   {pkg.authority_chain.map((a) => (
-                    <li key={a.id} className="rounded-md border border-border bg-surface p-3 text-sm">
+                    <li
+                      key={a.id}
+                      className="rounded-md border border-border bg-surface p-3 text-sm"
+                    >
                       <p
                         className="text-xs uppercase tracking-wider text-foreground-muted"
                         style={{ fontFamily: "var(--font-mono)" }}

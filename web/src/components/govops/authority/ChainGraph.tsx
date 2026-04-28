@@ -47,10 +47,7 @@ export function ChainGraph({
               onSelect={() => onSelect(selectedId === node.id ? null : node.id)}
             />
             {idx < chain.length - 1 && (
-              <span
-                aria-hidden
-                className="ms-4 block h-3 w-px bg-border"
-              />
+              <span aria-hidden className="ms-4 block h-3 w-px bg-border" />
             )}
           </li>
         ))}

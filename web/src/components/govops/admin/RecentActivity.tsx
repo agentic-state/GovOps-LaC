@@ -32,10 +32,7 @@ export function RecentActivity({ events }: { events: ActivityEvent[] }) {
       ) : (
         <ol className="space-y-2">
           {events.map((e, i) => (
-            <li
-              key={i}
-              className="rounded-md border border-border bg-surface px-3 py-2 text-sm"
-            >
+            <li key={i} className="rounded-md border border-border bg-surface px-3 py-2 text-sm">
               <div className="flex flex-wrap items-center gap-2 text-xs text-foreground-muted">
                 <span style={{ fontFamily: "var(--font-mono)" }}>{e.event_type}</span>
                 <span>·</span>

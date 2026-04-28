@@ -106,9 +106,7 @@ for (const route of NON_HOME_ROUTES) {
     // The first link is always the home crumb.
     await expect(crumbNav.getByRole("link").first()).toHaveAttribute("href", "/");
     // The current page is the last list item — non-link, with aria-current="page".
-    await expect(
-      crumbNav.locator('li [aria-current="page"]').first(),
-    ).toBeVisible();
+    await expect(crumbNav.locator('li [aria-current="page"]').first()).toBeVisible();
   });
 }
 
@@ -146,9 +144,7 @@ test("breadcrumb: stays visible (sticky) when the page is scrolled", async ({ pa
   expect(Math.abs(crumbTop - mastheadBottom)).toBeLessThan(12);
 
   // CSS computed-style sanity check: position: sticky.
-  const computedPosition = await crumb.evaluate(
-    (el) => getComputedStyle(el).position,
-  );
+  const computedPosition = await crumb.evaluate((el) => getComputedStyle(el).position);
   expect(computedPosition).toBe("sticky");
 });
 
@@ -175,9 +171,7 @@ test("encoder: approving a proposal locks the Approve/Modify/Reject buttons; Reo
 
   // Each batch list item is itself a link to /encode/{batchId} (excluding
   // the /encode/new "new extraction" link).
-  const firstBatchLink = page
-    .locator('a[href^="/encode/"]:not([href="/encode/new"])')
-    .first();
+  const firstBatchLink = page.locator('a[href^="/encode/"]:not([href="/encode/new"])').first();
   if (!(await firstBatchLink.isVisible().catch(() => false))) {
     test.skip(true, "no encoding batch fixture available in this run");
   }
@@ -237,7 +231,9 @@ test("walkthrough: 7-step paid-vacation scenario renders end to end", async ({ p
   await expect(stepHeadings).toHaveCount(8);
 
   // Closing CTA has primary + secondary actions
-  const closingPrimary = page.getByRole("link", { name: /approvals|approbations|aprobaciones|aprovaç|genehmigung|затверд/i }).last();
+  const closingPrimary = page
+    .getByRole("link", { name: /approvals|approbations|aprobaciones|aprovaç|genehmigung|затверд/i })
+    .last();
   await expect(closingPrimary).toBeVisible();
 
   // Visual record of the full scenario

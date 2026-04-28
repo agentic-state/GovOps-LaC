@@ -52,14 +52,22 @@ export function EvidenceTable({ items }: { items: EvidenceItem[] }) {
               </td>
               <td className="px-3 py-2">
                 {e.provided ? (
-                  <Check className="size-4" style={{ color: "var(--verdict-enacted)" }} aria-label="yes" />
+                  <Check
+                    className="size-4"
+                    style={{ color: "var(--verdict-enacted)" }}
+                    aria-label="yes"
+                  />
                 ) : (
                   <Minus className="size-4 text-foreground-muted" aria-label="no" />
                 )}
               </td>
               <td className="px-3 py-2">
                 {e.verified ? (
-                  <Check className="size-4" style={{ color: "var(--verdict-enacted)" }} aria-label="yes" />
+                  <Check
+                    className="size-4"
+                    style={{ color: "var(--verdict-enacted)" }}
+                    aria-label="yes"
+                  />
                 ) : (
                   <Minus className="size-4 text-foreground-muted" aria-label="no" />
                 )}

@@ -39,7 +39,8 @@ function walk(dir) {
 }
 walk(SRC);
 
-const FM_RE = /(?:formatMessage\(\s*\{\s*id:\s*|<FormattedMessage[^>]*\bid=)["'`](impact\.[a-zA-Z0-9_.\-]+)["'`]/g;
+const FM_RE =
+  /(?:formatMessage\(\s*\{\s*id:\s*|<FormattedMessage[^>]*\bid=)["'`](impact\.[a-zA-Z0-9_.\-]+)["'`]/g;
 const used = new Set();
 for (const file of sourceFiles) {
   for (const m of readFileSync(file, "utf8").matchAll(FM_RE)) used.add(m[1]);
@@ -112,4 +113,6 @@ if (failures > 0) {
   console.error(`\n${failures} impact i18n problem(s) found.`);
   process.exit(1);
 }
-console.log(`✓ impact.* i18n OK across ${Object.keys(locales).length} locale(s) (${used.size} keys).`);
+console.log(
+  `✓ impact.* i18n OK across ${Object.keys(locales).length} locale(s) (${used.size} keys).`,
+);

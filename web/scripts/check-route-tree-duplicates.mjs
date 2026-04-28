@@ -23,7 +23,8 @@ if (!existsSync(target)) {
 const src = readFileSync(target, "utf8");
 // Track values and types in separate namespaces, since TS allows
 // `interface Foo {}` + `const Foo: Foo = {}` to share a name.
-const decl = /^\s*(?:export\s+)?(const|let|var|interface|type|function|class)\s+([A-Za-z_$][\w$]*)/gm;
+const decl =
+  /^\s*(?:export\s+)?(const|let|var|interface|type|function|class)\s+([A-Za-z_$][\w$]*)/gm;
 const VALUE_KINDS = new Set(["const", "let", "var", "function", "class"]);
 const TYPE_KINDS = new Set(["interface", "type"]);
 const seen = new Map(); // `${ns}:${name}` -> [lineNumbers]

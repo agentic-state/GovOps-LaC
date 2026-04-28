@@ -4,6 +4,8 @@ import { useIntl } from "react-intl";
 import { ScreenShell } from "@/components/govops/ScreenShell";
 import { ScreenForm } from "@/components/govops/ScreenForm";
 import { ScreenResult } from "@/components/govops/ScreenResult";
+import { DownloadDecisionButton } from "@/components/govops/notices/DownloadDecisionButton";
+import { useLocale } from "@/lib/i18n";
 import { fetchJurisdiction, submitScreen } from "@/lib/api";
 import {
   SCREEN_JURISDICTIONS,
@@ -83,15 +85,14 @@ export const Route = createFileRoute("/screen/$jurisdictionId")({
   pendingComponent: () => <ScreenFormSkeleton />,
   component: ScreenFormPage,
   notFoundComponent: () => <UnknownJurisdiction />,
-  errorComponent: ({ error, reset }) => (
-    <ScreenLoaderError error={error} onRetry={reset} />
-  ),
+  errorComponent: ({ error, reset }) => <ScreenLoaderError error={error} onRetry={reset} />,
 });
 
 function ScreenFormPage() {
   const { jurisdictionId } = Route.useParams() as { jurisdictionId: ScreenJurisdictionId };
   const { live, data } = Route.useLoaderData() as LoaderData;
   const intl = useIntl();
+  const { locale } = useLocale();
 
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<ScreenResponse | null>(null);
@@ -150,12 +151,19 @@ function ScreenFormPage() {
       )}
 
       {result && (
-        <ScreenResult
-          data={result}
-          stale={stale}
-          jurisdictionId={jurisdictionId}
-          onRerun={() => lastReq && run(lastReq)}
-        />
+        <>
+          <ScreenResult
+            data={result}
+            stale={stale}
+            jurisdictionId={jurisdictionId}
+            onRerun={() => lastReq && run(lastReq)}
+          />
+          {lastReq && (
+            <div className="mt-4 flex justify-end">
+              <DownloadDecisionButton mode="screen" screenRequest={lastReq} language={locale} />
+            </div>
+          )}
+        </>
       )}
     </ScreenShell>
   );
@@ -169,10 +177,7 @@ function UnknownJurisdiction() {
       <p className="mt-2 text-foreground-muted">
         {intl.formatMessage({ id: "screen.unknown_jurisdiction" })}
       </p>
-      <Link
-        to="/screen"
-        className="mt-4 inline-block underline underline-offset-2 text-foreground"
-      >
+      <Link to="/screen" className="mt-4 inline-block underline underline-offset-2 text-foreground">
         {intl.formatMessage({ id: "screen.back" })}
       </Link>
     </ScreenShell>
@@ -190,10 +195,7 @@ function ScreenLoaderError({ error, onRetry }: { error: unknown; onRetry: () => 
   const message = error instanceof Error ? error.message : String(error);
   return (
     <ScreenShell showBack>
-      <div
-        role="alert"
-        className="rounded border border-destructive/60 bg-destructive/5 p-4"
-      >
+      <div role="alert" className="rounded border border-destructive/60 bg-destructive/5 p-4">
         <h1 className="font-serif text-2xl text-destructive">
           {intl.formatMessage({ id: "screen.loader_error.title" })}
         </h1>

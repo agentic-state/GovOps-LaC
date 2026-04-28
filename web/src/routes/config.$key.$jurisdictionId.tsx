@@ -72,6 +72,11 @@ function ConfigDetailPage() {
 
   return (
     <section aria-labelledby="config-detail-heading" className="space-y-8">
+      <nav aria-label="Breadcrumb" className="text-sm">
+        <Link to="/config" className="text-foreground-muted underline-offset-4 hover:underline">
+          ← {intl.formatMessage({ id: "nav.config" })}
+        </Link>
+      </nav>
 
       <header className="flex items-stretch">
         <ProvenanceRibbon variant={provenance} />

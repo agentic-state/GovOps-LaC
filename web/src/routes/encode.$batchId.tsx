@@ -1,13 +1,8 @@
 import { useMemo, useState } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useIntl } from "react-intl";
-import { ChevronDown } from "lucide-react";
-import {
-  bulkReviewProposals,
-  commitBatch,
-  getEncodingBatch,
-  reviewProposal,
-} from "@/lib/api";
+import { ChevronLeft, ChevronDown } from "lucide-react";
+import { bulkReviewProposals, commitBatch, getEncodingBatch, reviewProposal } from "@/lib/api";
 import type { EncodingBatch, ProposalStatus, RuleProposal } from "@/lib/types";
 import { ProposalCard } from "@/components/govops/encode/ProposalCard";
 import { BulkActionBar } from "@/components/govops/encode/BulkActionBar";
@@ -72,11 +67,7 @@ function BatchReviewPage() {
     }));
   };
 
-  const handleAct = async (
-    proposalId: string,
-    status: ProposalStatus,
-    notes?: string,
-  ) => {
+  const handleAct = async (proposalId: string, status: ProposalStatus, notes?: string) => {
     const updated = await reviewProposal(batch.id, proposalId, { status, notes });
     updateProposal(updated);
     setAnnouncement(`${proposalId} → ${status}`);
@@ -150,16 +141,20 @@ function BatchReviewPage() {
 
   return (
     <div className="space-y-6 pb-24">
+      <Link
+        to="/encode"
+        className="inline-flex items-center gap-1 text-sm text-foreground-muted hover:text-foreground"
+      >
+        <ChevronLeft className="size-4 rtl:rotate-180" aria-hidden />
+        {intl.formatMessage({ id: "encode.list.heading" })}
+      </Link>
 
       <header className="space-y-2">
         <h1
           className="text-3xl tracking-tight text-foreground"
           style={{ fontFamily: "var(--font-serif)", fontWeight: 600 }}
         >
-          {intl.formatMessage(
-            { id: "encode.review.heading" },
-            { title: batch.document_title },
-          )}
+          {intl.formatMessage({ id: "encode.review.heading" }, { title: batch.document_title })}
         </h1>
         <div className="flex flex-wrap items-center gap-2 text-xs text-foreground-muted">
           <span style={{ fontFamily: "var(--font-mono)" }}>{batch.document_citation}</span>

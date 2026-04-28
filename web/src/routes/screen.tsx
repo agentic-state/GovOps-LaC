@@ -53,10 +53,7 @@ function ScreenLanding() {
         aria-labelledby="screen-disclaimer-heading"
         className="rounded-lg border border-border bg-surface-sunken p-5 mb-8"
       >
-        <h2
-          id="screen-disclaimer-heading"
-          className="font-serif text-lg text-foreground mb-2"
-        >
+        <h2 id="screen-disclaimer-heading" className="font-serif text-lg text-foreground mb-2">
           {intl.formatMessage({ id: "screen.disclaimer.title" })}
         </h2>
         <p className="text-sm text-foreground-muted whitespace-pre-line">

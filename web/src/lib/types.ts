@@ -147,18 +147,9 @@ export type CaseStatus =
   | "decided"
   | "escalated";
 
-export type DecisionOutcome =
-  | "eligible"
-  | "ineligible"
-  | "insufficient_evidence"
-  | "escalate";
+export type DecisionOutcome = "eligible" | "ineligible" | "insufficient_evidence" | "escalate";
 
-export type ReviewActionType =
-  | "approve"
-  | "modify"
-  | "reject"
-  | "request_info"
-  | "escalate";
+export type ReviewActionType = "approve" | "modify" | "reject" | "request_info" | "escalate";
 
 export type RuleOutcome =
   | "satisfied"
@@ -230,6 +221,12 @@ export interface Recommendation {
   partial_ratio: string | null;
   missing_evidence: string[];
   flags: string[];
+  /** Phase 10B: present on `eligible` recommendations; null otherwise. */
+  benefit_amount?: BenefitAmount | null;
+  /** Phase 10D: prior recommendation id this one supersedes. */
+  supersedes?: string | null;
+  /** Phase 10D: id of the CaseEvent that triggered this evaluation. */
+  triggered_by_event_id?: string | null;
 }
 
 export interface HumanReviewAction {
@@ -364,11 +361,7 @@ export type ScreenJurisdictionId = (typeof SCREEN_JURISDICTIONS)[number];
 
 export type ScreenLegalStatus = "citizen" | "permanent_resident" | "other";
 
-export type ScreenOutcome =
-  | "eligible"
-  | "ineligible"
-  | "insufficient_evidence"
-  | "escalate";
+export type ScreenOutcome = "eligible" | "ineligible" | "insufficient_evidence" | "escalate";
 
 export type ScreenRuleOutcome =
   | "satisfied"
@@ -411,4 +404,76 @@ export interface ScreenResponse {
   evaluation_date: string;
   /** Set client-side when the mock fallback ran. Never sent by the server. */
   _preview?: boolean;
+  /** Phase 10B: present on `eligible` screens; null otherwise. */
+  benefit_amount?: BenefitAmount | null;
+}
+
+// ── Benefit amount (govops-017, ADR-011) ─────────────────────────────────────
+
+export type BenefitPeriod = "monthly" | "annual" | "lump_sum";
+
+export type FormulaTraceOp =
+  | "const"
+  | "ref"
+  | "field"
+  | "add"
+  | "subtract"
+  | "multiply"
+  | "divide"
+  | "min"
+  | "max"
+  | "clamp";
+
+export interface FormulaTraceStep {
+  op: FormulaTraceOp;
+  inputs: (number | string)[];
+  output: number;
+  citation?: string;
+  note?: string;
+}
+
+export interface BenefitAmount {
+  /** Already rounded to 2dp by the engine. */
+  value: number;
+  /** ISO 4217 — e.g. "CAD". */
+  currency: string;
+  period: BenefitPeriod;
+  formula_trace: FormulaTraceStep[];
+  /** Dedup'd in walk order. */
+  citations: string[];
+}
+
+// ── Case events / reassessment (govops-019, ADR-013) ────────────────────────
+
+export type CaseEventType = "move_country" | "change_legal_status" | "add_evidence" | "re_evaluate";
+
+export interface CaseEvent {
+  id: string;
+  case_id: string;
+  event_type: CaseEventType;
+  effective_date: string;
+  recorded_at: string;
+  actor: string;
+  payload: Record<string, unknown>;
+  note?: string | null;
+  /** Recommendation id this event triggered (if any). */
+  triggered_recommendation_id?: string | null;
+}
+
+export interface CaseEventRequest {
+  event_type: CaseEventType;
+  effective_date: string;
+  payload: Record<string, unknown>;
+  actor?: string;
+  note?: string;
+}
+
+export interface PostEventResponse {
+  event: CaseEvent;
+  recommendation?: Recommendation;
+}
+
+export interface GetEventsResponse {
+  events: CaseEvent[];
+  recommendations: Recommendation[];
 }

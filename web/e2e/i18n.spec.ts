@@ -54,8 +54,6 @@ test("switching to French changes a known nav label", async ({ page }) => {
   // The nav links should now be in French ("Accueil" / "Cas" / "Configuration"
   // depending on the translation file). We assert at least one French label
   // is reachable, accommodating either translation choice.
-  const frenchish = page
-    .getByRole("link", { name: /accueil|cas|configuration|autorité/i })
-    .first();
+  const frenchish = page.getByRole("link", { name: /accueil|cas|configuration|autorité/i }).first();
   await expect(frenchish).toBeVisible({ timeout: 10_000 });
 });

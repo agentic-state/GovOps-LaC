@@ -19,10 +19,7 @@ export function ApplicantPane({ bundle }: { bundle: CaseBundle }) {
         >
           {intl.formatMessage({ id: "cases.applicant.heading" })}
         </h2>
-        <p
-          className="text-2xl text-foreground"
-          style={{ fontFamily: "var(--font-serif)" }}
-        >
+        <p className="text-2xl text-foreground" style={{ fontFamily: "var(--font-serif)" }}>
           {a.legal_name}
         </p>
       </header>

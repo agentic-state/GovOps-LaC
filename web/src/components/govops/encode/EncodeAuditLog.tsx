@@ -24,7 +24,10 @@ export function EncodeAuditLog({ entries }: { entries: EncodingAuditEntry[] }) {
         >
           {intl.formatMessage({ id: "encode.review.audit.heading" })}
         </h2>
-        <ChevronDown className={`size-4 transition-transform ${open ? "rotate-180" : ""}`} aria-hidden />
+        <ChevronDown
+          className={`size-4 transition-transform ${open ? "rotate-180" : ""}`}
+          aria-hidden
+        />
       </button>
       {open && (
         <ol className="space-y-2">

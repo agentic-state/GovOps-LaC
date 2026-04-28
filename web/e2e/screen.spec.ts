@@ -22,10 +22,7 @@ async function fillSomeFields(page: import("@playwright/test").Page) {
 test.describe("/screen — privacy invariants", () => {
   test("no draft key in sessionStorage after filling the form", async ({ page }) => {
     await fillSomeFields(page);
-    const stored = await page.evaluate(
-      (k) => window.sessionStorage.getItem(k),
-      DRAFT_KEY,
-    );
+    const stored = await page.evaluate((k) => window.sessionStorage.getItem(k), DRAFT_KEY);
     expect(stored).toBeNull();
   });
 
@@ -33,10 +30,7 @@ test.describe("/screen — privacy invariants", () => {
     await fillSomeFields(page);
     // Submit — even if validation rejects, no storage write should happen.
     await page.locator('button[type="submit"]').first().click();
-    const stored = await page.evaluate(
-      (k) => window.sessionStorage.getItem(k),
-      DRAFT_KEY,
-    );
+    const stored = await page.evaluate((k) => window.sessionStorage.getItem(k), DRAFT_KEY);
     expect(stored).toBeNull();
   });
 
@@ -46,10 +40,7 @@ test.describe("/screen — privacy invariants", () => {
     await page.waitForSelector("#screen-dob", { state: "visible" });
     await expect(page.locator("#screen-dob")).toHaveValue("");
     await expect(page.locator("#screen-legal-citizen")).not.toBeChecked();
-    const stored = await page.evaluate(
-      (k) => window.sessionStorage.getItem(k),
-      DRAFT_KEY,
-    );
+    const stored = await page.evaluate((k) => window.sessionStorage.getItem(k), DRAFT_KEY);
     expect(stored).toBeNull();
   });
 
@@ -64,5 +55,16 @@ test.describe("/screen — privacy invariants", () => {
       return out;
     });
     expect(screenKeys).toEqual([]);
+  });
+});
+
+test.describe("/cases/$caseId — event timeline (govops-019)", () => {
+  test("renders an event timeline section", async ({ page }) => {
+    await page.goto("/cases/case-2025-0142");
+    await expect(page.getByRole("heading", { name: /event timeline|chronologie/i })).toBeVisible();
+    // "Record event" trigger present
+    await expect(
+      page.getByRole("button", { name: /record event|enregistrer un événement/i }),
+    ).toBeVisible();
   });
 });

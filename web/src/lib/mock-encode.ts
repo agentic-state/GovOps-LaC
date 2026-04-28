@@ -55,7 +55,8 @@ const SAMPLE_PROPOSALS_LLM: RuleProposal[] = [
   {
     id: "prop-003",
     rule_type: "legal_status" as RuleType,
-    description: "Applicant must be a Canadian citizen or legal resident on the day preceding application.",
+    description:
+      "Applicant must be a Canadian citizen or legal resident on the day preceding application.",
     formal_expression: "applicant.legal_status in {'citizen','permanent_resident'}",
     citation: "Old Age Security Act, s. 3(1)(c)",
     parameters: { allowed: ["citizen", "permanent_resident"] },

@@ -67,4 +67,6 @@ if (failures > 0) {
   console.error(`\n✗ i18n check failed: ${failures} missing key reference(s).`);
   process.exit(1);
 }
-console.log(`✓ i18n check passed: ${used.size} keys present in all ${Object.keys(locales).length} locales.`);
+console.log(
+  `✓ i18n check passed: ${used.size} keys present in all ${Object.keys(locales).length} locales.`,
+);
