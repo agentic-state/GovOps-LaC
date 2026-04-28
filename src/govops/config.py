@@ -238,6 +238,13 @@ class ConfigStore:
                 poolclass=StaticPool,
             )
         else:
+            # Ensure the parent directory exists. Without this, SQLite raises
+            # "unable to open database file" when GOVOPS_DB_PATH points at a
+            # location whose parent dir was never created — common in fresh
+            # CI environments where ./var/ isn't a tracked directory.
+            parent = os.path.dirname(os.path.abspath(db_path))
+            if parent:
+                os.makedirs(parent, exist_ok=True)
             self.engine = create_engine(
                 f"sqlite:///{db_path}",
                 connect_args={"check_same_thread": False},
