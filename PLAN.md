@@ -1,7 +1,7 @@
 # GovOps PLAN.md — Law-as-Code v2.0
 
-**Status**: Active — single source of truth for the v2.0 build
-**Branch**: `feat/law-as-code-v2`
+**Status**: Released (v0.4.0) — single source of truth for the v2.0 build, retained for phase history and §12.x follow-ups
+**Branch**: `main` (v2.0 merged; `feat/law-as-code-v2` deleted post-release)
 **Source vision**: [docs/IDEA-GovOps-v2.0-LawAsCode.md](docs/IDEA-GovOps-v2.0-LawAsCode.md)
 **SPRIND alignment**: [docs/design/LAW-AS-CODE.md](docs/design/LAW-AS-CODE.md)
 **Baseline tag**: `pre-lawcode-v0.2.0` (Phase 0 ✅)

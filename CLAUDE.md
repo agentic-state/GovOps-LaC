@@ -13,7 +13,7 @@ Built on **FKTE** (Fractal Knowledge Transformation Engine):
 
 ## Active Track
 
-**Law-as-Code v2.0** is in flight on branch `feat/law-as-code-v2`. The single source of truth for execution is [PLAN.md](PLAN.md). The strategic vision is [docs/IDEA-GovOps-v2.0-LawAsCode.md](docs/IDEA-GovOps-v2.0-LawAsCode.md). ADRs land in [docs/design/ADRs/](docs/design/ADRs/). Rollback point: tag `pre-lawcode-v0.2.0`.
+**Law-as-Code v2.0** shipped as v0.4.0 on `main` (branch `feat/law-as-code-v2` deleted post-release). The execution log lives in [PLAN.md](PLAN.md); §12.x tracks non-blocking follow-ups (i18n native re-look, govops-022 Lovable side). The strategic vision is [docs/IDEA-GovOps-v2.0-LawAsCode.md](docs/IDEA-GovOps-v2.0-LawAsCode.md). ADRs land in [docs/design/ADRs/](docs/design/ADRs/). Rollback point: tag `pre-lawcode-v0.2.0`.
 
 ## Current State
 
