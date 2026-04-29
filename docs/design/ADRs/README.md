@@ -2,7 +2,7 @@
 
 Decisions captured here are load-bearing — they shape what gets built and what does not. The format is intentionally light: context, decision, consequences, alternatives. New ADRs get the next sequential number; superseded ADRs stay in place with a `Superseded by ADR-NNN` (or `Superseded by reality`) line in the status header.
 
-Active track: **Law-as-Code v2.0** (see [PLAN.md](../../../PLAN.md)).
+Active track: **Program-as-Primitive v3.0** (see [PLAN-v3.md](../../../PLAN-v3.md)). v2.0 (Law-as-Code) shipped as v0.4.0; its plan lives in [PLAN.md](../../../PLAN.md).
 
 ## ADR Format
 
@@ -31,6 +31,8 @@ Each ADR follows this structure:
 | 011 | [Calculation rules as typed AST in YAML](ADR-011-calculation-rules-as-typed-ast.md) | Accepted | v2.0 / Phase 10B |
 | 012 | [Notice rendering: derived artefact, template-as-ConfigValue](ADR-012-notice-rendering.md) | Accepted | v2.0 / Phase 10C |
 | 013 | [Event-driven reassessment with supersession chain](ADR-013-event-driven-reassessment.md) | Accepted | v2.0 / Phase 10D |
+| 014 | [Program-as-Primitive (manifest model)](ADR-014-program-as-primitive.md) | Accepted | v3.0 / Gate 1 |
+| 015 | [Canonical Program Shape Library](ADR-015-program-shape-library.md) | Accepted | v3.0 / Gate 2 |
 
 ## Contributing ADRs
 

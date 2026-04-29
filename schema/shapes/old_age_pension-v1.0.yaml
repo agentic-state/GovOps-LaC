@@ -1,0 +1,49 @@
+# yaml-language-server: $schema=../program-shape-v1.0.json
+#
+# Canonical shape for old-age pension programs (e.g. Canada OAS, Japan kōsei nenkin
+# residency-based portion, etc). This is a published shape under ADR-015 — adopters
+# who deploy GovOps for their own jurisdiction may either reuse this shape or fork
+# it under lawcode/<jur>/_shapes/ for local divergence.
+#
+# Programs using this shape: every entry under lawcode/<jur>/programs/oas.yaml
+# (and equivalents — JP, BR-BPC-LOAS, ES, FR, DE, UA). Phase A migrates CA OAS
+# to this shape; Phases A and the v2 retrospective verify that the existing
+# 7-jurisdiction OAS family fits cleanly.
+
+shape_id: old_age_pension
+version: "1.0"
+
+description: |
+  Residency-and-age-based monthly pension for older adults. The canonical
+  example is Canada's Old Age Security: a federal pension paid to applicants
+  who meet an age threshold (typically 60-67) and a minimum residency or
+  contribution period in the home jurisdiction. Most implementations also
+  pro-rate a partial pension below a full-residency threshold (e.g. 1/40 per
+  year of residency for OAS), making the program a residency-weighted
+  monthly entitlement rather than a binary eligibility check.
+
+rule_types_allowed:
+  - age_threshold
+  - residency_minimum
+  - residency_partial
+  - legal_status
+  - evidence_required
+  - exclusion
+  - calculation
+
+required_rules:
+  - age_threshold
+  - residency_minimum
+  - legal_status
+  - evidence_required
+
+outcome_shape: pension_full_or_partial
+
+evaluator_module: govops.shapes.old_age_pension
+evaluator_class: OldAgePensionEvaluator
+
+references:
+  - "ADR-014 — Program-as-Primitive (manifest model)"
+  - "ADR-015 — Canonical Program Shape Library"
+  - "Charter §'The proof' — old-age pension is the v2 baseline; this shape captures it"
+  - "Statutory tradition: Canada Old Age Security Act, R.S.C. 1985, c. O-9, ss. 3-8"

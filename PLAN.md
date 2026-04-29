@@ -344,4 +344,4 @@ Source of truth for the round: [docs/i18n-rounds/2026-04-29/i18n-translation-not
 | Version | Theme | Charter | Status |
 |---|---|---|---|
 | **v2.1** | Hosted live demo on free tiers, multi-provider LLM failover (Groq → OpenRouter → Gemini → Mistral), single-container HF Spaces deploy, daily age-based GC | Designed (memory: `v2_1_hosted_demo_plan.md`) | Queued — execute when ready |
-| **v3.0** | Program-as-primitive: Employment Insurance across 6 jurisdictions, JP as control, citizen surface capped at entry + 1 life-event | [docs/IDEA-GovOps-v3.0-ProgramAsPrimitive.md](docs/IDEA-GovOps-v3.0-ProgramAsPrimitive.md) | Charter approved 2026-04-29 |
+| **v3.0** | Program-as-primitive: Employment Insurance across 6 jurisdictions, JP as control, citizen surface capped at entry + 1 life-event | [docs/IDEA-GovOps-v3.0-ProgramAsPrimitive.md](docs/IDEA-GovOps-v3.0-ProgramAsPrimitive.md); plan in [PLAN-v3.md](PLAN-v3.md) | In flight — Phase A starting 2026-04-29 |

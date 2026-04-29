@@ -1,0 +1,54 @@
+# yaml-language-server: $schema=../program-shape-v1.0.json
+#
+# Canonical shape for unemployment-insurance programs. The v3 charter's
+# "second program" instantiated symmetrically across CA, BR, ES, FR, DE, UA
+# (and explicitly NOT JP — JP stays as architectural control).
+#
+# This shape is a SKELETON at Phase A — `benefit_duration_bounded` and
+# `active_obligation` rule types are introduced in Phase C (ADR-017). Phase D
+# authors the 6 jurisdictional manifests against this shape. Until Phase C
+# lands the new rule primitives in the engine, this shape is reserved but
+# not yet usable for live manifests.
+
+shape_id: unemployment_insurance
+version: "1.0"
+
+description: |
+  Bounded-duration income replacement for workers who have lost their job
+  through no fault of their own and are actively seeking re-employment.
+  Unlike old-age pension (lifetime entitlement at a residency-weighted
+  rate), unemployment insurance is time-bounded (typically weeks of benefit
+  proportional to contribution period) and obligation-bearing (the recipient
+  must remain available for and actively seek work). Examples across the
+  v3 active jurisdictions: Canada Employment Insurance (EI), Brazil
+  Seguro-Desemprego, Spain Prestación por Desempleo, France Allocations
+  chômage, Germany Arbeitslosengeld, Ukraine Допомога по безробіттю.
+
+rule_types_allowed:
+  - residency_minimum            # contribution period maps to residency_minimum semantics
+  - legal_status
+  - evidence_required
+  - exclusion
+  - calculation
+  - benefit_duration_bounded     # NEW in Phase C — the bounded-period primitive
+  - active_obligation            # NEW in Phase C — the job-search obligation primitive
+
+required_rules:
+  - residency_minimum            # contribution period required
+  - legal_status
+  - evidence_required
+  - benefit_duration_bounded     # the load-bearing primitive that makes this NOT a pension
+  - active_obligation            # the load-bearing primitive that makes this NOT passive
+
+outcome_shape: bounded_benefit_period
+
+evaluator_module: govops.shapes.unemployment_insurance
+evaluator_class: UnemploymentInsuranceEvaluator
+
+references:
+  - "ADR-014 — Program-as-Primitive (manifest model)"
+  - "ADR-015 — Canonical Program Shape Library"
+  - "ADR-017 (pending) — New rule primitives: benefit_duration_bounded, active_obligation"
+  - "Charter §'The proof' — EI as second-program proof, JP excluded as control"
+  - "Charter §'New primitives EI forces' — bounded-duration timeline, active-obligation surface"
+  - "Statutory traditions: Canada Employment Insurance Act; Brazil Lei nº 7.998/1990; Spain Real Decreto Legislativo 8/2015; France Code du travail; Germany Sozialgesetzbuch III; Ukraine Закон України «Про загальнообов'язкове державне соціальне страхування на випадок безробіття»"
