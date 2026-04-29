@@ -35,6 +35,10 @@ ENV/
 .claude/projects/
 .claude/sessions/
 .claude/scheduled_tasks.lock
+
+# i18n translation work-in-progress exports (round-tripped via CSV)
+i18n-export-*.csv
+i18n-import-*.csv
 *.swp
 *.swo
 *~
