@@ -1,0 +1,22 @@
+# yaml-language-server: $schema=../../schema/lawcode-v1.0.json
+# global/engine.yaml — generated from legacy_constants.py at Phase 3.2 cutover.
+# Schema: defaults + values list per ADR-003 §Mitigations.
+
+defaults:
+  domain: engine
+  jurisdiction_id: global
+  effective_from: '1900-01-01'
+values:
+- key: global.engine.evidence.dob_types
+  value:
+  - birth_certificate
+  - passport
+  - id_card
+  value_type: list
+- key: global.engine.evidence.residency_types
+  value:
+  - tax_record
+  - residency_declaration
+  - passport_stamps
+  - utility_bill
+  value_type: list

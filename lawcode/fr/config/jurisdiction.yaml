@@ -1,0 +1,14 @@
+# yaml-language-server: $schema=../../../schema/lawcode-v1.0.json
+# fr/config/jurisdiction.yaml — see ca/config/jurisdiction.yaml for the
+# load-bearing comment. Substrate-resolved per govops-022.
+
+defaults:
+  domain: jurisdiction
+  jurisdiction_id: fr-cnav
+  effective_from: '1900-01-01'
+values:
+- key: jurisdiction.fr.howto_url
+  value: 'https://www.service-public.fr/'
+  value_type: string
+  citation: 'Service-Public.fr — portail officiel de l''administration française'
+  rationale: 'Primary citizen-facing landing for la retraite de base. Substrate-resolved per govops-022.'

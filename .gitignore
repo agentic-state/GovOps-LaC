@@ -1,0 +1,94 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+ENV/
+/build/
+/develop-eggs/
+/dist/
+/downloads/
+/eggs/
+/.eggs/
+/lib/
+/lib64/
+/parts/
+/sdist/
+/var/
+/wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# IDEs
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+.idea/
+
+# Claude Code: share team settings; ignore per-dev overrides and local state
+.claude/settings.local.json
+.claude/projects/
+.claude/sessions/
+.claude/scheduled_tasks.lock
+
+# i18n translation work-in-progress exports (round-tripped via CSV)
+i18n-export-*.csv
+i18n-import-*.csv
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Evidence & Logs (keep structure, ignore contents temporarily)
+evidence/*.json
+logs/*.log
+logs/*.txt
+
+# Keep directory structure
+!evidence/.gitkeep
+!logs/.gitkeep
+
+# Environment
+.env
+.env.local
+secrets.yaml
+*.key
+*.pem
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+*.cover
+
+# Playwright (web/)
+web/test-results/
+web/playwright-report/
+web/blob-report/
+web/playwright/.cache/
+web/.last-run.json
+
+# Data Model (temporary local data)
+data/local/*.db
+data/local/*.json
+
+# Generated code (during development)
+generated/
+output/
+
+# Documentation builds
+docs/_build/
+# site/ is the GitHub Pages directory — do not ignore
+# Documentation builds (other than site/)
+docs/_build/
+
+# OS
+Thumbs.db
+
+# Testing (hypothesis)
+.hypothesis/

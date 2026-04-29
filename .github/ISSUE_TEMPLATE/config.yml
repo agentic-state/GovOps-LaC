@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Question / discussion
+    url: https://github.com/agentic-state/GovOps-LaC/discussions
+    about: Open-ended questions, design discussion, "is GovOps the right fit for X?" — keep issues for actionable work.
+  - name: Read the v2.0 plan
+    url: https://github.com/agentic-state/GovOps-LaC/blob/main/PLAN.md
+    about: Phase plan + accepted backlog (§12). Many "is this on the roadmap?" questions are answered there.
+  - name: Read the Law-as-Code mapping
+    url: https://github.com/agentic-state/GovOps-LaC/blob/main/docs/design/LAW-AS-CODE.md
+    about: How GovOps maps onto the SPRIND Law-as-Code framework, with code references.

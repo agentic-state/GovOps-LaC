@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+{% block title %}GovOps - Review Encoding Batch {{ batch.id }}{% endblock %}
+{% block content %}
+<p class="mb-2"><a href="/encode?lang={{ lang }}">&larr; Back to encoding pipeline</a></p>
+
+<div class="card">
+    <h2>Encoding Batch: {{ batch.document_title }}</h2>
+    <table>
+        <tr><td style="width:140px;"><strong>Batch ID</strong></td><td><code>{{ batch.id }}</code></td></tr>
+        <tr><td><strong>Citation</strong></td><td>{{ batch.document_citation }}</td></tr>
+        <tr><td><strong>Method</strong></td><td><span class="badge badge-info">{{ batch.extraction_method }}</span></td></tr>
+        <tr><td><strong>Proposals</strong></td><td>{{ batch.proposals | length }}</td></tr>
+        <tr><td><strong>Created</strong></td><td>{{ batch.created_at.strftime("%Y-%m-%d %H:%M:%S UTC") }}</td></tr>
+    </table>
+</div>
+
+<!-- Source text -->
+<div class="card">
+    <h2>Source Legislative Text</h2>
+    <pre style="max-height:300px; overflow-y:auto;">{{ batch.input_text }}</pre>
+</div>
+
+<!-- Proposals -->
+<div class="card">
+    <h2>Proposed Rules ({{ batch.proposals | length }})</h2>
+    <p class="text-sm text-muted mb-2">Review each proposed rule. Approve it to add to the active rule set, edit to correct, or reject to discard.</p>
+
+    {% set pending_count = batch.proposals | selectattr("status", "equalto", "pending") | list | length %}
+    {% if pending_count > 1 %}
+    <div style="display:flex; gap:0.5rem; margin-bottom:1rem;">
+        <form method="POST" action="/encode/{{ batch.id }}/bulk?lang={{ lang }}">
+            <input type="hidden" name="status" value="approved">
+            <button type="submit" class="btn btn-success btn-sm">Approve All Pending ({{ pending_count }})</button>
+        </form>
+        <form method="POST" action="/encode/{{ batch.id }}/bulk?lang={{ lang }}">
+            <input type="hidden" name="status" value="rejected">
+            <button type="submit" class="btn btn-danger btn-sm">Reject All Pending ({{ pending_count }})</button>
+        </form>
+    </div>
+    {% endif %}
+
+    {% for p in batch.proposals %}
+    <div class="rule-eval {% if p.status.value == 'approved' or p.status.value == 'edited' %}satisfied{% elif p.status.value == 'rejected' %}not_satisfied{% else %}insufficient_evidence{% endif %}" style="margin-bottom:1rem;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem;">
+            <strong>{{ p.proposed_rule.description }}</strong>
+            {% if p.status.value == "pending" %}
+                <span class="badge badge-warning">PENDING REVIEW</span>
+            {% elif p.status.value == "approved" %}
+                <span class="badge badge-success">APPROVED</span>
+            {% elif p.status.value == "edited" %}
+                <span class="badge badge-info">EDITED &amp; APPROVED</span>
+            {% elif p.status.value == "rejected" %}
+                <span class="badge badge-danger">REJECTED</span>
+            {% endif %}
+        </div>
+
+        <table class="text-sm">
+            <tr><td style="width:130px;">Proposal ID</td><td><code>{{ p.id }}</code></td></tr>
+            <tr><td>Rule Type</td><td><span class="badge badge-info">{{ p.proposed_rule.rule_type.value }}</span></td></tr>
+            <tr><td>Citation</td><td class="citation">{{ p.proposed_rule.citation }}</td></tr>
+            <tr><td>Expression</td><td><code>{{ p.proposed_rule.formal_expression }}</code></td></tr>
+            <tr><td>Parameters</td><td><code>{{ p.proposed_rule.parameters }}</code></td></tr>
+            {% if p.source_text %}
+            <tr><td>Source Text</td><td style="font-style:italic; font-size:0.82rem;">{{ p.source_text[:300] }}{% if p.source_text | length > 300 %}...{% endif %}</td></tr>
+            {% endif %}
+        </table>
+
+        {% if p.status.value == "pending" %}
+        <div class="mt-1" style="display:flex; gap:0.5rem; align-items:flex-start; flex-wrap:wrap;">
+            <form method="POST" action="/encode/{{ batch.id }}/review/{{ p.id }}?lang={{ lang }}" style="display:inline;">
+                <input type="hidden" name="status" value="approved">
+                <input type="hidden" name="notes" value="">
+                <button type="submit" class="btn btn-success btn-sm">Approve</button>
+            </form>
+            <form method="POST" action="/encode/{{ batch.id }}/review/{{ p.id }}?lang={{ lang }}" style="display:inline;">
+                <input type="hidden" name="status" value="rejected">
+                <input type="hidden" name="notes" value="">
+                <button type="submit" class="btn btn-danger btn-sm">Reject</button>
+            </form>
+        </div>
+        {% endif %}
+
+        {% if p.reviewed_by %}
+        <p class="text-sm text-muted mt-1">
+            Reviewed by {{ p.reviewed_by }} at {{ p.reviewed_at.strftime("%Y-%m-%d %H:%M UTC") if p.reviewed_at else "N/A" }}
+            {% if p.reviewer_notes %} &mdash; {{ p.reviewer_notes }}{% endif %}
+        </p>
+        {% endif %}
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Commit approved rules -->
+{% set approved_count = batch.proposals | selectattr("status", "in", ["approved", "edited"]) | list | length %}
+{% if approved_count > 0 %}
+<div class="card" style="background:var(--accent); border: 2px solid var(--primary); text-align:center;">
+    <h2 style="border:none;">Commit {{ approved_count }} Approved Rule(s) to Active Engine</h2>
+    <p class="text-sm mb-2">This will add the approved rules to the current jurisdiction's active rule set. The rules will be used in all subsequent case evaluations.</p>
+    <form method="POST" action="/encode/{{ batch.id }}/commit?lang={{ lang }}">
+        <button type="submit" class="btn btn-primary" style="font-size:1rem; padding:0.7rem 2rem;">Commit Rules to Engine</button>
+    </form>
+</div>
+{% endif %}
+
+{% if batch.raw_llm_response %}
+<div class="card">
+    <details>
+        <summary style="cursor:pointer; font-weight:600; color:var(--primary);">Raw LLM Response (for audit)</summary>
+        <pre class="mt-1" style="max-height:400px; overflow-y:auto;">{{ batch.raw_llm_response }}</pre>
+    </details>
+</div>
+{% endif %}
+
+{% if batch.extraction_prompt %}
+<div class="card">
+    <details>
+        <summary style="cursor:pointer; font-weight:600; color:var(--primary);">Extraction Prompt Used (for audit)</summary>
+        <pre class="mt-1" style="max-height:300px; overflow-y:auto;">{{ batch.extraction_prompt }}</pre>
+    </details>
+</div>
+{% endif %}
+{% endblock %}

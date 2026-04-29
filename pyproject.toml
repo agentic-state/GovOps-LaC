@@ -1,0 +1,64 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "govops"
+version = "2.0.0"
+description = "GovOps - Policy-Driven Service Delivery Machine"
+readme = "README.md"
+license = "Apache-2.0"
+requires-python = ">=3.10"
+authors = [
+    { name = "GovOps Contributors" },
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering",
+]
+dependencies = [
+    "fastapi>=0.110.0",
+    "uvicorn[standard]>=0.29.0",
+    "jinja2>=3.1.0",
+    "pydantic>=2.0.0",
+    "python-multipart>=0.0.9",
+    "python-ulid>=2.0.0",
+    "pyyaml>=6.0",
+    "sqlmodel>=0.0.16",
+    "cryptography>=42.0.0",  # Phase 8 / ADR-009 — Ed25519 signing for lawcode federation
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+    "httpx>=0.27.0",
+    "pytest-asyncio>=0.23.0",
+    "jsonschema>=4.21.0",
+]
+
+[project.scripts]
+govops-demo = "govops.cli:main"
+govops = "govops.cli:dispatch"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/govops"]
+
+[tool.hatch.build.targets.wheel.force-include]
+"src/govops/templates" = "govops/templates"
+"src/govops/static" = "govops/static"
+
+[tool.mypy]
+python_version = "3.10"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = false
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"

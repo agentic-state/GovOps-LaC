@@ -1,0 +1,59 @@
+# yaml-language-server: $schema=../../../schema/lawcode-v1.0.json
+# ca/config/rules.yaml — generated from legacy_constants.py at Phase 3.2 cutover.
+# Schema: defaults + values list per ADR-003 §Mitigations.
+
+defaults:
+  domain: rule
+  jurisdiction_id: ca-oas
+  effective_from: '1900-01-01'
+values:
+- key: ca.rule.age-65.min_age
+  value: 65
+  value_type: number
+- key: ca.rule.evidence-age.required_types
+  value:
+  - birth_certificate
+  value_type: list
+- key: ca.rule.legal-status.accepted_statuses
+  value:
+  - citizen
+  - permanent_resident
+  value_type: list
+- key: ca.rule.residency-10.home_countries
+  value:
+  - CA
+  - CANADA
+  - CAN
+  value_type: list
+- key: ca.rule.residency-10.min_years
+  value: 10
+  value_type: number
+- key: ca.rule.residency-pension-type.full_years
+  value: 40
+  value_type: number
+- key: ca.rule.residency-pension-type.min_years
+  value: 10
+  value_type: number
+- key: ca.calc.oas.base_monthly_amount
+  value: 727.67
+  value_type: number
+  effective_to: '2026-01-01'
+  citation: 'Old Age Security Act, R.S.C. 1985, c. O-9, s. 7'
+  rationale: 'Basic OAS amount for ages 65-74, in effect from time-immemorial-default through 2025-Q4. Closed at 2026-01-01 by the Q1-2026 indexation supersession below. Disciplined supersession per schema/README.md §Supersession: close the prior record, insert a new record with the new value and effective_from.'
+- key: ca.calc.oas.base_monthly_amount
+  value: 735.45
+  value_type: number
+  effective_from: '2026-01-01'
+  supersedes: 'ca.calc.oas.base_monthly_amount@1900-01-01'
+  citation: 'Old Age Security Act, R.S.C. 1985, c. O-9, s. 7.1 (CPI indexation)'
+  rationale: 'Quarterly cost-of-living adjustment effective 2026-01-01. Approximate +1.07% lift over 2025-Q4 reflecting CPI movement; the exact figure is illustrative — the load-bearing point is that the formula structure does not change, only the coefficient. A case evaluated 2025-12-31 sees 727.67; the same case re-evaluated 2026-01-01 (or later) sees 735.45. Configure-without-deploy in action.'
+- key: ca.calc.oas.currency
+  value: 'CAD'
+  value_type: string
+  citation: 'Old Age Security Act, R.S.C. 1985, c. O-9, s. 7 (currency)'
+  rationale: 'Currency label for OAS benefit amount rendering. Lives in the substrate (not as an inline literal in seed.py) so the Phase 2 regression gate stays honest: every value the engine surfaces lives in lawcode/.'
+- key: ca.calc.oas.period
+  value: 'monthly'
+  value_type: string
+  citation: 'Old Age Security Act, R.S.C. 1985, c. O-9, s. 7 (monthly cadence)'
+  rationale: 'Period label for OAS benefit amount rendering. Same reasoning as currency: structural labels also live in the substrate.'

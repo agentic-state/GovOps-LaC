@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GovOps — Law as Code reference implementation</title>
+<meta name="description" content="GovOps is an open public-good reference implementation of Law as Code: legislation translated into deterministic, auditable, jurisdiction-aware software with full provenance from decision back to source authority. Seven jurisdictions, six languages, Apache 2.0.">
+<meta name="theme-color" content="#fcfbf7">
+<meta property="og:title" content="GovOps — Law as Code reference implementation">
+<meta property="og:description" content="An open public-good reference implementation of Law as Code. Seven jurisdictions, six languages, dated configuration substrate, full provenance from decision back to source authority.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://agentic-state.github.io/GovOps-LaC/">
+<meta property="og:image" content="https://agentic-state.github.io/GovOps-LaC/screenshots/v2/01-home.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="GovOps — Law as Code reference implementation">
+<meta name="twitter:description" content="An open public-good reference implementation of Law as Code. Apache 2.0.">
+<meta name="twitter:image" content="https://agentic-state.github.io/GovOps-LaC/screenshots/v2/01-home.png">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='10' fill='%23202028'/%3E%3Ctext x='32' y='44' font-family='Georgia,serif' font-size='40' font-weight='700' text-anchor='middle' fill='%23fcfbf7'%3EG%3C/text%3E%3Ccircle cx='42' cy='22' r='4' fill='%237959bd'/%3E%3C/svg%3E">
+<style>
+  /* GovOps tokens — light, parchment-on-ink. Mirrors web/src/styles.css with
+     hex fallbacks (no OKLCH dependency for the static page). Lavender = agentic
+     provenance; civic gold = human authority. */
+  :root {
+    --parchment-50:  #fcfbf7;
+    --parchment-100: #f8f6ef;
+    --parchment-200: #eeeae0;
+    --parchment-300: #e0dac9;
+    --ink-50:  #f7f7f8;
+    --ink-100: #ededee;
+    --ink-200: #d5d5d8;
+    --ink-300: #b4b4ba;
+    --ink-400: #8a8a92;
+    --ink-500: #66666e;
+    --ink-700: #3a3a42;
+    --ink-900: #1d1d24;
+    --ink-950: #131319;
+    --lavender-100: #ede4f7;
+    --lavender-300: #c2adea;
+    --lavender-500: #7959bd;
+    --lavender-600: #5e4296;
+    --lavender-700: #4d3989;
+    --civic-gold-200: #e8d6a4;
+    --civic-gold-500: #b89441;
+    --civic-gold-700: #7d6429;
+    --enacted: #3b9159;
+
+    --background:        var(--parchment-50);
+    --surface:           var(--parchment-100);
+    --surface-sunken:    var(--parchment-200);
+    --foreground:        var(--ink-900);
+    --foreground-muted:  var(--ink-500);
+    --foreground-subtle: var(--ink-400);
+    --border:            var(--ink-200);
+    --border-strong:     var(--ink-300);
+    --primary:           var(--ink-900);
+    --primary-foreground:var(--parchment-50);
+
+    --serif: "Source Serif 4", "Source Serif Pro", "Iowan Old Style", "Palatino Linotype", Palatino, "Liberation Serif", Georgia, "Times New Roman", serif;
+    --sans:  -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --mono:  "JetBrains Mono", "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, "Cascadia Mono", Consolas, monospace;
+  }
+
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background: var(--background);
+    color: var(--foreground);
+    font-family: var(--serif);
+    font-size: 17px;
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  ::selection { background: var(--lavender-300); color: var(--ink-950); }
+
+  a { color: var(--lavender-700); text-decoration-thickness: 1px; text-underline-offset: 2px; }
+  a:hover { color: var(--lavender-600); }
+  a:focus-visible {
+    outline: 2px solid var(--lavender-500);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+
+  /* Typography */
+  h1, h2, h3, h4 { font-family: var(--serif); font-weight: 700; letter-spacing: -0.015em; line-height: 1.18; color: var(--foreground); margin-top: 0; }
+  h1 { font-size: clamp(2.25rem, 4.2vw, 3.5rem); margin-bottom: 1.25rem; }
+  h2 { font-size: clamp(1.65rem, 2.6vw, 2.1rem); margin-bottom: 1rem; }
+  h3 { font-size: 1.2rem; margin-bottom: 0.5rem; }
+  p { margin: 0 0 1rem; }
+  ul { margin: 0 0 1rem; padding-left: 1.4em; }
+  li + li { margin-top: 0.4rem; }
+
+  .mono   { font-family: var(--mono); font-size: 0.86em; }
+  .sans   { font-family: var(--sans); }
+  .small  { font-size: 0.875rem; }
+  .muted  { color: var(--foreground-muted); }
+  .subtle { color: var(--foreground-subtle); }
+
+  .container { max-width: 1080px; margin: 0 auto; padding: 0 1.5rem; }
+  .narrow    { max-width: 720px; margin-left: auto; margin-right: auto; padding: 0 1.5rem; }
+
+  /* Top disclaimer (load-bearing) */
+  .disclaimer-top {
+    background: var(--surface-sunken);
+    border-bottom: 1px solid var(--border);
+    color: var(--ink-700);
+    font-size: 0.82rem;
+    line-height: 1.5;
+    padding: 0.7rem 1.5rem;
+    text-align: center;
+  }
+  .disclaimer-top strong { color: var(--ink-900); }
+
+  /* Site header */
+  .site-header {
+    border-bottom: 1px solid var(--border);
+    background: rgba(252, 251, 247, 0.92);
+    backdrop-filter: saturate(140%) blur(8px);
+    position: sticky;
+    top: 0;
+    z-index: 30;
+  }
+  .site-header .row {
+    display: flex; align-items: center; gap: 1.75rem;
+    padding: 0.95rem 0;
+  }
+  .wordmark {
+    font-family: var(--serif);
+    font-size: 1.45rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    color: var(--foreground);
+    text-decoration: none;
+  }
+  .wordmark .o-accent { color: var(--lavender-500); }
+  .nav { display: flex; gap: 1.5rem; flex: 1; flex-wrap: wrap; font-family: var(--sans); font-size: 0.92rem; }
+  .nav a { color: var(--foreground-muted); text-decoration: none; }
+  .nav a:hover { color: var(--foreground); }
+  .nav .repo-cta {
+    margin-left: auto;
+    color: var(--foreground);
+    border: 1px solid var(--border-strong);
+    padding: 0.4rem 0.85rem;
+    border-radius: 6px;
+    background: var(--surface);
+  }
+  .nav .repo-cta:hover { background: var(--ink-50); }
+
+  /* Hero */
+  .hero { padding: 4.5rem 0 3.5rem; }
+  .hero .eyebrow {
+    font-family: var(--mono);
+    font-size: 0.74rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--foreground-subtle);
+    border-left: 3px solid var(--civic-gold-500);
+    padding-left: 0.95rem;
+    margin-bottom: 1.5rem;
+  }
+  .hero h1 { max-width: 18ch; }
+  .hero h1 .accent { color: var(--lavender-600); font-style: italic; }
+  .hero .lede { font-size: 1.18rem; line-height: 1.55; color: var(--ink-700); max-width: 60ch; margin-bottom: 2rem; }
+  .cta-row { display: flex; gap: 0.85rem; flex-wrap: wrap; margin-bottom: 2rem; }
+  .btn {
+    display: inline-flex; align-items: center; gap: 0.55rem;
+    font-family: var(--sans); font-size: 0.95rem; font-weight: 500;
+    padding: 0.7rem 1.25rem;
+    border-radius: 8px;
+    text-decoration: none;
+    border: 1px solid transparent;
+    transition: background 160ms ease, border-color 160ms ease;
+  }
+  .btn-primary { background: var(--ink-900); color: var(--parchment-50); }
+  .btn-primary:hover { background: var(--ink-700); color: var(--parchment-50); }
+  .btn-secondary { background: var(--surface); color: var(--foreground); border-color: var(--border-strong); }
+  .btn-secondary:hover { background: var(--ink-50); color: var(--foreground); }
+  .badges { display: flex; gap: 0.45rem; flex-wrap: wrap; }
+  .badge {
+    font-family: var(--mono);
+    font-size: 0.74rem;
+    letter-spacing: 0.04em;
+    color: var(--foreground-muted);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 0.25rem 0.65rem;
+    border-radius: 999px;
+  }
+
+  /* Hero shot */
+  .hero-shot { padding: 0 0 4rem; }
+  .hero-shot figure { margin: 0; }
+  .hero-shot img {
+    display: block;
+    width: 100%;
+    height: auto;
+    border-radius: 14px;
+    border: 1px solid var(--border-strong);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 12px 32px rgba(29,29,36,0.08);
+  }
+  .hero-shot figcaption {
+    margin-top: 1rem;
+    font-size: 0.92rem;
+    color: var(--foreground-muted);
+    text-align: center;
+    max-width: 60ch; margin-left: auto; margin-right: auto;
+  }
+
+  /* Generic section */
+  section { padding: 4rem 0; }
+  section + section { border-top: 1px solid var(--border); }
+  .section-eyebrow {
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--foreground-subtle);
+    margin-bottom: 0.6rem;
+  }
+  .section-lede { font-size: 1.05rem; color: var(--foreground-muted); max-width: 65ch; margin-bottom: 2.25rem; }
+
+  /* Audience table */
+  .audience { width: 100%; border-collapse: collapse; font-family: var(--sans); font-size: 0.95rem; }
+  .audience thead { display: none; }
+  .audience tr { border-bottom: 1px solid var(--border); }
+  .audience tr:first-child { border-top: 1px solid var(--border); }
+  .audience td { padding: 1.1rem 0.5rem 1.1rem 0; vertical-align: top; }
+  .audience td:first-child {
+    font-family: var(--serif);
+    font-weight: 600;
+    width: 30%;
+    color: var(--foreground);
+    padding-right: 1.5rem;
+  }
+  .audience td:last-child { color: var(--foreground-muted); }
+  .audience .start { font-family: var(--mono); font-size: 0.82rem; display: inline-block; margin-top: 0.4rem; }
+
+  /* Screenshot gallery */
+  .gallery {
+    display: grid;
+    gap: 1.75rem;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  }
+  .shot {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    margin: 0;
+    display: flex; flex-direction: column;
+  }
+  .shot img {
+    display: block;
+    width: 100%;
+    height: auto;
+    border-bottom: 1px solid var(--border);
+  }
+  .shot figcaption { padding: 1rem 1.1rem 1.2rem; font-family: var(--sans); }
+  .shot figcaption .title {
+    display: block;
+    font-family: var(--serif);
+    font-weight: 700;
+    font-size: 1.02rem;
+    color: var(--foreground);
+    margin-bottom: 0.35rem;
+  }
+  .shot figcaption .body { color: var(--foreground-muted); font-size: 0.9rem; line-height: 1.5; }
+  .shot figcaption .ribbon {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--lavender-700);
+    background: var(--lavender-100);
+    padding: 0.18rem 0.55rem;
+    border-radius: 4px;
+    margin-bottom: 0.5rem;
+  }
+  .shot figcaption .ribbon.gold { color: var(--civic-gold-700); background: #f4e9c8; }
+
+  /* SPRIND mapping */
+  .sprind {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+  }
+  .sprind .item {
+    border-left: 3px solid var(--civic-gold-500);
+    padding: 0.4rem 0 0.5rem 1.1rem;
+  }
+  .sprind .item.sixth { border-left-color: var(--lavender-500); }
+  .sprind .item .label {
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--foreground-subtle);
+    margin-bottom: 0.25rem;
+  }
+  .sprind .item .text { font-family: var(--serif); font-size: 1rem; color: var(--foreground); margin-bottom: 0.4rem; }
+  .sprind .item .where { font-family: var(--mono); font-size: 0.82rem; color: var(--foreground-muted); }
+
+  /* Architecture / build summary */
+  .build-grid {
+    display: grid;
+    gap: 1.5rem;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  }
+  .build-card {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.25rem 1.4rem;
+    background: var(--surface);
+  }
+  .build-card h3 { font-size: 1rem; margin-bottom: 0.5rem; }
+  .build-card .meta { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--foreground-subtle); margin-bottom: 0.4rem; }
+  .build-card ul { padding-left: 1.1em; font-size: 0.92rem; color: var(--foreground-muted); margin: 0; }
+  .build-card li { line-height: 1.5; }
+
+  /* Quickstart */
+  .quickstart {
+    background: var(--ink-950);
+    color: var(--parchment-100);
+    border-radius: 12px;
+    padding: 1.5rem 1.75rem;
+    font-family: var(--mono);
+    font-size: 0.88rem;
+    line-height: 1.65;
+    overflow-x: auto;
+  }
+  .quickstart .comment { color: var(--ink-400); }
+  .quickstart .url { color: var(--lavender-300); }
+
+  /* Contribute table */
+  .contrib-table { width: 100%; border-collapse: collapse; font-family: var(--sans); font-size: 0.93rem; }
+  .contrib-table thead th {
+    text-align: left;
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--foreground-subtle);
+    padding: 0.6rem 0.5rem;
+    border-bottom: 1px solid var(--border-strong);
+  }
+  .contrib-table td {
+    padding: 0.95rem 0.5rem;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+    color: var(--foreground-muted);
+  }
+  .contrib-table td:first-child { color: var(--foreground); font-weight: 500; width: 28%; }
+  .contrib-table td:nth-child(2) { font-family: var(--mono); font-size: 0.82rem; width: 14%; color: var(--foreground); }
+
+  /* Footer */
+  footer.site {
+    background: var(--ink-950);
+    color: var(--ink-300);
+    padding: 3rem 0 2rem;
+    margin-top: 3rem;
+    font-family: var(--sans);
+    font-size: 0.9rem;
+  }
+  footer.site h4 { color: var(--parchment-100); font-size: 0.84rem; font-family: var(--mono); letter-spacing: 0.18em; text-transform: uppercase; margin-bottom: 0.85rem; font-weight: 500; }
+  footer.site a { color: var(--lavender-300); text-decoration: none; }
+  footer.site a:hover { text-decoration: underline; }
+  footer.site .footer-grid { display: grid; gap: 2rem; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+  footer.site ul { list-style: none; padding: 0; margin: 0; }
+  footer.site li { margin-bottom: 0.45rem; }
+  footer.site .baseline { margin-top: 2.5rem; padding-top: 1.5rem; border-top: 1px solid var(--ink-700); color: var(--ink-400); }
+  footer.site .baseline-disclaimer { font-size: 0.78rem; line-height: 1.55; color: var(--ink-400); max-width: 80ch; margin: 0.75rem auto 0; }
+
+  /* Responsive */
+  @media (max-width: 720px) {
+    body { font-size: 16px; }
+    .hero { padding: 3rem 0 2.5rem; }
+    .site-header .row { flex-wrap: wrap; gap: 1rem; }
+    .nav { width: 100%; justify-content: flex-start; }
+    .nav .repo-cta { margin-left: 0; }
+    .audience td:first-child { width: 100%; display: block; padding-bottom: 0.25rem; }
+    .audience td:last-child { display: block; padding-top: 0.25rem; padding-bottom: 1.1rem; }
+    .audience tr { display: block; padding: 0.5rem 0; }
+  }
+
+  @media (prefers-color-scheme: dark) {
+    /* The marketing landing intentionally stays light/printable; the product
+       itself supports a dark theme. Contributors who want dark can flip the
+       browser. No automatic dark mode here to keep the page reliable in PDF
+       prints and government-grade accessibility audits. */
+  }
+</style>
+</head>
+<body>
+
+<div class="disclaimer-top">
+  <strong>Disclaimer.</strong> Independent open-source prototype. Not affiliated with, endorsed by, or representing any government, department, agency, or initiative — including SPRIND, the Agentic State paper authors (Ilves, Kilian, Parazzoli, Peixoto, Velsberg), or any of the seven jurisdictions used as illustrative case studies. The <code>agentic-state</code> GitHub organization is an independent implementation effort whose name signals framework alignment, not authorship or endorsement. Legislative text is publicly available law interpreted by the author for illustrative purposes only — not authoritative operational guidance.
+</div>
+
+<header class="site-header">
+  <div class="container row">
+    <a href="#" class="wordmark">Gov<span class="o-accent">O</span>ps</a>
+    <nav class="nav" aria-label="Primary">
+      <a href="#what">What it is</a>
+      <a href="#proof">See it</a>
+      <a href="#build">How it's built</a>
+      <a href="#sprind">Law as Code</a>
+      <a href="#contribute">Contribute</a>
+      <a href="https://github.com/agentic-state/GovOps-LaC" class="repo-cta">View on GitHub →</a>
+    </nav>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="container">
+    <div class="eyebrow">v0.4.0 · Law-as-Code · Apache 2.0</div>
+    <h1>Statute meets <span class="accent">System</span>.</h1>
+    <p class="lede">
+      GovOps is an open public-good reference implementation of <strong>Law as Code</strong>: legislation translated into deterministic, auditable, jurisdiction-aware software with full provenance from decision back to source authority. Behaviour changes are configuration writes, not deploys. A case evaluated against 2025 still resolves with 2025's substrate after the rules change in 2026.
+    </p>
+    <div class="cta-row">
+      <a class="btn btn-primary" href="https://github.com/agentic-state/GovOps-LaC">Browse the source on GitHub</a>
+      <a class="btn btn-secondary" href="#what">Who is this for?</a>
+    </div>
+    <div class="badges">
+      <span class="badge">7 jurisdictions</span>
+      <span class="badge">6 locales</span>
+      <span class="badge">375 backend tests</span>
+      <span class="badge">53 web tests</span>
+      <span class="badge">Cross-browser E2E</span>
+      <span class="badge">Apache 2.0</span>
+    </div>
+  </div>
+</section>
+
+<section class="hero-shot" aria-label="Product home page">
+  <div class="container">
+    <figure>
+      <img src="screenshots/v2/01-home.png" alt="GovOps home page — three registers, one record. Agent-drafted policy, human-ratified by ministers and councils, citizen-auditable through diffable signed change history." loading="eager" width="1440" height="900">
+      <figcaption>The product home — three registers (agent-drafted, human-ratified, citizen-auditable) summarise the v2.0 thesis. Captured 2026-04-29 from the live dev server.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<section id="what">
+  <div class="container">
+    <div class="section-eyebrow">Who · What it gives you</div>
+    <h2>If you are…</h2>
+    <p class="section-lede">GovOps is a working MVP demo other contributors can fork to build whatever else they need — not a production multi-tenant platform. Five entry points:</p>
+    <table class="audience">
+      <thead><tr><th>Audience</th><th>What you get</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>Policy / legal team</td>
+          <td>
+            <strong>Configure-without-deploy.</strong> Change a statutory threshold by drafting a new dated <span class="mono">ConfigValue</span> record with citation + rationale. Dual approval. Full audit. Effective dates honour the statute's calendar, not yours.
+            <br><a class="start" href="https://github.com/agentic-state/GovOps-LaC/blob/main/docs/design/LAW-AS-CODE.md">→ docs/design/LAW-AS-CODE.md</a>
+          </td>
+        </tr>
+        <tr>
+          <td>Citizen</td>
+          <td>
+            <strong>Self-screen for a benefit.</strong> Estimate eligibility without creating a case, without storing PII, without an audit row. The citizen sees the same rule trace the officer would see.
+            <br><a class="start" href="#proof">→ See the /screen route</a>
+          </td>
+        </tr>
+        <tr>
+          <td>Auditor</td>
+          <td>
+            <strong>Every recommendation traces back.</strong> <span class="mono">Decision → Rule → ConfigValue → Citation → Authority → Jurisdiction</span>, with the exact substrate values that were in effect on the evaluation date.
+            <br><a class="start" href="https://github.com/agentic-state/GovOps-LaC/blob/main/src/govops/api.py">→ /api/cases/{id}/audit</a>
+          </td>
+        </tr>
+        <tr>
+          <td>Government / contributor</td>
+          <td>
+            <strong>Fork the repo, drop in your jurisdiction's YAML, run.</strong> Seven reference jurisdictions × six locales already shipped. Adding an eighth costs one YAML tree + one Python registration + four demo cases.
+            <br><a class="start" href="https://github.com/agentic-state/GovOps-LaC/blob/main/CONTRIBUTING.md">→ CONTRIBUTING.md</a>
+          </td>
+        </tr>
+        <tr>
+          <td>Researcher / SPRIND-curious</td>
+          <td>
+            <strong>A working reference against the SPRIND "Law as Code" framework's five elements</strong>, plus a sixth GovOps adds (the interpretive apparatus — including LLM prompts — is itself versioned configuration).
+            <br><a class="start" href="#sprind">→ SPRIND mapping</a>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section id="proof">
+  <div class="container">
+    <div class="section-eyebrow">Proof · Real captures, not mockups</div>
+    <h2>See it working</h2>
+    <p class="section-lede">Screenshots below are PNGs captured by Playwright against the live v0.4.0 dev server (Vite + TanStack + shadcn, parchment-on-ink theme). Click any image to see it full-resolution.</p>
+
+    <div class="gallery">
+
+      <figure class="shot">
+        <a href="screenshots/v2/06-screen-ca.png"><img src="screenshots/v2/06-screen-ca.png" alt="Citizen self-screening form for Canada OAS — date of birth, legal status, country of birth, residency periods, evidence checkboxes." loading="lazy" width="1440" height="900"></a>
+        <figcaption>
+          <span class="ribbon">CITIZEN · NO PII STORED</span>
+          <span class="title">Self-screening — /screen/&lt;jurisdiction&gt;</span>
+          <span class="body">A citizen estimates eligibility without creating a case. Form state lives in React state only — no <span class="mono">sessionStorage</span>, no audit row. The disclaimer is load-bearing; the trace shows which rule is satisfied and which is not.</span>
+        </figcaption>
+      </figure>
+
+      <figure class="shot">
+        <a href="screenshots/v2/09-config.png"><img src="screenshots/v2/09-config.png" alt="ConfigValue admin — searchable list of every parameter the engine resolves, with key, value, type, jurisdiction chip, and effective_from date." loading="lazy" width="1440" height="900"></a>
+        <figcaption>
+          <span class="ribbon gold">SUBSTRATE · CONFIGURE WITHOUT DEPLOY</span>
+          <span class="title">ConfigValue admin — /config</span>
+          <span class="body">Every value the engine touches is a dated record: thresholds, accepted statuses, calculation coefficients, UI labels, even LLM prompts. Search by key prefix, filter by jurisdiction, click through to the timeline.</span>
+        </figcaption>
+      </figure>
+
+      <figure class="shot">
+        <a href="screenshots/v2/10-config-approvals.png"><img src="screenshots/v2/10-config-approvals.png" alt="Approval queue — drafted ConfigValues awaiting dual approval, with author, citation, rationale, and approve / request-changes / reject actions." loading="lazy" width="1440" height="900"></a>
+        <figcaption>
+          <span class="ribbon gold">GOVERNANCE · DUAL APPROVAL</span>
+          <span class="title">Approval queue — /config/approvals</span>
+          <span class="body">Every change is a draft until two humans approve it (per <a href="https://github.com/agentic-state/GovOps-LaC/blob/main/docs/design/ADRs/ADR-008-prompt-as-config-approval-policy.md">ADR-008</a>). Reject and request-changes are first-class actions; the rationale is mandatory.</span>
+        </figcaption>
+      </figure>
+
+      <figure class="shot">
+        <a href="screenshots/v2/04-authority.png"><img src="screenshots/v2/04-authority.png" alt="Authority chain browser — Constitution to Act to Regulation to Service decision, with citations and effective dates per layer." loading="lazy" width="1440" height="900"></a>
+        <figcaption>
+          <span class="ribbon gold">TRACEABILITY · AUTHORITY CHAIN</span>
+          <span class="title">Authority — /authority</span>
+          <span class="body">Browse the legal lineage from a jurisdiction's constitution down through statute, regulation, and policy guidance. Every formalized rule cites a specific section.</span>
+        </figcaption>
+      </figure>
+
+      <figure class="shot">
+        <a href="screenshots/v2/08-impact.png"><img src="screenshots/v2/08-impact.png" alt="Citation impact search — query 'OAS Act, s. 3(1)' returns every ConfigValue across every jurisdiction that references that citation." loading="lazy" width="1440" height="900"></a>
+        <figcaption>
+          <span class="ribbon">RESEARCH · IMPACT SEARCH</span>
+          <span class="title">Citation impact — /impact</span>
+          <span class="body">When a statute changes, see in one query every parameter, every prompt, every notice template, across every jurisdiction, that points at that citation. Server-side pagination; URL-persisted query.</span>
+        </figcaption>
+      </figure>
+
+      <figure class="shot">
+        <a href="screenshots/v2/12-admin-federation.png"><img src="screenshots/v2/12-admin-federation.png" alt="Federation registry — Ed25519-signed lawcode packs from peer publishers, with trust state, signed/unsigned chip, and per-pack actions." loading="lazy" width="1440" height="900"></a>
+        <figcaption>
+          <span class="ribbon">FEDERATION · ED25519 SIGNED PACKS</span>
+          <span class="title">Federation — /admin/federation</span>
+          <span class="body">A second repository can publish its own jurisdiction as an Ed25519-signed pack. The main repo verifies the manifest, records source provenance in audit, and rejects unsigned by default (<a href="https://github.com/agentic-state/GovOps-LaC/blob/main/docs/design/ADRs/ADR-009-federation-trust-model.md">ADR-009</a>).</span>
+        </figcaption>
+      </figure>
+
+      <figure class="shot">
+        <a href="screenshots/v2/13-encode.png"><img src="screenshots/v2/13-encode.png" alt="Encoding pipeline — paste statutory text, an LLM extracts candidate rules, a human reviews each proposal, accepted proposals commit as ConfigValue records." loading="lazy" width="1440" height="900"></a>
+        <figcaption>
+          <span class="ribbon">PIPELINE · AI-ASSISTED, HUMAN-RATIFIED</span>
+          <span class="title">Encoding — /encode</span>
+          <span class="body">Statute text in, candidate rules out (LLM-assisted). Every proposal is reviewed by a human; accepted proposals emit commit-ready YAML, not Python. The exact prompt that ran is recorded in the batch audit and reproducible.</span>
+        </figcaption>
+      </figure>
+
+      <figure class="shot">
+        <a href="screenshots/v2/14-screen-fr.png"><img src="screenshots/v2/14-screen-fr.png" alt="Self-screening for France — Retraite de base (CNAV), République française. Substrate-driven program text renders in French." loading="lazy" width="1440" height="900"></a>
+        <figcaption>
+          <span class="ribbon">MULTI-JURISDICTION · SAME PIPELINE</span>
+          <span class="title">France — /screen/fr</span>
+          <span class="body">Same engine, same UI surface; substrate switches the program (Retraite de base, CNAV) and the jurisdiction (République française) to France's. Seven jurisdictions wired through the identical pipeline.</span>
+        </figcaption>
+      </figure>
+
+    </div>
+  </div>
+</section>
+
+<section id="build">
+  <div class="container">
+    <div class="section-eyebrow">Build · How it was implemented</div>
+    <h2>The substrate underneath</h2>
+    <p class="section-lede">Every parameter the engine resolves — age threshold, residency minimum, accepted statuses, calculation coefficients, UI labels, even the LLM prompts — lives as a dated <span class="mono">ConfigValue</span> record under <span class="mono">lawcode/</span>. The engine queries <span class="mono">resolve(key, evaluation_date, jurisdiction_id)</span> instead of reading a constant. Old evaluations stay reproducible because the substrate is dated, not destructive.</p>
+
+    <div class="build-grid">
+      <div class="build-card">
+        <div class="meta">Backend</div>
+        <h3>Python · FastAPI · Pydantic</h3>
+        <ul>
+          <li>Deterministic rule engine (7 rule types incl. typed-AST <span class="mono">calculation</span>)</li>
+          <li>Embedded SQLite for substrate persistence (<a href="https://github.com/agentic-state/GovOps-LaC/blob/main/docs/design/ADRs/ADR-010-sqlite-from-phase-6.md">ADR-010</a>)</li>
+          <li>Schema-validated YAML in CI (<span class="mono">21 files · 564 records</span>)</li>
+          <li>Ed25519 federation pipeline (<a href="https://github.com/agentic-state/GovOps-LaC/blob/main/docs/design/ADRs/ADR-009-federation-trust-model.md">ADR-009</a>)</li>
+          <li>375 tests on Python 3.10 / 3.11 / 3.12</li>
+        </ul>
+      </div>
+      <div class="build-card">
+        <div class="meta">Frontend</div>
+        <h3>Vite · TanStack · shadcn</h3>
+        <ul>
+          <li>React 19 + TanStack Start (SSR, flat routes)</li>
+          <li>Tailwind v4 + shadcn/ui + react-intl (ICU)</li>
+          <li>23 routes, 6 locales × ~498 keys</li>
+          <li>Dark + light themes; parchment-on-ink palette</li>
+          <li>Cross-browser Playwright + axe (Chromium / Firefox / WebKit)</li>
+        </ul>
+      </div>
+      <div class="build-card">
+        <div class="meta">Process</div>
+        <h3>12 phases · 28 ADRs</h3>
+        <ul>
+          <li>Built in ~16 weeks of evening / weekend work, solo</li>
+          <li>Every load-bearing decision recorded as an ADR</li>
+          <li><a href="https://github.com/agentic-state/GovOps-LaC/blob/main/PLAN.md">PLAN.md</a> tracks phases + accepted backlog</li>
+          <li>Conventional Commits; CI matrix on every PR</li>
+          <li>Apache 2.0 — open public-good posture preserved</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="sprind">
+  <div class="container">
+    <div class="section-eyebrow">Framework · SPRIND Law-as-Code mapping</div>
+    <h2>Five SPRIND elements + a sixth</h2>
+    <p class="section-lede">SPRIND's "Law as Code" initiative names five foundational elements for digital legal infrastructure. GovOps implements all five and adds a sixth that SPRIND does not yet articulate. Full element-by-element code mapping in <a href="https://github.com/agentic-state/GovOps-LaC/blob/main/docs/design/LAW-AS-CODE.md">docs/design/LAW-AS-CODE.md</a>.</p>
+
+    <div class="sprind">
+      <div class="item">
+        <div class="label">Element 1 · Binding schema for executable legal norms</div>
+        <p class="text">JSON Schema for <span class="mono">ConfigValue</span> records and <span class="mono">lawcode/</span> file shape; CI gate rejects malformed YAML.</p>
+        <div class="where">schema/configvalue-v1.0.json · schema/lawcode-v1.0.json · scripts/validate_lawcode.py</div>
+      </div>
+      <div class="item">
+        <div class="label">Element 2 · Open-source legal-coding editors</div>
+        <p class="text">Working editor for the legal code: search, timeline, diff, draft, dual-approval, prompt admin.</p>
+        <div class="where">web/src/routes/config.* · web/src/routes/encode.*</div>
+      </div>
+      <div class="item">
+        <div class="label">Element 3 · AI-powered legal-coding processes</div>
+        <p class="text">Statute text in → candidate rules out (LLM-assisted) → human review → commit-ready YAML.</p>
+        <div class="where">src/govops/encoder.py · src/govops/yaml_emitter.py</div>
+      </div>
+      <div class="item">
+        <div class="label">Element 4 · Central repository of the official legal code</div>
+        <p class="text">Versioned <span class="mono">lawcode/</span> tree per jurisdiction; federation lets a second repo publish a peer jurisdiction with Ed25519 signing.</p>
+        <div class="where">lawcode/{ca,br,es,fr,de,ua,jp}/config/ · src/govops/federation.py</div>
+      </div>
+      <div class="item">
+        <div class="label">Element 5 · Training and capacity building</div>
+        <p class="text">Implementation guide, training curriculum, certification program, RFP template, partner program — all Apache 2.0, all forkable.</p>
+        <div class="where">docs/ecosystem/{implementation-guide,training-curriculum,certification-program,rfp-template,partner-program}.md</div>
+      </div>
+      <div class="item sixth">
+        <div class="label">Element 6 (added) · Versioned interpretive apparatus</div>
+        <p class="text">The prompts the AI uses, the labels operators read, and the engine thresholds are themselves dated <span class="mono">ConfigValue</span> records — same schema, same approval flow as the rules. The interpretive layer is configuration, not code.</p>
+        <div class="where">lawcode/global/prompts.yaml · src/govops/config.py</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="contribute">
+  <div class="container">
+    <div class="section-eyebrow">Contribute · Five ways in</div>
+    <h2>Where to start</h2>
+    <p class="section-lede">Sorted by return on effort. Adding a jurisdiction is the highest-value contribution; native-speaker translation review is the most accessible to non-developers. Full guide in <a href="https://github.com/agentic-state/GovOps-LaC/blob/main/CONTRIBUTING.md">CONTRIBUTING.md</a>.</p>
+
+    <table class="contrib-table">
+      <thead>
+        <tr><th>Path</th><th>Effort</th><th>Skills</th><th>Start here</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Add a jurisdiction (new country)</td>
+          <td>~1 day</td>
+          <td>Domain knowledge of one country's benefit law</td>
+          <td><a href="https://github.com/agentic-state/GovOps-LaC/issues/new?template=new_jurisdiction.md">Issue template</a></td>
+        </tr>
+        <tr>
+          <td>Second program in an existing jurisdiction</td>
+          <td>~1 week</td>
+          <td>Domain knowledge of a non-pension benefit</td>
+          <td><a href="https://github.com/agentic-state/GovOps-LaC/issues/new?template=second_program.md">Issue template</a></td>
+        </tr>
+        <tr>
+          <td>Native-speaker i18n review</td>
+          <td>~1 hour per locale</td>
+          <td>Native fluency in fr / pt-BR / es-MX / de / uk</td>
+          <td><a href="https://github.com/agentic-state/GovOps-LaC/issues/new?template=native_speaker_review.md">Issue template</a></td>
+        </tr>
+        <tr>
+          <td>Add a rule type to the engine</td>
+          <td>~1 day</td>
+          <td>Python + tests</td>
+          <td><a href="https://github.com/agentic-state/GovOps-LaC/blob/main/CONTRIBUTING.md#extending-the-engine">CONTRIBUTING § engine</a></td>
+        </tr>
+        <tr>
+          <td>Federate a peer repo with its own jurisdiction</td>
+          <td>~1 week</td>
+          <td>Python + Ed25519 signing</td>
+          <td><a href="https://github.com/agentic-state/GovOps-LaC/blob/main/docs/design/ADRs/ADR-009-federation-trust-model.md">ADR-009</a></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section id="quickstart">
+  <div class="container narrow">
+    <div class="section-eyebrow">Quickstart · Three commands</div>
+    <h2>Run it locally</h2>
+    <p class="section-lede">Embedded SQLite, no cloud, no API keys. Backend serves a Jinja UI on port 8000; the modern TanStack web UI runs on port 8080.</p>
+    <pre class="quickstart"><span class="comment"># Backend (Jinja UI + JSON API)</span>
+git clone <span class="url">https://github.com/agentic-state/GovOps-LaC.git</span>
+cd 61-GovOps
+pip install -e ".[dev]"
+govops-demo                    <span class="comment"># http://127.0.0.1:8000</span>
+pytest -q                      <span class="comment"># 375 tests</span>
+
+<span class="comment"># Modern web UI (Vite + TanStack + shadcn — the surface most contributors should use)</span>
+cd web && npm install && npm run dev   <span class="comment"># http://localhost:8080</span>
+</pre>
+  </div>
+</section>
+
+<footer class="site">
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <h4>Project</h4>
+        <ul>
+          <li><a href="https://github.com/agentic-state/GovOps-LaC">Source on GitHub</a></li>
+          <li><a href="https://github.com/agentic-state/GovOps-LaC/blob/main/PLAN.md">PLAN.md (build log)</a></li>
+          <li><a href="https://github.com/agentic-state/GovOps-LaC/blob/main/CLAUDE.md">CLAUDE.md (dev notes)</a></li>
+          <li><a href="https://github.com/agentic-state/GovOps-LaC/blob/main/CONTRIBUTING.md">Contributing</a></li>
+          <li><a href="https://github.com/agentic-state/GovOps-LaC/blob/main/LICENSE">License (Apache 2.0)</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Design</h4>
+        <ul>
+          <li><a href="https://github.com/agentic-state/GovOps-LaC/blob/main/docs/design/LAW-AS-CODE.md">SPRIND mapping</a></li>
+          <li><a href="https://github.com/agentic-state/GovOps-LaC/tree/main/docs/design/ADRs/">ADR index</a></li>
+          <li><a href="https://github.com/agentic-state/GovOps-LaC/blob/main/docs/IDEA-GovOps-v2.0-LawAsCode.md">v2.0 vision doc</a></li>
+          <li><a href="https://github.com/agentic-state/GovOps-LaC/blob/main/docs/design/architecture/">Architecture</a></li>
+          <li><a href="https://github.com/agentic-state/GovOps-LaC/blob/main/docs/design/COMPLIANCE.md">Compliance</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Ecosystem</h4>
+        <ul>
+          <li><a href="https://github.com/agentic-state/GovOps-LaC/blob/main/docs/ecosystem/implementation-guide.md">Implementation guide</a></li>
+          <li><a href="https://github.com/agentic-state/GovOps-LaC/blob/main/docs/ecosystem/training-curriculum.md">Training curriculum</a></li>
+          <li><a href="https://github.com/agentic-state/GovOps-LaC/blob/main/docs/ecosystem/certification-program.md">Certification</a></li>
+          <li><a href="https://github.com/agentic-state/GovOps-LaC/blob/main/docs/ecosystem/rfp-template.md">RFP template</a></li>
+          <li><a href="https://github.com/agentic-state/GovOps-LaC/blob/main/docs/ecosystem/use-case-library.md">Use case library</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Origin</h4>
+        <ul>
+          <li><a href="https://www.sprind.org/en/law-as-code">SPRIND Law as Code</a></li>
+          <li><a href="https://agenticstate.org/paper.html">The Agentic State (Vision Paper)</a></li>
+        </ul>
+        <p style="margin-top: 1rem; color: var(--ink-400); font-size: 0.82rem;">An independent, nights-and-weekends open public-good contribution. Inspired by SPRIND and the Agentic State; representing neither.</p>
+      </div>
+    </div>
+    <div class="baseline" style="text-align:center;">
+      GovOps · Open Public Good · Apache 2.0 · <a href="https://github.com/agentic-state/GovOps-LaC">github.com/agentic-state/GovOps-LaC</a>
+      <p class="baseline-disclaimer">Independent prototype. Not affiliated with, endorsed by, or representing any government, department, agency, or initiative — including SPRIND, the Agentic State paper authors (Ilves, Kilian, Parazzoli, Peixoto, Velsberg), or any of the seven jurisdictions used as illustrative case studies. The <code>agentic-state</code> GitHub organization is an independent implementation effort whose name signals framework alignment, not authorship or endorsement. Legislative text is publicly available law interpreted by the author for illustrative purposes only — not authoritative operational guidance.</p>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

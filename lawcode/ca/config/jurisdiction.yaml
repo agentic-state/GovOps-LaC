@@ -1,0 +1,16 @@
+# yaml-language-server: $schema=../../../schema/lawcode-v1.0.json
+# ca/config/jurisdiction.yaml — substrate-resolved metadata for the
+# citizen-facing /screen route. Per docs/govops-022-howto-url-as-configvalue.md
+# the per-jurisdiction "How to apply" external URL lives here, not as a
+# hardcoded table in web/src/components/govops/ScreenResult.tsx.
+
+defaults:
+  domain: jurisdiction
+  jurisdiction_id: ca-oas
+  effective_from: '1900-01-01'
+values:
+- key: jurisdiction.ca.howto_url
+  value: 'https://www.canada.ca/en/services/benefits/publicpensions/cpp/old-age-security.html'
+  value_type: string
+  citation: 'Government of Canada — Old Age Security program landing page'
+  rationale: 'Primary citizen-facing landing for the OAS pension. Substrate-resolved per govops-022 so the URL can be updated without a code deploy and so federation packs can override it for derivative jurisdictions.'

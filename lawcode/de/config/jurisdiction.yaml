@@ -1,0 +1,14 @@
+# yaml-language-server: $schema=../../../schema/lawcode-v1.0.json
+# de/config/jurisdiction.yaml — see ca/config/jurisdiction.yaml for the
+# load-bearing comment. Substrate-resolved per govops-022.
+
+defaults:
+  domain: jurisdiction
+  jurisdiction_id: de-drv
+  effective_from: '1900-01-01'
+values:
+- key: jurisdiction.de.howto_url
+  value: 'https://www.deutsche-rentenversicherung.de/'
+  value_type: string
+  citation: 'Deutsche Rentenversicherung — Bundesportal'
+  rationale: 'Primary citizen-facing landing for die Regelaltersrente. Substrate-resolved per govops-022.'
