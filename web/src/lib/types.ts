@@ -363,7 +363,9 @@ export interface ImpactResponse {
 
 // ── Self-screening (govops-015) ─────────────────────────────────────────────
 
-export const SCREEN_JURISDICTIONS = ["ca", "br", "es", "fr", "de", "ua"] as const;
+// 7 jurisdictions match the backend JURISDICTION_REGISTRY (jp added 2026-04-28).
+// Keeping this list in sync with the backend prevents 404s on /screen/<jur>.
+export const SCREEN_JURISDICTIONS = ["ca", "br", "es", "fr", "de", "ua", "jp"] as const;
 export type ScreenJurisdictionId = (typeof SCREEN_JURISDICTIONS)[number];
 
 export type ScreenLegalStatus = "citizen" | "permanent_resident" | "other";
