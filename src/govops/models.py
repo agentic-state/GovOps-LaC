@@ -212,6 +212,15 @@ class Recommendation(BaseModel):
     supersedes: Optional[str] = None  # ADR-013 — id of the prior recommendation, if any
     evaluation_date: Optional[date] = None  # ADR-013 — the as-of date this evaluation answers
     triggered_by_event_id: Optional[str] = None  # ADR-013 — the event that prompted this re-eval
+    # v3 / ADR-014 — which program produced this recommendation. Populated when
+    # the engine is constructed with `program=…`; left None for legacy
+    # `rules=…`-only callers (api.py, screen.py, test_engine.py).
+    program_id: Optional[str] = None
+    # v3 / ADR-016 — shape-specific eligible-branch details. OAS-shape leaves
+    # this empty since pension_type / partial_ratio remain top-level. Phase C's
+    # bounded-benefit shape will populate it with `{benefit_period: {...},
+    # obligations: [...]}`.
+    program_outcome_detail: dict = Field(default_factory=dict)
 
 
 # ---------------------------------------------------------------------------

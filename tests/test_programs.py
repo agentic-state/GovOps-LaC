@@ -13,7 +13,7 @@ import pytest
 import yaml
 
 from govops import seed
-from govops.engine import OASEngine
+from govops.engine import ProgramEngine
 from govops.models import RuleType
 from govops.programs import (
     Program,
@@ -176,8 +176,8 @@ class TestEngineEquivalence:
         seed_case = next(
             c for c in seed.make_demo_cases() if c.id == "demo-case-001"
         )
-        loaded_rec, _ = OASEngine(rules=loaded_program.rules).evaluate(loaded_case)
-        seed_rec, _ = OASEngine(rules=seed.OAS_RULES).evaluate(seed_case)
+        loaded_rec, _ = ProgramEngine(rules=loaded_program.rules).evaluate(loaded_case)
+        seed_rec, _ = ProgramEngine(rules=seed.OAS_RULES).evaluate(seed_case)
         assert loaded_rec.outcome == seed_rec.outcome
         assert loaded_rec.pension_type == seed_rec.pension_type
         assert loaded_rec.partial_ratio == seed_rec.partial_ratio
@@ -188,8 +188,8 @@ class TestEngineEquivalence:
         seed_cases = {c.id: c for c in seed.make_demo_cases()}
         for case in loaded_program.demo_cases:
             sc = seed_cases[case.id]
-            lr, _ = OASEngine(rules=loaded_program.rules).evaluate(case)
-            sr, _ = OASEngine(rules=seed.OAS_RULES).evaluate(sc)
+            lr, _ = ProgramEngine(rules=loaded_program.rules).evaluate(case)
+            sr, _ = ProgramEngine(rules=seed.OAS_RULES).evaluate(sc)
             assert lr.outcome == sr.outcome, f"Outcome mismatch for {case.id}"
             assert lr.pension_type == sr.pension_type, (
                 f"pension_type mismatch for {case.id}: "
@@ -209,8 +209,8 @@ class TestEngineEquivalence:
         seed_case = next(
             c for c in seed.make_demo_cases() if c.id == "demo-case-001"
         )
-        loaded_rec, _ = OASEngine(rules=loaded_program.rules).evaluate(loaded_case)
-        seed_rec, _ = OASEngine(rules=seed.OAS_RULES).evaluate(seed_case)
+        loaded_rec, _ = ProgramEngine(rules=loaded_program.rules).evaluate(loaded_case)
+        seed_rec, _ = ProgramEngine(rules=seed.OAS_RULES).evaluate(seed_case)
         assert loaded_rec.benefit_amount is not None
         assert seed_rec.benefit_amount is not None
         assert loaded_rec.benefit_amount.value == seed_rec.benefit_amount.value

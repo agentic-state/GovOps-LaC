@@ -1,16 +1,25 @@
 """GovOps rule engine.
 
-Deterministic evaluation of pension/benefit eligibility rules.
-Example case study: Old Age Security (Canada), based on the publicly
-available Old Age Security Act (R.S.C., 1985, c. O-9).
+Deterministic evaluation of public-sector program eligibility rules.
+Originally shipped (v2) as ``OASEngine`` for old-age pension; v3 Phase B
+(per ADR-016) generalizes to ``ProgramEngine`` with shape-specific
+post-processing delegated to evaluators in :mod:`govops.shapes`.
 
-Key statutory rules encoded:
-  - s. 3(1): age >= 65
-  - s. 3(2)(a): 10+ years of residence in Canada after age 18 (full pension with 40+ years)
-  - s. 3(2)(b): partial pension for 10-39 years (pro-rata 1/40 per year)
+Backwards compatibility (one cycle, removed at v3.1 Phase I cutover):
+``OASEngine`` is preserved as a thin :class:`DeprecationWarning`-emitting
+subclass so v2 callers (api.py, screen.py, test_engine.py) keep working
+unchanged. Migration path: pass ``program=`` instead of ``rules=``, or
+import ``ProgramEngine`` directly.
+
+Reference statutory case study:
+  Old Age Security Act, R.S.C. 1985, c. O-9 — federal monthly pension for
+  Canadian residents aged 65+. Encoded statutory rules:
+    - s. 3(1): age >= 65
+    - s. 3(2)(a): 10+ years residence after age 18 (full pension at 40+)
+    - s. 3(2)(b): partial pension for 10-39 years (1/40 per year)
 
 Four possible outcomes:
-  - eligible (full or partial pension)
+  - eligible (full or partial — for OAS-shape; or bounded period for EI-shape)
   - ineligible
   - insufficient_evidence
   - escalate (edge cases needing human interpretation)
@@ -18,8 +27,8 @@ Four possible outcomes:
 
 from __future__ import annotations
 
+import warnings
 from datetime import date, datetime, timezone
-
 from typing import Any, Callable, Optional
 
 from govops.config import ConfigKeyNotMigrated
@@ -32,58 +41,88 @@ from govops.models import (
     DecisionOutcome,
     LegalRule,
     Recommendation,
-    ResidencyPeriod,
     RuleEvaluation,
     RuleOutcome,
     RuleType,
 )
+from govops.programs import Program
+from govops.residency import home_residency_years_after_18
+from govops.shapes import ShapeEvaluator, get_shape
 
 
+# Module-level helpers re-exported from govops.residency for backwards-compat —
+# pre-v3 callers may have imported `_home_residency_years_after_18` from this
+# module. Phase I cutover removes these.
 def _years_between(start: date, end: date) -> float:
-    """Calculate years between two dates as a decimal."""
-    days = (end - start).days
-    return days / 365.25
-
-
-def _age_at(dob: date, ref_date: date) -> float:
-    return _years_between(dob, ref_date)
+    """Deprecated alias for :func:`govops.residency.years_between`."""
+    from govops.residency import years_between
+    return years_between(start, end)
 
 
 def _home_residency_years_after_18(
     dob: date,
-    residency_periods: list[ResidencyPeriod],
+    residency_periods,
     ref_date: date,
     home_countries: tuple[str, ...],
 ) -> float:
-    """Total years of home-country residency/contribution after the applicant turned 18.
+    """Deprecated alias for :func:`govops.residency.home_residency_years_after_18`."""
+    return home_residency_years_after_18(dob, residency_periods, ref_date, home_countries)
 
-    Callers must pass ``home_countries`` explicitly (post-Phase-2 there's no
-    default to fall back on; jurisdictional values come from the registry via
-    ``OASEngine._get_home_countries()``).
+
+def _age_at(dob: date, ref_date: date) -> float:
+    days = (ref_date - dob).days
+    return days / 365.25
+
+
+# Default shape for legacy `rules=…`-only constructors (per ADR-016).
+# v2 was OAS-only, so defaulting to old_age_pension is correct for every
+# legacy caller that hasn't migrated to `program=…`.
+_LEGACY_DEFAULT_SHAPE = "old_age_pension"
+
+
+class ProgramEngine:
+    """Deterministic eligibility engine, shape-agnostic.
+
+    Per ADR-016, the engine handles program-agnostic concerns (rule dispatch,
+    triage, audit, formula AST evaluation) and delegates shape-specific
+    eligible-branch logic to a :class:`govops.shapes.ShapeEvaluator`.
+
+    Construction shapes (any one of these works):
+
+        ProgramEngine(program=ca_oas)                           # v3 native
+        ProgramEngine(rules=oas_rules_list)                     # legacy
+        ProgramEngine(rules=oas_rules_list, shape="old_age_pension")  # explicit
     """
-    age_18_date = date(dob.year + 18, dob.month, dob.day)
-    total_days = 0
-    for period in residency_periods:
-        if period.country.upper() not in home_countries:
-            continue
-        start = max(period.start_date, age_18_date)
-        end = period.end_date or ref_date
-        end = min(end, ref_date)
-        if start < end:
-            total_days += (end - start).days
-    return total_days / 365.25
-
-
-class OASEngine:
-    """Deterministic OAS initial eligibility engine."""
 
     def __init__(
         self,
-        rules: list[LegalRule],
-        evaluation_date: date | None = None,
+        rules: Optional[list[LegalRule]] = None,
+        program: Optional[Program] = None,
+        shape: Optional[str] = None,
+        evaluation_date: Optional[date] = None,
         ref_resolver: Optional[Callable[[str], float | int]] = None,
     ):
-        self.rules = {r.id: r for r in rules}
+        if program is not None and rules is not None:
+            raise ValueError(
+                "Pass either program= or rules=, not both. "
+                "When program is given, rules are read from program.rules."
+            )
+        if program is None and rules is None:
+            raise ValueError("Must pass either program= or rules=.")
+
+        if program is not None:
+            self.rules = {r.id: r for r in program.rules}
+            self._program: Optional[Program] = program
+            self._program_id: Optional[str] = program.program_id
+            shape_id = program.shape
+        else:
+            self.rules = {r.id: r for r in rules}
+            self._program = None
+            self._program_id = None
+            shape_id = shape or _LEGACY_DEFAULT_SHAPE
+
+        self._shape: ShapeEvaluator = get_shape(shape_id)
+        self._shape_id: str = shape_id
         self.evaluation_date = evaluation_date or date.today()
         self._audit: list[AuditEntry] = []
         # ConfigValue resolver for formula `ref` nodes (ADR-011). Defaults to
@@ -92,20 +131,20 @@ class OASEngine:
         # callable for hermetic formula coverage.
         self._ref_resolver = ref_resolver or resolve_param
 
+    # ------------------------------------------------------------------
+    # Audit + parameter resolution helpers
+    # ------------------------------------------------------------------
+
     def _log(self, event_type: str, detail: str, data: dict | None = None):
         self._audit.append(AuditEntry(
             event_type=event_type,
-            actor="system:oas-engine",
+            actor=f"system:program-engine[{self._shape_id}]",
             detail=detail,
             data=data or {},
         ))
 
     def _eval_dt(self) -> Optional[datetime]:
-        """The case's evaluation_date as a UTC-midnight datetime, for substrate lookups.
-
-        Returns None when evaluation_date is unset, signalling the substrate
-        resolver to use "now" — same behaviour as before the seam closed.
-        """
+        """The case's evaluation_date as a UTC-midnight datetime, for substrate lookups."""
         if self.evaluation_date is None:
             return None
         return datetime(
@@ -118,18 +157,11 @@ class OASEngine:
     def _param(self, rule: LegalRule, name: str, default: Any = None) -> Any:
         """Resolve a scalar rule parameter, substrate-first, honouring evaluation_date.
 
-        Closes ADR-013's named seam: a dated supersession of e.g.
+        Closes ADR-013's scalar seam: a dated supersession of e.g.
         ``ca.rule.age-65.min_age`` (65 → 67 effective 2027-01-01) takes effect
         on its date for any case evaluated against the same code. Cases dated
         before the supersession see the prior value; cases dated after see the
-        new one. Same engine, same rule object, different ``evaluation_date``,
-        different threshold — the substrate is the source of truth.
-
-        Falls back to ``rule.parameters[name]`` when the rule has no
-        ``param_key_prefix`` (ad-hoc rules in tests) or when the substrate
-        raises ``ConfigKeyNotMigrated`` (the substrate is silent for that key).
-        Frozen-dict fallback preserves backwards-compat for the 65→340 test
-        suite that pre-dates this refactor.
+        new one — the substrate is the source of truth.
         """
         frozen = rule.parameters.get(name, default)
         if not rule.param_key_prefix:
@@ -142,6 +174,10 @@ class OASEngine:
             )
         except ConfigKeyNotMigrated:
             return frozen
+
+    # ------------------------------------------------------------------
+    # Top-level evaluation
+    # ------------------------------------------------------------------
 
     def evaluate(self, case: CaseBundle) -> tuple[Recommendation, list[AuditEntry]]:
         """Run all rules against the case and produce a recommendation."""
@@ -178,8 +214,10 @@ class OASEngine:
                 "outcome": ev.outcome.value,
             })
 
-        # --- Determine overall outcome ---
-        outcome, pension_type, partial_ratio = self._determine_outcome(evals, missing_evidence, flags, case)
+        # --- Determine overall outcome (triage generic; eligible-branch shape-specific) ---
+        outcome, pension_type, partial_ratio, program_outcome_detail = self._determine_outcome(
+            evals, missing_evidence, flags, case,
+        )
 
         explanation = self._build_explanation(outcome, evals, pension_type, partial_ratio, missing_evidence)
 
@@ -205,6 +243,8 @@ class OASEngine:
             missing_evidence=missing_evidence,
             flags=flags,
             benefit_amount=benefit_amount,
+            program_id=self._program_id,
+            program_outcome_detail=program_outcome_detail,
         )
 
         self._log("recommendation_produced", f"Outcome: {outcome.value}", {
@@ -214,6 +254,10 @@ class OASEngine:
         })
 
         return rec, list(self._audit)
+
+    # ------------------------------------------------------------------
+    # Rule dispatch
+    # ------------------------------------------------------------------
 
     def _evaluate_rule(
         self,
@@ -244,14 +288,7 @@ class OASEngine:
             )
 
     def _eval_calculation(self, rule: LegalRule) -> RuleEvaluation:
-        """Calculation rules don't gate eligibility (ADR-011).
-
-        They produce an amount when the case is eligible. The gating loop
-        records them as NOT_APPLICABLE so they appear in the audit trail but
-        don't push the outcome to INELIGIBLE / INSUFFICIENT_EVIDENCE. The
-        actual amount is computed in calculate() after _determine_outcome
-        returns ELIGIBLE.
-        """
+        """Calculation rules don't gate eligibility (ADR-011)."""
         return RuleEvaluation(
             rule_id=rule.id,
             rule_description=rule.description,
@@ -273,7 +310,7 @@ class OASEngine:
         )
 
     def _get_home_countries(self) -> tuple[str, ...]:
-        """Derive home countries from the jurisdiction in the current rule set.
+        """Derive home countries from the residency rules in the current set.
 
         After Phase 2 Domain 1, every residency rule carries home_countries via
         the legacy_constants registry, so the loop below always finds a match
@@ -298,7 +335,7 @@ class OASEngine:
                 outcome=RuleOutcome.INSUFFICIENT_EVIDENCE,
                 detail="No residency/contribution periods provided",
             )
-        years = _home_residency_years_after_18(
+        years = home_residency_years_after_18(
             case.applicant.date_of_birth, case.residency_periods, self.evaluation_date,
             home_countries=home,
         )
@@ -323,7 +360,7 @@ class OASEngine:
                 outcome=RuleOutcome.INSUFFICIENT_EVIDENCE,
                 detail="No residency/contribution periods provided",
             )
-        years = _home_residency_years_after_18(
+        years = home_residency_years_after_18(
             case.applicant.date_of_birth, case.residency_periods, self.evaluation_date,
             home_countries=home,
         )
@@ -401,76 +438,60 @@ class OASEngine:
             detail="All required evidence provided",
         )
 
+    # ------------------------------------------------------------------
+    # Outcome triage (generic) + shape delegation (eligible branch)
+    # ------------------------------------------------------------------
+
     def _determine_outcome(
         self,
         evals: list[RuleEvaluation],
         missing_evidence: list[str],
         flags: list[str],
         case: CaseBundle,
-    ) -> tuple[DecisionOutcome, str, str | None]:
+    ) -> tuple[DecisionOutcome, str, str | None, dict]:
+        """Triage is generic; the eligible-branch is delegated to the shape (ADR-016)."""
         has_not_satisfied = any(e.outcome == RuleOutcome.NOT_SATISFIED for e in evals)
         has_insufficient = any(e.outcome == RuleOutcome.INSUFFICIENT_EVIDENCE for e in evals)
 
         if flags:
-            return DecisionOutcome.ESCALATE, "", None
+            return DecisionOutcome.ESCALATE, "", None, {}
 
         if has_not_satisfied and not has_insufficient:
-            return DecisionOutcome.INELIGIBLE, "", None
+            return DecisionOutcome.INELIGIBLE, "", None, {}
 
         if has_insufficient:
-            return DecisionOutcome.INSUFFICIENT_EVIDENCE, "", None
+            return DecisionOutcome.INSUFFICIENT_EVIDENCE, "", None, {}
 
-        # All rules satisfied — determine pension type
-        full_years = self._partial_full_years()
-        qualified = self._qualified_years(case, full_years)
-        if qualified >= full_years:
-            return DecisionOutcome.ELIGIBLE, "full", f"{full_years}/{full_years}"
-        else:
-            return DecisionOutcome.ELIGIBLE, "partial", f"{qualified}/{full_years}"
-
-    def _partial_full_years(self) -> int:
-        """Full-pension years threshold from the residency-partial rule.
-
-        Defaults to 40 (the OAS canonical) when no partial rule is present.
-        """
-        for rule in self.rules.values():
-            if rule.rule_type == RuleType.RESIDENCY_PARTIAL:
-                return self._param(rule, "full_years", 40)
-        return 40
-
-    def _qualified_years(self, case: CaseBundle, full_years: int) -> int:
-        """Years of home-country residency after 18, integer-floored and capped at full_years.
-
-        This is the value used both for the partial-pension ratio and for
-        formula `field("eligible_years_oas")` lookups. Keeping it in one
-        helper guarantees the displayed ratio (e.g. "33/40") and the dollar
-        amount stay in lockstep — they cite the same statutory clause.
-        """
-        home = self._get_home_countries()
-        years = _home_residency_years_after_18(
-            case.applicant.date_of_birth, case.residency_periods, self.evaluation_date,
-            home_countries=home,
+        # All rules satisfied — delegate eligible-branch details to shape evaluator.
+        details = self._shape.determine_eligible_details(
+            list(self.rules.values()),
+            case,
+            self.evaluation_date,
+            self._param,
         )
-        return min(int(years), full_years)
+        return (
+            DecisionOutcome.ELIGIBLE,
+            details.pension_type,
+            details.partial_ratio,
+            dict(details.program_outcome_detail),
+        )
+
+    # ------------------------------------------------------------------
+    # Calculation (ADR-011) — engine generic, field map shape-specific
+    # ------------------------------------------------------------------
 
     def calculate(self, case: CaseBundle) -> Optional[BenefitAmount]:
         """Compute the benefit amount for an eligible case via formula AST.
 
-        Per ADR-011, a calculation rule's `parameters['formula']` is a typed
-        AST tree. We resolve `ref` nodes through the substrate (default) and
-        `field` nodes from a context map populated for this case. The walk
-        produces a flat trace; every render of "you would receive $X/month"
-        must be reproducible from the trace alone.
-
-        Returns None when no calculation rule is present (older
-        jurisdictions that haven't adopted CALCULATION yet) or when the
-        formula is missing.
+        Per ADR-011, a calculation rule's ``parameters['formula']`` is a typed
+        AST tree. We resolve ``ref`` nodes through the substrate (default) and
+        ``field`` nodes from a context map populated for this case by the
+        active shape evaluator (ADR-016). Returns None when no calculation
+        rule is present or when the formula is missing.
         """
         calc_rules = [r for r in self.rules.values() if r.rule_type == RuleType.CALCULATION]
         if not calc_rules:
             return None
-        # One calc rule per jurisdiction in v1; if a jurisdiction needs
-        # several (e.g. base + supplement), we'll iterate and aggregate.
         rule = calc_rules[0]
         formula_dict = rule.parameters.get("formula")
         if not formula_dict:
@@ -478,13 +499,15 @@ class OASEngine:
 
         formula = FormulaNode.model_validate(formula_dict)
 
-        # Field map — values derived from the case at evaluation time. Keep
-        # this small and explicit; new fields land alongside new formulas.
-        full_years = self._partial_full_years()
-        fields = {
-            "eligible_years_oas": float(self._qualified_years(case, full_years)),
-            "full_years_oas": float(full_years),
-        }
+        # Field map — values derived from the case at evaluation time. The
+        # shape evaluator owns the field vocabulary (per ADR-016) so the
+        # engine doesn't bake in OAS-specific names like 'eligible_years_oas'.
+        fields = self._shape.compute_formula_fields(
+            list(self.rules.values()),
+            case,
+            self.evaluation_date,
+            self._param,
+        )
 
         def resolve_field(name: str) -> float:
             if name not in fields:
@@ -493,16 +516,12 @@ class OASEngine:
 
         # Date-aware ref resolution (ADR-013 §"the seam"): when the case's
         # evaluation_date is set, the formula's `ref` lookups resolve against
-        # the substrate as it stood on that date — so a 2025 case re-evaluated
-        # in 2026 still picks up 2025's coefficient. Tests can inject a
-        # callable directly via the constructor's `ref_resolver` for hermetic
-        # coverage; the default path threads the date through resolve_param.
+        # the substrate as it stood on that date.
         eval_dt = self._eval_dt()
         if self._ref_resolver is resolve_param:
             def resolve_ref(key: str) -> float | int:
                 return resolve_param(key, evaluation_date=eval_dt)
         else:
-            # Test-injected resolver: pass through unchanged.
             resolve_ref = self._ref_resolver
 
         value, trace = evaluate_formula(
@@ -528,6 +547,10 @@ class OASEngine:
             citations=citations,
         )
 
+    # ------------------------------------------------------------------
+    # Explanation (program-agnostic prose synthesis)
+    # ------------------------------------------------------------------
+
     def _build_explanation(
         self,
         outcome: DecisionOutcome,
@@ -540,13 +563,19 @@ class OASEngine:
         if outcome == DecisionOutcome.ELIGIBLE:
             if pension_type == "full":
                 parts.append("The applicant meets all statutory requirements for a FULL Old Age Security pension.")
-            else:
+            elif pension_type == "partial":
                 parts.append(
                     f"The applicant meets the minimum residency requirement for a PARTIAL Old Age Security pension "
                     f"at a rate of {partial_ratio} of the full amount."
                 )
+            else:
+                # Non-OAS shape (e.g. unemployment_insurance in Phase C): the shape
+                # provides its own narrative through program_outcome_detail; the
+                # engine produces a generic eligible-statement so the audit
+                # explanation isn't empty.
+                parts.append("The applicant meets all statutory requirements for this program.")
         elif outcome == DecisionOutcome.INELIGIBLE:
-            parts.append("The applicant does not meet one or more statutory requirements for Old Age Security.")
+            parts.append("The applicant does not meet one or more statutory requirements for this program.")
         elif outcome == DecisionOutcome.INSUFFICIENT_EVIDENCE:
             parts.append("The case cannot be determined due to missing or unverified evidence.")
         elif outcome == DecisionOutcome.ESCALATE:
@@ -572,3 +601,32 @@ class OASEngine:
                 parts.append(f"  - {m}")
 
         return "\n".join(parts)
+
+
+# ---------------------------------------------------------------------------
+# Backwards-compat alias (per ADR-016)
+# ---------------------------------------------------------------------------
+
+
+class OASEngine(ProgramEngine):
+    """Deprecated alias for :class:`ProgramEngine`.
+
+    Preserved through one v3 cycle so v2 callers (api.py, screen.py,
+    test_engine.py) keep working unchanged. Emits :class:`DeprecationWarning`
+    on construction. Scheduled for removal at v3 Phase I cutover (v0.5.0
+    release) per ADR-016 §"Deprecation".
+
+    Migration: ``OASEngine(rules=…)`` → ``ProgramEngine(rules=…)``, or
+    upgrade to ``ProgramEngine(program=…)`` once a Program object is in
+    scope.
+    """
+
+    def __init__(self, *args, **kwargs):
+        warnings.warn(
+            "OASEngine is a deprecated alias for ProgramEngine; migrate to "
+            "ProgramEngine before v3.1 (removal scheduled for Phase I cutover). "
+            "See ADR-016.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        super().__init__(*args, **kwargs)
