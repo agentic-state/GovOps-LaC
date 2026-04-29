@@ -6,4 +6,19 @@
 // You can pass additional config via defineConfig({ vite: { ... } }) if needed.
 import { defineConfig } from "@lovable.dev/vite-tanstack-config";
 
-export default defineConfig();
+// `allowedHosts` opens the dev server to non-localhost callers — required when
+// the dev server is the public-facing process inside the v2.1 hosted-demo
+// container (Dockerfile runs `npm run dev -- --host 0.0.0.0`). Without this,
+// vite refuses requests with a Host header that doesn't match its known list
+// and returns 403 to anyone hitting the HF Space URL. Local dev is unaffected
+// (localhost is always allowed).
+export default defineConfig({
+  vite: {
+    server: {
+      allowedHosts: [
+        "agentic-state-govops-lac.hf.space",
+        ".hf.space", // future-proof for any HF Space URL pattern
+      ],
+    },
+  },
+});
