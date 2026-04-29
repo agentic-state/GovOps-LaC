@@ -95,7 +95,7 @@
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.11.2",
-    "@eslint/js": "^9.32.0",
+    "@eslint/js": "^10.0.1",
     "@formatjs/icu-messageformat-parser": "^3.5.5",
     "@lovable.dev/vite-tanstack-config": "^1.4.0",
     "@playwright/test": "^1.59.1",
