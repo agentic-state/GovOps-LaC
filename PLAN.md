@@ -445,6 +445,20 @@ Three Lovable specs landed in `docs/` to seed the next Lovable cycle. Two of the
 
 **Cumulative test-budget impact for Phase 12**: backend +7 (`tests/test_api_jurisdiction_howto.py`); web vitest 51 → 53 (+2 new tests imported with the artefact); Playwright +9 SSR-head tests, all green (8 per-route + the cookie-on-SSR assertion that was previously `test.fixme` and is now active per the 2026-04-29 fix above).
 
+#### 12.4 — i18n translation round (2026-04-29) reviewer follow-ups
+
+The i18n translation round merged in commit `6b63caa` (PR #7) — 1,351 cells × 5 locales (fr / de / es-MX / pt-BR / uk), 0 brand-token violations, 0 empties, 0 placeholder-name mismatches. Round documentation: [docs/i18n-rounds/2026-04-29/i18n-translation-notes.md](docs/i18n-rounds/2026-04-29/i18n-translation-notes.md). Five cells are flagged in §4 of that note for native-speaker re-look — each is shipped and self-consistent, but the local register is one a native reviewer might want to nudge. Tracking here so they don't decay into invisible debt.
+
+| # | Cell(s) | Question for native reviewer | Status |
+| --- | --- | --- | --- |
+| 12.4.x.1 | `home.eyebrow` (all 5 locales) | Currently kept verbatim as the literal spec string `spec govops-002 · law-as-code` (developer-only reference). Should `spec` / `law-as-code` localise, or stay verbatim? | ⬜ Open — non-blocking |
+| 12.4.x.2 | `screen.benefit.op.*` (all 5 locales) | Operator/trace verb tags are lowercase verbs in fr/es/pt/uk and capitalised nouns in de (German noun convention). Confirm whether the calculation-trace UI prefers verbs (e.g. fr `ajouter`) or nominalisations (fr `Addition`). Cross-locale consistency is the lever. | ⬜ Open — non-blocking |
+| 12.4.x.3 | `events.summary.add_evidence` (`+ {evidence_type}`), `events.summary.move_country` (`{from} → {to}`) | Translations are pure-placeholder by design (identical across locales). If the runtime values for `evidence_type` are EN-only, the visible string will be EN regardless of locale. Upstream concern (event-summary content), not a translation gap; tracked here so the reviewer sees the intentional choice. | ⬜ Open — upstream concern |
+| 12.4.x.4 | `cases.detail.heading` fr (`Dossier {id}`) | French currently uses `Dossier {id}` to align with `nav.cases = Dossiers`. Product-team preference may be `Cas {id}` (literal cognate). This row is the single source of truth to flip. | ⬜ Open — non-blocking |
+| 12.4.x.5 | `admin.federation.col.{actions [fr], name [de], status [de/pt-BR], version [fr/de]}` | Column headers re-emitted as loanwords/cognates because the source EN words are loans/cognates in those locales. Worth confirming the existing locale JSON did not intend a deeper localisation. | ⬜ Open — non-blocking |
+
+These are explicitly **shipped, not blocking** — they're tracked so the next round of native review (or community contribution) has a concrete checklist to land against.
+
 ### Phase 8 — Lovable extras + admin federation surface (2026-04-28)
 
 Originating spec: [docs/govops-020-admin-federation.md](docs/govops-020-admin-federation.md). The admin federation route exposes registry + imported packs + fetch form. Trust-decision authoring stays as a YAML PR per ADR-009's stance.
