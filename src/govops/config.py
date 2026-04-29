@@ -667,7 +667,15 @@ class ConfigStore:
             effective_from=eff_from,
             effective_to=eff_to,
             citation=record.get("citation"),
-            author=record.get("author", "system:yaml"),
+            # v2.1 — author defaults to `system:seed:<source-file-name>` so the
+            # daily age-based GC can preserve seeded records forever and only
+            # expire user-created drafts. Falls back to `system:yaml` (the v2.0
+            # value) when load_from_yaml is called without a Path source (i.e.
+            # in unit tests that build records inline).
+            author=record.get(
+                "author",
+                f"system:seed:{source_file.name}" if source_file is not None else "system:yaml",
+            ),
             approved_by=record.get("approved_by"),
             rationale=record.get("rationale", ""),
             supersedes=record.get("supersedes"),
@@ -696,3 +704,49 @@ class ConfigStore:
             s.exec(delete(ConfigValue))
             s.exec(delete(ApprovalAuditEntry))
             s.commit()
+
+    # --- v2.1 hosted-demo GC (ADR-pending, plan in memory v2_1_hosted_demo_plan.md) ---
+
+    def gc_old_user_records(self, *, max_age_days: int = 7) -> int:
+        """Delete user-created records older than `max_age_days`.
+
+        "User-created" = author NOT prefixed with `system:seed:` (records the
+        YAML loader stamps for every seeded ConfigValue under lawcode/) and
+        NOT prefixed with `system:` (the small set of system-authored fixtures
+        used by the demo seed). Returns count of deleted rows.
+
+        Audit-trail entries linked to the deleted ConfigValues are removed in
+        the same transaction (FK cascade would do it, but we delete
+        explicitly to avoid surprises across SQLite versions).
+
+        Designed to be called by an APScheduler daily job (governed in
+        govops.gc_scheduler) and by the admin POST /api/admin/gc endpoint.
+        """
+        from datetime import timedelta as _td
+
+        cutoff = _utcnow() - _td(days=max_age_days)
+        with self._session() as s:
+            # Fetch IDs first so we can purge audit entries for the same set.
+            ids_to_delete = list(
+                s.exec(
+                    select(ConfigValue.id).where(
+                        ConfigValue.created_at < cutoff,
+                        # Preserve anything authored by "system", "system:seed:...",
+                        # "system:demo", "system:yaml" — i.e. any system-prefixed
+                        # author, with or without a colon-suffix discriminator.
+                        ~ConfigValue.author.like("system%"),  # type: ignore[attr-defined]
+                    )
+                )
+            )
+            if not ids_to_delete:
+                return 0
+            # Audit entries first (no FK constraint in the schema, but logical
+            # cleanup keeps the table from growing unbounded).
+            s.exec(
+                delete(ApprovalAuditEntry).where(
+                    ApprovalAuditEntry.config_value_id.in_(ids_to_delete)  # type: ignore[attr-defined]
+                )
+            )
+            s.exec(delete(ConfigValue).where(ConfigValue.id.in_(ids_to_delete)))  # type: ignore[attr-defined]
+            s.commit()
+            return len(ids_to_delete)

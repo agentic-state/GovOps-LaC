@@ -164,7 +164,12 @@ async def lifespan(app: FastAPI):
     # approvals queue on first load. GOVOPS_SEED_DEMO=1 turns it on.
     if os.environ.get("GOVOPS_SEED_DEMO") == "1":
         _seed_demo_drafts()
+    # v2.1 — start the daily GC scheduler when GOVOPS_DEMO_MODE=1.
+    # No-op for local dev (env unset). See govops.gc_scheduler.
+    from govops.gc_scheduler import start_scheduler, shutdown_scheduler
+    start_scheduler(config_store)
     yield
+    shutdown_scheduler()
 
 
 app = FastAPI(
@@ -722,6 +727,47 @@ def admin_federation_disable(publisher_id: str):
     hydration. Re-enable via ``/enable`` to restore.
     """
     return _set_pack_enabled_response(publisher_id, enabled=False)
+
+
+# ---------------------------------------------------------------------------
+# v2.1 — Demo GC admin endpoint
+# ---------------------------------------------------------------------------
+
+
+@app.post("/api/admin/gc")
+def admin_gc(token: str | None = None, max_age_days: int = 7):
+    """Force a GC sweep of user-created records older than max_age_days.
+
+    Token-gated via the DEMO_ADMIN_TOKEN env var. When the token is unset
+    on the server, the endpoint returns 403 (the demo deploy MUST set
+    DEMO_ADMIN_TOKEN to use this).
+
+    Returns the count of deleted ConfigValue records and a timestamp. Safe
+    to call any time — the underlying SQL is idempotent (cutoff is
+    monotonic, deleted rows can't be deleted twice). The same function is
+    fired daily at 03:00 UTC by the APScheduler in `gc_scheduler`; the
+    admin endpoint exists for "clean the demo before a presentation"
+    moments.
+    """
+    from govops.demo_mode import demo_admin_token
+    from govops.gc_scheduler import run_gc, get_last_gc_at
+
+    expected = demo_admin_token()
+    if not expected:
+        raise HTTPException(
+            403,
+            "DEMO_ADMIN_TOKEN not configured on the server (set the env var to enable this endpoint)",
+        )
+    if not token or token != expected:
+        raise HTTPException(401, "valid `token` query parameter required")
+
+    deleted = run_gc(config_store, max_age_days=max_age_days)
+    last = get_last_gc_at()
+    return {
+        "deleted": deleted,
+        "max_age_days": max_age_days,
+        "ran_at": last.isoformat() if last else None,
+    }
 
 
 def _set_pack_enabled_response(publisher_id: str, *, enabled: bool) -> dict:
