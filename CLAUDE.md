@@ -13,11 +13,11 @@ Built on **FKTE** (Fractal Knowledge Transformation Engine):
 
 ## Active Track
 
-**Program-as-Primitive v3.0** is in flight. Phases A (manifest substrate), B (engine generalization → `ProgramEngine` with shape dispatch), and C (EI canonical shape + bounded-benefit rule primitives) shipped on `main`; charter at [docs/IDEA-GovOps-v3.0-ProgramAsPrimitive.md](docs/IDEA-GovOps-v3.0-ProgramAsPrimitive.md), execution plan at [PLAN-v3.md](PLAN-v3.md). Phase D (EI rollout to 6 jurisdictions — JP excluded as architectural control) is next. The v2.0 plan lives in [PLAN.md](PLAN.md); v2.1 (hosted demo) is queued. ADRs land in [docs/design/ADRs/](docs/design/ADRs/).
+**Program-as-Primitive v3.0** is in flight. Phases A (manifest substrate), B (engine generalization → `ProgramEngine` with shape dispatch), C (EI canonical shape + bounded-benefit rule primitives), and D (EI rollout to 6 jurisdictions — JP excluded as architectural control) shipped on `main`. Charter: [docs/IDEA-GovOps-v3.0-ProgramAsPrimitive.md](docs/IDEA-GovOps-v3.0-ProgramAsPrimitive.md). Plan: [PLAN-v3.md](PLAN-v3.md). Phase E (cross-program evaluation API — one POST returns per-program slots for OAS + EI) is next. The v2.0 plan lives in [PLAN.md](PLAN.md); v2.1 (hosted demo) is queued. ADRs land in [docs/design/ADRs/](docs/design/ADRs/).
 
 ## Current State
 
-7 jurisdictions (CA/BR/ES/FR/DE/UA/JP), 6 languages (en/fr/pt/es/de/uk), **480 backend tests passing**.
+7 jurisdictions (CA/BR/ES/FR/DE/UA/JP), 6 languages (en/fr/pt/es/de/uk), **561 backend tests passing**. Two programs canonicalized: Old Age Security (all 7 jurisdictions) and Employment Insurance (6 jurisdictions — JP excluded as v3 architectural control).
 
 **Backend (Python / FastAPI):**
 - Deterministic rule engine for pension eligibility (age, residency/contribution, legal status, evidence)
@@ -44,7 +44,7 @@ govops-demo                                    # http://127.0.0.1:8000
 govops-demo --reload                           # auto-reload for development
 govops-demo --port 9000                        # custom port
 
-pytest -q                                      # all 480 tests
+pytest -q                                      # all 561 tests
 pytest tests/test_engine.py -v                 # one file
 pytest tests/test_engine.py::test_name -v      # one test
 pytest -k "residency" -v                       # by keyword
