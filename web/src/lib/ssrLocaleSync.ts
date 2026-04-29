@@ -19,6 +19,7 @@
  * the supported primitive.)
  */
 import { createIsomorphicFn } from "@tanstack/react-start";
+import { getCookie, getRequestHeader } from "@tanstack/react-start/server";
 import { StorageKeys } from "@/lib/storageKeys";
 
 const SUPPORTED = ["en", "fr", "es-MX", "pt-BR", "de", "uk"] as const;
@@ -38,13 +39,15 @@ function pick(input: string | undefined): Locale | null {
   return null;
 }
 
+// `createIsomorphicFn`'s transform strips the `.server()` branch (and any
+// imports it references) from the client bundle, so the server-only
+// `@tanstack/react-start/server` import above is safe at the top level.
+// The previous `require(...)` form crashed in Vite's ESM SSR environment
+// (`ReferenceError: require is not defined`), which silently swallowed
+// every child route's `head()` and was the real cause of PLAN §12.3.x.1.
 export const getSsrLocaleSync = createIsomorphicFn()
   .client(() => null as string | null)
   .server((): string | null => {
-    // Server-only branch — these imports are stripped from the client
-    // bundle by createIsomorphicFn's transform.
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const { getCookie, getRequestHeader } = require("@tanstack/react-start/server");
     try {
       const cookieLocale = getCookie(StorageKeys.locale);
       const fromCookie = pick(cookieLocale);

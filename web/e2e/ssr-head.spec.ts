@@ -38,30 +38,18 @@ for (const route of PHASE_6_ROUTES) {
   });
 }
 
-// Known v0.4.0 limitation — tracked in PLAN.md §12 as v0.5.0 follow-up.
-//
-// The cookie-localized SSR title is the ideal end state per govops-023 item 4
-// (search engines, social embeds, and human first-paint all see the locale-
-// matched title). Lovable's first cut shipped a partial implementation that
-// resolved client-side after hydration; my createIsomorphicFn rewrite gets
-// the build to pass but the runtime path doesn't surface a localized title
-// in the SSR HTML stream because TanStack Start's `head()` hook runs
-// synchronously in a route-match context that doesn't carry the request's
-// cookie/Accept-Language state through `getCookie`/`getRequestHeader`.
-//
-// The non-cookie-aware SSR titles still ship via head-i18n.ts's `t()` (which
-// passes for the 8 routes covered by the per-route loop above), and post-
-// hydration the client-side cookie read produces a correctly-localized
-// title before the user sees a meaningful frame. The remaining gap is purely
-// "search engines / social embeds see English-only" — real but not
-// blocking the v0.4.0 ship.
-//
-// Resolution path for v0.5.0: replace createIsomorphicFn() with a proper
-// server-fn that wraps the request context; thread the resolved locale
-// through the route-match `loaderData` chain so child `head()` hooks can
-// read it from `ctx.matches[0].loaderData.initialLocale` synchronously.
-// Re-enable this test by changing `test.fixme` back to `test`.
-test.fixme("SSR head: <title> reflects govops-locale cookie at SSR time, not after hydration", async ({
+// Closed (v0.4.0 follow-up): the cookie-localized SSR title now reaches the
+// SSR HTML stream. Root cause was not the route-match context (as PLAN
+// §12.3.x.1 originally framed it) — `ssrLocaleSync.ts` was using a CommonJS
+// `require("@tanstack/react-start/server")` to delay the server-only import,
+// which throws `ReferenceError: require is not defined` in Vite's ESM SSR
+// environment. TanStack swallowed the synchronous exception and dropped
+// every child route's `head()` from the rendered HTML, so only the root's
+// static head reached the wire. Replacing the `require()` with a static
+// top-of-file ESM import (createIsomorphicFn's transform strips the server
+// branch from the client bundle) restored child `head()` execution and the
+// cookie path now resolves end-to-end.
+test("SSR head: <title> reflects govops-locale cookie at SSR time, not after hydration", async ({
   playwright,
   baseURL,
 }) => {
