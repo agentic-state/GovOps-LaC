@@ -13,15 +13,18 @@ import type { FederationPack, FederationRegistryEntry } from "@/lib/federation-t
 import { RegistryTable } from "@/components/govops/federation/RegistryTable";
 import { PacksTable } from "@/components/govops/federation/PacksTable";
 import { FetchPackForm } from "@/components/govops/federation/FetchPackForm";
-import { t } from "@/lib/head-i18n";
+import { t, localeFromMatches } from "@/lib/head-i18n";
 
 export const Route = createFileRoute("/admin/federation")({
-  head: () => ({
-    meta: [
-      { title: t("admin.federation.heading") },
-      { name: "description", content: t("admin.federation.lede") },
-    ],
-  }),
+  head: ({ matches }) => {
+    const l = localeFromMatches(matches);
+    return {
+      meta: [
+        { title: t("admin.federation.heading", l) },
+        { name: "description", content: t("admin.federation.lede", l) },
+      ],
+    };
+  },
   component: FederationPage,
 });
 

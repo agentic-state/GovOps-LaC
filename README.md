@@ -112,12 +112,52 @@ The demo implements a complete **Old Age Security (OAS) initial eligibility dete
 - **Explicit uncertainty**: missing or contradictory inputs trigger review, not false certainty
 - **Human accountability**: humans remain the final decision authorities
 
+### v2.0 substrate
+
+Law-as-Code v2.0 inserts a **dated `ConfigValue` substrate** between the formalized rules and the engine. Every parameter the engine touches — age thresholds, residency minima, accepted legal statuses, calculation coefficients, prompts, UI labels — is resolved through `ConfigStore.resolve(key, evaluation_date, jurisdiction_id)` rather than a hardcoded constant. A case evaluated against 2025 still resolves with 2025's substrate even after the rules change in 2026; the supersession chain is durable.
+
+```
+                                                        Federation (Phase 8)
+                                                     +--------------------------+
+                                                     | Ed25519 signed packs     |
+                                                     | publisher allowlist      |
+                                                     | lawcode/REGISTRY.yaml    |
+                                                     +-----------+--------------+
+                                                                 | (verified merge)
+                                                                 v
++------------------------+        +------------------------------+-----+
+| Formalized Rules       |  ref   |         ConfigValue Substrate      |
+| (param_key_prefix +    +------->+   (dated, citation, supersedes,   |
+|  citation only)        |        |    rationale, approved_by)        |
++-----------+------------+        +-----------+------------------------+
+            |                                 ^
+            | engine.evaluate(                | resolve(key,
+            |   case, evaluation_date)        |  evaluation_date)
+            v                                 |
++------------------------+        +-----------+------------------------+
+| Deterministic engine   +------->+ Audit package (full ConfigResolution
+| (rule + calculation)   |        | trace per rule, sha256 of notice  |
++------------------------+        | template, supersession chain)     |
+                                  +------------------------------------+
+```
+
+YAML lives under [lawcode/](lawcode/), validated against [schema/lawcode-v1.0.json](schema/lawcode-v1.0.json) on every push. The encoding pipeline (`govops encode`) emits commit-ready YAML, not Python.
+
 ### Technology:
 
-- **Python + FastAPI** backend (no infrastructure dependencies)
-- **Jinja2** templates (no JavaScript build step)
-- **In-memory store** seeded from statutory data (resets on restart)
-- **Pydantic** models for the full domain (jurisdiction, authority chain, rules, cases, evidence, audit)
+**Backend** (`src/govops/`):
+- **Python + FastAPI** with **Pydantic** models for the full domain (jurisdiction, authority chain, rules, cases, evidence, audit, ConfigValue)
+- **Embedded SQLite** at `var/govops.db` for `ConfigStore` persistence (Phase 6+ per [ADR-010](docs/design/ADRs/ADR-010-sqlite-from-phase-6.md)); legacy in-memory store retained for the case fixtures
+- **Schema-validated YAML** for every business value under [lawcode/](lawcode/) — 21 files, 564 records, validated in CI
+- **Ed25519** for federation (Phase 8) — signed lawcode packs with publisher allowlist per [ADR-009](docs/design/ADRs/)
+- **Jinja2** templates retained as a fallback rendering surface; the primary UI is the `web/` SPA below
+
+**Frontend** (`web/`):
+- **TanStack Start** (SSR + flat-route conventions) on **Vite** + **React 19** + **TypeScript**
+- **Tailwind v4** + **shadcn/ui** for design-system primitives
+- **react-intl** with ICU MessageFormat for 6 locales × ~498 keys; ICU + key-parity validators run as `prebuild`
+- **CodeMirror** + **react-diff-viewer-continued** for the ConfigValue admin surface; **react-hook-form** + **zod** for forms
+- **Playwright + axe** cross-browser E2E suite covering smoke, admin flow, approval actions, a11y (WCAG 2.1 AA), i18n, and SSR head coverage
 
 ---
 
@@ -138,19 +178,46 @@ The demo exposes both a web UI and a JSON API.
 | POST | `/api/cases/{id}/evaluate` | Run the rule engine |
 | POST | `/api/cases/{id}/review` | Submit human review action |
 | GET | `/api/cases/{id}/audit` | Full audit package |
-| POST | `/api/jurisdiction/{code}` | Switch jurisdiction (ca, br, es, fr, de, ua) |
+| GET | `/api/cases/{id}/notice` | Render decision notice (Phase 10C) |
+| POST | `/api/cases/{id}/events` | Post a life event for reassessment (Phase 10D) |
+| GET | `/api/cases/{id}/events` | List life events for a case |
+| GET | `/api/jurisdiction/{code}` | Get jurisdiction metadata + `howto_url` |
+| POST | `/api/jurisdiction/{code}` | Switch jurisdiction (ca, br, es, fr, de, ua, jp) |
+| GET | `/api/impact` | Citation impact across all jurisdictions (Phase 7) |
+| POST | `/api/screen` | Citizen self-screening, no PII echo (Phase 10A) |
+| POST | `/api/screen/notice` | Self-screen decision notice (Phase 10C) |
+| GET | `/api/config/values` | Browse `ConfigValue` records (Law-as-Code v2.0) |
+| GET | `/api/config/resolve` | Resolve a key at an `evaluation_date` |
+| GET | `/api/config/versions` | Supersession chain for a key |
+| POST | `/api/config/values` | Draft a new `ConfigValue` |
+| POST | `/api/config/values/{id}/approve` | Approve a draft (dual approval per ADR-008) |
+| POST | `/api/config/values/{id}/request-changes` | Send a draft back |
+| POST | `/api/config/values/{id}/reject` | Reject a draft |
+| POST | `/api/encode/batches/{id}/emit-yaml` | Encoder commits approved batch to lawcode YAML |
+| GET | `/api/admin/federation/registry` | Federation publisher allowlist (Phase 8) |
+| GET | `/api/admin/federation/packs` | Fetched lawcode packs |
+| POST | `/api/admin/federation/fetch/{publisher_id}` | Pull a signed pack |
+| POST | `/api/admin/federation/packs/{publisher_id}/enable` | Enable a verified pack |
+| POST | `/api/admin/federation/packs/{publisher_id}/disable` | Disable a pack |
 
-### Web UI pages:
+### Web UI pages (TanStack Start SPA in `web/`, served at http://localhost:8080):
 
 | Path | Description |
 | --- | --- |
-| `/` | About page (what GovOps is, roadmap, honest assessment) |
-| `/cases` | Case dashboard |
+| `/` | Landing — Law-as-Code v2.0 hero, console dropdown into the operator surfaces |
+| `/about` | What GovOps is, SPRIND framing, FKTE pipeline, authority chain, "what this is not" |
+| `/cases` | Case dashboard with event timeline + benefit-amount card on case detail |
 | `/authority` | Authority chain browser |
-| `/encode` | Rule encoding pipeline (legislative text to rules) |
-| `/admin` | Glass window (all data behind the scenes) |
+| `/encode` | Rule encoding pipeline (legislative text → proposals → review → YAML emission) |
+| `/impact` | Citation impact across all jurisdictions (Phase 7) |
+| `/screen`, `/screen/:jurisdiction` | Citizen self-screening — no PII storage, no case row (Phase 10A) |
+| `/config` (+ `/timeline`, `/diff`, `/draft`, `/approvals`, `/prompts`) | ConfigValue admin (search, supersession, draft, dual approval, prompt management) |
+| `/admin` | Operator surface — seeded data, federation registry, runbook |
+| `/admin/federation` | Federation registry + signed pack management (Phase 8) |
+| `/walkthrough` | Guided tour of the substrate-as-truth flow |
+| `/policies` | Privacy + data handling notice |
 
-Interactive API docs: http://127.0.0.1:8000/docs
+The legacy Jinja UI (served at http://127.0.0.1:8000) is preserved as a no-build-step fallback covering `/`, `/cases`, `/authority`, `/encode`, `/admin`, `/mvp`. Interactive API docs: http://127.0.0.1:8000/docs
 
 ---
 
@@ -189,11 +256,11 @@ pip install -e ".[dev]"
 pytest -v
 ```
 
-343 backend tests covering (all green on Python 3.10/3.11/3.12):
+375 backend tests covering (all green on Python 3.10/3.11/3.12):
 - Rule engine unit tests (all decision paths, edge cases, residency calculation)
 - Determinism verification (identical inputs = identical outputs)
 - Authority traceability (every rule has a statutory citation)
-- Multi-jurisdiction switching and evaluation across 6 jurisdictions
+- Multi-jurisdiction switching and evaluation across 7 jurisdictions
 - Encoding pipeline (LLM response parsing, proposal review, batch lifecycle, YAML emission)
 - API integration tests (full case workflow + Phase 7 impact + Phase 8 federation)
 - ConfigValue substrate (round-trip, effective-date semantics, supersession chain)
@@ -215,7 +282,7 @@ src/govops/
   models.py            # Domain model (jurisdiction, rules, cases, evidence, audit)
   engine.py            # Deterministic rule engine
   seed.py              # Canadian OAS data
-  jurisdictions.py     # Brazil, Spain, France, Germany, Ukraine
+  jurisdictions.py     # Brazil, Spain, France, Germany, Ukraine, Japan
   i18n.py              # Multi-language support (en/fr/pt/es/de/uk)
   encoder.py           # Rule encoding pipeline (AI-assisted + human review)
   encoding_example.py  # Pre-loaded encoding demo
@@ -226,7 +293,7 @@ src/govops/
   config.py            # ConfigValue substrate (Law-as-Code v2.0)
 lawcode/               # Effective-dated ConfigValue records (YAML, schema-validated)
   global/              # Cross-jurisdictional values (engine thresholds, UI labels, prompts)
-  {ca,br,es,fr,de,ua}/config/  # Per-jurisdiction rule parameters
+  {ca,br,es,fr,de,ua,jp}/config/  # Per-jurisdiction rule parameters
 schema/
   configvalue-v1.0.json  # JSON Schema for a single ConfigValue record
   lawcode-v1.0.json      # JSON Schema for the lawcode/*.yaml file shape

@@ -44,7 +44,7 @@ govops-demo                                    # http://127.0.0.1:8000
 govops-demo --reload                           # auto-reload for development
 govops-demo --port 9000                        # custom port
 
-pytest -q                                      # all 98 tests
+pytest -q                                      # all 375 tests
 pytest tests/test_engine.py -v                 # one file
 pytest tests/test_engine.py::test_name -v      # one test
 pytest -k "residency" -v                       # by keyword

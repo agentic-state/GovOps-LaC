@@ -55,7 +55,7 @@ Every value the system uses — thresholds, accepted statuses, evidence types, c
 | 4 | Prompt-as-config approval policy | Dual approval (domain expert + maintainer) | End of Phase 4 | **LOCKED** — ADR-008 |
 | 5 | **(added)** Lovable code repo location | Same repo, `web/` folder; Lovable authors upstream, artefact brought in | End of Phase 0 | **LOCKED** — ADR-005 |
 | 6 | **(added)** Backwards-compat strategy during Phase 1–2 | `resolve()` falls back to current Python constants until Phase 2 cuts each domain over; tests stay green throughout | End of Phase 1 | **LOCKED** — ADR-004 |
-| 7 | **(added)** Federation trust model (Phase 8) | Signed manifests + checksum pinning in `lawcode/REGISTRY.yaml`; reject unsigned by default | End of Phase 7 | OPEN |
+| 7 | **(added)** Federation trust model (Phase 8) | Signed manifests + checksum pinning in `lawcode/REGISTRY.yaml`; reject unsigned by default | End of Phase 7 | **LOCKED** — ADR-009 (Ed25519 signed packs + publisher allowlist; fail-closed on unsigned/checksum mismatch). Implemented in `src/govops/federation.py`; admin surface at `/api/admin/federation/*`. |
 
 Record gate decisions as ADRs in `docs/design/ADRs/`.
 
@@ -241,14 +241,15 @@ Sequenced; each sub-phase ships independently.
 | 3 | ~85 | ✅ | + YAML loader tests |
 | 4 | ~88 | ✅ | + prompt reproducibility tests |
 | 5 | ~90 | ✅ | + schema validation tests |
-| 6 | ~100 | 🟡 in progress | + admin endpoint tests; UI surfaces shipped, full E2E exit-line proof pending |
-| 7 | ~105 | 🟡 backend done | impact endpoint + 23 tests landed; Lovable surface tracked as `docs/govops-014-citation-impact.md` |
-| 8 | ~115 | ⬜ | + federation tests |
+| 6 | ~100 | ✅ | admin endpoint tests + Lovable admin/timeline/diff/draft/approvals/prompts surfaces shipped; admin-flow E2E proves substrate boundary |
+| 7 | ~105 | ✅ | impact endpoint + 23 tests landed; Lovable `/impact` shipped (govops-014/14a) |
+| 8 | ~115 | ✅ | federation pipeline + admin federation HTTP surface; signed packs with Ed25519 (ADR-009) |
 | 9 | ✅ docs only | ✅ | `docs/design/LAW-AS-CODE.md` published |
-| 10A | ~110 | 🟡 backend done | self-screening endpoint + 18 tests landed; Lovable surface tracked as `docs/govops-015-self-screening.md` |
-| 10B | ~120 | ⬜ | calculation rule type + engine.calculate() |
-| 10C | ~130 | ⬜ | notification artefact templating |
-| 10D | ~145 | ⬜ | life-event reassessment |
+| 10A | ~110 | ✅ | self-screening endpoint + 18 tests landed; Lovable `/screen` shipped (govops-015/15a/15b) |
+| 10B | ~120 | ✅ | `RuleType.CALCULATION` + typed-AST formulas + per-step citation; CA OAS calc wired through `screen`, `evaluate`, `audit` |
+| 10C | ~130 | ✅ | decision-notice rendering with template-as-ConfigValue + sha256 in audit; `POST /api/screen/notice` |
+| 10D | ~145 | ✅ | event-driven reassessment with supersession chain + `POST /api/cases/{id}/events` |
+| 11 | — | ✅ | scalar seam closed (ADR-013 addendum) — every parameter honours `evaluation_date` |
 
 **Live count (2026-04-28)**: 375 backend tests passing (`pytest -q`). Delta from 343 → 375 covers the v0.3.0 federation + admin work (343 → 366), the govops-022 backend prelude (366 → 373, +7 in `tests/test_api_jurisdiction_howto.py`), and the 7th-jurisdiction integration (373 → 375, +2 in `tests/test_api.py::TestMultiJurisdiction`).
 
@@ -414,7 +415,7 @@ Originating spec: [docs/govops-019-case-event-timeline.md](docs/govops-019-case-
 
 Earlier §12 entries marking govops-016a / 017 / 018 / 019 / 020 as "Shipped (2026-04-28)" referred to user-insights-hub state — the Lovable repo where the artefacts were authored. The **import-into-`web/` step was skipped** for that whole batch and only surfaced when CI's E2E job started exercising `web/about.spec.ts` and `web/configure-without-deploy.spec.ts` (specs that assumed the post-016a state).
 
-The full re-import landed at commit `<TBD>` (this commit), bringing user-insights-hub@58c529c into `web/` with surgical preservation of local-only additions:
+The full re-import landed at commit `8a8ecde` (`phase-11: import Lovable artefacts (govops-016a/017/018/019/020) from user-insights-hub`), bringing user-insights-hub@58c529c into `web/` with surgical preservation of local-only additions:
 
 - **Imported (229 files copied, 51 net diff after preservation)**: src/, scripts/, public/, brand/, components.json, eslint.config.js, tsconfig.json, vite.config.ts, vitest.config.ts, wrangler.jsonc, bunfig.toml, e2e/screen.spec.ts (upstream is strict superset adding govops-019 event-timeline test). All 6 locale files merged: 782 upstream keys + 304 local-only keys (walkthrough/help/runbook/dataflow/breadcrumb/home) = 843 keys per locale.
 - **Preserved (local versions kept verbatim)**: package.json (govops-web name + axe + e2e scripts), playwright.config.ts (Python backend orchestration), .gitignore / .prettierignore / .prettierrc (cosmetic), web/e2e/* (9 local specs + fixtures), web/src/components/govops/{Breadcrumb,DataFlowDiagram,HelpDrawer,PageBreadcrumb,Runbook}.tsx (local features), web/src/routes/walkthrough.tsx (local route), web/src/components/govops/Masthead.tsx (Console dropdown + HelpDrawer + Walkthrough nav), web/src/routes/__root.tsx (PageBreadcrumb), web/src/components/govops/encode/ProposalCard.tsx (lock-on-terminal-state), web/src/routes/{index,cases,encode,config,config.approvals,config.prompts,admin}.tsx (Runbook + modules-section integrations).
@@ -439,10 +440,10 @@ Three Lovable specs landed in `docs/` to seed the next Lovable cycle. Two of the
 
 | # | Limitation | Status | Follow-up |
 | --- | --- | --- | --- |
-| 12.3.x.1 | **SSR locale wiring is partial**. `head()` hooks now resolve titles + descriptions through `head-i18n.ts` for all 8 Phase-6 routes (✅ verified by per-route `<title>` non-empty assertion in `web/e2e/ssr-head.spec.ts`). The govops-locale-cookie path through `getSsrLocaleSync` was rewritten via `createIsomorphicFn` after Lovable's first cut shipped a `.server.ts/.client.ts` swap that doesn't exist in this version of TanStack Start. The build is now clean, but the cookie-localized SSR title doesn't actually appear in the SSR HTML stream — `head()` runs synchronously in a route-match context that doesn't carry request cookies through `getCookie`/`getRequestHeader`. Net effect: search engines + social-share embeds see English-only titles regardless of the visitor's locale; human readers see the English title for one paint then a client-side flip. | ⚠️ Test marked `test.fixme` in `web/e2e/ssr-head.spec.ts:41` with a precise comment explaining why. Build/tsc/lint clean; per-route `<title>` non-empty assertion passes. The cookie-on-SSR assertion is the one true gap. | **v0.5.0 work**: replace `createIsomorphicFn` with a server-fn that wraps the request context; thread the resolved locale through the route-match `loaderData` chain so child `head()` hooks can read it from `ctx.matches[0].loaderData.initialLocale` synchronously. Re-enable the `test.fixme` test once the SSR path is fixed. |
+| 12.3.x.1 | **SSR locale wiring** — closed 2026-04-29. The original framing ("route-match context doesn't carry request cookies") was a misdiagnosis. The real failure was in `web/src/lib/ssrLocaleSync.ts` line 47: a CommonJS `require("@tanstack/react-start/server")` used to delay the server-only import threw `ReferenceError: require is not defined` in Vite's ESM SSR environment. TanStack swallowed the synchronous exception inside `executeHead`, dropped every child route's `head()` from the rendered SSR HTML stream (only the root's static head reached the wire), and the cookie path was never even attempted. Replacing the `require()` with a static top-of-file ESM import (createIsomorphicFn's transform strips the server branch from the client bundle, so the static import is the supported shape) restored child `head()` execution and the cookie path now resolves end-to-end. While here: `admin.federation.tsx` route's `head()` was missing the `({ matches })` param + `localeFromMatches(matches)` call, which would have produced an EN-only title even after the underlying fix; that was patched in the same commit. | ✅ closed (2026-04-29) — `web/e2e/ssr-head.spec.ts:52` cookie-on-SSR assertion flipped from `test.fixme` to `test`, all 9 ssr-head tests pass against the running dev server (`fr` cookie → "À propos de GovOps", `de` → "Über GovOps", `en` → "About GovOps"; `admin/federation` `fr` → "Fédération"). | None — `nav.authority` is the same word in EN and FR catalogs, so `/authority` SSR title reads "Authority" under both locales; that's a translator decision (or future content gap), not an SSR bug. |
 | 12.3.x.2 | TimelineCard date-arg bug pre-exists in Lovable upstream (passes string into ICU `{date, date, medium}` placeholder, throws `RangeError: Invalid time value` on every render of /config timeline). Re-fix re-applied at the same Lovable-import boundary that re-introduced it. | ✅ Re-fixed in this import (TimelineCard.tsx:48 — `from` Date object passed in, fallback to `now` for unparseable timestamps) | When this bug re-appears in a future Lovable batch (which it will until the spec author flags it upstream): same one-line fix. Or send a Lovable spec to fix it once at source. |
 
-**Cumulative test-budget impact for Phase 12**: backend +7 (`tests/test_api_jurisdiction_howto.py`); web vitest 51 → 53 (+2 new tests imported with the artefact); Playwright +9 SSR-head tests (8 per-route + 1 `fixme` for cookie wiring).
+**Cumulative test-budget impact for Phase 12**: backend +7 (`tests/test_api_jurisdiction_howto.py`); web vitest 51 → 53 (+2 new tests imported with the artefact); Playwright +9 SSR-head tests, all green (8 per-route + the cookie-on-SSR assertion that was previously `test.fixme` and is now active per the 2026-04-29 fix above).
 
 ### Phase 8 — Lovable extras + admin federation surface (2026-04-28)
 
