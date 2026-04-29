@@ -83,7 +83,7 @@ done\n\
 \n\
 # 3. Frontend on the public port. Vite dev binds to 0.0.0.0:7860.\n\
 cd /app/web && \\\n\
-  VITE_API_BASE_URL=http://127.0.0.1:8000 \\\n\
+  VITE_API_BASE_URL="" \\\n\
   VITE_DEMO_MODE=1 \\\n\
   npm run dev -- --host 0.0.0.0 --port 7860 --strictPort &\n\
 VITE_PID=$!\n\
