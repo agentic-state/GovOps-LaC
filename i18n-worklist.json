@@ -1,0 +1,5128 @@
+[
+  {
+    "key": "about.chain.constitution",
+    "en": "Constitution",
+    "needs": [
+      "fr"
+    ],
+    "existing": {
+      "fr": "Constitution"
+    }
+  },
+  {
+    "key": "about.chain.service",
+    "en": "Service",
+    "needs": [
+      "fr"
+    ],
+    "existing": {
+      "fr": "Service"
+    }
+  },
+  {
+    "key": "about.cta.github",
+    "en": "View on GitHub",
+    "needs": [
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "de": "[MT] Auf GitHub ansehen",
+      "es-MX": "[MT] Ver en GitHub",
+      "pt-BR": "[MT] Ver no GitHub",
+      "uk": "[MT] Переглянути на GitHub"
+    }
+  },
+  {
+    "key": "about.cta.project_home",
+    "en": "GitHub Pages",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "GitHub Pages",
+      "de": "[MT] GitHub Pages",
+      "es-MX": "[MT] GitHub Pages",
+      "pt-BR": "[MT] GitHub Pages",
+      "uk": "[MT] GitHub Pages"
+    }
+  },
+  {
+    "key": "about.deeper.schema",
+    "en": "Schema (configvalue-v1.0.json)",
+    "needs": [
+      "de"
+    ],
+    "existing": {
+      "de": "Schema (configvalue-v1.0.json)"
+    }
+  },
+  {
+    "key": "about.deeper.sprind",
+    "en": "SPRIND Law as Code",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "SPRIND Law as Code",
+      "de": "SPRIND Law as Code",
+      "es-MX": "SPRIND Law as Code",
+      "pt-BR": "SPRIND Law as Code",
+      "uk": "SPRIND Law as Code"
+    }
+  },
+  {
+    "key": "about.frameworks.agentic.name",
+    "en": "The Agentic State",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "The Agentic State",
+      "de": "The Agentic State",
+      "es-MX": "The Agentic State",
+      "pt-BR": "The Agentic State",
+      "uk": "The Agentic State"
+    }
+  },
+  {
+    "key": "about.frameworks.agentic.subtitle",
+    "en": "Tallinn Digital Summit, 2025",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Tallinn Digital Summit, 2025",
+      "de": "Tallinn Digital Summit, 2025",
+      "es-MX": "Tallinn Digital Summit, 2025",
+      "pt-BR": "Tallinn Digital Summit, 2025",
+      "uk": "Tallinn Digital Summit, 2025"
+    }
+  },
+  {
+    "key": "about.references.project_home",
+    "en": "Project home",
+    "needs": [
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "de": "[MT] Projektstartseite",
+      "es-MX": "[MT] Página principal del proyecto",
+      "pt-BR": "[MT] Página inicial do projeto",
+      "uk": "[MT] Головна сторінка проєкту"
+    }
+  },
+  {
+    "key": "about.references.project_home_desc",
+    "en": "Canonical GitHub Pages landing page for the GovOps prototype.",
+    "needs": [
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "de": "[MT] Kanonische GitHub-Pages-Landingpage des GovOps-Prototyps.",
+      "es-MX": "[MT] Página oficial en GitHub Pages del prototipo GovOps.",
+      "pt-BR": "[MT] Página de apresentação canônica no GitHub Pages do protótipo GovOps.",
+      "uk": "[MT] Канонічна сторінка GovOps на GitHub Pages."
+    }
+  },
+  {
+    "key": "admin.activity.empty",
+    "en": "No recent activity",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "No recent activity",
+      "de": "No recent activity",
+      "es-MX": "No recent activity",
+      "pt-BR": "No recent activity",
+      "uk": "No recent activity"
+    }
+  },
+  {
+    "key": "admin.activity.heading",
+    "en": "Recent activity",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Recent activity",
+      "de": "Recent activity",
+      "es-MX": "Recent activity",
+      "pt-BR": "Recent activity",
+      "uk": "Recent activity"
+    }
+  },
+  {
+    "key": "admin.activity.relative",
+    "en": "{date}",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "{date}",
+      "de": "{date}",
+      "es-MX": "{date}",
+      "pt-BR": "{date}",
+      "uk": "{date}"
+    }
+  },
+  {
+    "key": "admin.error.partial",
+    "en": "{count, plural, one {# tile failed to load} other {# tiles failed to load}}",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "{count, plural, one {# tile failed to load} other {# tiles failed to load}}",
+      "de": "{count, plural, one {# tile failed to load} other {# tiles failed to load}}",
+      "es-MX": "{count, plural, one {# tile failed to load} other {# tiles failed to load}}",
+      "pt-BR": "{count, plural, one {# tile failed to load} other {# tiles failed to load}}",
+      "uk": "{count, plural, one {# tile failed to load} other {# tiles failed to load}}"
+    }
+  },
+  {
+    "key": "admin.federation.col.actions",
+    "en": "Actions",
+    "needs": [
+      "fr"
+    ],
+    "existing": {
+      "fr": "Actions"
+    }
+  },
+  {
+    "key": "admin.federation.col.name",
+    "en": "Name",
+    "needs": [
+      "de"
+    ],
+    "existing": {
+      "de": "Name"
+    }
+  },
+  {
+    "key": "admin.federation.col.status",
+    "en": "Status",
+    "needs": [
+      "de",
+      "pt-BR"
+    ],
+    "existing": {
+      "de": "Status",
+      "pt-BR": "Status"
+    }
+  },
+  {
+    "key": "admin.federation.col.version",
+    "en": "Version",
+    "needs": [
+      "fr",
+      "de"
+    ],
+    "existing": {
+      "fr": "Version",
+      "de": "Version"
+    }
+  },
+  {
+    "key": "admin.heading",
+    "en": "Operator overview",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Operator overview",
+      "de": "Operator overview",
+      "es-MX": "Operator overview",
+      "pt-BR": "Operator overview",
+      "uk": "Operator overview"
+    }
+  },
+  {
+    "key": "admin.health.heading",
+    "en": "System health",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "System health",
+      "de": "System health",
+      "es-MX": "System health",
+      "pt-BR": "System health",
+      "uk": "System health"
+    }
+  },
+  {
+    "key": "admin.health.jurisdiction",
+    "en": "Jurisdiction: {code}",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Jurisdiction: {code}",
+      "de": "Jurisdiction: {code}",
+      "es-MX": "Jurisdiction: {code}",
+      "pt-BR": "Jurisdiction: {code}",
+      "uk": "Jurisdiction: {code}"
+    }
+  },
+  {
+    "key": "admin.health.program",
+    "en": "Program: {program}",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Program: {program}",
+      "de": "Program: {program}",
+      "es-MX": "Program: {program}",
+      "pt-BR": "Program: {program}",
+      "uk": "Program: {program}"
+    }
+  },
+  {
+    "key": "admin.health.status",
+    "en": "API: {status}",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "API: {status}",
+      "de": "API: {status}",
+      "es-MX": "API: {status}",
+      "pt-BR": "API: {status}",
+      "uk": "API: {status}"
+    }
+  },
+  {
+    "key": "admin.health.version",
+    "en": "v{version}",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "v{version}",
+      "de": "v{version}",
+      "es-MX": "v{version}",
+      "pt-BR": "v{version}",
+      "uk": "v{version}"
+    }
+  },
+  {
+    "key": "admin.jurisdiction.switcher.help",
+    "en": "Switching reseeds all data.",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Switching reseeds all data.",
+      "de": "Switching reseeds all data.",
+      "es-MX": "Switching reseeds all data.",
+      "pt-BR": "Switching reseeds all data.",
+      "uk": "Switching reseeds all data."
+    }
+  },
+  {
+    "key": "admin.jurisdiction.switcher.label",
+    "en": "Jurisdiction",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Jurisdiction",
+      "de": "Jurisdiction",
+      "es-MX": "Jurisdiction",
+      "pt-BR": "Jurisdiction",
+      "uk": "Jurisdiction"
+    }
+  },
+  {
+    "key": "admin.lede",
+    "en": "Counts, recent activity, and system health at a glance.",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Counts, recent activity, and system health at a glance.",
+      "de": "Counts, recent activity, and system health at a glance.",
+      "es-MX": "Counts, recent activity, and system health at a glance.",
+      "pt-BR": "Counts, recent activity, and system health at a glance.",
+      "uk": "Counts, recent activity, and system health at a glance."
+    }
+  },
+  {
+    "key": "admin.refresh",
+    "en": "Refresh",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Refresh",
+      "de": "Refresh",
+      "es-MX": "Refresh",
+      "pt-BR": "Refresh",
+      "uk": "Refresh"
+    }
+  },
+  {
+    "key": "admin.refreshing",
+    "en": "Refreshing…",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Refreshing…",
+      "de": "Refreshing…",
+      "es-MX": "Refreshing…",
+      "pt-BR": "Refreshing…",
+      "uk": "Refreshing…"
+    }
+  },
+  {
+    "key": "admin.tile.audit_entries",
+    "en": "Audit entries",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Audit entries",
+      "de": "Audit entries",
+      "es-MX": "Audit entries",
+      "pt-BR": "Audit entries",
+      "uk": "Audit entries"
+    }
+  },
+  {
+    "key": "admin.tile.authority_links",
+    "en": "Authority links",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Authority links",
+      "de": "Authority links",
+      "es-MX": "Authority links",
+      "pt-BR": "Authority links",
+      "uk": "Authority links"
+    }
+  },
+  {
+    "key": "admin.tile.cases",
+    "en": "Cases",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Cases",
+      "de": "Cases",
+      "es-MX": "Cases",
+      "pt-BR": "Cases",
+      "uk": "Cases"
+    }
+  },
+  {
+    "key": "admin.tile.config_values",
+    "en": "ConfigValues",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "ConfigValues",
+      "de": "ConfigValues",
+      "es-MX": "ConfigValues",
+      "pt-BR": "ConfigValues",
+      "uk": "ConfigValues"
+    }
+  },
+  {
+    "key": "admin.tile.encoding_batches",
+    "en": "Encoding batches",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Encoding batches",
+      "de": "Encoding batches",
+      "es-MX": "Encoding batches",
+      "pt-BR": "Encoding batches",
+      "uk": "Encoding batches"
+    }
+  },
+  {
+    "key": "admin.tile.jurisdictions",
+    "en": "Jurisdictions",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Jurisdictions",
+      "de": "Jurisdictions",
+      "es-MX": "Jurisdictions",
+      "pt-BR": "Jurisdictions",
+      "uk": "Jurisdictions"
+    }
+  },
+  {
+    "key": "admin.tile.legal_documents",
+    "en": "Legal documents",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Legal documents",
+      "de": "Legal documents",
+      "es-MX": "Legal documents",
+      "pt-BR": "Legal documents",
+      "uk": "Legal documents"
+    }
+  },
+  {
+    "key": "admin.tile.pending_approvals",
+    "en": "Pending approvals",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Pending approvals",
+      "de": "Pending approvals",
+      "es-MX": "Pending approvals",
+      "pt-BR": "Pending approvals",
+      "uk": "Pending approvals"
+    }
+  },
+  {
+    "key": "admin.tile.recommendations",
+    "en": "Recommendations",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Recommendations",
+      "de": "Recommendations",
+      "es-MX": "Recommendations",
+      "pt-BR": "Recommendations",
+      "uk": "Recommendations"
+    }
+  },
+  {
+    "key": "admin.tile.reviews",
+    "en": "Reviews",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Reviews",
+      "de": "Reviews",
+      "es-MX": "Reviews",
+      "pt-BR": "Reviews",
+      "uk": "Reviews"
+    }
+  },
+  {
+    "key": "admin.tile.rules",
+    "en": "Rules",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Rules",
+      "de": "Rules",
+      "es-MX": "Rules",
+      "pt-BR": "Rules",
+      "uk": "Rules"
+    }
+  },
+  {
+    "key": "admin.trend.quiet",
+    "en": "No recent activity",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "No recent activity",
+      "de": "No recent activity",
+      "es-MX": "No recent activity",
+      "pt-BR": "No recent activity",
+      "uk": "No recent activity"
+    }
+  },
+  {
+    "key": "admin.trend.recent",
+    "en": "Activity in the last 7 days",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Activity in the last 7 days",
+      "de": "Activity in the last 7 days",
+      "es-MX": "Activity in the last 7 days",
+      "pt-BR": "Activity in the last 7 days",
+      "uk": "Activity in the last 7 days"
+    }
+  },
+  {
+    "key": "app.name",
+    "en": "GovOps",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "GovOps",
+      "de": "GovOps",
+      "es-MX": "GovOps",
+      "pt-BR": "GovOps",
+      "uk": "GovOps"
+    }
+  },
+  {
+    "key": "approvals.filter.status.label",
+    "en": "Status",
+    "needs": [
+      "de",
+      "pt-BR"
+    ],
+    "existing": {
+      "de": "Status",
+      "pt-BR": "Status"
+    }
+  },
+  {
+    "key": "authority.chain.heading",
+    "en": "Chain",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Chain",
+      "de": "Chain",
+      "es-MX": "Chain",
+      "pt-BR": "Chain",
+      "uk": "Chain"
+    }
+  },
+  {
+    "key": "authority.chain.selected.aria",
+    "en": "{docs} documents and {rules} rules linked to {title}",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "{docs} documents and {rules} rules linked to {title}",
+      "de": "{docs} documents and {rules} rules linked to {title}",
+      "es-MX": "{docs} documents and {rules} rules linked to {title}",
+      "pt-BR": "{docs} documents and {rules} rules linked to {title}",
+      "uk": "{docs} documents and {rules} rules linked to {title}"
+    }
+  },
+  {
+    "key": "authority.documents.empty",
+    "en": "No documents.",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "No documents.",
+      "de": "No documents.",
+      "es-MX": "No documents.",
+      "pt-BR": "No documents.",
+      "uk": "No documents."
+    }
+  },
+  {
+    "key": "authority.documents.heading",
+    "en": "Legal documents",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Legal documents",
+      "de": "Legal documents",
+      "es-MX": "Legal documents",
+      "pt-BR": "Legal documents",
+      "uk": "Legal documents"
+    }
+  },
+  {
+    "key": "authority.documents.section.aria",
+    "en": "Section {ref} of {title}",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Section {ref} of {title}",
+      "de": "Section {ref} of {title}",
+      "es-MX": "Section {ref} of {title}",
+      "pt-BR": "Section {ref} of {title}",
+      "uk": "Section {ref} of {title}"
+    }
+  },
+  {
+    "key": "authority.filter.document_type",
+    "en": "Document type",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Document type",
+      "de": "Document type",
+      "es-MX": "Document type",
+      "pt-BR": "Document type",
+      "uk": "Document type"
+    }
+  },
+  {
+    "key": "authority.filter.reset",
+    "en": "Reset filter",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Reset filter",
+      "de": "Reset filter",
+      "es-MX": "Reset filter",
+      "pt-BR": "Reset filter",
+      "uk": "Reset filter"
+    }
+  },
+  {
+    "key": "authority.filter.rule_type",
+    "en": "Rule type",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Rule type",
+      "de": "Rule type",
+      "es-MX": "Rule type",
+      "pt-BR": "Rule type",
+      "uk": "Rule type"
+    }
+  },
+  {
+    "key": "authority.jurisdiction.country",
+    "en": "Country",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Country",
+      "de": "Country",
+      "es-MX": "Country",
+      "pt-BR": "Country",
+      "uk": "Country"
+    }
+  },
+  {
+    "key": "authority.jurisdiction.language_regime",
+    "en": "Language regime",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Language regime",
+      "de": "Language regime",
+      "es-MX": "Language regime",
+      "pt-BR": "Language regime",
+      "uk": "Language regime"
+    }
+  },
+  {
+    "key": "authority.jurisdiction.legal_tradition",
+    "en": "Legal tradition",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Legal tradition",
+      "de": "Legal tradition",
+      "es-MX": "Legal tradition",
+      "pt-BR": "Legal tradition",
+      "uk": "Legal tradition"
+    }
+  },
+  {
+    "key": "authority.jurisdiction.level",
+    "en": "Level",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Level",
+      "de": "Level",
+      "es-MX": "Level",
+      "pt-BR": "Level",
+      "uk": "Level"
+    }
+  },
+  {
+    "key": "authority.layer.act",
+    "en": "Act",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Act",
+      "de": "Act",
+      "es-MX": "Act",
+      "pt-BR": "Act",
+      "uk": "Act"
+    }
+  },
+  {
+    "key": "authority.layer.constitution",
+    "en": "Constitution",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Constitution",
+      "de": "Constitution",
+      "es-MX": "Constitution",
+      "pt-BR": "Constitution",
+      "uk": "Constitution"
+    }
+  },
+  {
+    "key": "authority.layer.policy",
+    "en": "Policy",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Policy",
+      "de": "Policy",
+      "es-MX": "Policy",
+      "pt-BR": "Policy",
+      "uk": "Policy"
+    }
+  },
+  {
+    "key": "authority.layer.program",
+    "en": "Program",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Program",
+      "de": "Program",
+      "es-MX": "Program",
+      "pt-BR": "Program",
+      "uk": "Program"
+    }
+  },
+  {
+    "key": "authority.layer.regulation",
+    "en": "Regulation",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Regulation",
+      "de": "Regulation",
+      "es-MX": "Regulation",
+      "pt-BR": "Regulation",
+      "uk": "Regulation"
+    }
+  },
+  {
+    "key": "authority.layer.service",
+    "en": "Service",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Service",
+      "de": "Service",
+      "es-MX": "Service",
+      "pt-BR": "Service",
+      "uk": "Service"
+    }
+  },
+  {
+    "key": "authority.lede",
+    "en": "Trace any operational rule back through every layer of authority that legitimizes it.",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Trace any operational rule back through every layer of authority that legitimizes it.",
+      "de": "Trace any operational rule back through every layer of authority that legitimizes it.",
+      "es-MX": "Trace any operational rule back through every layer of authority that legitimizes it.",
+      "pt-BR": "Trace any operational rule back through every layer of authority that legitimizes it.",
+      "uk": "Trace any operational rule back through every layer of authority that legitimizes it."
+    }
+  },
+  {
+    "key": "authority.no_jurisdiction.body",
+    "en": "Switch jurisdiction in the masthead.",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Switch jurisdiction in the masthead.",
+      "de": "Switch jurisdiction in the masthead.",
+      "es-MX": "Switch jurisdiction in the masthead.",
+      "pt-BR": "Switch jurisdiction in the masthead.",
+      "uk": "Switch jurisdiction in the masthead."
+    }
+  },
+  {
+    "key": "authority.no_jurisdiction.title",
+    "en": "No jurisdiction loaded",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "No jurisdiction loaded",
+      "de": "No jurisdiction loaded",
+      "es-MX": "No jurisdiction loaded",
+      "pt-BR": "No jurisdiction loaded",
+      "uk": "No jurisdiction loaded"
+    }
+  },
+  {
+    "key": "authority.rules.empty",
+    "en": "No rules.",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "No rules.",
+      "de": "No rules.",
+      "es-MX": "No rules.",
+      "pt-BR": "No rules.",
+      "uk": "No rules."
+    }
+  },
+  {
+    "key": "authority.rules.formal_expression",
+    "en": "Formal expression",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Formal expression",
+      "de": "Formal expression",
+      "es-MX": "Formal expression",
+      "pt-BR": "Formal expression",
+      "uk": "Formal expression"
+    }
+  },
+  {
+    "key": "authority.rules.heading",
+    "en": "Rules",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Rules",
+      "de": "Rules",
+      "es-MX": "Rules",
+      "pt-BR": "Rules",
+      "uk": "Rules"
+    }
+  },
+  {
+    "key": "authority.rules.parameters",
+    "en": "Parameters",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Parameters",
+      "de": "Parameters",
+      "es-MX": "Parameters",
+      "pt-BR": "Parameters",
+      "uk": "Parameters"
+    }
+  },
+  {
+    "key": "authority.rules.view_source",
+    "en": "View source section",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "View source section",
+      "de": "View source section",
+      "es-MX": "View source section",
+      "pt-BR": "View source section",
+      "uk": "View source section"
+    }
+  },
+  {
+    "key": "authority.search.placeholder",
+    "en": "Search citations, titles, descriptions…",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Search citations, titles, descriptions…",
+      "de": "Search citations, titles, descriptions…",
+      "es-MX": "Search citations, titles, descriptions…",
+      "pt-BR": "Search citations, titles, descriptions…",
+      "uk": "Search citations, titles, descriptions…"
+    }
+  },
+  {
+    "key": "branding.check.caption",
+    "en": "Confirms the active title and wordmark text resolve to “GovOps” for every supported locale.",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Confirms the active title and wordmark text resolve to “GovOps” for every supported locale.",
+      "de": "Confirms the active title and wordmark text resolve to “GovOps” for every supported locale.",
+      "es-MX": "Confirms the active title and wordmark text resolve to “GovOps” for every supported locale.",
+      "pt-BR": "Confirms the active title and wordmark text resolve to “GovOps” for every supported locale.",
+      "uk": "Confirms the active title and wordmark text resolve to “GovOps” for every supported locale."
+    }
+  },
+  {
+    "key": "branding.check.col.locale",
+    "en": "Locale",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Locale",
+      "de": "Locale",
+      "es-MX": "Locale",
+      "pt-BR": "Locale",
+      "uk": "Locale"
+    }
+  },
+  {
+    "key": "branding.check.col.status",
+    "en": "Status",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Status",
+      "de": "Status",
+      "es-MX": "Status",
+      "pt-BR": "Status",
+      "uk": "Status"
+    }
+  },
+  {
+    "key": "branding.check.col.title",
+    "en": "app.name",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "app.name",
+      "de": "app.name",
+      "es-MX": "app.name",
+      "pt-BR": "app.name",
+      "uk": "app.name"
+    }
+  },
+  {
+    "key": "branding.check.col.wordmark",
+    "en": "Wordmark",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Wordmark",
+      "de": "Wordmark",
+      "es-MX": "Wordmark",
+      "pt-BR": "Wordmark",
+      "uk": "Wordmark"
+    }
+  },
+  {
+    "key": "branding.check.status.fail",
+    "en": "Fail",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Fail",
+      "de": "Fail",
+      "es-MX": "Fail",
+      "pt-BR": "Fail",
+      "uk": "Fail"
+    }
+  },
+  {
+    "key": "branding.check.status.pass",
+    "en": "Pass",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Pass",
+      "de": "Pass",
+      "es-MX": "Pass",
+      "pt-BR": "Pass",
+      "uk": "Pass"
+    }
+  },
+  {
+    "key": "branding.check.title",
+    "en": "Branding check",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Branding check",
+      "de": "Branding check",
+      "es-MX": "Branding check",
+      "pt-BR": "Branding check",
+      "uk": "Branding check"
+    }
+  },
+  {
+    "key": "cases.applicant.country_of_birth",
+    "en": "Country of birth",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Country of birth",
+      "de": "Country of birth",
+      "es-MX": "Country of birth",
+      "pt-BR": "Country of birth",
+      "uk": "Country of birth"
+    }
+  },
+  {
+    "key": "cases.applicant.dob",
+    "en": "Date of birth",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Date of birth",
+      "de": "Date of birth",
+      "es-MX": "Date of birth",
+      "pt-BR": "Date of birth",
+      "uk": "Date of birth"
+    }
+  },
+  {
+    "key": "cases.applicant.heading",
+    "en": "Applicant & evidence",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Applicant & evidence",
+      "de": "Applicant & evidence",
+      "es-MX": "Applicant & evidence",
+      "pt-BR": "Applicant & evidence",
+      "uk": "Applicant & evidence"
+    }
+  },
+  {
+    "key": "cases.applicant.legal_status",
+    "en": "Legal status",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Legal status",
+      "de": "Legal status",
+      "es-MX": "Legal status",
+      "pt-BR": "Legal status",
+      "uk": "Legal status"
+    }
+  },
+  {
+    "key": "cases.audit.export_json",
+    "en": "Export JSON",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Export JSON",
+      "de": "Export JSON",
+      "es-MX": "Export JSON",
+      "pt-BR": "Export JSON",
+      "uk": "Export JSON"
+    }
+  },
+  {
+    "key": "cases.audit.heading",
+    "en": "Audit package",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Audit package",
+      "de": "Audit package",
+      "es-MX": "Audit package",
+      "pt-BR": "Audit package",
+      "uk": "Audit package"
+    }
+  },
+  {
+    "key": "cases.audit.open",
+    "en": "View audit package",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "View audit package",
+      "de": "View audit package",
+      "es-MX": "View audit package",
+      "pt-BR": "View audit package",
+      "uk": "View audit package"
+    }
+  },
+  {
+    "key": "cases.audit.tab.authority",
+    "en": "Authority",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Authority",
+      "de": "Authority",
+      "es-MX": "Authority",
+      "pt-BR": "Authority",
+      "uk": "Authority"
+    }
+  },
+  {
+    "key": "cases.audit.tab.evidence",
+    "en": "Evidence",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Evidence",
+      "de": "Evidence",
+      "es-MX": "Evidence",
+      "pt-BR": "Evidence",
+      "uk": "Evidence"
+    }
+  },
+  {
+    "key": "cases.audit.tab.recommendation",
+    "en": "Recommendation",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Recommendation",
+      "de": "Recommendation",
+      "es-MX": "Recommendation",
+      "pt-BR": "Recommendation",
+      "uk": "Recommendation"
+    }
+  },
+  {
+    "key": "cases.audit.tab.reviews",
+    "en": "Reviews",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Reviews",
+      "de": "Reviews",
+      "es-MX": "Reviews",
+      "pt-BR": "Reviews",
+      "uk": "Reviews"
+    }
+  },
+  {
+    "key": "cases.audit.tab.trail",
+    "en": "Trail",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Trail",
+      "de": "Trail",
+      "es-MX": "Trail",
+      "pt-BR": "Trail",
+      "uk": "Trail"
+    }
+  },
+  {
+    "key": "cases.confidence.aria",
+    "en": "Confidence {pct, number}%",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Confidence {pct, number}%",
+      "de": "Confidence {pct, number}%",
+      "es-MX": "Confidence {pct, number}%",
+      "pt-BR": "Confidence {pct, number}%",
+      "uk": "Confidence {pct, number}%"
+    }
+  },
+  {
+    "key": "cases.detail.heading",
+    "en": "Case {id}",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Case {id}",
+      "de": "Case {id}",
+      "es-MX": "Case {id}",
+      "pt-BR": "Case {id}",
+      "uk": "Case {id}"
+    }
+  },
+  {
+    "key": "cases.evidence.column.description",
+    "en": "Description",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Description",
+      "de": "Description",
+      "es-MX": "Description",
+      "pt-BR": "Description",
+      "uk": "Description"
+    }
+  },
+  {
+    "key": "cases.evidence.column.provided",
+    "en": "Provided",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Provided",
+      "de": "Provided",
+      "es-MX": "Provided",
+      "pt-BR": "Provided",
+      "uk": "Provided"
+    }
+  },
+  {
+    "key": "cases.evidence.column.type",
+    "en": "Type",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Type",
+      "de": "Type",
+      "es-MX": "Type",
+      "pt-BR": "Type",
+      "uk": "Type"
+    }
+  },
+  {
+    "key": "cases.evidence.column.verified",
+    "en": "Verified",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Verified",
+      "de": "Verified",
+      "es-MX": "Verified",
+      "pt-BR": "Verified",
+      "uk": "Verified"
+    }
+  },
+  {
+    "key": "cases.evidence.empty",
+    "en": "No evidence on file.",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "No evidence on file.",
+      "de": "No evidence on file.",
+      "es-MX": "No evidence on file.",
+      "pt-BR": "No evidence on file.",
+      "uk": "No evidence on file."
+    }
+  },
+  {
+    "key": "cases.evidence.heading",
+    "en": "Evidence items",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Evidence items",
+      "de": "Evidence items",
+      "es-MX": "Evidence items",
+      "pt-BR": "Evidence items",
+      "uk": "Evidence items"
+    }
+  },
+  {
+    "key": "cases.list.column.applicant",
+    "en": "Applicant",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Applicant",
+      "de": "Applicant",
+      "es-MX": "Applicant",
+      "pt-BR": "Applicant",
+      "uk": "Applicant"
+    }
+  },
+  {
+    "key": "cases.list.column.evaluated",
+    "en": "Evaluated",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Evaluated",
+      "de": "Evaluated",
+      "es-MX": "Evaluated",
+      "pt-BR": "Evaluated",
+      "uk": "Evaluated"
+    }
+  },
+  {
+    "key": "cases.list.column.status",
+    "en": "Status",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Status",
+      "de": "Status",
+      "es-MX": "Status",
+      "pt-BR": "Status",
+      "uk": "Status"
+    }
+  },
+  {
+    "key": "cases.list.empty.body",
+    "en": "Seed a jurisdiction or import data to populate this view.",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Seed a jurisdiction or import data to populate this view.",
+      "de": "Seed a jurisdiction or import data to populate this view.",
+      "es-MX": "Seed a jurisdiction or import data to populate this view.",
+      "pt-BR": "Seed a jurisdiction or import data to populate this view.",
+      "uk": "Seed a jurisdiction or import data to populate this view."
+    }
+  },
+  {
+    "key": "cases.list.empty.title",
+    "en": "No cases yet",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "No cases yet",
+      "de": "No cases yet",
+      "es-MX": "No cases yet",
+      "pt-BR": "No cases yet",
+      "uk": "No cases yet"
+    }
+  },
+  {
+    "key": "cases.list.filter.jurisdiction",
+    "en": "Jurisdiction",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Jurisdiction",
+      "de": "Jurisdiction",
+      "es-MX": "Jurisdiction",
+      "pt-BR": "Jurisdiction",
+      "uk": "Jurisdiction"
+    }
+  },
+  {
+    "key": "cases.list.filter.status",
+    "en": "Status",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Status",
+      "de": "Status",
+      "es-MX": "Status",
+      "pt-BR": "Status",
+      "uk": "Status"
+    }
+  },
+  {
+    "key": "cases.list.heading",
+    "en": "Cases",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Cases",
+      "de": "Cases",
+      "es-MX": "Cases",
+      "pt-BR": "Cases",
+      "uk": "Cases"
+    }
+  },
+  {
+    "key": "cases.recommendation.confidence",
+    "en": "Confidence",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Confidence",
+      "de": "Confidence",
+      "es-MX": "Confidence",
+      "pt-BR": "Confidence",
+      "uk": "Confidence"
+    }
+  },
+  {
+    "key": "cases.recommendation.empty.body",
+    "en": "Run the evaluation engine against this case bundle.",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Run the evaluation engine against this case bundle.",
+      "de": "Run the evaluation engine against this case bundle.",
+      "es-MX": "Run the evaluation engine against this case bundle.",
+      "pt-BR": "Run the evaluation engine against this case bundle.",
+      "uk": "Run the evaluation engine against this case bundle."
+    }
+  },
+  {
+    "key": "cases.recommendation.empty.title",
+    "en": "No recommendation yet",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "No recommendation yet",
+      "de": "No recommendation yet",
+      "es-MX": "No recommendation yet",
+      "pt-BR": "No recommendation yet",
+      "uk": "No recommendation yet"
+    }
+  },
+  {
+    "key": "cases.recommendation.evaluate",
+    "en": "Run evaluation",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Run evaluation",
+      "de": "Run evaluation",
+      "es-MX": "Run evaluation",
+      "pt-BR": "Run evaluation",
+      "uk": "Run evaluation"
+    }
+  },
+  {
+    "key": "cases.recommendation.evaluating",
+    "en": "Evaluating…",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Evaluating…",
+      "de": "Evaluating…",
+      "es-MX": "Evaluating…",
+      "pt-BR": "Evaluating…",
+      "uk": "Evaluating…"
+    }
+  },
+  {
+    "key": "cases.recommendation.explanation",
+    "en": "Explanation",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Explanation",
+      "de": "Explanation",
+      "es-MX": "Explanation",
+      "pt-BR": "Explanation",
+      "uk": "Explanation"
+    }
+  },
+  {
+    "key": "cases.recommendation.flags",
+    "en": "Flags",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Flags",
+      "de": "Flags",
+      "es-MX": "Flags",
+      "pt-BR": "Flags",
+      "uk": "Flags"
+    }
+  },
+  {
+    "key": "cases.recommendation.heading",
+    "en": "Recommendation",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Recommendation",
+      "de": "Recommendation",
+      "es-MX": "Recommendation",
+      "pt-BR": "Recommendation",
+      "uk": "Recommendation"
+    }
+  },
+  {
+    "key": "cases.recommendation.missing_evidence",
+    "en": "Missing evidence",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Missing evidence",
+      "de": "Missing evidence",
+      "es-MX": "Missing evidence",
+      "pt-BR": "Missing evidence",
+      "uk": "Missing evidence"
+    }
+  },
+  {
+    "key": "cases.recommendation.outcome",
+    "en": "Outcome",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Outcome",
+      "de": "Outcome",
+      "es-MX": "Outcome",
+      "pt-BR": "Outcome",
+      "uk": "Outcome"
+    }
+  },
+  {
+    "key": "cases.recommendation.partial_ratio",
+    "en": "Partial ratio",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Partial ratio",
+      "de": "Partial ratio",
+      "es-MX": "Partial ratio",
+      "pt-BR": "Partial ratio",
+      "uk": "Partial ratio"
+    }
+  },
+  {
+    "key": "cases.recommendation.pension_type.full",
+    "en": "Full pension",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Full pension",
+      "de": "Full pension",
+      "es-MX": "Full pension",
+      "pt-BR": "Full pension",
+      "uk": "Full pension"
+    }
+  },
+  {
+    "key": "cases.recommendation.pension_type.partial",
+    "en": "Partial pension",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Partial pension",
+      "de": "Partial pension",
+      "es-MX": "Partial pension",
+      "pt-BR": "Partial pension",
+      "uk": "Partial pension"
+    }
+  },
+  {
+    "key": "cases.recommendation.rules_applied",
+    "en": "Rules applied",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Rules applied",
+      "de": "Rules applied",
+      "es-MX": "Rules applied",
+      "pt-BR": "Rules applied",
+      "uk": "Rules applied"
+    }
+  },
+  {
+    "key": "cases.residency.heading",
+    "en": "Residency periods",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Residency periods",
+      "de": "Residency periods",
+      "es-MX": "Residency periods",
+      "pt-BR": "Residency periods",
+      "uk": "Residency periods"
+    }
+  },
+  {
+    "key": "cases.residency.ongoing",
+    "en": "Ongoing",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Ongoing",
+      "de": "Ongoing",
+      "es-MX": "Ongoing",
+      "pt-BR": "Ongoing",
+      "uk": "Ongoing"
+    }
+  },
+  {
+    "key": "cases.residency.unverified",
+    "en": "Unverified",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Unverified",
+      "de": "Unverified",
+      "es-MX": "Unverified",
+      "pt-BR": "Unverified",
+      "uk": "Unverified"
+    }
+  },
+  {
+    "key": "cases.residency.verified",
+    "en": "Verified",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Verified",
+      "de": "Verified",
+      "es-MX": "Verified",
+      "pt-BR": "Verified",
+      "uk": "Verified"
+    }
+  },
+  {
+    "key": "cases.review.action.approve",
+    "en": "Approve",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Approve",
+      "de": "Approve",
+      "es-MX": "Approve",
+      "pt-BR": "Approve",
+      "uk": "Approve"
+    }
+  },
+  {
+    "key": "cases.review.action.escalate",
+    "en": "Escalate",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Escalate",
+      "de": "Escalate",
+      "es-MX": "Escalate",
+      "pt-BR": "Escalate",
+      "uk": "Escalate"
+    }
+  },
+  {
+    "key": "cases.review.action.label",
+    "en": "Action",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Action",
+      "de": "Action",
+      "es-MX": "Action",
+      "pt-BR": "Action",
+      "uk": "Action"
+    }
+  },
+  {
+    "key": "cases.review.action.modify",
+    "en": "Modify",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Modify",
+      "de": "Modify",
+      "es-MX": "Modify",
+      "pt-BR": "Modify",
+      "uk": "Modify"
+    }
+  },
+  {
+    "key": "cases.review.action.reject",
+    "en": "Reject",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Reject",
+      "de": "Reject",
+      "es-MX": "Reject",
+      "pt-BR": "Reject",
+      "uk": "Reject"
+    }
+  },
+  {
+    "key": "cases.review.action.request_info",
+    "en": "Request info",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Request info",
+      "de": "Request info",
+      "es-MX": "Request info",
+      "pt-BR": "Request info",
+      "uk": "Request info"
+    }
+  },
+  {
+    "key": "cases.review.empty",
+    "en": "No reviews recorded.",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "No reviews recorded.",
+      "de": "No reviews recorded.",
+      "es-MX": "No reviews recorded.",
+      "pt-BR": "No reviews recorded.",
+      "uk": "No reviews recorded."
+    }
+  },
+  {
+    "key": "cases.review.final_outcome.label",
+    "en": "Final outcome",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Final outcome",
+      "de": "Final outcome",
+      "es-MX": "Final outcome",
+      "pt-BR": "Final outcome",
+      "uk": "Final outcome"
+    }
+  },
+  {
+    "key": "cases.review.heading",
+    "en": "Human review",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Human review",
+      "de": "Human review",
+      "es-MX": "Human review",
+      "pt-BR": "Human review",
+      "uk": "Human review"
+    }
+  },
+  {
+    "key": "cases.review.rationale.label",
+    "en": "Rationale",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Rationale",
+      "de": "Rationale",
+      "es-MX": "Rationale",
+      "pt-BR": "Rationale",
+      "uk": "Rationale"
+    }
+  },
+  {
+    "key": "cases.review.rationale.placeholder",
+    "en": "Document why you're taking this action (min 20 characters)…",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Document why you're taking this action (min 20 characters)…",
+      "de": "Document why you're taking this action (min 20 characters)…",
+      "es-MX": "Document why you're taking this action (min 20 characters)…",
+      "pt-BR": "Document why you're taking this action (min 20 characters)…",
+      "uk": "Document why you're taking this action (min 20 characters)…"
+    }
+  },
+  {
+    "key": "cases.review.submit",
+    "en": "Record review",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Record review",
+      "de": "Record review",
+      "es-MX": "Record review",
+      "pt-BR": "Record review",
+      "uk": "Record review"
+    }
+  },
+  {
+    "key": "cases.review.submitting",
+    "en": "Recording…",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Recording…",
+      "de": "Recording…",
+      "es-MX": "Recording…",
+      "pt-BR": "Recording…",
+      "uk": "Recording…"
+    }
+  },
+  {
+    "key": "cases.review.success",
+    "en": "Review recorded",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Review recorded",
+      "de": "Review recorded",
+      "es-MX": "Review recorded",
+      "pt-BR": "Review recorded",
+      "uk": "Review recorded"
+    }
+  },
+  {
+    "key": "config.column.type",
+    "en": "Type",
+    "needs": [
+      "fr"
+    ],
+    "existing": {
+      "fr": "Type"
+    }
+  },
+  {
+    "key": "config.detail.citation",
+    "en": "Citation",
+    "needs": [
+      "fr"
+    ],
+    "existing": {
+      "fr": "Citation"
+    }
+  },
+  {
+    "key": "config.diff.crumb",
+    "en": "Diff",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Diff",
+      "de": "Diff",
+      "es-MX": "Diff",
+      "pt-BR": "Diff",
+      "uk": "Diff"
+    }
+  },
+  {
+    "key": "config.filter.domain.engine",
+    "en": "Engine",
+    "needs": [
+      "de"
+    ],
+    "existing": {
+      "de": "Engine"
+    }
+  },
+  {
+    "key": "config.filter.domain.prompt",
+    "en": "Prompt",
+    "needs": [
+      "de",
+      "pt-BR"
+    ],
+    "existing": {
+      "de": "Prompt",
+      "pt-BR": "Prompt"
+    }
+  },
+  {
+    "key": "config.filter.jurisdiction.global",
+    "en": "Global",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR"
+    ],
+    "existing": {
+      "fr": "Global",
+      "de": "Global",
+      "es-MX": "Global",
+      "pt-BR": "Global"
+    }
+  },
+  {
+    "key": "country.iso.AU",
+    "en": "Australia",
+    "needs": [
+      "es-MX"
+    ],
+    "existing": {
+      "es-MX": "Australia"
+    }
+  },
+  {
+    "key": "country.iso.CA",
+    "en": "Canada",
+    "needs": [
+      "fr"
+    ],
+    "existing": {
+      "fr": "Canada"
+    }
+  },
+  {
+    "key": "country.iso.FR",
+    "en": "France",
+    "needs": [
+      "fr"
+    ],
+    "existing": {
+      "fr": "France"
+    }
+  },
+  {
+    "key": "country.iso.UA",
+    "en": "Ukraine",
+    "needs": [
+      "fr",
+      "de"
+    ],
+    "existing": {
+      "fr": "Ukraine",
+      "de": "Ukraine"
+    }
+  },
+  {
+    "key": "dataflow.legend.title",
+    "en": "register",
+    "needs": [
+      "de"
+    ],
+    "existing": {
+      "de": "register"
+    }
+  },
+  {
+    "key": "dataflow.register.agent",
+    "en": "agent",
+    "needs": [
+      "fr",
+      "de"
+    ],
+    "existing": {
+      "fr": "agent",
+      "de": "agent"
+    }
+  },
+  {
+    "key": "dataflow.register.system",
+    "en": "system",
+    "needs": [
+      "de"
+    ],
+    "existing": {
+      "de": "system"
+    }
+  },
+  {
+    "key": "diff.metadata.citation",
+    "en": "Citation",
+    "needs": [
+      "fr"
+    ],
+    "existing": {
+      "fr": "Citation"
+    }
+  },
+  {
+    "key": "diff.metadata.status",
+    "en": "Status",
+    "needs": [
+      "de",
+      "pt-BR"
+    ],
+    "existing": {
+      "de": "Status",
+      "pt-BR": "Status"
+    }
+  },
+  {
+    "key": "document_type.guidance",
+    "en": "Guidance",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Guidance",
+      "de": "Guidance",
+      "es-MX": "Guidance",
+      "pt-BR": "Guidance",
+      "uk": "Guidance"
+    }
+  },
+  {
+    "key": "document_type.policy_manual",
+    "en": "Policy manual",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Policy manual",
+      "de": "Policy manual",
+      "es-MX": "Policy manual",
+      "pt-BR": "Policy manual",
+      "uk": "Policy manual"
+    }
+  },
+  {
+    "key": "document_type.regulation",
+    "en": "Regulation",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Regulation",
+      "de": "Regulation",
+      "es-MX": "Regulation",
+      "pt-BR": "Regulation",
+      "uk": "Regulation"
+    }
+  },
+  {
+    "key": "document_type.statute",
+    "en": "Statute",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Statute",
+      "de": "Statute",
+      "es-MX": "Statute",
+      "pt-BR": "Statute",
+      "uk": "Statute"
+    }
+  },
+  {
+    "key": "draft.field.citation.label",
+    "en": "Citation",
+    "needs": [
+      "fr"
+    ],
+    "existing": {
+      "fr": "Citation"
+    }
+  },
+  {
+    "key": "draft.field.effective_from.format_help",
+    "en": "Format: YYYY-MM-DDTHH:mm[:ss[.sss]]Z",
+    "needs": [
+      "de"
+    ],
+    "existing": {
+      "de": "Format: YYYY-MM-DDTHH:mm[:ss[.sss]]Z"
+    }
+  },
+  {
+    "key": "encode.list.column.citation",
+    "en": "Citation",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Citation",
+      "de": "Citation",
+      "es-MX": "Citation",
+      "pt-BR": "Citation",
+      "uk": "Citation"
+    }
+  },
+  {
+    "key": "encode.list.column.counts",
+    "en": "Proposals",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Proposals",
+      "de": "Proposals",
+      "es-MX": "Proposals",
+      "pt-BR": "Proposals",
+      "uk": "Proposals"
+    }
+  },
+  {
+    "key": "encode.list.column.created",
+    "en": "Created",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Created",
+      "de": "Created",
+      "es-MX": "Created",
+      "pt-BR": "Created",
+      "uk": "Created"
+    }
+  },
+  {
+    "key": "encode.list.column.method",
+    "en": "Method",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Method",
+      "de": "Method",
+      "es-MX": "Method",
+      "pt-BR": "Method",
+      "uk": "Method"
+    }
+  },
+  {
+    "key": "encode.list.column.title",
+    "en": "Description",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Description",
+      "de": "Description",
+      "es-MX": "Description",
+      "pt-BR": "Description",
+      "uk": "Description"
+    }
+  },
+  {
+    "key": "encode.list.empty.body",
+    "en": "Paste statutory text and the agent will draft rule proposals for review.",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Paste statutory text and the agent will draft rule proposals for review.",
+      "de": "Paste statutory text and the agent will draft rule proposals for review.",
+      "es-MX": "Paste statutory text and the agent will draft rule proposals for review.",
+      "pt-BR": "Paste statutory text and the agent will draft rule proposals for review.",
+      "uk": "Paste statutory text and the agent will draft rule proposals for review."
+    }
+  },
+  {
+    "key": "encode.list.empty.title",
+    "en": "Start a new extraction",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Start a new extraction",
+      "de": "Start a new extraction",
+      "es-MX": "Start a new extraction",
+      "pt-BR": "Start a new extraction",
+      "uk": "Start a new extraction"
+    }
+  },
+  {
+    "key": "encode.list.heading",
+    "en": "Encoding batches",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Encoding batches",
+      "de": "Encoding batches",
+      "es-MX": "Encoding batches",
+      "pt-BR": "Encoding batches",
+      "uk": "Encoding batches"
+    }
+  },
+  {
+    "key": "encode.list.lede",
+    "en": "Statute → proposals → review → commit. Each batch is auditable end-to-end.",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Statute → proposals → review → commit. Each batch is auditable end-to-end.",
+      "de": "Statute → proposals → review → commit. Each batch is auditable end-to-end.",
+      "es-MX": "Statute → proposals → review → commit. Each batch is auditable end-to-end.",
+      "pt-BR": "Statute → proposals → review → commit. Each batch is auditable end-to-end.",
+      "uk": "Statute → proposals → review → commit. Each batch is auditable end-to-end."
+    }
+  },
+  {
+    "key": "encode.list.new",
+    "en": "New extraction",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "New extraction",
+      "de": "New extraction",
+      "es-MX": "New extraction",
+      "pt-BR": "New extraction",
+      "uk": "New extraction"
+    }
+  },
+  {
+    "key": "encode.method.llm",
+    "en": "LLM (Claude)",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "LLM (Claude)",
+      "de": "LLM (Claude)",
+      "es-MX": "LLM (Claude)",
+      "pt-BR": "LLM (Claude)",
+      "uk": "LLM (Claude)"
+    }
+  },
+  {
+    "key": "encode.method.llm_fallback",
+    "en": "Manual (LLM fallback)",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Manual (LLM fallback)",
+      "de": "Manual (LLM fallback)",
+      "es-MX": "Manual (LLM fallback)",
+      "pt-BR": "Manual (LLM fallback)",
+      "uk": "Manual (LLM fallback)"
+    }
+  },
+  {
+    "key": "encode.method.manual",
+    "en": "Manual",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Manual",
+      "de": "Manual",
+      "es-MX": "Manual",
+      "pt-BR": "Manual",
+      "uk": "Manual"
+    }
+  },
+  {
+    "key": "encode.new.cancel",
+    "en": "Cancel",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Cancel",
+      "de": "Cancel",
+      "es-MX": "Cancel",
+      "pt-BR": "Cancel",
+      "uk": "Cancel"
+    }
+  },
+  {
+    "key": "encode.new.error.llm_fallback",
+    "en": "LLM extraction failed; falling back to manual rule patterns.",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "LLM extraction failed; falling back to manual rule patterns.",
+      "de": "LLM extraction failed; falling back to manual rule patterns.",
+      "es-MX": "LLM extraction failed; falling back to manual rule patterns.",
+      "pt-BR": "LLM extraction failed; falling back to manual rule patterns.",
+      "uk": "LLM extraction failed; falling back to manual rule patterns."
+    }
+  },
+  {
+    "key": "encode.new.field.api_key.help",
+    "en": "Used for this extraction only; not persisted or logged.",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Used for this extraction only; not persisted or logged.",
+      "de": "Used for this extraction only; not persisted or logged.",
+      "es-MX": "Used for this extraction only; not persisted or logged.",
+      "pt-BR": "Used for this extraction only; not persisted or logged.",
+      "uk": "Used for this extraction only; not persisted or logged."
+    }
+  },
+  {
+    "key": "encode.new.field.api_key.label",
+    "en": "API key",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "API key",
+      "de": "API key",
+      "es-MX": "API key",
+      "pt-BR": "API key",
+      "uk": "API key"
+    }
+  },
+  {
+    "key": "encode.new.field.citation",
+    "en": "Document citation",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Document citation",
+      "de": "Document citation",
+      "es-MX": "Document citation",
+      "pt-BR": "Document citation",
+      "uk": "Document citation"
+    }
+  },
+  {
+    "key": "encode.new.field.method.label",
+    "en": "Extraction method",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Extraction method",
+      "de": "Extraction method",
+      "es-MX": "Extraction method",
+      "pt-BR": "Extraction method",
+      "uk": "Extraction method"
+    }
+  },
+  {
+    "key": "encode.new.field.method.llm",
+    "en": "LLM-assisted",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "LLM-assisted",
+      "de": "LLM-assisted",
+      "es-MX": "LLM-assisted",
+      "pt-BR": "LLM-assisted",
+      "uk": "LLM-assisted"
+    }
+  },
+  {
+    "key": "encode.new.field.method.manual",
+    "en": "Manual",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Manual",
+      "de": "Manual",
+      "es-MX": "Manual",
+      "pt-BR": "Manual",
+      "uk": "Manual"
+    }
+  },
+  {
+    "key": "encode.new.field.source_url",
+    "en": "Source URL (optional)",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Source URL (optional)",
+      "de": "Source URL (optional)",
+      "es-MX": "Source URL (optional)",
+      "pt-BR": "Source URL (optional)",
+      "uk": "Source URL (optional)"
+    }
+  },
+  {
+    "key": "encode.new.field.text.help",
+    "en": "characters",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "characters",
+      "de": "characters",
+      "es-MX": "characters",
+      "pt-BR": "characters",
+      "uk": "characters"
+    }
+  },
+  {
+    "key": "encode.new.field.text.label",
+    "en": "Statutory text",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Statutory text",
+      "de": "Statutory text",
+      "es-MX": "Statutory text",
+      "pt-BR": "Statutory text",
+      "uk": "Statutory text"
+    }
+  },
+  {
+    "key": "encode.new.field.title",
+    "en": "Document title",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Document title",
+      "de": "Document title",
+      "es-MX": "Document title",
+      "pt-BR": "Document title",
+      "uk": "Document title"
+    }
+  },
+  {
+    "key": "encode.new.heading",
+    "en": "New extraction",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "New extraction",
+      "de": "New extraction",
+      "es-MX": "New extraction",
+      "pt-BR": "New extraction",
+      "uk": "New extraction"
+    }
+  },
+  {
+    "key": "encode.new.submit",
+    "en": "Extract proposals",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Extract proposals",
+      "de": "Extract proposals",
+      "es-MX": "Extract proposals",
+      "pt-BR": "Extract proposals",
+      "uk": "Extract proposals"
+    }
+  },
+  {
+    "key": "encode.new.submitting",
+    "en": "Extracting…",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Extracting…",
+      "de": "Extracting…",
+      "es-MX": "Extracting…",
+      "pt-BR": "Extracting…",
+      "uk": "Extracting…"
+    }
+  },
+  {
+    "key": "encode.proposal.annotate",
+    "en": "Annotate",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Annotate",
+      "de": "Annotate",
+      "es-MX": "Annotate",
+      "pt-BR": "Annotate",
+      "uk": "Annotate"
+    }
+  },
+  {
+    "key": "encode.proposal.approve",
+    "en": "Approve",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Approve",
+      "de": "Approve",
+      "es-MX": "Approve",
+      "pt-BR": "Approve",
+      "uk": "Approve"
+    }
+  },
+  {
+    "key": "encode.proposal.modify",
+    "en": "Modify",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Modify",
+      "de": "Modify",
+      "es-MX": "Modify",
+      "pt-BR": "Modify",
+      "uk": "Modify"
+    }
+  },
+  {
+    "key": "encode.proposal.modify.cancel",
+    "en": "Cancel",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Cancel",
+      "de": "Cancel",
+      "es-MX": "Cancel",
+      "pt-BR": "Cancel",
+      "uk": "Cancel"
+    }
+  },
+  {
+    "key": "encode.proposal.modify.heading",
+    "en": "Modify proposal",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Modify proposal",
+      "de": "Modify proposal",
+      "es-MX": "Modify proposal",
+      "pt-BR": "Modify proposal",
+      "uk": "Modify proposal"
+    }
+  },
+  {
+    "key": "encode.proposal.modify.save",
+    "en": "Save changes",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Save changes",
+      "de": "Save changes",
+      "es-MX": "Save changes",
+      "pt-BR": "Save changes",
+      "uk": "Save changes"
+    }
+  },
+  {
+    "key": "encode.proposal.notes.label",
+    "en": "Notes",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Notes",
+      "de": "Notes",
+      "es-MX": "Notes",
+      "pt-BR": "Notes",
+      "uk": "Notes"
+    }
+  },
+  {
+    "key": "encode.proposal.notes.placeholder",
+    "en": "Optional reviewer note…",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Optional reviewer note…",
+      "de": "Optional reviewer note…",
+      "es-MX": "Optional reviewer note…",
+      "pt-BR": "Optional reviewer note…",
+      "uk": "Optional reviewer note…"
+    }
+  },
+  {
+    "key": "encode.proposal.reject",
+    "en": "Reject",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Reject",
+      "de": "Reject",
+      "es-MX": "Reject",
+      "pt-BR": "Reject",
+      "uk": "Reject"
+    }
+  },
+  {
+    "key": "encode.proposal.select",
+    "en": "Select proposal",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Select proposal",
+      "de": "Select proposal",
+      "es-MX": "Select proposal",
+      "pt-BR": "Select proposal",
+      "uk": "Select proposal"
+    }
+  },
+  {
+    "key": "encode.review.audit.heading",
+    "en": "Audit log",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Audit log",
+      "de": "Audit log",
+      "es-MX": "Audit log",
+      "pt-BR": "Audit log",
+      "uk": "Audit log"
+    }
+  },
+  {
+    "key": "encode.review.bulk.approve",
+    "en": "Approve all",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Approve all",
+      "de": "Approve all",
+      "es-MX": "Approve all",
+      "pt-BR": "Approve all",
+      "uk": "Approve all"
+    }
+  },
+  {
+    "key": "encode.review.bulk.clear",
+    "en": "Clear selection",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Clear selection",
+      "de": "Clear selection",
+      "es-MX": "Clear selection",
+      "pt-BR": "Clear selection",
+      "uk": "Clear selection"
+    }
+  },
+  {
+    "key": "encode.review.bulk.heading",
+    "en": "{count, plural, one {# selected} other {# selected}}",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "{count, plural, one {# selected} other {# selected}}",
+      "de": "{count, plural, one {# selected} other {# selected}}",
+      "es-MX": "{count, plural, one {# selected} other {# selected}}",
+      "pt-BR": "{count, plural, one {# selected} other {# selected}}",
+      "uk": "{count, plural, one {# selected} other {# selected}}"
+    }
+  },
+  {
+    "key": "encode.review.bulk.reject",
+    "en": "Reject all",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Reject all",
+      "de": "Reject all",
+      "es-MX": "Reject all",
+      "pt-BR": "Reject all",
+      "uk": "Reject all"
+    }
+  },
+  {
+    "key": "encode.review.commit",
+    "en": "Commit to engine",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Commit to engine",
+      "de": "Commit to engine",
+      "es-MX": "Commit to engine",
+      "pt-BR": "Commit to engine",
+      "uk": "Commit to engine"
+    }
+  },
+  {
+    "key": "encode.review.commit.confirm.body",
+    "en": "Commit {count} approved {count, plural, one {proposal} other {proposals}} to the engine?",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Commit {count} approved {count, plural, one {proposal} other {proposals}} to the engine?",
+      "de": "Commit {count} approved {count, plural, one {proposal} other {proposals}} to the engine?",
+      "es-MX": "Commit {count} approved {count, plural, one {proposal} other {proposals}} to the engine?",
+      "pt-BR": "Commit {count} approved {count, plural, one {proposal} other {proposals}} to the engine?",
+      "uk": "Commit {count} approved {count, plural, one {proposal} other {proposals}} to the engine?"
+    }
+  },
+  {
+    "key": "encode.review.commit.confirm.title",
+    "en": "Commit approved proposals",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Commit approved proposals",
+      "de": "Commit approved proposals",
+      "es-MX": "Commit approved proposals",
+      "pt-BR": "Commit approved proposals",
+      "uk": "Commit approved proposals"
+    }
+  },
+  {
+    "key": "encode.review.commit.success",
+    "en": "Committed {count} {count, plural, one {rule} other {rules}}",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Committed {count} {count, plural, one {rule} other {rules}}",
+      "de": "Committed {count} {count, plural, one {rule} other {rules}}",
+      "es-MX": "Committed {count} {count, plural, one {rule} other {rules}}",
+      "pt-BR": "Committed {count} {count, plural, one {rule} other {rules}}",
+      "uk": "Committed {count} {count, plural, one {rule} other {rules}}"
+    }
+  },
+  {
+    "key": "encode.review.filter.status",
+    "en": "Status",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Status",
+      "de": "Status",
+      "es-MX": "Status",
+      "pt-BR": "Status",
+      "uk": "Status"
+    }
+  },
+  {
+    "key": "encode.review.heading",
+    "en": "Review proposals — {title}",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Review proposals — {title}",
+      "de": "Review proposals — {title}",
+      "es-MX": "Review proposals — {title}",
+      "pt-BR": "Review proposals — {title}",
+      "uk": "Review proposals — {title}"
+    }
+  },
+  {
+    "key": "encode.review.source_text.toggle",
+    "en": "Source text",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Source text",
+      "de": "Source text",
+      "es-MX": "Source text",
+      "pt-BR": "Source text",
+      "uk": "Source text"
+    }
+  },
+  {
+    "key": "events.summary.add_evidence",
+    "en": "+ {evidence_type}",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "+ {evidence_type}",
+      "de": "+ {evidence_type}",
+      "es-MX": "+ {evidence_type}",
+      "pt-BR": "+ {evidence_type}",
+      "uk": "+ {evidence_type}"
+    }
+  },
+  {
+    "key": "events.summary.move_country",
+    "en": "{from} → {to}",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "{from} → {to}",
+      "de": "{from} → {to}",
+      "es-MX": "{from} → {to}",
+      "pt-BR": "{from} → {to}",
+      "uk": "{from} → {to}"
+    }
+  },
+  {
+    "key": "help.encode.title",
+    "en": "Encoder",
+    "needs": [
+      "de"
+    ],
+    "existing": {
+      "de": "Encoder"
+    }
+  },
+  {
+    "key": "home.cta.about",
+    "en": "How it works",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "How it works",
+      "de": "How it works",
+      "es-MX": "How it works",
+      "pt-BR": "How it works",
+      "uk": "How it works"
+    }
+  },
+  {
+    "key": "home.cta.config",
+    "en": "Browse configuration",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Browse configuration",
+      "de": "Browse configuration",
+      "es-MX": "Browse configuration",
+      "pt-BR": "Browse configuration",
+      "uk": "Browse configuration"
+    }
+  },
+  {
+    "key": "home.eyebrow",
+    "en": "spec govops-002 · law-as-code",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "spec govops-002 · law-as-code",
+      "de": "spec govops-002 · law-as-code",
+      "es-MX": "spec govops-002 · law-as-code",
+      "pt-BR": "spec govops-002 · law-as-code",
+      "uk": "spec govops-002 · law-as-code"
+    }
+  },
+  {
+    "key": "home.footnote",
+    "en": "Drafted by agents · ratified by humans · auditable by citizens",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Drafted by agents · ratified by humans · auditable by citizens",
+      "de": "Drafted by agents · ratified by humans · auditable by citizens",
+      "es-MX": "Drafted by agents · ratified by humans · auditable by citizens",
+      "pt-BR": "Drafted by agents · ratified by humans · auditable by citizens",
+      "uk": "Drafted by agents · ratified by humans · auditable by citizens"
+    }
+  },
+  {
+    "key": "home.headline.accent",
+    "en": "System",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "System",
+      "de": "System",
+      "es-MX": "System",
+      "pt-BR": "System",
+      "uk": "System"
+    }
+  },
+  {
+    "key": "home.headline.before",
+    "en": "Statute meets ",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Statute meets",
+      "de": "Statute meets",
+      "es-MX": "Statute meets",
+      "pt-BR": "Statute meets",
+      "uk": "Statute meets"
+    }
+  },
+  {
+    "key": "home.hello",
+    "en": "GovOps",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "GovOps",
+      "de": "GovOps",
+      "es-MX": "GovOps",
+      "pt-BR": "GovOps",
+      "uk": "GovOps"
+    }
+  },
+  {
+    "key": "home.lede",
+    "en": "GovOps is the agentic, multilingual platform for law-as-code: drafted by agents, ratified by humans, auditable by citizens. Every clause wears its provenance on its sleeve.",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "GovOps is the agentic, multilingual platform for law-as-code: drafted by agents, ratified by humans, auditable by citizens. Every clause wears its provenance on its sleeve.",
+      "de": "GovOps is the agentic, multilingual platform for law-as-code: drafted by agents, ratified by humans, auditable by citizens. Every clause wears its provenance on its sleeve.",
+      "es-MX": "GovOps is the agentic, multilingual platform for law-as-code: drafted by agents, ratified by humans, auditable by citizens. Every clause wears its provenance on its sleeve.",
+      "pt-BR": "GovOps is the agentic, multilingual platform for law-as-code: drafted by agents, ratified by humans, auditable by citizens. Every clause wears its provenance on its sleeve.",
+      "uk": "GovOps is the agentic, multilingual platform for law-as-code: drafted by agents, ratified by humans, auditable by citizens. Every clause wears its provenance on its sleeve."
+    }
+  },
+  {
+    "key": "home.modules.audit.title",
+    "en": "Audit",
+    "needs": [
+      "fr",
+      "de"
+    ],
+    "existing": {
+      "fr": "Audit",
+      "de": "Audit"
+    }
+  },
+  {
+    "key": "home.modules.encoder.title",
+    "en": "Encoder",
+    "needs": [
+      "de"
+    ],
+    "existing": {
+      "de": "Encoder"
+    }
+  },
+  {
+    "key": "home.modules.engine.title",
+    "en": "Engine",
+    "needs": [
+      "de"
+    ],
+    "existing": {
+      "de": "Engine"
+    }
+  },
+  {
+    "key": "home.modules.eyebrow",
+    "en": "modules",
+    "needs": [
+      "fr"
+    ],
+    "existing": {
+      "fr": "modules"
+    }
+  },
+  {
+    "key": "home.modules.schema.title",
+    "en": "Schema",
+    "needs": [
+      "de"
+    ],
+    "existing": {
+      "de": "Schema"
+    }
+  },
+  {
+    "key": "home.pillars.agent.body",
+    "en": "Policy agents propose precise, citable language overnight — never enacted on their own.",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Policy agents propose precise, citable language overnight — never enacted on their own.",
+      "de": "Policy agents propose precise, citable language overnight — never enacted on their own.",
+      "es-MX": "Policy agents propose precise, citable language overnight — never enacted on their own.",
+      "pt-BR": "Policy agents propose precise, citable language overnight — never enacted on their own.",
+      "uk": "Policy agents propose precise, citable language overnight — never enacted on their own."
+    }
+  },
+  {
+    "key": "home.pillars.agent.title",
+    "en": "Agent-drafted",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Agent-drafted",
+      "de": "Agent-drafted",
+      "es-MX": "Agent-drafted",
+      "pt-BR": "Agent-drafted",
+      "uk": "Agent-drafted"
+    }
+  },
+  {
+    "key": "home.pillars.citizen.body",
+    "en": "Every change is diffable, reversible, and signed. The public reads the same record you do.",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Every change is diffable, reversible, and signed. The public reads the same record you do.",
+      "de": "Every change is diffable, reversible, and signed. The public reads the same record you do.",
+      "es-MX": "Every change is diffable, reversible, and signed. The public reads the same record you do.",
+      "pt-BR": "Every change is diffable, reversible, and signed. The public reads the same record you do.",
+      "uk": "Every change is diffable, reversible, and signed. The public reads the same record you do."
+    }
+  },
+  {
+    "key": "home.pillars.citizen.title",
+    "en": "Citizen-auditable",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Citizen-auditable",
+      "de": "Citizen-auditable",
+      "es-MX": "Citizen-auditable",
+      "pt-BR": "Citizen-auditable",
+      "uk": "Citizen-auditable"
+    }
+  },
+  {
+    "key": "home.pillars.human.body",
+    "en": "Ministers, committees, and councils sign every clause. Authority stays with people.",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Ministers, committees, and councils sign every clause. Authority stays with people.",
+      "de": "Ministers, committees, and councils sign every clause. Authority stays with people.",
+      "es-MX": "Ministers, committees, and councils sign every clause. Authority stays with people.",
+      "pt-BR": "Ministers, committees, and councils sign every clause. Authority stays with people.",
+      "uk": "Ministers, committees, and councils sign every clause. Authority stays with people."
+    }
+  },
+  {
+    "key": "home.pillars.human.title",
+    "en": "Human-ratified",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Human-ratified",
+      "de": "Human-ratified",
+      "es-MX": "Human-ratified",
+      "pt-BR": "Human-ratified",
+      "uk": "Human-ratified"
+    }
+  },
+  {
+    "key": "home.pillars.title",
+    "en": "Three registers, one record",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Three registers, one record",
+      "de": "Three registers, one record",
+      "es-MX": "Three registers, one record",
+      "pt-BR": "Three registers, one record",
+      "uk": "Three registers, one record"
+    }
+  },
+  {
+    "key": "home.preview.caption",
+    "en": "A snapshot of the statute keys currently in force. Open the registry to filter by jurisdiction, domain, and language.",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "A snapshot of the statute keys currently in force. Open the registry to filter by jurisdiction, domain, and language.",
+      "de": "A snapshot of the statute keys currently in force. Open the registry to filter by jurisdiction, domain, and language.",
+      "es-MX": "A snapshot of the statute keys currently in force. Open the registry to filter by jurisdiction, domain, and language.",
+      "pt-BR": "A snapshot of the statute keys currently in force. Open the registry to filter by jurisdiction, domain, and language.",
+      "uk": "A snapshot of the statute keys currently in force. Open the registry to filter by jurisdiction, domain, and language."
+    }
+  },
+  {
+    "key": "home.preview.cta",
+    "en": "Open the registry →",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Open the registry →",
+      "de": "Open the registry →",
+      "es-MX": "Open the registry →",
+      "pt-BR": "Open the registry →",
+      "uk": "Open the registry →"
+    }
+  },
+  {
+    "key": "home.preview.title",
+    "en": "Live ConfigValue registry",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Live ConfigValue registry",
+      "de": "Live ConfigValue registry",
+      "es-MX": "Live ConfigValue registry",
+      "pt-BR": "Live ConfigValue registry",
+      "uk": "Live ConfigValue registry"
+    }
+  },
+  {
+    "key": "lang.de",
+    "en": "Deutsch",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Deutsch",
+      "de": "Deutsch",
+      "es-MX": "Deutsch",
+      "pt-BR": "Deutsch",
+      "uk": "Deutsch"
+    }
+  },
+  {
+    "key": "lang.en",
+    "en": "English",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "English",
+      "de": "English",
+      "es-MX": "English",
+      "pt-BR": "English",
+      "uk": "English"
+    }
+  },
+  {
+    "key": "lang.es-MX",
+    "en": "Español (México)",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Español (México)",
+      "de": "Español (México)",
+      "es-MX": "Español (México)",
+      "pt-BR": "Español (México)",
+      "uk": "Español (México)"
+    }
+  },
+  {
+    "key": "lang.fr",
+    "en": "Français",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Français",
+      "de": "Français",
+      "es-MX": "Français",
+      "pt-BR": "Français",
+      "uk": "Français"
+    }
+  },
+  {
+    "key": "lang.pt-BR",
+    "en": "Português (Brasil)",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Português (Brasil)",
+      "de": "Português (Brasil)",
+      "es-MX": "Português (Brasil)",
+      "pt-BR": "Português (Brasil)",
+      "uk": "Português (Brasil)"
+    }
+  },
+  {
+    "key": "nav.admin",
+    "en": "Admin",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Admin",
+      "de": "Admin",
+      "es-MX": "Admin",
+      "pt-BR": "Admin",
+      "uk": "Admin"
+    }
+  },
+  {
+    "key": "nav.authority",
+    "en": "Authority",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Authority",
+      "de": "Authority",
+      "es-MX": "Authority",
+      "pt-BR": "Authority",
+      "uk": "Authority"
+    }
+  },
+  {
+    "key": "nav.cases",
+    "en": "Cases",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Cases",
+      "de": "Cases",
+      "es-MX": "Cases",
+      "pt-BR": "Cases",
+      "uk": "Cases"
+    }
+  },
+  {
+    "key": "nav.console",
+    "en": "Console",
+    "needs": [
+      "fr",
+      "pt-BR"
+    ],
+    "existing": {
+      "fr": "Console",
+      "pt-BR": "Console"
+    }
+  },
+  {
+    "key": "nav.encode",
+    "en": "Encode",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Encode",
+      "de": "Encode",
+      "es-MX": "Encode",
+      "pt-BR": "Encode",
+      "uk": "Encode"
+    }
+  },
+  {
+    "key": "nav.impact",
+    "en": "Impact",
+    "needs": [
+      "fr"
+    ],
+    "existing": {
+      "fr": "Impact"
+    }
+  },
+  {
+    "key": "nav.menu",
+    "en": "Menu",
+    "needs": [
+      "fr",
+      "pt-BR"
+    ],
+    "existing": {
+      "fr": "Menu",
+      "pt-BR": "Menu"
+    }
+  },
+  {
+    "key": "nav.prompts",
+    "en": "Prompts",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR"
+    ],
+    "existing": {
+      "fr": "Prompts",
+      "de": "Prompts",
+      "es-MX": "Prompts",
+      "pt-BR": "Prompts"
+    }
+  },
+  {
+    "key": "outcome.eligible",
+    "en": "Eligible",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Eligible",
+      "de": "Eligible",
+      "es-MX": "Eligible",
+      "pt-BR": "Eligible",
+      "uk": "Eligible"
+    }
+  },
+  {
+    "key": "outcome.escalate",
+    "en": "Escalate",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Escalate",
+      "de": "Escalate",
+      "es-MX": "Escalate",
+      "pt-BR": "Escalate",
+      "uk": "Escalate"
+    }
+  },
+  {
+    "key": "outcome.ineligible",
+    "en": "Ineligible",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Ineligible",
+      "de": "Ineligible",
+      "es-MX": "Ineligible",
+      "pt-BR": "Ineligible",
+      "uk": "Ineligible"
+    }
+  },
+  {
+    "key": "outcome.insufficient_evidence",
+    "en": "Insufficient evidence",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Insufficient evidence",
+      "de": "Insufficient evidence",
+      "es-MX": "Insufficient evidence",
+      "pt-BR": "Insufficient evidence",
+      "uk": "Insufficient evidence"
+    }
+  },
+  {
+    "key": "policies.column.verdict",
+    "en": "Verdict",
+    "needs": [
+      "fr"
+    ],
+    "existing": {
+      "fr": "Verdict"
+    }
+  },
+  {
+    "key": "prompt.editor.col.test",
+    "en": "Test",
+    "needs": [
+      "fr",
+      "de"
+    ],
+    "existing": {
+      "fr": "Test",
+      "de": "Test"
+    }
+  },
+  {
+    "key": "prompt.fixture.result.latency",
+    "en": "{ms, number} ms",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR"
+    ],
+    "existing": {
+      "fr": "{ms, number} ms",
+      "de": "{ms, number} ms",
+      "es-MX": "{ms, number} ms",
+      "pt-BR": "{ms, number} ms"
+    }
+  },
+  {
+    "key": "prompt.fixture.result.tokens",
+    "en": "{tokens, number} tokens",
+    "needs": [
+      "es-MX",
+      "pt-BR"
+    ],
+    "existing": {
+      "es-MX": "{tokens, number} tokens",
+      "pt-BR": "{tokens, number} tokens"
+    }
+  },
+  {
+    "key": "prompts.row.versions",
+    "en": "{count, plural, one {# version} other {# versions}}",
+    "needs": [
+      "fr"
+    ],
+    "existing": {
+      "fr": "{count, plural, one {# version} other {# versions}}"
+    }
+  },
+  {
+    "key": "proposal_status.approved",
+    "en": "Approved",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Approved",
+      "de": "Approved",
+      "es-MX": "Approved",
+      "pt-BR": "Approved",
+      "uk": "Approved"
+    }
+  },
+  {
+    "key": "proposal_status.modified",
+    "en": "Modified",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Modified",
+      "de": "Modified",
+      "es-MX": "Modified",
+      "pt-BR": "Modified",
+      "uk": "Modified"
+    }
+  },
+  {
+    "key": "proposal_status.pending",
+    "en": "Pending",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Pending",
+      "de": "Pending",
+      "es-MX": "Pending",
+      "pt-BR": "Pending",
+      "uk": "Pending"
+    }
+  },
+  {
+    "key": "proposal_status.rejected",
+    "en": "Rejected",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Rejected",
+      "de": "Rejected",
+      "es-MX": "Rejected",
+      "pt-BR": "Rejected",
+      "uk": "Rejected"
+    }
+  },
+  {
+    "key": "rule_outcome.insufficient_evidence",
+    "en": "Insufficient evidence",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Insufficient evidence",
+      "de": "Insufficient evidence",
+      "es-MX": "Insufficient evidence",
+      "pt-BR": "Insufficient evidence",
+      "uk": "Insufficient evidence"
+    }
+  },
+  {
+    "key": "rule_outcome.not_applicable",
+    "en": "Not applicable",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Not applicable",
+      "de": "Not applicable",
+      "es-MX": "Not applicable",
+      "pt-BR": "Not applicable",
+      "uk": "Not applicable"
+    }
+  },
+  {
+    "key": "rule_outcome.not_satisfied",
+    "en": "Not satisfied",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Not satisfied",
+      "de": "Not satisfied",
+      "es-MX": "Not satisfied",
+      "pt-BR": "Not satisfied",
+      "uk": "Not satisfied"
+    }
+  },
+  {
+    "key": "rule_outcome.satisfied",
+    "en": "Satisfied",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Satisfied",
+      "de": "Satisfied",
+      "es-MX": "Satisfied",
+      "pt-BR": "Satisfied",
+      "uk": "Satisfied"
+    }
+  },
+  {
+    "key": "rule_type.age_threshold",
+    "en": "Age threshold",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Age threshold",
+      "de": "Age threshold",
+      "es-MX": "Age threshold",
+      "pt-BR": "Age threshold",
+      "uk": "Age threshold"
+    }
+  },
+  {
+    "key": "rule_type.evidence_required",
+    "en": "Evidence required",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Evidence required",
+      "de": "Evidence required",
+      "es-MX": "Evidence required",
+      "pt-BR": "Evidence required",
+      "uk": "Evidence required"
+    }
+  },
+  {
+    "key": "rule_type.exclusion",
+    "en": "Exclusion",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Exclusion",
+      "de": "Exclusion",
+      "es-MX": "Exclusion",
+      "pt-BR": "Exclusion",
+      "uk": "Exclusion"
+    }
+  },
+  {
+    "key": "rule_type.legal_status",
+    "en": "Legal status",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Legal status",
+      "de": "Legal status",
+      "es-MX": "Legal status",
+      "pt-BR": "Legal status",
+      "uk": "Legal status"
+    }
+  },
+  {
+    "key": "rule_type.residency_minimum",
+    "en": "Residency minimum",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Residency minimum",
+      "de": "Residency minimum",
+      "es-MX": "Residency minimum",
+      "pt-BR": "Residency minimum",
+      "uk": "Residency minimum"
+    }
+  },
+  {
+    "key": "rule_type.residency_partial",
+    "en": "Residency (partial)",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Residency (partial)",
+      "de": "Residency (partial)",
+      "es-MX": "Residency (partial)",
+      "pt-BR": "Residency (partial)",
+      "uk": "Residency (partial)"
+    }
+  },
+  {
+    "key": "screen.benefit.citations_heading",
+    "en": "Statutory authorities",
+    "needs": [
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "de": "[MT] Gesetzliche Grundlagen",
+      "es-MX": "[MT] Autoridades estatutarias",
+      "pt-BR": "[MT] Autoridades estatutárias",
+      "uk": "[MT] Нормативні підстави"
+    }
+  },
+  {
+    "key": "screen.benefit.disclose_calculation",
+    "en": "How is this calculated?",
+    "needs": [
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "de": "[MT] Wie wird das berechnet?",
+      "es-MX": "[MT] ¿Cómo se calcula esto?",
+      "pt-BR": "[MT] Como isso é calculado?",
+      "uk": "[MT] Як це обчислено?"
+    }
+  },
+  {
+    "key": "screen.benefit.heading",
+    "en": "Projected monthly amount",
+    "needs": [
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "de": "[MT] Voraussichtlicher Monatsbetrag",
+      "es-MX": "[MT] Monto mensual proyectado",
+      "pt-BR": "[MT] Valor mensal projetado",
+      "uk": "[MT] Прогнозована місячна сума"
+    }
+  },
+  {
+    "key": "screen.benefit.op.add",
+    "en": "add",
+    "needs": [
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "de": "[MT] addieren",
+      "es-MX": "[MT] sumar",
+      "pt-BR": "[MT] somar",
+      "uk": "[MT] додати"
+    }
+  },
+  {
+    "key": "screen.benefit.op.clamp",
+    "en": "clamp",
+    "needs": [
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "de": "[MT] begrenzen",
+      "es-MX": "[MT] acotar",
+      "pt-BR": "[MT] limitar",
+      "uk": "[MT] обмежити"
+    }
+  },
+  {
+    "key": "screen.benefit.op.const",
+    "en": "constant",
+    "needs": [
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "de": "[MT] Konstante",
+      "es-MX": "[MT] constante",
+      "pt-BR": "[MT] constante",
+      "uk": "[MT] константа"
+    }
+  },
+  {
+    "key": "screen.benefit.op.divide",
+    "en": "divide",
+    "needs": [
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "de": "[MT] dividieren",
+      "es-MX": "[MT] dividir",
+      "pt-BR": "[MT] dividir",
+      "uk": "[MT] поділити"
+    }
+  },
+  {
+    "key": "screen.benefit.op.field",
+    "en": "case input",
+    "needs": [
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "de": "[MT] Falleingabe",
+      "es-MX": "[MT] dato del caso",
+      "pt-BR": "[MT] dado do caso",
+      "uk": "[MT] дані справи"
+    }
+  },
+  {
+    "key": "screen.benefit.op.max",
+    "en": "maximum",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "maximum",
+      "de": "[MT] Maximum",
+      "es-MX": "[MT] máximo",
+      "pt-BR": "[MT] máximo",
+      "uk": "[MT] максимум"
+    }
+  },
+  {
+    "key": "screen.benefit.op.min",
+    "en": "minimum",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "minimum",
+      "de": "[MT] Minimum",
+      "es-MX": "[MT] mínimo",
+      "pt-BR": "[MT] mínimo",
+      "uk": "[MT] мінімум"
+    }
+  },
+  {
+    "key": "screen.benefit.op.multiply",
+    "en": "multiply",
+    "needs": [
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "de": "[MT] multiplizieren",
+      "es-MX": "[MT] multiplicar",
+      "pt-BR": "[MT] multiplicar",
+      "uk": "[MT] помножити"
+    }
+  },
+  {
+    "key": "screen.benefit.op.ref",
+    "en": "lookup",
+    "needs": [
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "de": "[MT] Amtswert",
+      "es-MX": "[MT] valor oficial",
+      "pt-BR": "[MT] valor oficial",
+      "uk": "[MT] офіційне значення"
+    }
+  },
+  {
+    "key": "screen.benefit.op.subtract",
+    "en": "subtract",
+    "needs": [
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "de": "[MT] subtrahieren",
+      "es-MX": "[MT] restar",
+      "pt-BR": "[MT] subtrair",
+      "uk": "[MT] відняти"
+    }
+  },
+  {
+    "key": "screen.benefit.period.annual",
+    "en": "/year",
+    "needs": [
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "de": "[MT] /Jahr",
+      "es-MX": "[MT] /año",
+      "pt-BR": "[MT] /ano",
+      "uk": "[MT] /рік"
+    }
+  },
+  {
+    "key": "screen.benefit.period.lump_sum",
+    "en": " (lump sum)",
+    "needs": [
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "de": "[MT]  (Einmalbetrag)",
+      "es-MX": "[MT]  (suma global)",
+      "pt-BR": "[MT]  (montante único)",
+      "uk": "[MT]  (одноразово)"
+    }
+  },
+  {
+    "key": "screen.benefit.period.monthly",
+    "en": "/month",
+    "needs": [
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "de": "[MT] /Monat",
+      "es-MX": "[MT] /mes",
+      "pt-BR": "[MT] /mês",
+      "uk": "[MT] /місяць"
+    }
+  },
+  {
+    "key": "screen.benefit.ratio_caption",
+    "en": "{ratio} of the full base amount",
+    "needs": [
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "de": "[MT] {ratio} des vollen Grundbetrags",
+      "es-MX": "[MT] {ratio} del monto base completo",
+      "pt-BR": "[MT] {ratio} do valor base integral",
+      "uk": "[MT] {ratio} від повної базової суми"
+    }
+  },
+  {
+    "key": "screen.benefit.trace_unavailable",
+    "en": "Calculation trace not available.",
+    "needs": [
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "de": "[MT] Berechnungs-Trace nicht verfügbar.",
+      "es-MX": "[MT] Traza de cálculo no disponible.",
+      "pt-BR": "[MT] Trace de cálculo indisponível.",
+      "uk": "[MT] Трасування обчислення недоступне."
+    }
+  },
+  {
+    "key": "screen.benefit.type.full",
+    "en": "Full pension",
+    "needs": [
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "de": "[MT] Vollrente",
+      "es-MX": "[MT] Pensión completa",
+      "pt-BR": "[MT] Pensão integral",
+      "uk": "[MT] Повна пенсія"
+    }
+  },
+  {
+    "key": "screen.benefit.type.partial",
+    "en": "Partial pension",
+    "needs": [
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "de": "[MT] Teilrente",
+      "es-MX": "[MT] Pensión parcial",
+      "pt-BR": "[MT] Pensão parcial",
+      "uk": "[MT] Часткова пенсія"
+    }
+  },
+  {
+    "key": "screen.download.cta",
+    "en": "Download decision",
+    "needs": [
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "de": "[MT] Bescheid herunterladen",
+      "es-MX": "[MT] Descargar decisión",
+      "pt-BR": "[MT] Baixar decisão",
+      "uk": "[MT] Завантажити рішення"
+    }
+  },
+  {
+    "key": "screen.download.error",
+    "en": "Could not generate the notice. Please try again.",
+    "needs": [
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "de": "[MT] Bescheid konnte nicht erzeugt werden. Bitte erneut versuchen.",
+      "es-MX": "[MT] No se pudo generar el aviso. Intente de nuevo.",
+      "pt-BR": "[MT] Não foi possível gerar o aviso. Tente novamente.",
+      "uk": "[MT] Не вдалося сформувати повідомлення. Спробуйте ще раз."
+    }
+  },
+  {
+    "key": "screen.download.in_progress",
+    "en": "Rendering…",
+    "needs": [
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "de": "[MT] Wird erzeugt…",
+      "es-MX": "[MT] Generando…",
+      "pt-BR": "[MT] Gerando…",
+      "uk": "[MT] Формування…"
+    }
+  },
+  {
+    "key": "screen.download.tooltip",
+    "en": "Open the decision notice in a new tab. Use your browser's \"Save as PDF\" or \"Print\" to keep a copy.",
+    "needs": [
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "de": "[MT] Bescheid in einem neuen Tab öffnen. Nutzen Sie \"Als PDF speichern\" oder \"Drucken\" des Browsers, um eine Kopie zu behalten.",
+      "es-MX": "[MT] Abre el aviso de decisión en una nueva pestaña. Usa \"Guardar como PDF\" o \"Imprimir\" del navegador para conservar una copia.",
+      "pt-BR": "[MT] Abrir o aviso de decisão em uma nova aba. Use \"Salvar como PDF\" ou \"Imprimir\" do navegador para guardar uma cópia.",
+      "uk": "[MT] Відкрити повідомлення про рішення в новій вкладці. Використайте \"Зберегти як PDF\" або \"Друк\" у браузері, щоб зберегти копію."
+    }
+  },
+  {
+    "key": "status.decided",
+    "en": "Decided",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Decided",
+      "de": "Decided",
+      "es-MX": "Decided",
+      "pt-BR": "Decided",
+      "uk": "Decided"
+    }
+  },
+  {
+    "key": "status.escalated",
+    "en": "Escalated",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Escalated",
+      "de": "Escalated",
+      "es-MX": "Escalated",
+      "pt-BR": "Escalated",
+      "uk": "Escalated"
+    }
+  },
+  {
+    "key": "status.evaluating",
+    "en": "Evaluating",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Evaluating",
+      "de": "Evaluating",
+      "es-MX": "Evaluating",
+      "pt-BR": "Evaluating",
+      "uk": "Evaluating"
+    }
+  },
+  {
+    "key": "status.intake",
+    "en": "Intake",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Intake",
+      "de": "Intake",
+      "es-MX": "Intake",
+      "pt-BR": "Intake",
+      "uk": "Intake"
+    }
+  },
+  {
+    "key": "status.recommendation_ready",
+    "en": "Ready for review",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Ready for review",
+      "de": "Ready for review",
+      "es-MX": "Ready for review",
+      "pt-BR": "Ready for review",
+      "uk": "Ready for review"
+    }
+  },
+  {
+    "key": "status.under_review",
+    "en": "Under review",
+    "needs": [
+      "fr",
+      "de",
+      "es-MX",
+      "pt-BR",
+      "uk"
+    ],
+    "existing": {
+      "fr": "Under review",
+      "de": "Under review",
+      "es-MX": "Under review",
+      "pt-BR": "Under review",
+      "uk": "Under review"
+    }
+  },
+  {
+    "key": "walkthrough.step2.tag",
+    "en": "encoder",
+    "needs": [
+      "de"
+    ],
+    "existing": {
+      "de": "encoder"
+    }
+  }
+]
