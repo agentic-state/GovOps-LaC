@@ -7,7 +7,11 @@
 // values overwritten in place — no key reordering, no key additions, no key
 // drops). Reports per-locale counts (touched / unchanged / missing-from-catalog).
 //
-// Run from repo root: `node scripts/merge_i18n_translations.mjs`.
+// Pass the deliverable path as the first arg; otherwise the script auto-resolves
+// to the most recent round under `docs/i18n-rounds/<YYYY-MM-DD>/i18n-translations.json`.
+//
+//   node scripts/merge_i18n_translations.mjs                                  # latest round
+//   node scripts/merge_i18n_translations.mjs docs/i18n-rounds/2026-04-29/i18n-translations.json
 
 import fs from "node:fs";
 import path from "node:path";
@@ -15,9 +19,30 @@ import { fileURLToPath } from "node:url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(__dirname, "..");
-const translationsPath = path.join(repoRoot, "i18n-translations.json");
 const messagesDir = path.join(repoRoot, "web", "src", "messages");
 const LOCALES = ["fr", "de", "es-MX", "pt-BR", "uk"];
+
+function resolveTranslationsPath() {
+  const fromArg = process.argv[2];
+  if (fromArg) return path.resolve(fromArg);
+  const roundsDir = path.join(repoRoot, "docs", "i18n-rounds");
+  if (!fs.existsSync(roundsDir)) {
+    throw new Error(`no docs/i18n-rounds/ directory; pass the deliverable path explicitly`);
+  }
+  const dateDirs = fs
+    .readdirSync(roundsDir)
+    .filter((d) => /^\d{4}-\d{2}-\d{2}$/.test(d))
+    .sort()
+    .reverse();
+  for (const d of dateDirs) {
+    const candidate = path.join(roundsDir, d, "i18n-translations.json");
+    if (fs.existsSync(candidate)) return candidate;
+  }
+  throw new Error(`no i18n-translations.json found under any docs/i18n-rounds/<date>/ folder`);
+}
+
+const translationsPath = resolveTranslationsPath();
+console.log("reading translations from " + path.relative(repoRoot, translationsPath) + "\n");
 
 const translations = JSON.parse(fs.readFileSync(translationsPath, "utf8"));
 

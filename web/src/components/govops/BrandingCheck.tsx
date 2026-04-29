@@ -52,6 +52,7 @@ export function BrandingCheck() {
                 className="px-4 py-2 text-[11px] uppercase tracking-[0.14em] text-foreground-subtle"
                 style={{ fontFamily: "var(--font-mono)" }}
               >
+                {/* Intentional: the "branding.check.col.title" message is the literal i18n key name `app.name` in every locale — this column references a key by name, not by value. Do not "translate" it. */}
                 {intl.formatMessage({ id: "branding.check.col.title" })}
               </th>
               <th
