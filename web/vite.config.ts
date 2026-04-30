@@ -13,34 +13,38 @@ import { defineConfig } from "@lovable.dev/vite-tanstack-config";
 // and returns 403 to anyone hitting the HF Space URL. Local dev is unaffected
 // (localhost is always allowed).
 //
-// `VITE_HOSTED_DEMO=1` (set in the Dockerfile) signals this is the hosted-
-// demo container. Two effects, both fixes for documented vite-dev failure
-// modes that surfaced on the free-tier HF Spaces deploy:
-//   1. server.hmr=false  — HF's proxy closes idle websockets at ~30s; vite's
-//      reconnect path can put the page in a broken mid-session state. HMR
-//      has zero value in a deployed demo, so we just turn it off.
-//   2. server.watch.ignored=["**"]  — chokidar holds a growing watcher graph
-//      that is one of the documented vite-dev memory leak surfaces (vite
-//      #8341, #21473). With HMR off the watcher does no useful work anyway.
-// Local dev (env unset → undefined) keeps vite defaults.
-const isHostedDemo = process.env.VITE_HOSTED_DEMO === "1";
-
+// `cloudflare: false` skips the @cloudflare/vite-plugin so `vite build` does
+// NOT emit a Workers bundle (which the v2.1 demo can't run). Combined with
+// `tanstackStart.spa.enabled: true` and `prerender.enabled: true`, the build
+// produces a static SPA in `dist/client/` (including a real `index.html`
+// rendered once at build time, then hydrated client-side). FastAPI serves
+// that directory directly — no vite at runtime, no Node at runtime, no
+// supervisor. The hosted demo runs as one uvicorn process.
+//
+// Dev-server flags (HMR, watcher) are kept untouched: local dev still does
+// `vite dev` with HMR on. Only the production build path changes.
 export default defineConfig({
+  cloudflare: false,
+  tanstackStart: {
+    spa: {
+      enabled: true,
+      // outputPath: "/index" makes TanStack Start write the SPA shell at
+      // dist/client/index.html (it appends ".html" for the SPA shell case;
+      // see start-plugin-core/vite/prerender.js → `isSpaShell` branch).
+      prerender: { enabled: true, outputPath: "/index" },
+    },
+  },
   vite: {
     server: {
+      // `allowedHosts` is dev-only ergonomics; harmless in the build path.
+      // Kept for any future case where someone wants `vite dev` reachable
+      // from the HF Space subdomain (was load-bearing for the prior vite-dev
+      // deploy; deliberately left in place so a contributor experimenting
+      // with `npm run dev` doesn't trip over a 403).
       allowedHosts: [
         "agentic-state-govops-lac.hf.space",
-        ".hf.space", // future-proof for any HF Space URL pattern
+        ".hf.space",
       ],
-      hmr: isHostedDemo ? false : undefined,
-      watch: isHostedDemo ? { ignored: ["**"] } : undefined,
-      // Reverse-proxy /api/* to the FastAPI backend running on the same
-      // container at port 8000. Without this, vite would serve the SPA
-      // index.html for /api/* requests (its catch-all SPA fallback) and the
-      // browser would never reach the JSON API. Enabled in dev only — the
-      // Dockerfile is the only consumer that needs it (local dev uses two
-      // separate ports per CONTRIBUTING.md and doesn't go through this
-      // proxy).
       proxy: {
         "/api": {
           target: "http://127.0.0.1:8000",
