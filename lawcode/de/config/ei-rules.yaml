@@ -1,0 +1,37 @@
+# yaml-language-server: $schema=../../../schema/lawcode-v1.0.json
+# de/config/ei-rules.yaml — substrate values for DE Arbeitslosengeld I (v3 Phase D).
+
+defaults:
+  domain: rule
+  jurisdiction_id: de-ei
+  effective_from: '1900-01-01'
+values:
+  - key: de-ei.rule.contribution.min_years
+    value: 1
+    value_type: number
+    citation: SGB III, § 142 (Anwartschaftszeit 12 Monate ≈ 1 Jahr)
+  - key: de-ei.rule.contribution.home_countries
+    value: [DE, GERMANY, DEUTSCHLAND]
+    value_type: list
+  - key: de-ei.rule.legal-status.accepted_statuses
+    value: [citizen, permanent_resident]
+    value_type: list
+  - key: de-ei.rule.evidence.required_types
+    value: [arbeitsbescheinigung]
+    value_type: list
+    citation: SGB III, § 312
+  - key: de-ei.rule.duration.weeks_total
+    value: 26
+    value_type: number
+    citation: SGB III, § 147
+    rationale: 'Illustrative — Mindestanspruchsdauer 6 Monate; älter Versicherte mit längerer Beitragszeit erreichen bis zu 24 Monate.'
+  - key: de-ei.rule.duration.start_offset_days
+    value: 0
+    value_type: number
+  - key: de-ei.rule.job-search.obligation_id
+    value: de-ba-vermittlung-mitwirkung
+    value_type: string
+  - key: de-ei.rule.job-search.cadence
+    value: monthly
+    value_type: string
+    citation: SGB III, § 138 (Verfügbarkeit und Mitwirkung)

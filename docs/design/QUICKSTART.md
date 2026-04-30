@@ -16,7 +16,7 @@ It is an open public-good contribution that governments can inspect, adapt, and 
 
 ```bash
 git clone https://github.com/agentic-state/GovOps-LaC.git
-cd 61-GovOps
+cd GovOps-LaC
 pip install -e ".[dev]"
 govops-demo
 ```

@@ -1,0 +1,80 @@
+# Dependabot configuration for agentic-state/GovOps-LaC
+#
+# Security updates are auto-enabled at the repo level (Settings → Security).
+# This file adds version-bump PRs on a weekly cadence so the dep graph
+# doesn't drift between security incidents.
+#
+# Conservative posture appropriate for an MVP demo — weekly batches, not
+# daily PR floods, and the reviewer is the maintainer.
+
+version: 2
+updates:
+  # Backend Python dependencies
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "06:00"
+      timezone: "Etc/UTC"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "backend"
+    commit-message:
+      prefix: "deps"
+      include: "scope"
+
+  # Frontend npm dependencies (web/)
+  - package-ecosystem: "npm"
+    directory: "/web"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "06:00"
+      timezone: "Etc/UTC"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "frontend"
+    commit-message:
+      prefix: "deps(web)"
+      include: "scope"
+    # Group minor + patch updates into one PR per package family to reduce noise
+    groups:
+      tanstack:
+        patterns:
+          - "@tanstack/*"
+      tailwind:
+        patterns:
+          - "tailwindcss"
+          - "@tailwindcss/*"
+          - "tw-animate-css"
+      shadcn-radix:
+        patterns:
+          - "@radix-ui/*"
+      react-intl:
+        patterns:
+          - "react-intl"
+          - "@formatjs/*"
+      vitest-playwright:
+        patterns:
+          - "vitest"
+          - "@vitest/*"
+          - "@playwright/*"
+          - "playwright"
+
+  # GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "06:00"
+      timezone: "Etc/UTC"
+    open-pull-requests-limit: 3
+    labels:
+      - "dependencies"
+      - "ci"
+    commit-message:
+      prefix: "ci(deps)"

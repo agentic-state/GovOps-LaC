@@ -1,0 +1,247 @@
+# yaml-language-server: $schema=../../../schema/program-manifest-v1.0.json
+#
+# Canada — Employment Insurance program manifest (v3 Phase D).
+# Per ADR-014, structure lives here; parameter values live in
+# lawcode/ca/config/ei-rules.yaml. Per ADR-017, BENEFIT_DURATION_BOUNDED
+# and ACTIVE_OBLIGATION are non-gating rules consumed by the
+# unemployment_insurance shape evaluator post-eligibility.
+
+schema_version: "1.0"
+program_id: ei
+jurisdiction_id: jur-ca-federal
+shape: unemployment_insurance
+status: active
+
+name:
+  en: Employment Insurance
+  fr: Assurance-emploi
+
+description:
+  en: Federal income replacement for workers who have lost employment through no fault of their own and remain available for and actively seek suitable employment (Employment Insurance Act, S.C. 1996, c. 23).
+  fr: Remplacement fédéral du revenu pour les travailleurs ayant perdu leur emploi sans en être responsables, qui demeurent disponibles pour un emploi convenable et le recherchent activement (Loi sur l'assurance-emploi, L.C. 1996, ch. 23).
+
+authority_chain:
+  - id: auth-ei-constitution
+    layer: constitution
+    title: Constitution Act, 1867
+    citation: 30 & 31 Vict., c. 3 (U.K.), s. 91(2A)
+    effective_date: 1867-07-01
+    url: https://laws-lois.justice.gc.ca/eng/const/page-1.html
+  - id: auth-ei-act
+    layer: act
+    title: Employment Insurance Act
+    citation: S.C. 1996, c. 23
+    effective_date: 1996-06-20
+    url: https://laws-lois.justice.gc.ca/eng/acts/E-5.6/
+    parent: auth-ei-constitution
+  - id: auth-ei-regs
+    layer: regulation
+    title: Employment Insurance Regulations
+    citation: SOR/96-332
+    effective_date: 1996-06-20
+    parent: auth-ei-act
+  - id: auth-ei-program
+    layer: program
+    title: Employment Insurance Program (Service Canada)
+    citation: Department of Employment and Social Development Act, S.C. 2005, c. 34
+    effective_date: 2005-12-12
+    parent: auth-ei-act
+  - id: auth-ei-determination
+    layer: service
+    title: EI Initial Eligibility Determination
+    citation: EI Act, ss. 6-12, s. 18
+    parent: auth-ei-program
+
+legal_documents:
+  - id: doc-ei-act
+    type: statute
+    title: Employment Insurance Act
+    citation: S.C. 1996, c. 23
+    effective_date: 1996-06-20
+    sections:
+      - id: sec-ei-7
+        ref: s. 7(2)
+        heading: Qualification requirement
+        text: >-
+          An insured person, other than a new entrant or re-entrant to the labour force, qualifies if the person has had an interruption of earnings from employment and has had during their qualifying period at least the number of hours of insurable employment set out in the schedule.
+      - id: sec-ei-12
+        ref: s. 12(2)
+        heading: Maximum number of weeks
+        text: >-
+          The maximum number of weeks for which benefits may be paid in a benefit period is determined in accordance with the table set out in Schedule I, by reference to the regional rate of unemployment that applies to the claimant and the number of hours of insurable employment in the claimant's qualifying period.
+      - id: sec-ei-18
+        ref: s. 18(1)(a)
+        heading: Availability for work
+        text: >-
+          A claimant is not entitled to be paid benefits for a working day in a benefit period for which the claimant fails to prove that on that day the claimant was capable of and available for work and unable to obtain suitable employment.
+
+rules:
+  - id: rule-ei-contribution
+    rule_type: residency_minimum
+    description: Minimum qualifying employment period (insurable hours equivalent)
+    formal_expression: insurable_employment_period >= 1 year
+    citation: Employment Insurance Act, S.C. 1996, c. 23, s. 7(2)
+    source_document_id: doc-ei-act
+    source_section_ref: s. 7(2)
+    param_key_prefix: ca-ei.rule.contribution
+    parameters:
+      min_years: { ref: ca-ei.rule.contribution.min_years }
+      home_countries: { ref: ca-ei.rule.contribution.home_countries }
+
+  - id: rule-ei-legal-status
+    rule_type: legal_status
+    description: Applicant must be authorized to work in Canada
+    formal_expression: "applicant.legal_status in ['citizen', 'permanent_resident']"
+    citation: Employment Insurance Act, S.C. 1996, c. 23, s. 6(1)
+    source_document_id: doc-ei-act
+    source_section_ref: s. 6(1)
+    param_key_prefix: ca-ei.rule.legal-status
+    parameters:
+      accepted_statuses: { ref: ca-ei.rule.legal-status.accepted_statuses }
+
+  - id: rule-ei-evidence
+    rule_type: evidence_required
+    description: Record of Employment from former employer must be provided
+    formal_expression: has_evidence('record_of_employment')
+    citation: Employment Insurance Act, S.C. 1996, c. 23, s. 50(1)
+    source_document_id: doc-ei-act
+    source_section_ref: s. 50(1)
+    param_key_prefix: ca-ei.rule.evidence
+    parameters:
+      required_types: { ref: ca-ei.rule.evidence.required_types }
+
+  - id: rule-ei-duration
+    rule_type: benefit_duration_bounded
+    description: Maximum weeks of regular EI benefits payable in a benefit period
+    formal_expression: weeks = f(insurable_hours, regional_unemployment_rate)
+    citation: Employment Insurance Act, S.C. 1996, c. 23, s. 12(2)
+    source_document_id: doc-ei-act
+    source_section_ref: s. 12(2)
+    param_key_prefix: ca-ei.rule.duration
+    parameters:
+      weeks_total: { ref: ca-ei.rule.duration.weeks_total }
+      start_offset_days: { ref: ca-ei.rule.duration.start_offset_days }
+
+  - id: rule-ei-job-search
+    rule_type: active_obligation
+    description: Recipient must be available for and actively seeking suitable employment
+    formal_expression: "must remain available + actively seeking suitable work"
+    citation: Employment Insurance Act, S.C. 1996, c. 23, s. 18(1)(a)
+    source_document_id: doc-ei-act
+    source_section_ref: s. 18(1)(a)
+    param_key_prefix: ca-ei.rule.job-search
+    parameters:
+      obligation_id: { ref: ca-ei.rule.job-search.obligation_id }
+      cadence: { ref: ca-ei.rule.job-search.cadence }
+
+demo_cases:
+  - id: demo-ca-ei-001
+    applicant:
+      id: app-ca-ei-001
+      date_of_birth: 1990-03-15
+      legal_name: Sarah Tremblay
+      legal_status: citizen
+      country_of_birth: CA
+    residency_periods:
+      - country: Canada
+        start_date: 1990-03-15
+        verified: true
+    evidence_items:
+      - id: ev-ca-ei-001-bc
+        type: birth_certificate
+        description: Canadian birth certificate
+        provided: true
+        verified: true
+      - id: ev-ca-ei-001-tax
+        type: tax_record
+        description: CRA T4 slips 2018-2025
+        provided: true
+        verified: true
+      - id: ev-ca-ei-001-roe
+        type: record_of_employment
+        description: ROE from former employer (block 16 — A00 lack of work)
+        provided: true
+        verified: true
+
+  - id: demo-ca-ei-002
+    applicant:
+      id: app-ca-ei-002
+      date_of_birth: 1996-09-10
+      legal_name: Daniel Wong
+      legal_status: permanent_resident
+      country_of_birth: HK
+    residency_periods:
+      - country: Hong Kong
+        start_date: 1996-09-10
+        end_date: 2025-08-01
+      - country: Canada
+        start_date: 2025-08-01
+        verified: true
+    evidence_items:
+      - id: ev-ca-ei-002-bc
+        type: birth_certificate
+        description: Hong Kong birth certificate (translated)
+        provided: true
+        verified: true
+      - id: ev-ca-ei-002-pr
+        type: residency_declaration
+        description: Permanent resident card
+        provided: true
+        verified: true
+      - id: ev-ca-ei-002-roe
+        type: record_of_employment
+        description: ROE from short-term Canadian employment
+        provided: true
+        verified: true
+
+  - id: demo-ca-ei-003
+    applicant:
+      id: app-ca-ei-003
+      date_of_birth: 1985-06-22
+      legal_name: Marie Dubois
+      legal_status: citizen
+      country_of_birth: CA
+    residency_periods:
+      - country: Canada
+        start_date: 1985-06-22
+        verified: true
+    evidence_items:
+      - id: ev-ca-ei-003-bc
+        type: birth_certificate
+        description: Quebec birth certificate
+        provided: true
+        verified: true
+      - id: ev-ca-ei-003-tax
+        type: tax_record
+        description: Revenu Québec + CRA tax filing 2010-2025
+        provided: true
+        verified: true
+      - id: ev-ca-ei-003-roe
+        type: record_of_employment
+        description: ROE following layoff
+        provided: true
+        verified: true
+
+  - id: demo-ca-ei-004
+    applicant:
+      id: app-ca-ei-004
+      date_of_birth: 1988-12-05
+      legal_name: Ahmed Khalil
+      legal_status: citizen
+      country_of_birth: CA
+    residency_periods:
+      - country: Canada
+        start_date: 1988-12-05
+        verified: true
+    evidence_items:
+      - id: ev-ca-ei-004-bc
+        type: birth_certificate
+        description: Canadian birth certificate
+        provided: true
+        verified: true
+      - id: ev-ca-ei-004-tax
+        type: tax_record
+        description: CRA tax filing history
+        provided: true
+        verified: true
+      # No record_of_employment provided — triggers INSUFFICIENT_EVIDENCE

@@ -264,18 +264,25 @@ def parse_llm_response(raw_response: str, batch: EncodingBatch) -> list[RuleProp
 
 async def extract_rules_with_llm(
     batch: EncodingBatch,
-    api_key: str,
+    api_key: str | None = None,
     model: str = "claude-sonnet-4-20250514",
     base_url: str = "https://api.anthropic.com",
 ) -> tuple[list[RuleProposal], str, str, str, str]:
     """Call an LLM to extract rules from legislative text.
 
+    Two paths depending on `api_key`:
+
+    1. **`api_key` provided** — bring-your-own-Anthropic-key path. Preserved
+       for self-hosted demos and developer setups. Calls Anthropic's native
+       `/v1/messages` endpoint directly.
+    2. **`api_key` is None** — uses the `govops.llm_proxy` provider chain
+       (Groq → OpenRouter → Gemini → Mistral by default, env-configurable).
+       This is the v2.1 hosted-demo path; the proxy fails over on 429/5xx.
+
     Returns (proposals, user_prompt_used, raw_response, user_prompt_key,
     system_prompt_key) — the keys identify which substrate ConfigValues
     sourced each prompt, so the audit trail can pin reproducibility.
     """
-    import httpx
-
     # Resolve fresh from the substrate so any post-startup admin write is
     # picked up on the next batch (the in-memory store reseeds on restart;
     # within one process, calls return the current snapshot).
@@ -289,25 +296,42 @@ async def extract_rules_with_llm(
         text=batch.input_text,
     )
 
-    async with httpx.AsyncClient(timeout=120.0) as client:
-        resp = await client.post(
-            f"{base_url}/v1/messages",
-            headers={
-                "x-api-key": api_key,
-                "anthropic-version": "2023-06-01",
-                "content-type": "application/json",
-            },
-            json={
-                "model": model,
-                "max_tokens": 4096,
-                "system": system_prompt,
-                "messages": [{"role": "user", "content": prompt}],
-            },
-        )
-        resp.raise_for_status()
-        data = resp.json()
+    if api_key:
+        # Path 1 — Anthropic-native (legacy, bring-your-own-key)
+        import httpx
 
-    raw_response = data.get("content", [{}])[0].get("text", "")
+        async with httpx.AsyncClient(timeout=120.0) as client:
+            resp = await client.post(
+                f"{base_url}/v1/messages",
+                headers={
+                    "x-api-key": api_key,
+                    "anthropic-version": "2023-06-01",
+                    "content-type": "application/json",
+                },
+                json={
+                    "model": model,
+                    "max_tokens": 4096,
+                    "system": system_prompt,
+                    "messages": [{"role": "user", "content": prompt}],
+                },
+            )
+            resp.raise_for_status()
+            data = resp.json()
+
+        raw_response = data.get("content", [{}])[0].get("text", "")
+    else:
+        # Path 2 — multi-provider OpenAI-compat proxy (v2.1 hosted demo)
+        from govops.llm_proxy import chat as proxy_chat
+
+        result = await proxy_chat(
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": prompt},
+            ],
+            max_tokens=4096,
+        )
+        raw_response = result.content
+
     proposals = parse_llm_response(raw_response, batch)
     return (
         proposals,

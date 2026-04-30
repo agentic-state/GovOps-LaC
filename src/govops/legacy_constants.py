@@ -47,6 +47,7 @@ if _lawcode_path.exists():
 
 
 _JURISDICTION_PREFIX_TO_ID = {
+    # OAS / pension-equivalent programs (v2)
     "ca": "ca-oas",
     "br": "br-inss",
     "es": "es-jub",
@@ -54,6 +55,16 @@ _JURISDICTION_PREFIX_TO_ID = {
     "de": "de-drv",
     "ua": "ua-pfu",
     "jp": "jp-koukinenkin",
+    # v3 Phase D — Employment Insurance / equivalent. Keys are scoped under
+    # `<code>-ei.<...>` so they route to the dedicated `<code>-ei` substrate
+    # namespace instead of overloading the OAS jurisdiction. Per ADR-014's
+    # implicit program-scoping convention.
+    "ca-ei": "ca-ei",
+    "br-ei": "br-ei",
+    "es-ei": "es-ei",
+    "fr-ei": "fr-ei",
+    "de-ei": "de-ei",
+    "ua-ei": "ua-ei",
     # "global" and "ui" map to the global scope (None / "global" — equivalent).
 }
 

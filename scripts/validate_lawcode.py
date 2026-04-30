@@ -184,10 +184,17 @@ def _resolve_files(arg_file: str | None) -> list[Path]:
     # registry entries, not ConfigValue records) so it's excluded from
     # the substrate validator. The CLI parses it directly.
     excluded_names = {"REGISTRY.yaml"}
+    # v3 / ADR-014 + ADR-015 — programs/ holds Program manifests (different
+    # shape, validated against schema/program-manifest-v1.0.json by
+    # tests/test_programs.py). _shapes/ holds local shape declarations per
+    # ADR-015's two-tier model. Both are excluded from the lawcode/ConfigValue
+    # validator.
+    excluded_ancestor_dir_names = {"programs", "_shapes"}
     return [
         p
         for p in (sorted(LAWCODE_DIR.rglob("*.yaml")) + sorted(LAWCODE_DIR.rglob("*.yml")))
         if p.name not in excluded_names
+        and not any(parent.name in excluded_ancestor_dir_names for parent in p.parents)
     ]
 
 

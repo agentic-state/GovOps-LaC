@@ -69,6 +69,13 @@ const PROGRAM_LABELS: Record<ScreenJurisdictionId, JurisdictionResponse> = {
     default_language: "uk",
     howto_url: "https://www.pfu.gov.ua/",
   },
+  jp: {
+    id: "jp",
+    jurisdiction_label: "Nihon-koku (Japan)",
+    program_name: "Kosei Nenkin Hoken (Employees' Pension Insurance)",
+    default_language: "en",
+    howto_url: "https://www.nenkin.go.jp/",
+  },
 };
 
 type LoaderData = { live: boolean; data: JurisdictionResponse };

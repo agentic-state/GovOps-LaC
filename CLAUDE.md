@@ -13,11 +13,11 @@ Built on **FKTE** (Fractal Knowledge Transformation Engine):
 
 ## Active Track
 
-**Law-as-Code v2.0** is launched on `main` as the v2.0.0 baseline. The execution log lives in [PLAN.md](PLAN.md); §12 tracks the one open non-blocking follow-up (i18n native-speaker re-look). The strategic vision is [docs/IDEA-GovOps-v2.0-LawAsCode.md](docs/IDEA-GovOps-v2.0-LawAsCode.md). ADRs land in [docs/design/ADRs/](docs/design/ADRs/). v2.1 (hosted demo) and v3.0 (program-as-primitive) are queued; v3 charter is [docs/IDEA-GovOps-v3.0-ProgramAsPrimitive.md](docs/IDEA-GovOps-v3.0-ProgramAsPrimitive.md).
+**Program-as-Primitive v3.0** has cut over. Phases A–I all shipped on `main`: manifest substrate, ProgramEngine refactor, EI canonical shape + bounded-benefit primitives, EI rollout to 6 jurisdictions (JP excluded as architectural control), cross-program evaluation API with interaction warnings, government-leader `/compare` surface, citizen `/check` + `/check/life-event`, adoption substrate (`govops init` + `docker compose up` + plain-language sidecars), and Phase I cutover (deprecated `OASEngine` alias removed, demo seed extended for EI cases × 6 jurisdictions). Charter: [docs/IDEA-GovOps-v3.0-ProgramAsPrimitive.md](docs/IDEA-GovOps-v3.0-ProgramAsPrimitive.md). Plan: [PLAN-v3.md](PLAN-v3.md). The v2.0 plan lives in [PLAN.md](PLAN.md); v2.1 (hosted demo) is the parallel agent's lane. ADRs land in [docs/design/ADRs/](docs/design/ADRs/).
 
 ## Current State
 
-7 jurisdictions (CA/BR/ES/FR/DE/UA/JP), 6 languages (en/fr/pt/es/de/uk), **375 backend tests passing**.
+7 jurisdictions (CA/BR/ES/FR/DE/UA/JP), 6 languages (en/fr/pt/es/de/uk), **640 backend tests passing**. Two programs canonicalized: Old Age Security (all 7 jurisdictions, encoded from each country's own statutes — not a literal export of Canada's OAS Act) and Employment Insurance (6 jurisdictions — JP excluded as v3 architectural control). Cross-program evaluation API live: `POST /api/cases/{id}/evaluate` accepts an optional `programs: [...]` body and returns `program_evaluations` + interaction `warnings` per ADR-018. Comparison surface live at `/compare/<program-id>` backed by `GET /api/programs/{id}/compare?jurisdictions=...`. Citizen entry surface live at `/check` and `/check/life-event?event=job_loss` backed by `POST /api/check` — same privacy posture as `/api/screen`. Adoption substrate live: `govops init <iso-code>` scaffolds a complete `lawcode/<code>/` skeleton; `docker compose up` (root `docker-compose.yml` + `docker/{api,web}.Dockerfile`, distinct from the v2.1 hosted-demo `Dockerfile`) brings up the two-process demo on any Docker host; every program manifest has a plain-language sidecar rendered by `govops docs <manifest-path>`. Phase I cutover removed the deprecated `OASEngine` alias — all callers now use `ProgramEngine` directly; `GOVOPS_SEED_DEMO=1` populates EI demo cases alongside OAS for visitor-facing surfaces.
 
 **Backend (Python / FastAPI):**
 - Deterministic rule engine for pension eligibility (age, residency/contribution, legal status, evidence)
@@ -44,7 +44,7 @@ govops-demo                                    # http://127.0.0.1:8000
 govops-demo --reload                           # auto-reload for development
 govops-demo --port 9000                        # custom port
 
-pytest -q                                      # all 375 tests
+pytest -q                                      # all 561 tests
 pytest tests/test_engine.py -v                 # one file
 pytest tests/test_engine.py::test_name -v      # one test
 pytest -k "residency" -v                       # by keyword
@@ -97,7 +97,13 @@ Other workflows: `codeql.yml` (code scanning), `gitleaks.yml` (secret scanning, 
 | Surface | Path |
 | --- | --- |
 | Domain model | `src/govops/models.py` |
-| Rule engine | `src/govops/engine.py` |
+| Rule engine (v3 `ProgramEngine`; `OASEngine` is a deprecated alias per ADR-016) | `src/govops/engine.py` |
+| Residency math (extracted Phase B) | `src/govops/residency.py` |
+| Program manifest loader (v3, ADR-014) | `src/govops/programs.py` |
+| Shape evaluators (v3, ADR-015) | `src/govops/shapes/` |
+| Cross-program interaction registry (v3, ADR-018) | `src/govops/program_interactions.py` |
+| `govops init` + plain-language docs (v3 Phase H) | `src/govops/cli_init.py` |
+| docker-compose stack (v3 Phase H) | `docker-compose.yml`, `docker/api.Dockerfile`, `docker/web.Dockerfile` |
 | Canadian seed data | `src/govops/seed.py` |
 | Other jurisdictions | `src/govops/jurisdictions.py` |
 | Translations | `src/govops/i18n.py` |
@@ -163,6 +169,9 @@ The engine in `engine.py` dispatches on `RuleType` (defined in `models.py`):
 | `legal_status` | Citizenship / permanent residency check |
 | `evidence_required` | Required document presence |
 | `exclusion` | Disqualifying conditions |
+| `calculation` | Typed-AST formula for benefit amount (ADR-011) |
+| `benefit_duration_bounded` | Weeks of eligibility for time-bounded programs (ADR-017) |
+| `active_obligation` | Forward-looking conditions surfaced on the recommendation (ADR-017) |
 
 To add a new rule type: extend the `RuleType` enum in `models.py`, add the evaluation method in `engine.py`, add test coverage in `test_engine.py`. **Note**: `RuleType.CALCULATION` is the only addition planned during v2.0 (Phase 10B).
 

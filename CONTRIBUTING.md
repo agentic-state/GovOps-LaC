@@ -23,7 +23,7 @@ A jurisdiction in GovOps is a country (or sub-national authority) that publishes
 
 ```bash
 git clone https://github.com/agentic-state/GovOps-LaC.git
-cd 61-GovOps
+cd GovOps-LaC
 pip install -e ".[dev]"
 pytest -q                  # 375 tests should pass before you change anything
 ```
@@ -98,26 +98,30 @@ Use the issue templates in [`.github/ISSUE_TEMPLATE/`](.github/ISSUE_TEMPLATE/).
 
 ## Development setup
 
+The v2 dev experience runs in two terminals — modern UI on `:8080`, backend API + legacy fallback on `:8000`. v2.1 collapses these into one Docker container; for now they're separate processes.
+
 ```bash
-# Backend
+# Terminal 1 — backend (JSON API + Jinja v0/v1 fallback UI)
 pip install -e ".[dev]"
-govops-demo                    # http://127.0.0.1:8000 (Jinja UI + JSON API)
-govops-demo --reload           # auto-reload during development
-pytest -q                      # 375 tests
+govops-demo                    # http://127.0.0.1:8000
+govops-demo --reload           # auto-reload during backend development
+pytest -q                      # 423 tests
 pytest -k residency -v         # filter by keyword
 
-# Premium web UI (Vite + TanStack + shadcn)
+# Terminal 2 — modern v2 UI (Vite + TanStack + shadcn — what's in the screenshots)
 cd web
 npm install                    # or bun install
-npm run dev                    # http://localhost:8080
+npm run dev                    # http://localhost:8080  ← visit this for the v2 experience
 npm run check:i18n             # ICU + key parity + translation parity
 npm test -- --run              # vitest unit tests
 npm run lint                   # eslint + prettier
 
-# E2E (Playwright + axe, cross-browser)
+# E2E (Playwright + axe, cross-browser; auto-orchestrates both servers)
 npm run test:e2e:install       # one-time, ~300 MB
 npm run test:e2e               # Chromium + Firefox + WebKit
 ```
+
+The Jinja UI on `:8000` carries a sticky banner labelling it as the v0 / v1 fallback and pointing visitors at `:8080`. Source: `src/govops/templates/base.html`.
 
 ## Code standards
 

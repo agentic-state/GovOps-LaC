@@ -420,14 +420,15 @@
       GovOps is an open public-good reference implementation of <strong>Law as Code</strong>: legislation translated into deterministic, auditable, jurisdiction-aware software with full provenance from decision back to source authority. Behaviour changes are configuration writes, not deploys. A case evaluated against 2025 still resolves with 2025's substrate after the rules change in 2026.
     </p>
     <div class="cta-row">
-      <a class="btn btn-primary" href="https://github.com/agentic-state/GovOps-LaC">Browse the source on GitHub</a>
+      <a class="btn btn-primary" href="https://huggingface.co/spaces/agentic-state/govops-lac">Try the live demo →</a>
+      <a class="btn btn-secondary" href="https://github.com/agentic-state/GovOps-LaC">Browse the source on GitHub</a>
       <a class="btn btn-secondary" href="#what">Who is this for?</a>
     </div>
     <div class="badges">
       <span class="badge">7 jurisdictions</span>
+      <span class="badge">2 programs</span>
       <span class="badge">6 locales</span>
-      <span class="badge">375 backend tests</span>
-      <span class="badge">53 web tests</span>
+      <span class="badge">640 backend tests</span>
       <span class="badge">Cross-browser E2E</span>
       <span class="badge">Apache 2.0</span>
     </div>
@@ -493,14 +494,14 @@
 
 <section id="proof">
   <div class="container">
-    <div class="section-eyebrow">Proof · Real captures, not mockups</div>
+    <div class="section-eyebrow">Proof · Real captures + clickable mock demo</div>
     <h2>See it working</h2>
-    <p class="section-lede">Screenshots below are PNGs captured by Playwright against the live v0.4.0 dev server (Vite + TanStack + shadcn, parchment-on-ink theme). Click any image to see it full-resolution.</p>
+    <p class="section-lede">PNGs captured by Playwright against the live v2 dev server (Vite + TanStack + shadcn, parchment-on-ink). <strong>Click any image to open a static mock demo of that page</strong> — interactivity is disabled in the snapshot; a real hosted live demo ships in v2.1 (≈1 week). Source PNGs are in <a href="screenshots/v2/" style="color:var(--lavender-700);">screenshots/v2/</a>.</p>
 
     <div class="gallery">
 
       <figure class="shot">
-        <a href="screenshots/v2/06-screen-ca.png"><img src="screenshots/v2/06-screen-ca.png" alt="Citizen self-screening form for Canada OAS — date of birth, legal status, country of birth, residency periods, evidence checkboxes." loading="lazy" width="1440" height="900"></a>
+        <a href="demo/v2/06-screen-ca.html"><img src="screenshots/v2/06-screen-ca.png" alt="Citizen self-screening form for Canada OAS — date of birth, legal status, country of birth, residency periods, evidence checkboxes." loading="lazy" width="1440" height="900"></a>
         <figcaption>
           <span class="ribbon">CITIZEN · NO PII STORED</span>
           <span class="title">Self-screening — /screen/&lt;jurisdiction&gt;</span>
@@ -509,7 +510,7 @@
       </figure>
 
       <figure class="shot">
-        <a href="screenshots/v2/09-config.png"><img src="screenshots/v2/09-config.png" alt="ConfigValue admin — searchable list of every parameter the engine resolves, with key, value, type, jurisdiction chip, and effective_from date." loading="lazy" width="1440" height="900"></a>
+        <a href="demo/v2/09-config.html"><img src="screenshots/v2/09-config.png" alt="ConfigValue admin — searchable list of every parameter the engine resolves, with key, value, type, jurisdiction chip, and effective_from date." loading="lazy" width="1440" height="900"></a>
         <figcaption>
           <span class="ribbon gold">SUBSTRATE · CONFIGURE WITHOUT DEPLOY</span>
           <span class="title">ConfigValue admin — /config</span>
@@ -518,7 +519,7 @@
       </figure>
 
       <figure class="shot">
-        <a href="screenshots/v2/10-config-approvals.png"><img src="screenshots/v2/10-config-approvals.png" alt="Approval queue — drafted ConfigValues awaiting dual approval, with author, citation, rationale, and approve / request-changes / reject actions." loading="lazy" width="1440" height="900"></a>
+        <a href="demo/v2/10-config-approvals.html"><img src="screenshots/v2/10-config-approvals.png" alt="Approval queue — drafted ConfigValues awaiting dual approval, with author, citation, rationale, and approve / request-changes / reject actions." loading="lazy" width="1440" height="900"></a>
         <figcaption>
           <span class="ribbon gold">GOVERNANCE · DUAL APPROVAL</span>
           <span class="title">Approval queue — /config/approvals</span>
@@ -527,7 +528,7 @@
       </figure>
 
       <figure class="shot">
-        <a href="screenshots/v2/04-authority.png"><img src="screenshots/v2/04-authority.png" alt="Authority chain browser — Constitution to Act to Regulation to Service decision, with citations and effective dates per layer." loading="lazy" width="1440" height="900"></a>
+        <a href="demo/v2/04-authority.html"><img src="screenshots/v2/04-authority.png" alt="Authority chain browser — Constitution to Act to Regulation to Service decision, with citations and effective dates per layer." loading="lazy" width="1440" height="900"></a>
         <figcaption>
           <span class="ribbon gold">TRACEABILITY · AUTHORITY CHAIN</span>
           <span class="title">Authority — /authority</span>
@@ -536,7 +537,7 @@
       </figure>
 
       <figure class="shot">
-        <a href="screenshots/v2/08-impact.png"><img src="screenshots/v2/08-impact.png" alt="Citation impact search — query 'OAS Act, s. 3(1)' returns every ConfigValue across every jurisdiction that references that citation." loading="lazy" width="1440" height="900"></a>
+        <a href="demo/v2/08-impact.html"><img src="screenshots/v2/08-impact.png" alt="Citation impact search — query 'OAS Act, s. 3(1)' returns every ConfigValue across every jurisdiction that references that citation." loading="lazy" width="1440" height="900"></a>
         <figcaption>
           <span class="ribbon">RESEARCH · IMPACT SEARCH</span>
           <span class="title">Citation impact — /impact</span>
@@ -545,7 +546,7 @@
       </figure>
 
       <figure class="shot">
-        <a href="screenshots/v2/12-admin-federation.png"><img src="screenshots/v2/12-admin-federation.png" alt="Federation registry — Ed25519-signed lawcode packs from peer publishers, with trust state, signed/unsigned chip, and per-pack actions." loading="lazy" width="1440" height="900"></a>
+        <a href="demo/v2/12-admin-federation.html"><img src="screenshots/v2/12-admin-federation.png" alt="Federation registry — Ed25519-signed lawcode packs from peer publishers, with trust state, signed/unsigned chip, and per-pack actions." loading="lazy" width="1440" height="900"></a>
         <figcaption>
           <span class="ribbon">FEDERATION · ED25519 SIGNED PACKS</span>
           <span class="title">Federation — /admin/federation</span>
@@ -554,7 +555,7 @@
       </figure>
 
       <figure class="shot">
-        <a href="screenshots/v2/13-encode.png"><img src="screenshots/v2/13-encode.png" alt="Encoding pipeline — paste statutory text, an LLM extracts candidate rules, a human reviews each proposal, accepted proposals commit as ConfigValue records." loading="lazy" width="1440" height="900"></a>
+        <a href="demo/v2/13-encode.html"><img src="screenshots/v2/13-encode.png" alt="Encoding pipeline — paste statutory text, an LLM extracts candidate rules, a human reviews each proposal, accepted proposals commit as ConfigValue records." loading="lazy" width="1440" height="900"></a>
         <figcaption>
           <span class="ribbon">PIPELINE · AI-ASSISTED, HUMAN-RATIFIED</span>
           <span class="title">Encoding — /encode</span>
@@ -563,7 +564,7 @@
       </figure>
 
       <figure class="shot">
-        <a href="screenshots/v2/14-screen-fr.png"><img src="screenshots/v2/14-screen-fr.png" alt="Self-screening for France — Retraite de base (CNAV), République française. Substrate-driven program text renders in French." loading="lazy" width="1440" height="900"></a>
+        <a href="demo/v2/14-screen-fr.html"><img src="screenshots/v2/14-screen-fr.png" alt="Self-screening for France — Retraite de base (CNAV), République française. Substrate-driven program text renders in French." loading="lazy" width="1440" height="900"></a>
         <figcaption>
           <span class="ribbon">MULTI-JURISDICTION · SAME PIPELINE</span>
           <span class="title">France — /screen/fr</span>
@@ -590,7 +591,7 @@
           <li>Embedded SQLite for substrate persistence (<a href="https://github.com/agentic-state/GovOps-LaC/blob/main/docs/design/ADRs/ADR-010-sqlite-from-phase-6.md">ADR-010</a>)</li>
           <li>Schema-validated YAML in CI (<span class="mono">21 files · 564 records</span>)</li>
           <li>Ed25519 federation pipeline (<a href="https://github.com/agentic-state/GovOps-LaC/blob/main/docs/design/ADRs/ADR-009-federation-trust-model.md">ADR-009</a>)</li>
-          <li>375 tests on Python 3.10 / 3.11 / 3.12</li>
+          <li>423 tests on Python 3.10 / 3.11 / 3.12</li>
         </ul>
       </div>
       <div class="build-card">
@@ -708,18 +709,21 @@
 
 <section id="quickstart">
   <div class="container narrow">
-    <div class="section-eyebrow">Quickstart · Three commands</div>
+    <div class="section-eyebrow">Quickstart · Two terminals</div>
     <h2>Run it locally</h2>
-    <p class="section-lede">Embedded SQLite, no cloud, no API keys. Backend serves a Jinja UI on port 8000; the modern TanStack web UI runs on port 8080.</p>
-    <pre class="quickstart"><span class="comment"># Backend (Jinja UI + JSON API)</span>
+    <p class="section-lede">v2.0 has two surfaces during local dev — the modern v2 UI on <code>:8080</code> (what's in the screenshots above) and a legacy Jinja fallback on <code>:8000</code>. v2.1 will collapse these into one Docker container; for now they're separate processes.</p>
+    <pre class="quickstart"><span class="comment"># One-time setup</span>
 git clone <span class="url">https://github.com/agentic-state/GovOps-LaC.git</span>
-cd 61-GovOps
+cd GovOps-LaC
 pip install -e ".[dev]"
-govops-demo                    <span class="comment"># http://127.0.0.1:8000</span>
-pytest -q                      <span class="comment"># 375 tests</span>
 
-<span class="comment"># Modern web UI (Vite + TanStack + shadcn — the surface most contributors should use)</span>
-cd web && npm install && npm run dev   <span class="comment"># http://localhost:8080</span>
+<span class="comment"># Terminal 1 — backend API + legacy Jinja UI</span>
+govops-demo                            <span class="comment"># http://127.0.0.1:8000</span>
+
+<span class="comment"># Terminal 2 — the v2 React/TanStack/shadcn UI</span>
+cd web &amp;&amp; npm install &amp;&amp; npm run dev   <span class="comment"># http://localhost:8080  ← visit this</span>
+
+pytest -q                              <span class="comment"># 423 tests (in a third terminal if you want)</span>
 </pre>
   </div>
 </section>

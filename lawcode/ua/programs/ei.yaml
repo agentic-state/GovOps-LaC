@@ -1,0 +1,245 @@
+# yaml-language-server: $schema=../../../schema/program-manifest-v1.0.json
+#
+# Ukraine — Допомога по безробіттю (Unemployment Assistance) program manifest (v3 Phase D).
+# Insurance-based benefit under Закон України «Про загальнообов'язкове державне
+# соціальне страхування на випадок безробіття» (No. 1533-III, 2000).
+
+schema_version: "1.0"
+program_id: ei
+jurisdiction_id: jur-ua-national
+shape: unemployment_insurance
+status: active
+
+name:
+  en: Unemployment Assistance (Допомога по безробіттю)
+  uk: Допомога по безробіттю
+
+description:
+  en: Insurance-based unemployment benefit administered by the State Employment Service of Ukraine, requiring at least 26 weeks of insurance contributions in the last 12 months (Закон України No. 1533-III, 2000).
+  uk: Страхова допомога по безробіттю, яку виплачує Державна служба зайнятості України; потребує не менше 26 тижнів страхового стажу за останні 12 місяців (Закон України № 1533-III, 2000).
+
+authority_chain:
+  - id: auth-ua-ei-constitution
+    layer: constitution
+    title: Конституція України
+    citation: Конституція України, ст. 46
+    effective_date: 1996-06-28
+    url: https://zakon.rada.gov.ua/laws/show/254%D0%BA/96-%D0%B2%D1%80
+  - id: auth-ua-ei-zakon-1533
+    layer: act
+    title: Закон України «Про загальнообов'язкове державне соціальне страхування на випадок безробіття»
+    citation: Закон України № 1533-III від 02.03.2000
+    effective_date: 2000-03-02
+    url: https://zakon.rada.gov.ua/laws/show/1533-14
+    parent: auth-ua-ei-constitution
+  - id: auth-ua-ei-zakon-5067
+    layer: act
+    title: Закон України «Про зайнятість населення»
+    citation: Закон України № 5067-VI від 05.07.2012
+    effective_date: 2013-01-01
+    url: https://zakon.rada.gov.ua/laws/show/5067-17
+    parent: auth-ua-ei-constitution
+  - id: auth-ua-ei-dsz
+    layer: program
+    title: Державна служба зайнятості України
+    citation: Закон України № 5067-VI, ст. 19
+    parent: auth-ua-ei-zakon-5067
+  - id: auth-ua-ei-determination
+    layer: service
+    title: Призначення допомоги по безробіттю
+    citation: Закон України № 1533-III, ст. 22
+    parent: auth-ua-ei-dsz
+
+legal_documents:
+  - id: doc-ua-ei-zakon-1533
+    type: statute
+    title: Закон України «Про загальнообов'язкове державне соціальне страхування на випадок безробіття»
+    citation: Закон України № 1533-III від 02.03.2000
+    effective_date: 2000-03-02
+    sections:
+      - id: sec-ua-ei-22
+        ref: ст. 22
+        heading: Умови та тривалість виплати допомоги по безробіттю
+        text: >-
+          Право на матеріальне забезпечення на випадок безробіття мають застраховані особи, визнані в установленому порядку безробітними, страховий стаж яких протягом 12 місяців, що передували реєстрації особи як безробітної, становить не менше 26 календарних тижнів.
+      - id: sec-ua-ei-23
+        ref: ст. 23
+        heading: Тривалість виплати допомоги
+        text: >-
+          Загальна тривалість виплати допомоги по безробіттю не може перевищувати 360 календарних днів протягом двох років, а для осіб передпенсійного віку — 720 календарних днів.
+      - id: sec-ua-ei-31
+        ref: ст. 31
+        heading: Обов'язки безробітного
+        text: >-
+          Безробітні зобов'язані відвідувати державну службу зайнятості у строки, встановлені цією службою, активно сприяти своєму працевлаштуванню та проходити перепідготовку чи підвищення кваліфікації.
+
+rules:
+  - id: rule-ei-contribution
+    rule_type: residency_minimum
+    description: Не менше 26 тижнів страхового стажу за останні 12 місяців
+    formal_expression: insurance_weeks >= 26 in last 12 months
+    citation: Закон України № 1533-III, ст. 22
+    source_document_id: doc-ua-ei-zakon-1533
+    source_section_ref: ст. 22
+    param_key_prefix: ua-ei.rule.contribution
+    parameters:
+      min_years: { ref: ua-ei.rule.contribution.min_years }
+      home_countries: { ref: ua-ei.rule.contribution.home_countries }
+
+  - id: rule-ei-legal-status
+    rule_type: legal_status
+    description: Особа з правом на роботу в Україні
+    formal_expression: "applicant.legal_status in ['citizen', 'permanent_resident']"
+    citation: Закон України № 5067-VI, ст. 1
+    source_document_id: doc-ua-ei-zakon-1533
+    source_section_ref: ст. 22
+    param_key_prefix: ua-ei.rule.legal-status
+    parameters:
+      accepted_statuses: { ref: ua-ei.rule.legal-status.accepted_statuses }
+
+  - id: rule-ei-evidence
+    rule_type: evidence_required
+    description: Довідка про звільнення від останнього роботодавця
+    formal_expression: has_evidence('dovidka_zvilnennia')
+    citation: Закон України № 5067-VI, ст. 22
+    source_document_id: doc-ua-ei-zakon-1533
+    source_section_ref: ст. 22
+    param_key_prefix: ua-ei.rule.evidence
+    parameters:
+      required_types: { ref: ua-ei.rule.evidence.required_types }
+
+  - id: rule-ei-duration
+    rule_type: benefit_duration_bounded
+    description: Загальна тривалість виплати допомоги (до 360 днів)
+    formal_expression: days <= 360 (720 for pre-retirement)
+    citation: Закон України № 1533-III, ст. 23
+    source_document_id: doc-ua-ei-zakon-1533
+    source_section_ref: ст. 23
+    param_key_prefix: ua-ei.rule.duration
+    parameters:
+      weeks_total: { ref: ua-ei.rule.duration.weeks_total }
+      start_offset_days: { ref: ua-ei.rule.duration.start_offset_days }
+
+  - id: rule-ei-job-search
+    rule_type: active_obligation
+    description: Активне сприяння працевлаштуванню та відвідування служби зайнятості
+    formal_expression: active_cooperation AND service_visits
+    citation: Закон України № 1533-III, ст. 31
+    source_document_id: doc-ua-ei-zakon-1533
+    source_section_ref: ст. 31
+    param_key_prefix: ua-ei.rule.job-search
+    parameters:
+      obligation_id: { ref: ua-ei.rule.job-search.obligation_id }
+      cadence: { ref: ua-ei.rule.job-search.cadence }
+
+demo_cases:
+  - id: demo-ua-ei-001
+    applicant:
+      id: app-ua-ei-001
+      date_of_birth: 1989-03-22
+      legal_name: Олена Коваленко
+      legal_status: citizen
+      country_of_birth: UA
+    residency_periods:
+      - country: Ukraine
+        start_date: 1989-03-22
+        verified: true
+    evidence_items:
+      - id: ev-ua-ei-001-bc
+        type: birth_certificate
+        description: Свідоцтво про народження
+        provided: true
+        verified: true
+      - id: ev-ua-ei-001-tax
+        type: tax_record
+        description: Виписка з Пенсійного фонду 2012-2025
+        provided: true
+        verified: true
+      - id: ev-ua-ei-001-zv
+        type: dovidka_zvilnennia
+        description: Довідка про звільнення з останнього місця роботи
+        provided: true
+        verified: true
+
+  - id: demo-ua-ei-002
+    applicant:
+      id: app-ua-ei-002
+      date_of_birth: 1995-12-09
+      legal_name: Aleksandr Petrov
+      legal_status: permanent_resident
+      country_of_birth: MD
+    residency_periods:
+      - country: Moldova
+        start_date: 1995-12-09
+        end_date: 2025-09-01
+      - country: Ukraine
+        start_date: 2025-09-01
+        verified: true
+    evidence_items:
+      - id: ev-ua-ei-002-bc
+        type: birth_certificate
+        description: Свідоцтво про народження (Молдова, з нотаріальним перекладом)
+        provided: true
+        verified: true
+      - id: ev-ua-ei-002-pr
+        type: residency_declaration
+        description: Посвідка на постійне проживання
+        provided: true
+        verified: true
+      - id: ev-ua-ei-002-zv
+        type: dovidka_zvilnennia
+        description: Довідка про звільнення (короткостроковий контракт)
+        provided: true
+        verified: true
+
+  - id: demo-ua-ei-003
+    applicant:
+      id: app-ua-ei-003
+      date_of_birth: 1982-08-30
+      legal_name: Іван Шевченко
+      legal_status: citizen
+      country_of_birth: UA
+    residency_periods:
+      - country: Ukraine
+        start_date: 1982-08-30
+        verified: true
+    evidence_items:
+      - id: ev-ua-ei-003-bc
+        type: birth_certificate
+        description: Свідоцтво про народження
+        provided: true
+        verified: true
+      - id: ev-ua-ei-003-tax
+        type: tax_record
+        description: Виписка з Пенсійного фонду 2003-2025
+        provided: true
+        verified: true
+      - id: ev-ua-ei-003-zv
+        type: dovidka_zvilnennia
+        description: Довідка про звільнення (скорочення штату)
+        provided: true
+        verified: true
+
+  - id: demo-ua-ei-004
+    applicant:
+      id: app-ua-ei-004
+      date_of_birth: 1991-05-17
+      legal_name: Марія Бондар
+      legal_status: citizen
+      country_of_birth: UA
+    residency_periods:
+      - country: Ukraine
+        start_date: 1991-05-17
+        verified: true
+    evidence_items:
+      - id: ev-ua-ei-004-bc
+        type: birth_certificate
+        description: Свідоцтво про народження
+        provided: true
+        verified: true
+      - id: ev-ua-ei-004-tax
+        type: tax_record
+        description: Виписка з Пенсійного фонду
+        provided: true
+        verified: true
+      # No dovidka_zvilnennia — INSUFFICIENT_EVIDENCE

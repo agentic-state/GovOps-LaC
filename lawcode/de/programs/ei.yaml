@@ -1,0 +1,237 @@
+# yaml-language-server: $schema=../../../schema/program-manifest-v1.0.json
+#
+# Germany — Arbeitslosengeld I (ALG I) program manifest (v3 Phase D).
+# Contribution-based unemployment insurance under Sozialgesetzbuch III (SGB III).
+
+schema_version: "1.0"
+program_id: ei
+jurisdiction_id: jur-de-federal
+shape: unemployment_insurance
+status: active
+
+name:
+  en: Unemployment Benefit I (Arbeitslosengeld I)
+  de: Arbeitslosengeld I
+
+description:
+  en: Contribution-based unemployment insurance administered by the Bundesagentur für Arbeit, requiring at least 12 months of insured employment in the last 30 months (Sozialgesetzbuch III).
+  de: Beitragsfinanzierte Arbeitslosenversicherung der Bundesagentur für Arbeit, erfordert mindestens 12 Monate versicherungspflichtige Beschäftigung in den letzten 30 Monaten (Sozialgesetzbuch III).
+
+authority_chain:
+  - id: auth-de-ei-grundgesetz
+    layer: constitution
+    title: Grundgesetz für die Bundesrepublik Deutschland
+    citation: GG, Art. 74 Abs. 1 Nr. 12 (Sozialversicherung)
+    effective_date: 1949-05-23
+    url: https://www.gesetze-im-internet.de/gg/
+  - id: auth-de-ei-sgb3
+    layer: act
+    title: Sozialgesetzbuch (SGB) Drittes Buch — Arbeitsförderung
+    citation: SGB III
+    effective_date: 1998-01-01
+    url: https://www.gesetze-im-internet.de/sgb_3/
+    parent: auth-de-ei-grundgesetz
+  - id: auth-de-ei-ba
+    layer: program
+    title: Bundesagentur für Arbeit
+    citation: SGB III, § 367
+    parent: auth-de-ei-sgb3
+  - id: auth-de-ei-determination
+    layer: service
+    title: Anspruch auf Arbeitslosengeld
+    citation: SGB III, §§ 136-164
+    parent: auth-de-ei-ba
+
+legal_documents:
+  - id: doc-de-ei-sgb3
+    type: statute
+    title: Sozialgesetzbuch (SGB) Drittes Buch — Arbeitsförderung
+    citation: SGB III
+    effective_date: 1998-01-01
+    sections:
+      - id: sec-de-ei-137
+        ref: § 137
+        heading: Anspruch auf Arbeitslosengeld
+        text: >-
+          Anspruch auf Arbeitslosengeld bei Arbeitslosigkeit haben Arbeitnehmerinnen und Arbeitnehmer, die arbeitslos sind, sich bei der Agentur für Arbeit arbeitslos gemeldet und die Anwartschaftszeit erfüllt haben.
+      - id: sec-de-ei-142
+        ref: § 142
+        heading: Anwartschaftszeit
+        text: >-
+          Die Anwartschaftszeit hat erfüllt, wer in der Rahmenfrist mindestens zwölf Monate in einem Versicherungspflichtverhältnis gestanden hat. Die Rahmenfrist beträgt 30 Monate; sie beginnt mit dem Tag vor der Erfüllung aller sonstigen Voraussetzungen für den Anspruch auf Arbeitslosengeld.
+      - id: sec-de-ei-138
+        ref: § 138
+        heading: Verfügbarkeit
+        text: >-
+          Den Vermittlungsbemühungen der Agentur für Arbeit zur Verfügung stehen Arbeitnehmerinnen und Arbeitnehmer, die arbeitsfähig sind, eine versicherungspflichtige Beschäftigung unter den üblichen Bedingungen ausüben können und dürfen, bereit sind, jede zumutbare Beschäftigung anzunehmen, und an Maßnahmen zur beruflichen Eingliederung in das Erwerbsleben teilnehmen.
+
+rules:
+  - id: rule-ei-contribution
+    rule_type: residency_minimum
+    description: Mindestens 12 Monate versicherungspflichtige Beschäftigung in der Rahmenfrist von 30 Monaten
+    formal_expression: insured_months >= 12 in last 30 months
+    citation: SGB III, § 142
+    source_document_id: doc-de-ei-sgb3
+    source_section_ref: § 142
+    param_key_prefix: de-ei.rule.contribution
+    parameters:
+      min_years: { ref: de-ei.rule.contribution.min_years }
+      home_countries: { ref: de-ei.rule.contribution.home_countries }
+
+  - id: rule-ei-legal-status
+    rule_type: legal_status
+    description: Arbeitnehmer mit Erlaubnis zur Erwerbstätigkeit in Deutschland
+    formal_expression: "applicant.legal_status in ['citizen', 'permanent_resident']"
+    citation: SGB III, § 138 Abs. 5
+    source_document_id: doc-de-ei-sgb3
+    source_section_ref: § 138 Abs. 5
+    param_key_prefix: de-ei.rule.legal-status
+    parameters:
+      accepted_statuses: { ref: de-ei.rule.legal-status.accepted_statuses }
+
+  - id: rule-ei-evidence
+    rule_type: evidence_required
+    description: Arbeitsbescheinigung des letzten Arbeitgebers
+    formal_expression: has_evidence('arbeitsbescheinigung')
+    citation: SGB III, § 312
+    source_document_id: doc-de-ei-sgb3
+    source_section_ref: § 312
+    param_key_prefix: de-ei.rule.evidence
+    parameters:
+      required_types: { ref: de-ei.rule.evidence.required_types }
+
+  - id: rule-ei-duration
+    rule_type: benefit_duration_bounded
+    description: Anspruchsdauer abhängig von Versicherungszeit und Lebensalter
+    formal_expression: months = f(insured_months, age)
+    citation: SGB III, § 147
+    source_document_id: doc-de-ei-sgb3
+    source_section_ref: § 147
+    param_key_prefix: de-ei.rule.duration
+    parameters:
+      weeks_total: { ref: de-ei.rule.duration.weeks_total }
+      start_offset_days: { ref: de-ei.rule.duration.start_offset_days }
+
+  - id: rule-ei-job-search
+    rule_type: active_obligation
+    description: Verfügbarkeit für Vermittlung und aktive Mitwirkung an der beruflichen Eingliederung
+    formal_expression: available_for_placement AND active_cooperation
+    citation: SGB III, § 138
+    source_document_id: doc-de-ei-sgb3
+    source_section_ref: § 138
+    param_key_prefix: de-ei.rule.job-search
+    parameters:
+      obligation_id: { ref: de-ei.rule.job-search.obligation_id }
+      cadence: { ref: de-ei.rule.job-search.cadence }
+
+demo_cases:
+  - id: demo-de-ei-001
+    applicant:
+      id: app-de-ei-001
+      date_of_birth: 1987-02-18
+      legal_name: Anna Müller
+      legal_status: citizen
+      country_of_birth: DE
+    residency_periods:
+      - country: Germany
+        start_date: 1987-02-18
+        verified: true
+    evidence_items:
+      - id: ev-de-ei-001-bc
+        type: birth_certificate
+        description: Geburtsurkunde
+        provided: true
+        verified: true
+      - id: ev-de-ei-001-tax
+        type: tax_record
+        description: Sozialversicherungsnachweis 2010-2025
+        provided: true
+        verified: true
+      - id: ev-de-ei-001-arb
+        type: arbeitsbescheinigung
+        description: Arbeitsbescheinigung des letzten Arbeitgebers
+        provided: true
+        verified: true
+
+  - id: demo-de-ei-002
+    applicant:
+      id: app-de-ei-002
+      date_of_birth: 1996-06-10
+      legal_name: Tomáš Novák
+      legal_status: permanent_resident
+      country_of_birth: CZ
+    residency_periods:
+      - country: Czech Republic
+        start_date: 1996-06-10
+        end_date: 2025-08-15
+      - country: Germany
+        start_date: 2025-08-15
+        verified: true
+    evidence_items:
+      - id: ev-de-ei-002-bc
+        type: birth_certificate
+        description: Geburtsurkunde aus Tschechien (übersetzt)
+        provided: true
+        verified: true
+      - id: ev-de-ei-002-pr
+        type: residency_declaration
+        description: Aufenthaltstitel
+        provided: true
+        verified: true
+      - id: ev-de-ei-002-arb
+        type: arbeitsbescheinigung
+        description: Arbeitsbescheinigung kurzer Beschäftigung
+        provided: true
+        verified: true
+
+  - id: demo-de-ei-003
+    applicant:
+      id: app-de-ei-003
+      date_of_birth: 1979-10-25
+      legal_name: Stefan Schmidt
+      legal_status: citizen
+      country_of_birth: DE
+    residency_periods:
+      - country: Germany
+        start_date: 1979-10-25
+        verified: true
+    evidence_items:
+      - id: ev-de-ei-003-bc
+        type: birth_certificate
+        description: Geburtsurkunde
+        provided: true
+        verified: true
+      - id: ev-de-ei-003-tax
+        type: tax_record
+        description: Sozialversicherungsnachweis 2002-2025
+        provided: true
+        verified: true
+      - id: ev-de-ei-003-arb
+        type: arbeitsbescheinigung
+        description: Arbeitsbescheinigung nach betriebsbedingter Kündigung
+        provided: true
+        verified: true
+
+  - id: demo-de-ei-004
+    applicant:
+      id: app-de-ei-004
+      date_of_birth: 1990-07-14
+      legal_name: Lukas Weber
+      legal_status: citizen
+      country_of_birth: DE
+    residency_periods:
+      - country: Germany
+        start_date: 1990-07-14
+        verified: true
+    evidence_items:
+      - id: ev-de-ei-004-bc
+        type: birth_certificate
+        description: Geburtsurkunde
+        provided: true
+        verified: true
+      - id: ev-de-ei-004-tax
+        type: tax_record
+        description: Sozialversicherungsnachweis (unvollständig)
+        provided: true
+        verified: true
+      # No arbeitsbescheinigung — INSUFFICIENT_EVIDENCE

@@ -57,7 +57,7 @@ The second program shipped is **unemployment insurance**, instantiated symmetric
 | DE | Arbeitslosengeld | *Sozialgesetzbuch III* |
 | UA | Допомога по безробіттю | *Закон України «Про загальнообов'язкове державне соціальне страхування на випадок безробіття»* |
 
-**JP remains untouched** — the architectural control. It proves the architecture does not *require* symmetric extension; adopters choose where to extend. JP's old-age pension surfaces from v2 stay exactly as they are.
+**Japan remains untouched** — the architectural control. It proves the architecture does not *require* symmetric extension; adopters choose where to extend. Japan's old-age pension surfaces from v2 stay exactly as they are.
 
 ### Why unemployment insurance
 

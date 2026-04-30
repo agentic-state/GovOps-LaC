@@ -24,6 +24,9 @@ const A11Y_ROUTES = [
   "/config/diff",
   "/config/prompts",
   "/admin",
+  "/compare/ei",
+  "/check",
+  "/check/life-event?jurisdiction=ca&event=job_loss",
 ];
 
 const STRICT = process.env.E2E_A11Y_STRICT === "1";

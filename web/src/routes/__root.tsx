@@ -15,6 +15,8 @@ import { PageBreadcrumb } from "@/components/govops/PageBreadcrumb";
 import { SkipToContent } from "@/components/govops/SkipToContent";
 import { Toaster } from "@/components/ui/sonner";
 import { RouteError } from "@/components/govops/RouteError";
+import { DemoBanner } from "@/components/govops/DemoBanner";
+import { WarmingSplash } from "@/components/govops/WarmingSplash";
 import { getSsrLocale } from "@/lib/ssrLocale";
 
 function NotFoundComponent() {
@@ -105,6 +107,8 @@ function RootComponent() {
       <ThemeProvider>
         <I18nProvider initialLocale={initialLocale}>
           <SkipToContent />
+          <DemoBanner />
+          <WarmingSplash />
           <Outlet />
           <Toaster />
         </I18nProvider>
@@ -115,6 +119,8 @@ function RootComponent() {
     <ThemeProvider>
       <I18nProvider initialLocale={initialLocale}>
         <SkipToContent />
+        <DemoBanner />
+        <WarmingSplash />
         <Masthead />
         <main id="main" className="mx-auto max-w-5xl px-6 py-10">
           <PageBreadcrumb />

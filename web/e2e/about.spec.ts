@@ -64,10 +64,10 @@ test.describe("About — hero + disclaimer", () => {
     const repoLink = page.getByRole("link", {
       name: /github|view on github/i,
     });
-    await expect(repoLink.first()).toHaveAttribute("href", /github\.com\/eva-foundry\/61-GovOps/);
+    await expect(repoLink.first()).toHaveAttribute("href", /github\.com\/agentic-state\/GovOps-LaC/);
     // Pages link (PROJECT_HOME) — distinct from the repo link
     const pagesLink = page.getByRole("link", { name: /github pages/i });
-    await expect(pagesLink.first()).toHaveAttribute("href", /eva-foundry\.github\.io\/61-GovOps/);
+    await expect(pagesLink.first()).toHaveAttribute("href", /agentic-state\.github\.io\/GovOps-LaC/);
   });
 });
 
@@ -112,7 +112,7 @@ test.describe("About — §10 references", () => {
     // The "Project home" row is the new govops-016a addition; the link
     // opens in a new tab.
     const link = page.getByRole("link", { name: /project home/i }).first();
-    await expect(link).toHaveAttribute("href", /eva-foundry\.github\.io\/61-GovOps/);
+    await expect(link).toHaveAttribute("href", /agentic-state\.github\.io\/GovOps-LaC/);
     await expect(link).toHaveAttribute("target", "_blank");
   });
 

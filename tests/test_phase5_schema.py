@@ -69,7 +69,17 @@ def record_validator() -> Draft202012Validator:
 
 @pytest.fixture(scope="module")
 def lawcode_files() -> list[Path]:
-    return sorted(LAWCODE_DIR.rglob("*.yaml")) + sorted(LAWCODE_DIR.rglob("*.yml"))
+    # v3 / ADR-014 + ADR-015 — `programs/` holds Program manifests (validated
+    # by tests/test_programs.py against schema/program-manifest-v1.0.json),
+    # `_shapes/` holds local shape declarations per ADR-015's two-tier model.
+    # Both are excluded from the v2 ConfigValue file gate.
+    excluded_ancestor_dir_names = {"programs", "_shapes"}
+    yaml_files = sorted(LAWCODE_DIR.rglob("*.yaml")) + sorted(LAWCODE_DIR.rglob("*.yml"))
+    return [
+        p
+        for p in yaml_files
+        if not any(parent.name in excluded_ancestor_dir_names for parent in p.parents)
+    ]
 
 
 def test_lawcode_tree_has_files(lawcode_files):

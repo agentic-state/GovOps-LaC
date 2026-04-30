@@ -21,6 +21,9 @@ const PRIMARY_ROUTES = [
   { path: "/config/diff", name: "config-diff" },
   { path: "/config/prompts", name: "config-prompts" },
   { path: "/admin", name: "admin" },
+  { path: "/compare/ei", name: "compare-ei" },
+  { path: "/check", name: "check-entry" },
+  { path: "/check/life-event?jurisdiction=ca&event=job_loss", name: "check-life-event" },
 ];
 
 for (const route of PRIMARY_ROUTES) {

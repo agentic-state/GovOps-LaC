@@ -1,3 +1,22 @@
+---
+title: GovOps LaC — Law as Code
+emoji: ⚖️
+colorFrom: yellow
+colorTo: indigo
+sdk: docker
+app_port: 7860
+pinned: false
+license: apache-2.0
+short_description: Law-as-Code reference implementation
+---
+
+<!--
+The block above is Hugging Face Spaces metadata. GitHub renders it as a
+YAML code-block at the top of the README. It only takes effect when the
+repo is pushed to a Space (huggingface.co/spaces/agentic-state/govops-lac).
+For GitHub-only readers, jump past it to the heading below.
+-->
+
 # GovOps - Policy-Driven Service Delivery Machine
 
 > **Disclaimer**: This is an independent open-source prototype. It is **not affiliated with, endorsed by, or representing any government, department, agency, or initiative — including SPRIND, the Agentic State paper authors (Ilves, Kilian, Parazzoli, Peixoto, Velsberg), or any of the seven jurisdictions used as illustrative case studies**. The `agentic-state` GitHub organization is an independent open-source implementation effort whose name signals framework alignment, **not authorship or endorsement** by the Agentic State paper authors. Legislative text used in the demo (including the Old Age Security Act) is publicly available law interpreted by the author for illustrative purposes only — it is **not authoritative operational guidance** and should not be relied upon for actual eligibility determinations.
@@ -10,7 +29,7 @@ GovOps turns authoritative governance sources into coherent, traceable, executab
 
 This is an open public-good contribution: a working MVP demo other contributors can fork to build whatever else they need.
 
-**Project home**: [agentic-state.github.io/GovOps-LaC](https://agentic-state.github.io/GovOps-LaC/) · **Source**: [github.com/agentic-state/GovOps-LaC](https://github.com/agentic-state/GovOps-LaC)
+**Project home**: [agentic-state.github.io/GovOps-LaC](https://agentic-state.github.io/GovOps-LaC/) · **Source**: [github.com/agentic-state/GovOps-LaC](https://github.com/agentic-state/GovOps-LaC) · **Live demo (v2.1)**: [huggingface.co/spaces/agentic-state/govops-lac](https://huggingface.co/spaces/agentic-state/govops-lac) — _free-tier; first load may take ~30s if idle_
 
 <p align="center">
   <a href="https://agentic-state.github.io/GovOps-LaC/"><img src="docs/screenshots/v2/01-home.png" alt="GovOps product home — three registers (agent-drafted, human-ratified, citizen-auditable) summarise the v2.0 thesis." width="900"></a>
@@ -35,52 +54,106 @@ For build history and accepted backlog: [`PLAN.md`](PLAN.md). For load-bearing d
 
 ## Quick Start
 
+GovOps v2.0 has **two surfaces** during local development. The modern v2 UI is what visitors see in the screenshots; the legacy Jinja UI is preserved as a no-build-step fallback.
+
 ```bash
 git clone https://github.com/agentic-state/GovOps-LaC.git
-cd 61-GovOps
+cd GovOps-LaC
 pip install -e ".[dev]"
-govops-demo                    # Jinja UI + JSON API at http://127.0.0.1:8000
 ```
 
-For the modern web UI (Vite + TanStack + shadcn — 23 routes, 6 locales, the surface most contributors should use):
+**Start both surfaces** (two terminals, ~30s setup each):
 
 ```bash
+# Terminal 1 — backend API + legacy Jinja UI fallback
+govops-demo                            # http://127.0.0.1:8000
+
+# Terminal 2 — the v2 React/TanStack/shadcn UI (what's in the screenshots)
 cd web && npm install && npm run dev   # http://localhost:8080
 ```
+
+Open **http://localhost:8080** for the v2 experience (23 routes, 6 locales, parchment-on-ink theme). The Jinja UI at `:8000` is the v0 / v1 fallback retained for "no Node toolchain" demos and is clearly labelled as such.
+
+> **Coming in v2.1**: a single hosted demo URL collapses both surfaces into one process via Docker (FastAPI serves the built React SPA + the JSON API + an LLM proxy). See `memory/v2_1_hosted_demo_plan.md`.
 
 No database server, no cloud, no API keys. Embedded SQLite handles the substrate.
 
 ---
 
+## Add your country in 5 minutes (v3 — adoption substrate)
+
+GovOps v3 is built around the idea that adding a jurisdiction should be the same shape as forking a Unix tool: a single command produces a complete skeleton, every value is a TODO marker pointing at the law that fills it, and the test suite tells you when you're done.
+
+### One command, schema-valid skeleton
+
+```bash
+pip install -e ".[dev]"
+govops init pl --shapes oas,ei
+```
+
+This writes:
+
+```
+lawcode/pl/
+├── jurisdiction.yaml
+├── programs/
+│   ├── oas.yaml          # program manifest (ADR-014)
+│   ├── oas.md            # plain-language sidecar for non-coder review
+│   ├── ei.yaml
+│   └── ei.md
+└── config/
+    ├── oas-rules.yaml    # substrate values (per-parameter, dated)
+    └── ei-rules.yaml
+```
+
+Every TODO marker in those files is a hand-fill point. The skeleton is schema-valid the moment it lands — `pytest` confirms the structure before you touch a single citation. The plain-language sidecars (`*.md`) are generated alongside the YAML so a non-coder program leader can review the encoded rules without reading YAML; regenerate them at any time with `govops docs lawcode/pl/programs/oas.yaml`.
+
+### Zero-toolchain run via `docker compose`
+
+Don't have Python or Node installed?
+
+```bash
+docker compose up
+```
+
+…brings up the same two-process demo (FastAPI on `:8000`, TanStack UI on `:8080`) on any machine with Docker. Editing `lawcode/<jur>/` on the host hot-reloads inside the container — the contribution loop opens up to anyone who can read law and edit text.
+
+> The `docker-compose.yml` at the repo root and the two images under `docker/` are distinct from the top-level `Dockerfile` (which is the v2.1 hosted-demo single-container image). Use either independently.
+
+---
+
 ## What the Demo Does
 
-The demo implements a complete **Old Age Security (OAS) initial eligibility determination** for Canada -- a real federal benefit program with real statutory rules.
+GovOps ships **two canonical programs across seven jurisdictions** as the working reference implementation. Each program is encoded from the country's own statutes (not literally Canada's law applied elsewhere) and shares a canonical _shape_ — `old_age_pension` for the lifetime monthly benefit, `unemployment_insurance` for the bounded-duration benefit. Switching jurisdictions in the demo swaps in that country's authority chain, citations, and demo cases.
 
-### The workflow:
-
-1. **View** a case -- see the applicant profile, evidence, and residency history
-2. **Evaluate** -- the rule engine checks each statutory condition deterministically
-3. **Review** -- approve, reject, escalate, or request more information (human-in-the-loop)
-4. **Audit** -- every rule evaluation traces back to its legal citation
-
-### Four demo cases cover all decision paths:
-
-| Case | Applicant | Expected Outcome |
+| Jurisdiction | Old-age pension | Employment insurance |
 | --- | --- | --- |
-| demo-case-001 | Margaret Chen | Eligible - Full pension (40/40) |
-| demo-case-002 | David Park | Ineligible - Under age 65 |
-| demo-case-003 | Amara Osei | Eligible - Partial pension (33/40) |
-| demo-case-004 | Jean-Pierre Tremblay | Insufficient evidence |
+| Canada | Old Age Security (OAS Act, R.S.C. 1985, c. O-9) | Employment Insurance (S.C. 1996, c. 23) |
+| Brazil | Aposentadoria por Idade (Lei 8.213/91) | Seguro-Desemprego (Lei nº 7.998/1990) |
+| Spain | Pensión de jubilación (TRLGSS) | Prestación por desempleo (TRLGSS) |
+| France | Retraite de base (CNAV) | Allocations chômage (Code du travail / UNÉDIC) |
+| Germany | Regelaltersrente (SGB VI) | Arbeitslosengeld I (SGB III) |
+| Ukraine | Пенсія за віком (Закон № 1058-IV) | Допомога по безробіттю (Закон № 1533-III) |
+| Japan | Kosei Nenkin Hoken | _(architectural control — see charter)_ |
 
-### Rules encoded from the Old Age Security Act:
+Japan's pension is fully encoded; its EI is **deliberately absent** as the v3 architectural control proving symmetric extension is a choice, not a requirement.
 
-| Rule | Citation | Logic |
-| --- | --- | --- |
-| Age threshold | OAS Act, s. 3(1) | `age >= 65` |
-| Minimum residency | OAS Act, s. 3(1) | `canadian_residency_after_18 >= 10 years` |
-| Pension calculation | OAS Act, s. 3(2) | `min(years, 40) / 40` |
-| Legal status | OAS Act, s. 3(1) | citizen or permanent resident |
-| Evidence of age | OAS Regulations, s. 21(1) | birth certificate required |
+### The workflow per case:
+
+1. **View** a case — applicant profile, evidence, residency / contribution history
+2. **Evaluate** — the rule engine checks each statutory condition deterministically against every program registered for the jurisdiction
+3. **Review** — approve, reject, escalate, or request more information (human-in-the-loop)
+4. **Audit** — every rule evaluation traces back to its legal citation; cross-program interactions surface as warnings
+
+### v3 surfaces
+
+| Surface | What it does |
+| --- | --- |
+| `/cases/<id>` | Officer view: per-case eligibility across every program in the jurisdiction |
+| `/compare/<program-id>` | Government-leader view: side-by-side parameter table across the active jurisdictions, citation per cell |
+| `/check` | Citizen entry: declare a few facts, see every program you may qualify for. No PII stored. |
+| `/check/life-event?event=job_loss` | Citizen reassessment: bounded-duration timeline + obligations |
+| `/admin/federation` | Operator view: signed lawcode packs from peer publishers |
 
 ---
 
@@ -294,7 +367,7 @@ pip install -e ".[dev]"
 pytest -v
 ```
 
-375 backend tests covering (all green on Python 3.10/3.11/3.12):
+640 backend tests covering (all green on Python 3.10/3.11/3.12):
 - Rule engine unit tests (all decision paths, edge cases, residency calculation)
 - Determinism verification (identical inputs = identical outputs)
 - Authority traceability (every rule has a statutory citation)
@@ -308,6 +381,10 @@ pytest -v
 - Event-driven reassessment (supersession chain, life-event replay)
 - Federation (Ed25519 signing, manifest verification, fail-closed pipeline)
 - Date-aware substrate resolution (scalar + formula `ref` honour `evaluation_date`)
+- v3: program-as-primitive manifest loader + ProgramEngine shape dispatch + bounded-benefit primitives
+- v3: cross-program evaluation API + ProgramInteractionWarning + Employment Insurance × 6 jurisdictions
+- v3: government-leader comparison surface + citizen entry + life-event reassessment
+- v3: `govops init <country>` scaffolder + plain-language sidecar generator
 
 Plus a Playwright + axe E2E suite under `web/e2e/` covering the citizen and operator surfaces.
 

@@ -17,8 +17,10 @@ from govops.models import (
     Jurisdiction,
     LegalDocument,
     LegalRule,
+    ProgramInteractionWarning,
     Recommendation,
 )
+from govops.programs import Program
 
 
 class DemoStore:
@@ -36,6 +38,20 @@ class DemoStore:
         self.audit_trails: dict[str, list[AuditEntry]] = {}  # keyed by case_id
         # Phase 10D — append-only event log per case.
         self.case_events: dict[str, list[CaseEvent]] = {}  # keyed by case_id
+        # v3 / ADR-018 — registered programs for the current jurisdiction,
+        # keyed by `program_id`. Populated by api._seed_jurisdiction_programs
+        # after `seed()`. Insertion order is preserved (Python dicts) so that
+        # `program_evaluations` in the API response runs in registration order.
+        self.programs: dict[str, Program] = {}
+        # v3 / ADR-018 — latest recommendation per (case, program). Existing
+        # `recommendations` (single, latest-of-any) is preserved unchanged for
+        # back-compat. The audit package builds `program_evaluations` from
+        # this map.
+        self.program_recommendations: dict[str, dict[str, Recommendation]] = {}
+        # v3 / ADR-018 — interaction warnings produced by the most recent
+        # cross-program evaluation per case. Recomputed on each evaluate
+        # call so it reflects the latest run, not history.
+        self.program_warnings: dict[str, list[ProgramInteractionWarning]] = {}
 
     def seed(
         self,
@@ -56,6 +72,11 @@ class DemoStore:
         self.review_actions = {}
         self.audit_trails = {}
         self.case_events = {}
+        # v3 / ADR-018 — programs and per-program recommendations are also
+        # per-jurisdiction state, so they reset alongside everything else.
+        self.programs = {}
+        self.program_recommendations = {}
+        self.program_warnings = {}
 
         self.jurisdictions[jurisdiction.id] = jurisdiction
         self.authority_chain = list(authority_chain)
@@ -76,13 +97,52 @@ class DemoStore:
     def get_case(self, case_id: str) -> CaseBundle | None:
         return self.cases.get(case_id)
 
+    def register_program(self, program: Program) -> None:
+        """Register a Program for the currently-seeded jurisdiction (ADR-018).
+
+        Insertion order is preserved so the cross-program `evaluate` endpoint
+        returns recommendations in registration order. Re-registering the
+        same `program_id` overwrites the prior entry (last-write-wins) —
+        useful for tests that swap a program in place.
+        """
+        self.programs[program.program_id] = program
+
     def save_recommendation(self, rec: Recommendation, audit: list[AuditEntry]):
+        """Save a *primary* recommendation for the case.
+
+        The primary chain is what the back-compat surfaces read: the
+        singular `recommendations[case_id]` and the flat
+        `recommendation_history[case_id]` (which the supersession-chain
+        contract from ADR-013 walks). Phase E keeps this chain
+        single-program — the cross-program API designates one program as
+        primary per evaluation (OAS when present, otherwise the first
+        evaluated program) and saves it here. Secondary programs are
+        saved via :meth:`save_secondary_program_recommendation` and live
+        only in the per-program index.
+        """
         self.recommendations[rec.case_id] = rec
-        # Append to the history chain — preserves all prior recommendations
-        # so the supersession trail is queryable even after multiple
-        # reassessments. Latest in `recommendations`, full chain in
-        # `recommendation_history`.
         self.recommendation_history.setdefault(rec.case_id, []).append(rec)
+        # v3 / ADR-018 — when the rec carries a `program_id`, also index it
+        # under the per-program map so cross-program audit consumers can
+        # read latest-per-program in O(1).
+        if rec.program_id:
+            self.program_recommendations.setdefault(rec.case_id, {})[rec.program_id] = rec
+        case = self.cases.get(rec.case_id)
+        if case:
+            case.status = CaseStatus.RECOMMENDATION_READY
+        self.audit_trails.setdefault(rec.case_id, []).extend(audit)
+
+    def save_secondary_program_recommendation(
+        self, rec: Recommendation, audit: list[AuditEntry]
+    ) -> None:
+        """Save a non-primary program rec (ADR-018).
+
+        Touches only the per-program index and the audit trail — leaves the
+        primary chain (`recommendations`, `recommendation_history`) alone so
+        ADR-013 supersession semantics stay single-program by design.
+        """
+        if rec.program_id:
+            self.program_recommendations.setdefault(rec.case_id, {})[rec.program_id] = rec
         case = self.cases.get(rec.case_id)
         if case:
             case.status = CaseStatus.RECOMMENDATION_READY
@@ -132,6 +192,24 @@ class DemoStore:
         rec = self.recommendations.get(case_id)
         reviews = self.review_actions.get(case_id, [])
         trail = self.audit_trails.get(case_id, [])
+        # v3 / ADR-018 — per-program slots. When the case has been evaluated
+        # via the cross-program API, `program_recommendations` carries one
+        # rec per program; render them in `programs` (insertion) order so
+        # the audit consumer sees a stable layout. When the case was only
+        # ever evaluated through the legacy single-program path,
+        # `program_evaluations` stays empty and `recommendation` is the
+        # only surface that matters.
+        per_program = self.program_recommendations.get(case_id, {})
+        program_evals: list[Recommendation] = []
+        for program_id in self.programs.keys():
+            if program_id in per_program:
+                program_evals.append(per_program[program_id])
+        # Pick up any per-program recs that aren't in the current programs
+        # registry (e.g. the jurisdiction was switched between evaluations).
+        for program_id, prec in per_program.items():
+            if program_id not in self.programs:
+                program_evals.append(prec)
+        warnings = list(self.program_warnings.get(case_id, []))
         return AuditPackage(
             case_id=case_id,
             jurisdiction=jur,
@@ -149,4 +227,6 @@ class DemoStore:
                 {"type": e.evidence_type, "provided": e.provided, "verified": e.verified}
                 for e in case.evidence_items
             ],
+            program_evaluations=program_evals,
+            program_warnings=warnings,
         )

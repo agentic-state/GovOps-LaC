@@ -6,7 +6,7 @@ Determinism property: identical inputs must produce identical outputs.
 from datetime import date
 
 
-from govops.engine import OASEngine
+from govops.engine import ProgramEngine
 from govops.models import (
     Applicant,
     CaseBundle,
@@ -18,8 +18,8 @@ from govops.models import (
 from govops.seed import OAS_RULES
 
 
-def _make_engine(eval_date: date | None = None) -> OASEngine:
-    return OASEngine(rules=OAS_RULES, evaluation_date=eval_date or date(2026, 4, 13))
+def _make_engine(eval_date: date | None = None) -> ProgramEngine:
+    return ProgramEngine(rules=OAS_RULES, evaluation_date=eval_date or date(2026, 4, 13))
 
 
 def _make_case(
@@ -679,7 +679,7 @@ class TestScalarParameterDatedSupersession:
         ad-hoc engine constructions that build a LegalRule by hand without
         setting a substrate prefix.
         """
-        from govops.engine import OASEngine
+        from govops.engine import ProgramEngine
         from govops.models import LegalRule, RuleType
 
         rule = LegalRule(
@@ -694,7 +694,7 @@ class TestScalarParameterDatedSupersession:
             # NO param_key_prefix — this is the test
         )
 
-        engine = OASEngine(rules=[rule], evaluation_date=date(2026, 6, 1))
+        engine = ProgramEngine(rules=[rule], evaluation_date=date(2026, 6, 1))
         # _param must return the frozen-dict value when prefix is absent.
         assert engine._param(rule, "min_age", 65) == 70
         # Unknown key with a default also works.

@@ -11,6 +11,7 @@ const JURISDICTION_LABELS: Record<ScreenJurisdictionId, string> = {
   fr: "France",
   de: "Deutschland",
   ua: "Україна",
+  jp: "日本",
 };
 
 export const Route = createFileRoute("/screen")({

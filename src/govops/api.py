@@ -33,20 +33,28 @@ from govops.encoder import (
     extract_rules_manual,
     extract_rules_with_llm,
 )
-from govops.engine import OASEngine
+from govops.engine import ProgramEngine
 from govops.i18n import DEFAULT_LANGUAGE, SUPPORTED_LANGUAGES, get_translator
 from govops.jurisdictions import JURISDICTION_REGISTRY
 from govops.models import (
+    AuditEntry,
     CaseEvent,
     DecisionOutcome,
     EventType,
     HumanReviewAction,
+    ProgramInteractionWarning,
+    Recommendation,
     ReviewAction,
 )
+from govops.program_interactions import detect_program_interactions
+from govops.programs import Program, load_program_manifest
 from govops.screen import (
+    CheckRequest,
+    CheckResponse,
     ScreenRequest,
     ScreenResponse,
     UnknownJurisdiction,
+    run_check,
     run_screen,
 )
 from govops.store import DemoStore
@@ -82,6 +90,78 @@ def _seed_jurisdiction(jur_code: str):
         rules=pack.rules,
         cases=pack.make_cases(),
     )
+    # v3 / ADR-018 — register every program available for this jurisdiction so
+    # the cross-program /evaluate endpoint sees them. The legacy OAS-shaped
+    # rules just seeded above become the canonical OAS Program; any other
+    # programs declared as manifests under `lawcode/<jur>/programs/*.yaml`
+    # are loaded directly. JP has no EI manifest by design (charter §"The
+    # proof") — registration silently skips it.
+    _register_jurisdiction_programs(jur_code, pack)
+
+
+def _register_jurisdiction_programs(jur_code: str, pack) -> None:
+    """Populate `store.programs` for the freshly-seeded jurisdiction.
+
+    OAS is synthesised from the rules `seed.py`/`jurisdictions.py` already
+    pushed into `store`, preserving byte-identical evaluation for the 30+
+    pre-v3 callers that POST `/api/cases/{id}/evaluate` with no body. Every
+    other manifest under `lawcode/<jur_code>/programs/` is loaded via
+    `load_program_manifest` so EI, when present, attaches automatically.
+    """
+    oas_program = Program(
+        program_id="oas",
+        jurisdiction_id=pack.jurisdiction.id,
+        shape="old_age_pension",
+        status="active",
+        name={"en": pack.program_name},
+        rules=list(store.rules.values()),
+        authority_chain=list(store.authority_chain),
+        legal_documents=list(store.legal_documents.values()),
+        demo_cases=list(store.cases.values()),
+    )
+    store.register_program(oas_program)
+
+    programs_dir = LAWCODE_DIR / jur_code / "programs"
+    if not programs_dir.exists():
+        return
+    for manifest_path in sorted(programs_dir.glob("*.yaml")):
+        if manifest_path.name.startswith("_"):
+            continue
+        if manifest_path.stem == "oas":
+            # OAS is already covered by the synthesised Program above —
+            # the manifest version (only present for CA today) would
+            # duplicate the rule set under a different LegalRule.id and
+            # break the back-compat path's byte-identical guarantee.
+            continue
+        try:
+            program = load_program_manifest(manifest_path)
+        except Exception:
+            # Manifest loading failures are surfaced by the schema-validation
+            # CI job; the API stays best-effort so a malformed file doesn't
+            # take the whole jurisdiction offline.
+            continue
+        store.register_program(program)
+        # Phase I: when the demo seed is on, also surface the program's
+        # demo cases in `/api/cases` so a visitor lands on a populated
+        # case list across both OAS and EI. Gated on GOVOPS_SEED_DEMO=1
+        # so the existing pre-v3 case-count test invariants
+        # (4 cases per jurisdiction in test_api.py) keep holding by
+        # default.
+        if os.environ.get("GOVOPS_SEED_DEMO") == "1":
+            for case in program.demo_cases:
+                if case.id in store.cases:
+                    continue  # idempotent — re-seed doesn't duplicate
+                store.cases[case.id] = case
+                store.audit_trails.setdefault(case.id, []).append(
+                    AuditEntry(
+                        event_type="case_created",
+                        actor="system:demo-seed",
+                        detail=(
+                            f"Demo case seeded: {case.applicant.legal_name} "
+                            f"(program={program.program_id})"
+                        ),
+                    )
+                )
 
 
 def _seed_demo_drafts():
@@ -164,15 +244,29 @@ async def lifespan(app: FastAPI):
     # approvals queue on first load. GOVOPS_SEED_DEMO=1 turns it on.
     if os.environ.get("GOVOPS_SEED_DEMO") == "1":
         _seed_demo_drafts()
+    # v2.1 — start the daily GC scheduler when GOVOPS_DEMO_MODE=1.
+    # No-op for local dev (env unset). See govops.gc_scheduler.
+    from govops.gc_scheduler import start_scheduler, shutdown_scheduler
+    start_scheduler(config_store)
     yield
+    shutdown_scheduler()
 
 
 app = FastAPI(
     title="GovOps",
     description="Policy-Driven Service Delivery Machine - Independent prototype using publicly available legislation as illustrative case studies.",
-    version="0.2.0",
+    version="0.5.0",
     lifespan=lifespan,
 )
+
+# v2.1 hosted-demo middleware stack. Order matters: rate-limit FIRST (cheapest
+# to evaluate, blocks abuse before we do any work), then demo-mode header.
+# Both are no-ops when their env vars are unset, so local dev sees no change.
+from govops.rate_limit import RateLimitMiddleware  # noqa: E402
+from govops.demo_mode import DemoModeMiddleware  # noqa: E402
+
+app.add_middleware(DemoModeMiddleware)
+app.add_middleware(RateLimitMiddleware)
 
 templates = Jinja2Templates(directory=str(TEMPLATES_DIR))
 if STATIC_DIR.exists():
@@ -216,15 +310,73 @@ def _base_context(lang: str) -> dict:
 
 @app.get("/api/health")
 def health():
+    from govops.demo_mode import is_demo_mode
+    from govops.llm_proxy import configured_providers
+
     jur_code = _current_jur_code()
     pack = JURISDICTION_REGISTRY.get(jur_code)
     return {
         "status": "healthy",
         "engine": "govops-demo",
-        "version": "0.2.0",
+        "version": "2.1.0",
         "jurisdiction": jur_code,
         "program": pack.program_name if pack else "",
         "available_jurisdictions": list(JURISDICTION_REGISTRY.keys()),
+        "demo_mode": is_demo_mode(),
+        "llm_providers": configured_providers(),
+    }
+
+
+# ---------------------------------------------------------------------------
+# v2.1 LLM proxy endpoint — used by the encoder UI on the hosted demo so
+# visitors don't need their own API key. Rate-limited per IP via
+# RateLimitMiddleware (default 5 req/min, 100 req/day).
+# ---------------------------------------------------------------------------
+
+
+class _ChatMessage(BaseModel):
+    role: str  # "system" | "user" | "assistant"
+    content: str
+
+
+class LLMChatRequest(BaseModel):
+    messages: list[_ChatMessage]
+    max_tokens: int = 1024
+    temperature: float = 0.2
+
+
+@app.post("/api/llm/chat")
+async def llm_chat(payload: LLMChatRequest):
+    """Proxy a chat-completion request through the configured provider chain.
+
+    Returns a minimal subset of the OpenAI Chat Completions response shape:
+        { provider, model, content, elapsed_ms }
+
+    503 when no provider is configured; 502 when every provider in the chain
+    fails. Rate-limited at the middleware layer.
+    """
+    from govops.llm_proxy import (
+        LLMConfigError,
+        LLMExhaustedError,
+        chat as proxy_chat,
+    )
+
+    try:
+        result = await proxy_chat(
+            messages=[m.model_dump() for m in payload.messages],
+            max_tokens=payload.max_tokens,
+            temperature=payload.temperature,
+        )
+    except LLMConfigError as exc:
+        raise HTTPException(503, f"LLM proxy not configured: {exc}") from exc
+    except LLMExhaustedError as exc:
+        raise HTTPException(502, f"All LLM providers failed: {exc}") from exc
+
+    return {
+        "provider": result.provider,
+        "model": result.model,
+        "content": result.content,
+        "elapsed_ms": result.elapsed_ms,
     }
 
 
@@ -331,19 +483,101 @@ def get_case(case_id: str):
     }
 
 
+class EvaluateRequest(BaseModel):
+    """Optional cross-program selector for the evaluate endpoint (ADR-018).
+
+    `programs` lists the program ids to run. Omit (or send empty) to run
+    every program registered for the case's jurisdiction. Unknown ids
+    return HTTP 400.
+    """
+    programs: list[str] | None = None
+
+
 @app.post("/api/cases/{case_id}/evaluate")
-def evaluate_case(case_id: str):
+def evaluate_case(case_id: str, body: EvaluateRequest | None = None):
+    """Run the rule engine against the case (ADR-018 — cross-program).
+
+    Backward compatible: callers that POST with no body keep getting the
+    same `{"recommendation": ...}` shape they did pre-v3. v3 callers also
+    receive `program_evaluations` (one Recommendation per program) and
+    `warnings` (cross-program interaction notes).
+    """
     case = store.get_case(case_id)
     if not case:
         raise HTTPException(404, f"Case {case_id} not found")
-    engine = OASEngine(rules=list(store.rules.values()))
-    rec, audit = engine.evaluate(case)
-    # Link to the prior recommendation if any (ADR-013 supersession chain).
-    prior = store.recommendations.get(case_id)
-    if prior is not None:
-        rec.supersedes = prior.id
-    store.save_recommendation(rec, audit)
-    return {"recommendation": rec}
+
+    requested = list(body.programs) if (body and body.programs) else None
+
+    # Legacy fallback: when no programs are registered (ad-hoc test fixtures
+    # that bypass `_seed_jurisdiction`), preserve the v2 single-engine path
+    # exactly. v3 deployments register programs at seed time, so this branch
+    # is dead code for the demo but keeps the door open for direct DemoStore
+    # usage in tests.
+    if not store.programs:
+        engine = ProgramEngine(rules=list(store.rules.values()))
+        rec, audit = engine.evaluate(case)
+        prior = store.recommendations.get(case_id)
+        if prior is not None:
+            rec.supersedes = prior.id
+        store.save_recommendation(rec, audit)
+        store.program_warnings[case_id] = []
+        return {
+            "recommendation": rec,
+            "program_evaluations": [rec],
+            "warnings": [],
+        }
+
+    if requested is None:
+        program_ids = list(store.programs.keys())
+    else:
+        unknown = [p for p in requested if p not in store.programs]
+        if unknown:
+            raise HTTPException(
+                400,
+                f"Unknown program(s) for this jurisdiction: {unknown}. "
+                f"Available: {list(store.programs.keys())}",
+            )
+        program_ids = list(requested)
+
+    # Decide which program is the back-compat *primary* BEFORE running, so
+    # only its rec writes through `save_recommendation` (which updates the
+    # singular `recommendations[case_id]` and the flat
+    # `recommendation_history[case_id]` chain that ADR-013 supersession +
+    # legacy audit/notice consumers walk). Others go to the per-program
+    # index via `save_secondary_program_recommendation`. OAS wins when
+    # present so v2 callers keep reading the OAS rec from the back-compat
+    # surfaces; otherwise the first selected program is primary.
+    primary_id = "oas" if "oas" in program_ids else program_ids[0]
+
+    evaluations: list[Recommendation] = []
+    for pid in program_ids:
+        program = store.programs[pid]
+        engine = ProgramEngine(program=program)
+        rec, audit = engine.evaluate(case)
+        prior = store.program_recommendations.get(case_id, {}).get(pid)
+        if prior is not None:
+            rec.supersedes = prior.id
+        if pid == primary_id:
+            store.save_recommendation(rec, audit)
+        else:
+            store.save_secondary_program_recommendation(rec, audit)
+        evaluations.append(rec)
+
+    warnings = detect_program_interactions(evaluations, case.jurisdiction_id)
+    store.program_warnings[case_id] = warnings
+
+    # Back-compat alias: the singular `recommendation` field returns the
+    # OAS recommendation when present, otherwise the first evaluation.
+    primary = next(
+        (r for r in evaluations if r.program_id == "oas"),
+        evaluations[0],
+    )
+
+    return {
+        "recommendation": primary,
+        "program_evaluations": evaluations,
+        "warnings": warnings,
+    }
 
 
 # ---------------------------------------------------------------------------
@@ -403,7 +637,7 @@ def post_case_event(case_id: str, body: CaseEventRequest, reevaluate: bool = Tru
         as_of = max(e.effective_date for e in events) if events else event.effective_date
         projected = replay_events(case, events, as_of=as_of)
 
-        engine = OASEngine(rules=list(store.rules.values()), evaluation_date=as_of)
+        engine = ProgramEngine(rules=list(store.rules.values()), evaluation_date=as_of)
         rec, audit = engine.evaluate(projected)
 
         prior = store.recommendations.get(case_id)
@@ -655,6 +889,47 @@ def admin_federation_disable(publisher_id: str):
     hydration. Re-enable via ``/enable`` to restore.
     """
     return _set_pack_enabled_response(publisher_id, enabled=False)
+
+
+# ---------------------------------------------------------------------------
+# v2.1 — Demo GC admin endpoint
+# ---------------------------------------------------------------------------
+
+
+@app.post("/api/admin/gc")
+def admin_gc(token: str | None = None, max_age_days: int = 7):
+    """Force a GC sweep of user-created records older than max_age_days.
+
+    Token-gated via the DEMO_ADMIN_TOKEN env var. When the token is unset
+    on the server, the endpoint returns 403 (the demo deploy MUST set
+    DEMO_ADMIN_TOKEN to use this).
+
+    Returns the count of deleted ConfigValue records and a timestamp. Safe
+    to call any time — the underlying SQL is idempotent (cutoff is
+    monotonic, deleted rows can't be deleted twice). The same function is
+    fired daily at 03:00 UTC by the APScheduler in `gc_scheduler`; the
+    admin endpoint exists for "clean the demo before a presentation"
+    moments.
+    """
+    from govops.demo_mode import demo_admin_token
+    from govops.gc_scheduler import run_gc, get_last_gc_at
+
+    expected = demo_admin_token()
+    if not expected:
+        raise HTTPException(
+            403,
+            "DEMO_ADMIN_TOKEN not configured on the server (set the env var to enable this endpoint)",
+        )
+    if not token or token != expected:
+        raise HTTPException(401, "valid `token` query parameter required")
+
+    deleted = run_gc(config_store, max_age_days=max_age_days)
+    last = get_last_gc_at()
+    return {
+        "deleted": deleted,
+        "max_age_days": max_age_days,
+        "ran_at": last.isoformat() if last else None,
+    }
 
 
 def _set_pack_enabled_response(publisher_id: str, *, enabled: bool) -> dict:
@@ -1128,6 +1403,237 @@ def impact_by_citation(
 
 
 # ---------------------------------------------------------------------------
+# Cross-jurisdiction program comparison (v3 / Phase F)
+# ---------------------------------------------------------------------------
+
+
+# Active jurisdictions in v3 scope, in display order. JP is included as the
+# architectural-control entry; whether it appears in any specific comparison
+# depends on the program (e.g. JP has no EI manifest by design).
+_COMPARE_DEFAULT_JURISDICTIONS = ["ca", "br", "es", "fr", "de", "ua", "jp"]
+
+# Charter-locked: JP is the architectural control. Symmetric extension is
+# opt-in for adopters; absent manifests for the JP/program pair are by design,
+# not by oversight.
+_JP_EXCLUSION_REASON = (
+    "Japan is the v3 architectural control. Symmetric extension to JP is "
+    "opt-in for adopters and requires explicit re-approval per the charter "
+    "(docs/IDEA-GovOps-v3.0-ProgramAsPrimitive.md, §'The proof')."
+)
+
+
+def _compare_jurisdiction_label(jur_code: str) -> str:
+    pack = JURISDICTION_REGISTRY.get(jur_code)
+    if pack is None:
+        return jur_code.upper()
+    return pack.jurisdiction.name
+
+
+@app.get("/api/programs/{program_id}/compare")
+def compare_program(
+    program_id: str,
+    jurisdictions: str = "",
+):
+    """Cross-jurisdiction comparison surface for a single program (Phase F).
+
+    Loads each jurisdiction's manifest at `lawcode/<code>/programs/{program_id}.yaml`
+    directly from disk — independent of which jurisdiction is currently
+    seeded into `store`, so a comparison call doesn't disrupt operator
+    state. Resolved parameter values come through the substrate (refs are
+    resolved at manifest load time per ADR-014).
+
+    Query parameters:
+      - `jurisdictions`: comma-separated jur codes (default: all 7).
+
+    Response shape:
+      ```
+      {
+        "program_id": "ei",
+        "shape": "unemployment_insurance" | None,
+        "jurisdictions": [
+          {
+            "code": "ca",
+            "label": "Government of Canada",
+            "available": true,
+            "name": {"en": ..., "fr": ...},
+            "description": {...},
+            "shape": "unemployment_insurance",
+            "authority_chain": [...],
+            "rules": [...]
+          },
+          {
+            "code": "jp",
+            "label": "Nihon-koku",
+            "available": false,
+            "unavailable_reason": "..."
+          },
+          ...
+        ],
+        "comparison": {
+          "rule_ids": [...],
+          "rows": [
+            {
+              "rule_id": "rule-ei-contribution",
+              "rule_type": "residency_minimum",
+              "citation_per_jurisdiction": {"ca": "...", ...},
+              "description_per_jurisdiction": {"ca": "...", ...},
+              "parameters": {
+                "min_years": {"ca": 1, "br": 1.5, ...}
+              }
+            },
+            ...
+          ]
+        }
+      }
+      ```
+    """
+    requested = [c.strip().lower() for c in jurisdictions.split(",") if c.strip()]
+    if not requested:
+        requested = list(_COMPARE_DEFAULT_JURISDICTIONS)
+
+    invalid = [c for c in requested if c not in _COMPARE_DEFAULT_JURISDICTIONS]
+    if invalid:
+        raise HTTPException(
+            400,
+            f"Unknown jurisdiction code(s): {invalid}. "
+            f"Allowed: {_COMPARE_DEFAULT_JURISDICTIONS}",
+        )
+
+    jur_slots: list[dict[str, Any]] = []
+    available_programs: dict[str, Program] = {}
+
+    for code in requested:
+        manifest_path = LAWCODE_DIR / code / "programs" / f"{program_id}.yaml"
+        label = _compare_jurisdiction_label(code)
+        if not manifest_path.exists():
+            unavailable_reason = (
+                _JP_EXCLUSION_REASON
+                if code == "jp"
+                else (
+                    f"No manifest at lawcode/{code}/programs/{program_id}.yaml. "
+                    f"Symmetric extension to {code.upper()} is not yet authored."
+                )
+            )
+            jur_slots.append(
+                {
+                    "code": code,
+                    "label": label,
+                    "available": False,
+                    "unavailable_reason": unavailable_reason,
+                }
+            )
+            continue
+        try:
+            program = load_program_manifest(manifest_path)
+        except Exception as exc:
+            jur_slots.append(
+                {
+                    "code": code,
+                    "label": label,
+                    "available": False,
+                    "unavailable_reason": (
+                        f"Manifest at lawcode/{code}/programs/{program_id}.yaml "
+                        f"could not be loaded: {exc}"
+                    ),
+                }
+            )
+            continue
+        available_programs[code] = program
+        jur_slots.append(
+            {
+                "code": code,
+                "label": label,
+                "available": True,
+                "name": dict(program.name),
+                "description": dict(program.description),
+                "shape": program.shape,
+                "authority_chain": list(program.authority_chain),
+                "rules": list(program.rules),
+            }
+        )
+
+    # Comparison rows: union of rule_ids across all available manifests, in
+    # the order they appear in the first available program (preserves
+    # author-intended rule ordering for the canonical jurisdiction).
+    rule_id_order: list[str] = []
+    seen: set[str] = set()
+    for code in requested:
+        program = available_programs.get(code)
+        if program is None:
+            continue
+        for rule in program.rules:
+            if rule.id not in seen:
+                seen.add(rule.id)
+                rule_id_order.append(rule.id)
+
+    rows: list[dict[str, Any]] = []
+    for rule_id in rule_id_order:
+        # Collect every (jur, rule) pairing for this rule_id
+        rule_per_jur: dict[str, LegalRule] = {}
+        for code, program in available_programs.items():
+            for rule in program.rules:
+                if rule.id == rule_id:
+                    rule_per_jur[code] = rule
+                    break
+        if not rule_per_jur:
+            continue
+        # Rule type — first one wins (manifests for the same shape use the
+        # same rule_type for the same rule_id by Phase D's symmetry contract).
+        first_rule = next(iter(rule_per_jur.values()))
+        rule_type = first_rule.rule_type.value
+        # Per-jurisdiction citations + descriptions (often the same words in
+        # the source jurisdiction's own language; the frontend renders them
+        # alongside the values for traceability).
+        citation_per_jurisdiction = {
+            code: rule.citation for code, rule in rule_per_jur.items()
+        }
+        description_per_jurisdiction = {
+            code: rule.description for code, rule in rule_per_jur.items()
+        }
+        # Parameters: union of keys across jurisdictions, then transpose.
+        param_keys: list[str] = []
+        param_seen: set[str] = set()
+        for rule in rule_per_jur.values():
+            for k in rule.parameters.keys():
+                if k not in param_seen:
+                    param_seen.add(k)
+                    param_keys.append(k)
+        parameters: dict[str, dict[str, Any]] = {}
+        for k in param_keys:
+            parameters[k] = {
+                code: rule.parameters.get(k)
+                for code, rule in rule_per_jur.items()
+                if k in rule.parameters
+            }
+        rows.append(
+            {
+                "rule_id": rule_id,
+                "rule_type": rule_type,
+                "citation_per_jurisdiction": citation_per_jurisdiction,
+                "description_per_jurisdiction": description_per_jurisdiction,
+                "parameters": parameters,
+            }
+        )
+
+    # Shape declared at the program level — the same shape is required across
+    # every available jurisdiction (Phase D's symmetry rule), so the first
+    # available program's shape is the canonical answer.
+    canonical_shape = next(
+        (p.shape for p in available_programs.values()), None
+    )
+
+    return {
+        "program_id": program_id,
+        "shape": canonical_shape,
+        "jurisdictions": jur_slots,
+        "comparison": {
+            "rule_ids": rule_id_order,
+            "rows": rows,
+        },
+    }
+
+
+# ---------------------------------------------------------------------------
 # Self-screening API (Law-as-Code v2.0 Phase 10A)
 # ---------------------------------------------------------------------------
 
@@ -1149,6 +1655,30 @@ def screen(req: ScreenRequest) -> ScreenResponse:
             f"Unknown jurisdiction '{exc.args[0]}'. "
             f"Known: {sorted(JURISDICTION_REGISTRY)}",
         ) from exc
+
+
+@app.post("/api/check", response_model=CheckResponse)
+def check(req: CheckRequest) -> CheckResponse:
+    """Multi-program citizen check (v3 Phase G — citizen entry surface).
+
+    Evaluates every program available for the jurisdiction (OAS + EI in
+    CA/BR/ES/FR/DE/UA, OAS only in JP) against the citizen's declared
+    facts and returns one result per program. Privacy posture is identical
+    to `POST /api/screen` — no case row, no audit entry, no PII echoed.
+
+    Optional `programs: [...]` body field restricts evaluation to a subset;
+    unknown program ids → 400.
+    """
+    try:
+        return run_check(req)
+    except UnknownJurisdiction as exc:
+        raise HTTPException(
+            404,
+            f"Unknown jurisdiction '{exc.args[0]}'. "
+            f"Known: {sorted(JURISDICTION_REGISTRY)}",
+        ) from exc
+    except ValueError as exc:
+        raise HTTPException(400, str(exc)) from exc
 
 
 @app.post("/api/screen/notice")
@@ -1283,7 +1813,7 @@ def ui_evaluate(request: Request, case_id: str):
     case = store.get_case(case_id)
     if not case:
         raise HTTPException(404)
-    engine = OASEngine(rules=list(store.rules.values()))
+    engine = ProgramEngine(rules=list(store.rules.values()))
     rec, audit = engine.evaluate(case)
     store.save_recommendation(rec, audit)
     return RedirectResponse(url=f"/cases/{case_id}?lang={lang}", status_code=303)

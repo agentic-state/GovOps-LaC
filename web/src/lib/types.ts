@@ -363,7 +363,9 @@ export interface ImpactResponse {
 
 // ── Self-screening (govops-015) ─────────────────────────────────────────────
 
-export const SCREEN_JURISDICTIONS = ["ca", "br", "es", "fr", "de", "ua"] as const;
+// 7 jurisdictions match the backend JURISDICTION_REGISTRY (jp added 2026-04-28).
+// Keeping this list in sync with the backend prevents 404s on /screen/<jur>.
+export const SCREEN_JURISDICTIONS = ["ca", "br", "es", "fr", "de", "ua", "jp"] as const;
 export type ScreenJurisdictionId = (typeof SCREEN_JURISDICTIONS)[number];
 
 export type ScreenLegalStatus = "citizen" | "permanent_resident" | "other";
@@ -483,4 +485,125 @@ export interface PostEventResponse {
 export interface GetEventsResponse {
   events: CaseEvent[];
   recommendations: Recommendation[];
+}
+
+// ── Cross-jurisdiction program comparison (Phase F) ─────────────────────────
+
+export interface CompareJurisdictionAvailable {
+  code: string;
+  label: string;
+  available: true;
+  name: Record<string, string>;
+  description: Record<string, string>;
+  shape: string;
+  authority_chain: AuthorityReference[];
+  rules: LegalRule[];
+}
+
+export interface CompareJurisdictionUnavailable {
+  code: string;
+  label: string;
+  available: false;
+  unavailable_reason: string;
+}
+
+export type CompareJurisdiction =
+  | CompareJurisdictionAvailable
+  | CompareJurisdictionUnavailable;
+
+export interface CompareRow {
+  rule_id: string;
+  rule_type: string;
+  citation_per_jurisdiction: Record<string, string>;
+  description_per_jurisdiction: Record<string, string>;
+  parameters: Record<string, Record<string, unknown>>;
+}
+
+export interface CompareProgramResponse {
+  program_id: string;
+  shape: string | null;
+  jurisdictions: CompareJurisdiction[];
+  comparison: {
+    rule_ids: string[];
+    rows: CompareRow[];
+  };
+}
+
+// ── Multi-program citizen check (Phase G) ───────────────────────────────────
+
+export interface CheckEvidence {
+  dob: boolean;
+  residency: boolean;
+  job_loss: boolean;
+}
+
+export interface CheckResidencyPeriod {
+  country: string;
+  start_date: string;       // ISO date
+  end_date?: string | null; // ISO date, null/undefined = ongoing
+}
+
+export interface CheckRequest {
+  jurisdiction_id: string;
+  date_of_birth: string;      // ISO date
+  legal_status: "citizen" | "permanent_resident" | "other";
+  country_of_birth?: string | null;
+  residency_periods: CheckResidencyPeriod[];
+  evidence_present: CheckEvidence;
+  programs?: string[] | null;
+  evaluation_date?: string | null;
+}
+
+export interface CheckRuleResult {
+  rule_id: string;
+  description: string;
+  citation: string;
+  outcome: string;
+  detail: string;
+  effective_from?: string | null;
+}
+
+export interface CheckBenefitAmount {
+  value: number;
+  currency: string;
+  period: string;
+  formula_trace: Array<Record<string, unknown>>;
+  citations: string[];
+}
+
+export interface CheckBenefitPeriod {
+  start_date: string;       // ISO date
+  end_date: string;         // ISO date
+  weeks_total: number;
+  weeks_remaining: number;
+  citations: string[];
+}
+
+export interface CheckActiveObligation {
+  obligation_id: string;
+  description: string;
+  citation: string;
+  cadence?: string | null;
+}
+
+export interface CheckProgramResult {
+  program_id: string;
+  program_name: string;
+  shape: string;
+  outcome: string;
+  pension_type: string;
+  partial_ratio?: string | null;
+  rule_results: CheckRuleResult[];
+  missing_evidence: string[];
+  benefit_amount?: CheckBenefitAmount | null;
+  benefit_period?: CheckBenefitPeriod | null;
+  active_obligations: CheckActiveObligation[];
+}
+
+export interface CheckResponse {
+  jurisdiction_id: string;
+  jurisdiction_label: string;
+  evaluation_date: string;
+  programs: CheckProgramResult[];
+  disclaimer: string;
 }

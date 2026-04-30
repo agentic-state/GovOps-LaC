@@ -12,6 +12,7 @@ This directory holds the **dated, citable rules** that GovOps resolves against. 
 | A translator | A `ui.label.*.<lang>` row in `lawcode/global/ui-labels.yaml` |
 | A maintainer adjusting an LLM prompt | An entry in `lawcode/global/prompts.yaml` (requires dual approval per [ADR-008](../docs/design/ADRs/ADR-008-prompt-as-config-dual-approval.md)) |
 | An engineer changing engine defaults | An entry in `lawcode/global/engine.yaml` |
+| A program leader adding a program (v3) | A new manifest at `lawcode/<jurisdiction>/programs/<program-id>.yaml` (per [ADR-014](../docs/design/ADRs/ADR-014-program-as-primitive.md)); pick a shape from [`schema/shapes/`](../schema/shapes/README.md) |
 
 If your change spans multiple files, that is normal — rule parameters often need new UI labels and may need new accepted-evidence types. Keep all of them in **one PR** so the reviewer sees the full picture.
 
@@ -32,6 +33,7 @@ Roles in an open-source public-good project don't formalise the way they do in a
 | Ratify a prompt change (per [ADR-008](../docs/design/ADRs/ADR-008-prompt-as-config-dual-approval.md), reviewer ≠ author) | – | – | – | **R** | **A** | C | I |
 | Modify the JSON Schema (`schema/*.json`) | C | – | – | C | **R/A** | C | I |
 | Onboard a new jurisdiction | **R** | C | – | C | **A** | C | I |
+| Add a program manifest (v3, ADR-014) | **R** | C | – | C | **A** | C | I |
 | Run validators + tests on every PR | – | – | – | – | – | **R/A** | I |
 
 **Read it like this**: to draft a rule parameter, a domain expert does the work (R) and writes the YAML; the maintainer is accountable (A) for whether it merges; a peer reviewer is consulted (C); the CI gate is consulted (it must pass); and citizens are informed because the merged record is on the public registry.

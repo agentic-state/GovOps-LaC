@@ -15,6 +15,7 @@ import { Route as PoliciesRouteImport } from './routes/policies'
 import { Route as ImpactRouteImport } from './routes/impact'
 import { Route as EncodeRouteImport } from './routes/encode'
 import { Route as ConfigRouteImport } from './routes/config'
+import { Route as CheckRouteImport } from './routes/check'
 import { Route as CasesRouteImport } from './routes/cases'
 import { Route as AuthorityRouteImport } from './routes/authority'
 import { Route as AdminRouteImport } from './routes/admin'
@@ -27,6 +28,8 @@ import { Route as ConfigPromptsRouteImport } from './routes/config.prompts'
 import { Route as ConfigDraftRouteImport } from './routes/config.draft'
 import { Route as ConfigDiffRouteImport } from './routes/config.diff'
 import { Route as ConfigApprovalsRouteImport } from './routes/config.approvals'
+import { Route as CompareProgramIdRouteImport } from './routes/compare.$programId'
+import { Route as CheckLifeEventRouteImport } from './routes/check.life-event'
 import { Route as CasesCaseIdRouteImport } from './routes/cases.$caseId'
 import { Route as AdminFederationRouteImport } from './routes/admin.federation'
 import { Route as ConfigApprovalsIdRouteImport } from './routes/config.approvals.$id'
@@ -61,6 +64,11 @@ const EncodeRoute = EncodeRouteImport.update({
 const ConfigRoute = ConfigRouteImport.update({
   id: '/config',
   path: '/config',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CheckRoute = CheckRouteImport.update({
+  id: '/check',
+  path: '/check',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CasesRoute = CasesRouteImport.update({
@@ -123,6 +131,16 @@ const ConfigApprovalsRoute = ConfigApprovalsRouteImport.update({
   path: '/approvals',
   getParentRoute: () => ConfigRoute,
 } as any)
+const CompareProgramIdRoute = CompareProgramIdRouteImport.update({
+  id: '/compare/$programId',
+  path: '/compare/$programId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CheckLifeEventRoute = CheckLifeEventRouteImport.update({
+  id: '/life-event',
+  path: '/life-event',
+  getParentRoute: () => CheckRoute,
+} as any)
 const CasesCaseIdRoute = CasesCaseIdRouteImport.update({
   id: '/$caseId',
   path: '/$caseId',
@@ -156,6 +174,7 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRouteWithChildren
   '/authority': typeof AuthorityRoute
   '/cases': typeof CasesRouteWithChildren
+  '/check': typeof CheckRouteWithChildren
   '/config': typeof ConfigRouteWithChildren
   '/encode': typeof EncodeRouteWithChildren
   '/impact': typeof ImpactRoute
@@ -164,6 +183,8 @@ export interface FileRoutesByFullPath {
   '/walkthrough': typeof WalkthroughRoute
   '/admin/federation': typeof AdminFederationRoute
   '/cases/$caseId': typeof CasesCaseIdRoute
+  '/check/life-event': typeof CheckLifeEventRoute
+  '/compare/$programId': typeof CompareProgramIdRoute
   '/config/approvals': typeof ConfigApprovalsRouteWithChildren
   '/config/diff': typeof ConfigDiffRoute
   '/config/draft': typeof ConfigDraftRoute
@@ -181,6 +202,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminRouteWithChildren
   '/authority': typeof AuthorityRoute
   '/cases': typeof CasesRouteWithChildren
+  '/check': typeof CheckRouteWithChildren
   '/config': typeof ConfigRouteWithChildren
   '/encode': typeof EncodeRouteWithChildren
   '/impact': typeof ImpactRoute
@@ -189,6 +211,8 @@ export interface FileRoutesByTo {
   '/walkthrough': typeof WalkthroughRoute
   '/admin/federation': typeof AdminFederationRoute
   '/cases/$caseId': typeof CasesCaseIdRoute
+  '/check/life-event': typeof CheckLifeEventRoute
+  '/compare/$programId': typeof CompareProgramIdRoute
   '/config/approvals': typeof ConfigApprovalsRouteWithChildren
   '/config/diff': typeof ConfigDiffRoute
   '/config/draft': typeof ConfigDraftRoute
@@ -207,6 +231,7 @@ export interface FileRoutesById {
   '/admin': typeof AdminRouteWithChildren
   '/authority': typeof AuthorityRoute
   '/cases': typeof CasesRouteWithChildren
+  '/check': typeof CheckRouteWithChildren
   '/config': typeof ConfigRouteWithChildren
   '/encode': typeof EncodeRouteWithChildren
   '/impact': typeof ImpactRoute
@@ -215,6 +240,8 @@ export interface FileRoutesById {
   '/walkthrough': typeof WalkthroughRoute
   '/admin/federation': typeof AdminFederationRoute
   '/cases/$caseId': typeof CasesCaseIdRoute
+  '/check/life-event': typeof CheckLifeEventRoute
+  '/compare/$programId': typeof CompareProgramIdRoute
   '/config/approvals': typeof ConfigApprovalsRouteWithChildren
   '/config/diff': typeof ConfigDiffRoute
   '/config/draft': typeof ConfigDraftRoute
@@ -234,6 +261,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/authority'
     | '/cases'
+    | '/check'
     | '/config'
     | '/encode'
     | '/impact'
@@ -242,6 +270,8 @@ export interface FileRouteTypes {
     | '/walkthrough'
     | '/admin/federation'
     | '/cases/$caseId'
+    | '/check/life-event'
+    | '/compare/$programId'
     | '/config/approvals'
     | '/config/diff'
     | '/config/draft'
@@ -259,6 +289,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/authority'
     | '/cases'
+    | '/check'
     | '/config'
     | '/encode'
     | '/impact'
@@ -267,6 +298,8 @@ export interface FileRouteTypes {
     | '/walkthrough'
     | '/admin/federation'
     | '/cases/$caseId'
+    | '/check/life-event'
+    | '/compare/$programId'
     | '/config/approvals'
     | '/config/diff'
     | '/config/draft'
@@ -284,6 +317,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/authority'
     | '/cases'
+    | '/check'
     | '/config'
     | '/encode'
     | '/impact'
@@ -292,6 +326,8 @@ export interface FileRouteTypes {
     | '/walkthrough'
     | '/admin/federation'
     | '/cases/$caseId'
+    | '/check/life-event'
+    | '/compare/$programId'
     | '/config/approvals'
     | '/config/diff'
     | '/config/draft'
@@ -310,12 +346,14 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRouteWithChildren
   AuthorityRoute: typeof AuthorityRoute
   CasesRoute: typeof CasesRouteWithChildren
+  CheckRoute: typeof CheckRouteWithChildren
   ConfigRoute: typeof ConfigRouteWithChildren
   EncodeRoute: typeof EncodeRouteWithChildren
   ImpactRoute: typeof ImpactRoute
   PoliciesRoute: typeof PoliciesRoute
   ScreenRoute: typeof ScreenRouteWithChildren
   WalkthroughRoute: typeof WalkthroughRoute
+  CompareProgramIdRoute: typeof CompareProgramIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -360,6 +398,13 @@ declare module '@tanstack/react-router' {
       path: '/config'
       fullPath: '/config'
       preLoaderRoute: typeof ConfigRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/check': {
+      id: '/check'
+      path: '/check'
+      fullPath: '/check'
+      preLoaderRoute: typeof CheckRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/cases': {
@@ -446,6 +491,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ConfigApprovalsRouteImport
       parentRoute: typeof ConfigRoute
     }
+    '/compare/$programId': {
+      id: '/compare/$programId'
+      path: '/compare/$programId'
+      fullPath: '/compare/$programId'
+      preLoaderRoute: typeof CompareProgramIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/check/life-event': {
+      id: '/check/life-event'
+      path: '/life-event'
+      fullPath: '/check/life-event'
+      preLoaderRoute: typeof CheckLifeEventRouteImport
+      parentRoute: typeof CheckRoute
+    }
     '/cases/$caseId': {
       id: '/cases/$caseId'
       path: '/$caseId'
@@ -503,6 +562,16 @@ const CasesRouteChildren: CasesRouteChildren = {
 }
 
 const CasesRouteWithChildren = CasesRoute._addFileChildren(CasesRouteChildren)
+
+interface CheckRouteChildren {
+  CheckLifeEventRoute: typeof CheckLifeEventRoute
+}
+
+const CheckRouteChildren: CheckRouteChildren = {
+  CheckLifeEventRoute: CheckLifeEventRoute,
+}
+
+const CheckRouteWithChildren = CheckRoute._addFileChildren(CheckRouteChildren)
 
 interface ConfigApprovalsRouteChildren {
   ConfigApprovalsIdRoute: typeof ConfigApprovalsIdRoute
@@ -578,12 +647,14 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRoute: AdminRouteWithChildren,
   AuthorityRoute: AuthorityRoute,
   CasesRoute: CasesRouteWithChildren,
+  CheckRoute: CheckRouteWithChildren,
   ConfigRoute: ConfigRouteWithChildren,
   EncodeRoute: EncodeRouteWithChildren,
   ImpactRoute: ImpactRoute,
   PoliciesRoute: PoliciesRoute,
   ScreenRoute: ScreenRouteWithChildren,
   WalkthroughRoute: WalkthroughRoute,
+  CompareProgramIdRoute: CompareProgramIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

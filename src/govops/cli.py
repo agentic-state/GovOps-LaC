@@ -192,6 +192,37 @@ def dispatch(argv: list[str] | None = None) -> int:
         help="Verify the fetch would succeed; do not write any files",
     )
 
+    init_p = sub.add_parser(
+        "init",
+        help="Scaffold a new jurisdiction from canonical shape templates (Phase H)",
+    )
+    init_p.add_argument(
+        "country_code",
+        help="ISO-style country code, e.g. 'pl' or 'mx'",
+    )
+    init_p.add_argument(
+        "--shapes",
+        default=None,
+        help=(
+            "Comma-separated shape ids (default: oas,ei). "
+            "Supported: oas, ei."
+        ),
+    )
+    init_p.add_argument(
+        "--lawcode-dir",
+        default=None,
+        help="Override the lawcode/ output directory (default: repo lawcode/)",
+    )
+
+    docs_p = sub.add_parser(
+        "docs",
+        help="Render a plain-language Markdown sidecar for a program manifest",
+    )
+    docs_p.add_argument(
+        "manifest_path",
+        help="Path to a program manifest (e.g. lawcode/ca/programs/oas.yaml)",
+    )
+
     args = parser.parse_args(argv)
     if args.command == "demo":
         return _run_demo(args.host, args.port, args.reload)
@@ -206,6 +237,21 @@ def dispatch(argv: list[str] | None = None) -> int:
             allow_unsigned=args.allow_unsigned,
             dry_run=args.dry_run,
         )
+    if args.command == "init":
+        from govops.cli_init import _run_init
+        shapes = (
+            [s for s in args.shapes.split(",") if s.strip()]
+            if args.shapes
+            else None
+        )
+        return _run_init(
+            country_code=args.country_code,
+            shapes=shapes,
+            lawcode_dir=args.lawcode_dir,
+        )
+    if args.command == "docs":
+        from govops.cli_init import _run_docs
+        return _run_docs(manifest_path=args.manifest_path)
     parser.error(f"unknown command: {args.command}")
     return 2
 

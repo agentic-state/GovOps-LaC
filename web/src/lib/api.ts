@@ -1,4 +1,24 @@
-const BASE = (import.meta.env.VITE_API_BASE_URL as string | undefined) ?? "http://127.0.0.1:8000";
+// SSR-aware BASE. Two distinct call paths use this fetcher:
+//
+//   1. Server-side (Vite dev SSR / TanStack Start route loaders running in
+//      Node) — Node's fetch cannot do relative URLs, so BASE must be an
+//      absolute URL the Node process can reach. In the v2.1 hosted-demo
+//      container this is FastAPI on the loopback interface; in local dev
+//      (two-process model per CONTRIBUTING.md) FastAPI also runs on :8000.
+//
+//   2. Client-side (browser after hydration) — uses BASE as a prefix for
+//      `fetch(`${BASE}${path}`)`. On the v2.1 hosted demo, BASE is empty so
+//      the browser does same-origin requests that Vite's dev proxy forwards
+//      to FastAPI; in local dev with cross-origin (vite :8080, FastAPI
+//      :8000) BASE must be the absolute URL of the FastAPI process.
+//
+// The SSR branch ALWAYS uses 127.0.0.1:8000 because that's where FastAPI
+// listens in both deploy targets we support. Browser branch honours
+// VITE_API_BASE_URL when set (empty string allowed → relative URLs), falls
+// back to 127.0.0.1:8000 for the local dev case.
+const BASE = import.meta.env.SSR
+  ? "http://127.0.0.1:8000"
+  : ((import.meta.env.VITE_API_BASE_URL as string | undefined) ?? "http://127.0.0.1:8000");
 
 /**
  * Minimal fetch wrapper for the GovOps FastAPI backend.
@@ -433,6 +453,31 @@ export async function setFederationPackEnabled(
   const op = enabled ? "enable" : "disable";
   return fetcher(`/api/admin/federation/packs/${encodeURIComponent(publisherId)}/${op}`, {
     method: "POST",
+  });
+}
+
+// ---- Cross-jurisdiction program comparison (Phase F) -----------------------
+
+import type { CheckRequest, CheckResponse, CompareProgramResponse } from "./types";
+
+export async function compareProgram(
+  programId: string,
+  jurisdictions?: string[],
+): Promise<CompareProgramResponse> {
+  const qs = jurisdictions && jurisdictions.length > 0
+    ? `?jurisdictions=${encodeURIComponent(jurisdictions.join(","))}`
+    : "";
+  return fetcher<CompareProgramResponse>(
+    `/api/programs/${encodeURIComponent(programId)}/compare${qs}`,
+  );
+}
+
+// ---- Multi-program citizen check (Phase G) ---------------------------------
+
+export async function runCheck(req: CheckRequest): Promise<CheckResponse> {
+  return fetcher<CheckResponse>("/api/check", {
+    method: "POST",
+    body: JSON.stringify(req),
   });
 }
 

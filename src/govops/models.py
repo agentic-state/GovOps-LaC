@@ -86,6 +86,8 @@ class RuleType(str, Enum):
     EVIDENCE_REQUIRED = "evidence_required"
     EXCLUSION = "exclusion"
     CALCULATION = "calculation"  # ADR-011 — typed-AST formula for benefit amount
+    BENEFIT_DURATION_BOUNDED = "benefit_duration_bounded"  # ADR-017 — weeks of eligibility for time-bounded programs (e.g. EI)
+    ACTIVE_OBLIGATION = "active_obligation"  # ADR-017 — forward-looking conditions surfaced on the recommendation
 
 
 class LegalRule(BaseModel):
@@ -196,6 +198,36 @@ class BenefitAmount(BaseModel):
     citations: list[str] = []  # deduplicated, in walk order
 
 
+class BenefitPeriod(BaseModel):
+    """Bounded eligibility period for time-bounded programs (ADR-017).
+
+    Output of a `RuleType.BENEFIT_DURATION_BOUNDED` rule, consumed by the
+    active shape evaluator (e.g. unemployment_insurance) and surfaced on
+    the recommendation. ``weeks_remaining`` is computed from
+    ``evaluation_date`` so a case re-evaluated mid-benefit shows accurate
+    remaining duration without back-end state.
+    """
+    start_date: date
+    end_date: date
+    weeks_total: int
+    weeks_remaining: int
+    citations: list[str] = []
+
+
+class ActiveObligation(BaseModel):
+    """Forward-looking obligation that applies to a recipient (ADR-017).
+
+    Output of a `RuleType.ACTIVE_OBLIGATION` rule, collected by the active
+    shape evaluator and surfaced on the recommendation. Obligations are
+    declarative — they describe what *applies*, not what's been verified.
+    Tracking compliance is a v4 citizen-track concern.
+    """
+    obligation_id: str
+    description: str
+    citation: str
+    cadence: Optional[str] = None  # e.g. "biweekly", "monthly"
+
+
 class Recommendation(BaseModel):
     id: str = Field(default_factory=_new_id)
     case_id: str
@@ -212,6 +244,23 @@ class Recommendation(BaseModel):
     supersedes: Optional[str] = None  # ADR-013 — id of the prior recommendation, if any
     evaluation_date: Optional[date] = None  # ADR-013 — the as-of date this evaluation answers
     triggered_by_event_id: Optional[str] = None  # ADR-013 — the event that prompted this re-eval
+    # v3 / ADR-014 — which program produced this recommendation. Populated when
+    # the engine is constructed with `program=…`; left None for legacy
+    # `rules=…`-only callers (api.py, screen.py, test_engine.py).
+    program_id: Optional[str] = None
+    # v3 / ADR-016 — shape-specific eligible-branch details. OAS-shape leaves
+    # this empty since pension_type / partial_ratio remain top-level. Adopters
+    # of the shape catalog can store implementation-specific detail here
+    # without growing the canonical Recommendation.
+    program_outcome_detail: dict = Field(default_factory=dict)
+    # v3 / ADR-017 — bounded-benefit output for time-bounded programs (e.g. EI).
+    # Populated by shapes that consume RuleType.BENEFIT_DURATION_BOUNDED;
+    # OAS-shape leaves it None.
+    benefit_period: Optional[BenefitPeriod] = None
+    # v3 / ADR-017 — forward-looking obligations declared on the recommendation.
+    # Populated by shapes that consume RuleType.ACTIVE_OBLIGATION; OAS-shape
+    # returns an empty list.
+    active_obligations: list[ActiveObligation] = Field(default_factory=list)
 
 
 # ---------------------------------------------------------------------------
@@ -277,6 +326,27 @@ class AuditEntry(BaseModel):
     data: dict = {}
 
 
+# ---------------------------------------------------------------------------
+# Cross-program interactions (v3 / ADR-018 / Phase E)
+# ---------------------------------------------------------------------------
+
+class ProgramInteractionWarning(BaseModel):
+    """Interaction signal emitted when two or more programs run against the
+    same case produce results that warrant joint attention.
+
+    Severity is informational by default — adopters of the substrate can
+    author richer rules (offsets, asset tests, family-unit interactions) at
+    v4 without changing the engine. Phase E ships exactly one rule:
+    OAS + EI dual eligibility surfaces an `info` warning so cross-program
+    consumers can render both programs side by side.
+    """
+    id: str = Field(default_factory=_new_id)
+    severity: str = "info"           # "info" | "warning" | "conflict"
+    programs: list[str] = Field(default_factory=list)   # program_ids involved
+    description: str = ""
+    citation: str = ""
+
+
 class AuditPackage(BaseModel):
     case_id: str
     generated_at: datetime = Field(default_factory=_utcnow)
@@ -288,3 +358,10 @@ class AuditPackage(BaseModel):
     audit_trail: list[AuditEntry] = []
     rules_applied: list[RuleEvaluation] = []
     evidence_summary: list[dict] = []
+    # v3 / ADR-018 — per-program slots. `recommendation` (singular) stays as
+    # the back-compat alias for v2 audit consumers; v3 consumers read
+    # `program_evaluations`. Both are populated when more than one program
+    # ran against the case; older single-program flows leave
+    # `program_evaluations` empty.
+    program_evaluations: list[Recommendation] = Field(default_factory=list)
+    program_warnings: list[ProgramInteractionWarning] = Field(default_factory=list)
