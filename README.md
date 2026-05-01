@@ -48,7 +48,7 @@ This is an open public-good contribution: a working MVP demo other contributors 
 | **Government / contributor** | Fork the repo, drop in your jurisdiction's YAML, run. 7 reference jurisdictions × 6 locales already shipped. | [`CONTRIBUTING.md`](CONTRIBUTING.md) |
 | **Researcher / SPRIND-curious** | A working reference implementation against the SPRIND "Law as Code" framework's 5 elements, plus a 6th GovOps adds (versioned interpretive apparatus) | [`docs/design/LAW-AS-CODE.md`](docs/design/LAW-AS-CODE.md) |
 
-For build history and accepted backlog: [`PLAN.md`](PLAN.md). For load-bearing decisions: [`docs/design/ADRs/`](docs/design/ADRs/).
+This README describes what is currently implemented. For load-bearing decisions: [`docs/design/ADRs/`](docs/design/ADRs/). For build history: git log + tags (`v2.0.0`, `v0.5.0`). The roadmap (operational plans for v2 / v3) lives in the workspace memory, not in this repo, per the maintainer's visibility rule.
 
 ---
 
@@ -425,7 +425,7 @@ docs/
 
 ### Law-as-Code v2.0
 
-Every business value (thresholds, accepted statuses, UI labels, LLM prompts) lives as a dated `ConfigValue` record under [lawcode/](lawcode/). The on-disk shape is locked by [schema/lawcode-v1.0.json](schema/lawcode-v1.0.json); each merged record satisfies [schema/configvalue-v1.0.json](schema/configvalue-v1.0.json). CI runs `python scripts/validate_lawcode.py` on every push, so a malformed YAML breaks the build before merge. Track the live execution plan in [PLAN.md](PLAN.md).
+Every business value (thresholds, accepted statuses, UI labels, LLM prompts) lives as a dated `ConfigValue` record under [lawcode/](lawcode/). The on-disk shape is locked by [schema/lawcode-v1.0.json](schema/lawcode-v1.0.json); each merged record satisfies [schema/configvalue-v1.0.json](schema/configvalue-v1.0.json). CI runs `python scripts/validate_lawcode.py` on every push, so a malformed YAML breaks the build before merge.
 
 ---
 
