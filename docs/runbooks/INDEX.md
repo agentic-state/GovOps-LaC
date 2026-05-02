@@ -15,6 +15,9 @@
 | Drafting an architectural decision record | [`draft-adr.md`](draft-adr.md) |
 | Adding a new country / region to GovOps | [`add-jurisdiction.md`](add-jurisdiction.md) |
 | Verifying lawcode + ConfigValue substrate integrity | [`data-validity.md`](data-validity.md) |
+| Adding a new program (same shape or new shape) | [`add-program.md`](add-program.md) |
+| Running an LLM-assisted encoding batch | [`encoder-batch.md`](encoder-batch.md) |
+| Publishing or consuming a federated lawcode pack | [`federation-publish.md`](federation-publish.md) |
 | Validating any deploy with the journey bench | [`../test-bench/RUNBOOK.md`](../test-bench/RUNBOOK.md) |
 
 ## Coverage map (the "100% tested" gates)
@@ -38,8 +41,15 @@ The release-readiness runbook composes these. Each is its own gate.
 - Common gotchas should reference workspace memory entries in `eva-foundation/.claude-memory/` so the *why* doesn't rot.
 - Runbooks are P61-specific for now. If a pattern proves portable, promote it to `eva-foundation/docs/runbooks/` so other projects can copy it.
 
-## Active backlog (more runbooks worth writing)
+## Active backlog
 
-- `add-program.md` — for new shapes beyond `old_age_pension` / `unemployment_insurance`
-- `encoder-batch.md` — LLM-assisted YAML emission
-- `federation-publish.md` — Ed25519-signed pack onboarding
+The initial runbook ecosystem (10 runbooks) is now complete. Additions are warranted when:
+
+- A new recurring operation surfaces that has gotchas worth capturing
+- An existing runbook's "Last validated" date is older than the operation's actual change rate (the runbook drifted from reality — refresh it)
+
+Candidate future runbooks if the patterns prove out:
+
+- `incident-response.md` — SEV1 / outage handling (only useful once we have a real incident to ground it against)
+- `quarterly-review.md` — runbook hygiene + memory pruning + dependency refresh as a routine
+- `onboard-contributor.md` — the "first PR" path for an external contributor
