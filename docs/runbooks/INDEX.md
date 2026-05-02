@@ -11,6 +11,10 @@
 | About to deploy a new version of GovOps to the HF Space | [`deploy-to-hf.md`](deploy-to-hf.md) |
 | Tagging a release / preparing v0.6.0 / v1.0 / etc. — the "am I ready?" gate | [`release-readiness.md`](release-readiness.md) |
 | A page renders but an interaction silently fails ("Failed to fetch", form does nothing, etc.) | [`debug-fetch-failure.md`](debug-fetch-failure.md) |
+| The deploy is bad / commit was wrong / ConfigValue approved in error | [`rollback.md`](rollback.md) |
+| Drafting an architectural decision record | [`draft-adr.md`](draft-adr.md) |
+| Adding a new country / region to GovOps | [`add-jurisdiction.md`](add-jurisdiction.md) |
+| Verifying lawcode + ConfigValue substrate integrity | [`data-validity.md`](data-validity.md) |
 | Validating any deploy with the journey bench | [`../test-bench/RUNBOOK.md`](../test-bench/RUNBOOK.md) |
 
 ## Coverage map (the "100% tested" gates)
@@ -36,10 +40,6 @@ The release-readiness runbook composes these. Each is its own gate.
 
 ## Active backlog (more runbooks worth writing)
 
-- `rollback.md` — when a deploy breaks; recovery from the pre-deploy tag
-- `add-jurisdiction.md` — full step-by-step for a new country (extends CLAUDE.md's 4-bullet)
 - `add-program.md` — for new shapes beyond `old_age_pension` / `unemployment_insurance`
-- `draft-adr.md` — numbering + lifecycle + landing
 - `encoder-batch.md` — LLM-assisted YAML emission
 - `federation-publish.md` — Ed25519-signed pack onboarding
-- `data-validity.md` — lawcode + supersession chain integrity beyond the schema check
