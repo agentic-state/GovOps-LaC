@@ -29,7 +29,7 @@ const PHASE_6_ROUTES = [
 ] as const;
 
 for (const route of PHASE_6_ROUTES) {
-  test(`SSR head: ${route} renders a non-empty <title>`, async ({ request }) => {
+  test(`[M02] SSR head: ${route} renders a non-empty <title>`, async ({ request }) => {
     const r = await request.get(route);
     const html = await r.text();
     const m = html.match(/<title>([^<]*)<\/title>/i);
@@ -49,7 +49,7 @@ for (const route of PHASE_6_ROUTES) {
 // top-of-file ESM import (createIsomorphicFn's transform strips the server
 // branch from the client bundle) restored child `head()` execution and the
 // cookie path now resolves end-to-end.
-test("SSR head: <title> reflects govops-locale cookie at SSR time, not after hydration", async ({
+test("[M02] SSR head: <title> reflects govops-locale cookie at SSR time, not after hydration", async ({
   playwright,
   baseURL,
 }) => {

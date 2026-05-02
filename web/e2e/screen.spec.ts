@@ -19,7 +19,7 @@ async function fillSomeFields(page: import("@playwright/test").Page) {
   await page.check("#screen-legal-citizen");
 }
 
-test.describe("/screen — privacy invariants", () => {
+test.describe("[J05] /screen — privacy invariants", () => {
   test("no draft key in sessionStorage after filling the form", async ({ page }) => {
     await fillSomeFields(page);
     const stored = await page.evaluate((k) => window.sessionStorage.getItem(k), DRAFT_KEY);
@@ -58,7 +58,7 @@ test.describe("/screen — privacy invariants", () => {
   });
 });
 
-test.describe("/cases/$caseId — event timeline (govops-019)", () => {
+test.describe("[J16] /cases/$caseId — event timeline (govops-019)", () => {
   test("renders an event timeline section", async ({ page }) => {
     await page.goto("/cases/case-2025-0142");
     await expect(page.getByRole("heading", { name: /event timeline|chronologie/i })).toBeVisible();

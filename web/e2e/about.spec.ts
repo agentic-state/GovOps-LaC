@@ -18,13 +18,17 @@ const STRICT_A11Y = process.env.E2E_A11Y_STRICT === "1";
 
 async function gotoAbout(page: Page, lang: "en" | "fr" = "en"): Promise<void> {
   // I18nProvider reads the `govops-locale` cookie at SSR boot, not a ?lang=
-  // query param. Set the cookie before navigating so the FR variant actually
-  // renders FR. Cookie domain is the test frontend host.
+  // query param. Set the cookie on the active baseURL so it works against
+  // any target (local dev, HF Space, partner forks).
+  const baseURL =
+    process.env.TEST_BENCH_TARGET ??
+    process.env.PLAYWRIGHT_BASE_URL ??
+    "http://127.0.0.1:17081/";
   await page.context().addCookies([
     {
       name: "govops-locale",
       value: lang,
-      url: "http://127.0.0.1:17081/",
+      url: baseURL,
     },
   ]);
   await page.goto(`/about`);
@@ -36,7 +40,7 @@ async function gotoAbout(page: Page, lang: "en" | "fr" = "en"): Promise<void> {
 // §1 — Hero + Disclaimer card
 // ---------------------------------------------------------------------------
 
-test.describe("About — hero + disclaimer", () => {
+test.describe("[J44] About — hero + disclaimer", () => {
   test("page renders without an error boundary", async ({ page }) => {
     await gotoAbout(page);
     // Generic error-boundary patterns the project uses elsewhere.
@@ -75,7 +79,7 @@ test.describe("About — hero + disclaimer", () => {
 // §4 — Reference cards (SPRIND + Agentic State)
 // ---------------------------------------------------------------------------
 
-test.describe("About — reference cards", () => {
+test.describe("[J44] About — reference cards", () => {
   test("SPRIND reference card shows the verbatim definition + correct attribution", async ({
     page,
   }) => {
@@ -106,7 +110,7 @@ test.describe("About — reference cards", () => {
 // §10 — In-repo references resolve to canonical agentic-state/GovOps-LaC URLs
 // ---------------------------------------------------------------------------
 
-test.describe("About — §10 references", () => {
+test.describe("[J44] About — §10 references", () => {
   test("Project home row points at the GitHub Pages URL", async ({ page }) => {
     await gotoAbout(page);
     // The "Project home" row is the new govops-016a addition; the link
@@ -135,7 +139,7 @@ test.describe("About — §10 references", () => {
 // FR locale — page localizes; reference cards keep verbatim quotes
 // ---------------------------------------------------------------------------
 
-test.describe("About — French locale", () => {
+test.describe("[J44] About — French locale", () => {
   test("page renders FR strings in chrome but keeps verbatim SPRIND quote", async ({ page }) => {
     await gotoAbout(page, "fr");
     // The lang attribute should reflect FR.
@@ -150,7 +154,7 @@ test.describe("About — French locale", () => {
 // Accessibility — axe-core deep scan on about specifically
 // ---------------------------------------------------------------------------
 
-test.describe("About — accessibility", () => {
+test.describe("[J44] About — accessibility", () => {
   test("axe scan: no critical or serious violations", async ({ page }) => {
     await gotoAbout(page);
     const results = await new AxeBuilder({ page })

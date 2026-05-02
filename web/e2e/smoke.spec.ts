@@ -27,7 +27,7 @@ const PRIMARY_ROUTES = [
 ];
 
 for (const route of PRIMARY_ROUTES) {
-  test(`smoke: ${route.path} renders`, async ({ page }) => {
+  test(`[M04] smoke: ${route.path} renders`, async ({ page }) => {
     const errors: string[] = [];
     page.on("pageerror", (err) => errors.push(err.message));
 
@@ -53,7 +53,7 @@ for (const route of PRIMARY_ROUTES) {
   });
 }
 
-test("home: modules + actors + walkthrough CTA all render", async ({ page }) => {
+test("[J48] home: modules + actors + walkthrough CTA all render", async ({ page }) => {
   await page.goto("/");
   await page.waitForLoadState("networkidle");
 
@@ -101,7 +101,7 @@ const NON_HOME_ROUTES = [
 ];
 
 for (const route of NON_HOME_ROUTES) {
-  test(`breadcrumb: ${route} renders the layout-level breadcrumb`, async ({ page }) => {
+  test(`[M06] breadcrumb: ${route} renders the layout-level breadcrumb`, async ({ page }) => {
     await page.goto(route);
     await page.waitForLoadState("networkidle");
     const crumbNav = page.locator('[data-testid="breadcrumb"]');
@@ -113,7 +113,7 @@ for (const route of NON_HOME_ROUTES) {
   });
 }
 
-test("breadcrumb: home page does NOT render a breadcrumb (no orientation noise)", async ({
+test("[M06] breadcrumb: home page does NOT render a breadcrumb (no orientation noise)", async ({
   page,
 }) => {
   await page.goto("/");
@@ -121,7 +121,7 @@ test("breadcrumb: home page does NOT render a breadcrumb (no orientation noise)"
   await expect(page.locator('[data-testid="breadcrumb"]')).toHaveCount(0);
 });
 
-test("breadcrumb: stays visible (sticky) when the page is scrolled", async ({ page }) => {
+test("[M06] breadcrumb: stays visible (sticky) when the page is scrolled", async ({ page }) => {
   await page.goto("/walkthrough");
   await page.waitForLoadState("networkidle");
 
@@ -151,7 +151,7 @@ test("breadcrumb: stays visible (sticky) when the page is scrolled", async ({ pa
   expect(computedPosition).toBe("sticky");
 });
 
-test("help drawer: Help button opens a sheet with route-aware content", async ({ page }) => {
+test("[M05] help drawer: Help button opens a sheet with route-aware content", async ({ page }) => {
   await page.goto("/walkthrough");
   await page.waitForLoadState("networkidle");
   // Click the Help button (label varies by locale; English default is "Help")
@@ -165,7 +165,7 @@ test("help drawer: Help button opens a sheet with route-aware content", async ({
   await expect(dialog.getByRole("heading").first()).toContainText(/walkthrough|paid statutory/i);
 });
 
-test("encoder: approving a proposal locks the Approve/Modify/Reject buttons; Reopen replaces Annotate", async ({
+test("[J32] encoder: approving a proposal locks the Approve/Modify/Reject buttons; Reopen replaces Annotate", async ({
   page,
 }) => {
   // The seeded encoding example puts a batch with pending proposals on /encode.
@@ -209,7 +209,7 @@ const RUNBOOK_ROUTES = [
 ];
 
 for (const { path, prefix } of RUNBOOK_ROUTES) {
-  test(`runbook: ${path} shows the operator runbook with 3 collapsible scenarios`, async ({
+  test(`[M04] runbook: ${path} shows the operator runbook with 3 collapsible scenarios`, async ({
     page,
   }) => {
     await page.goto(path);
@@ -224,7 +224,7 @@ for (const { path, prefix } of RUNBOOK_ROUTES) {
   });
 }
 
-test("walkthrough: 7-step paid-vacation scenario renders end to end", async ({ page }) => {
+test("[J45] walkthrough: 7-step paid-vacation scenario renders end to end", async ({ page }) => {
   await page.goto("/walkthrough");
   await page.waitForLoadState("networkidle");
 

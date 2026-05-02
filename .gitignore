@@ -73,6 +73,15 @@ web/blob-report/
 web/playwright/.cache/
 web/.last-run.json
 
+# Test-bench run artifacts (HTML report, screenshots, traces, per-journey JSON)
+# Keep the markdown run records under docs/test-bench/runs/ — those are the
+# durable, diff-able artifact. Everything under test-results-deploy/ and
+# playwright-report-deploy/ is reproducible from a re-run.
+web/test-results-deploy/
+web/playwright-report-deploy/
+web/e2e/test-results-deploy/
+test-bench-run*.log
+
 # Data Model (temporary local data)
 data/local/*.db
 data/local/*.json

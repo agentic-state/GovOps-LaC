@@ -8,7 +8,7 @@ import { test, expect } from "@playwright/test";
 import { backend } from "./fixtures/api";
 
 test.describe("Phase 6 approval actions — reject + request-changes", () => {
-  test("rejected draft moves out of the queue and is marked terminal", async ({
+  test("[J25] rejected draft moves out of the queue and is marked terminal", async ({
     page,
     request,
   }) => {
@@ -50,7 +50,7 @@ test.describe("Phase 6 approval actions — reject + request-changes", () => {
     expect(r.status()).toBe(409);
   });
 
-  test("request-changes returns a pending draft to the author", async ({ request }) => {
+  test("[J26] request-changes returns a pending draft to the author", async ({ request }) => {
     const api = await backend(request);
     const draft = await api.createDraft({
       domain: "rule",
