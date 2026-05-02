@@ -48,8 +48,22 @@ COPY web/ ./
 # Run only the load-bearing prebuild step (route-tree generator). Skip the
 # i18n validators — they're CI quality gates and can fail on translation
 # debt without affecting whether the build itself produces a valid artifact.
-RUN node scripts/clean-route-tree.mjs \
- && npx vite build \
+#
+# VITE_API_BASE_URL="" is load-bearing: vite inlines this env var AT BUILD
+# TIME into the client bundle. Without it the bundle bakes in the api.ts
+# fallback http://127.0.0.1:8000 — which from a visitor's browser hits
+# THEIR localhost, not the HF container. Result: every API fetch from
+# the browser fails with "Failed to fetch".
+#
+# The original v2.1 fix (commit fc19f64) set this env var on the supervisor
+# script that ran `npm run dev`. When the Dockerfile pivoted from vite-dev
+# at runtime to vite-build at build time (commit 35fb187), the env var
+# didn't follow into the build RUN. Re-applied here.
+#
+# Empty string = browser uses same-origin relative URLs (/api/...). Those
+# hit the FastAPI process inside the same uvicorn container directly.
+RUN VITE_API_BASE_URL="" node scripts/clean-route-tree.mjs \
+ && VITE_API_BASE_URL="" npx vite build \
  && node scripts/check-route-tree-duplicates.mjs
 
 # ============================================================================
