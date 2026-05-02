@@ -1,0 +1,79 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.10", "3.11", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - run: pip install -e ".[dev]"
+      - run: python scripts/check_no_hardcoded_constants.py
+      # Phase 5 gate: every YAML under lawcode/ must validate against
+      # schema/lawcode-v1.0.json + schema/configvalue-v1.0.json.
+      - name: Validate lawcode/ against JSON Schema
+        run: python scripts/validate_lawcode.py
+      # Phase 6+ contract gate (PLAN §9 risk register row 2): the live
+      # FastAPI OpenAPI document must match the committed snapshot at
+      # docs/api/openapi-v0.3.0-draft.json. Lovable consumes the snapshot;
+      # silent drift breaks the contract.
+      - name: OpenAPI snapshot drift check
+        run: python scripts/check_openapi_drift.py
+      - run: pytest -v
+      # Phase 3 strict-mode gate (per ADR-004 §3): every resolve must hit the
+      # substrate (YAML) — never fall through to LEGACY_CONSTANTS.
+      - name: Strict-mode pytest (no LEGACY fallthrough)
+        env:
+          AIA_CONFIG_STRICT: "1"
+        run: pytest -v
+
+  e2e:
+    needs: test
+    runs-on: ubuntu-latest
+    name: E2E (Playwright + axe, cross-browser)
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - run: pip install -e ".[dev]"
+      - name: Install web deps
+        working-directory: web
+        run: npm ci
+      - name: Install Playwright browsers
+        working-directory: web
+        run: npx playwright install --with-deps chromium firefox webkit
+      - name: Run E2E suite
+        working-directory: web
+        env:
+          CI: "1"
+        run: npm run test:e2e
+      - name: Upload Playwright report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: web/playwright-report/
+          retention-days: 14
+      - name: Upload screenshots and traces
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-test-results
+          path: web/test-results/
+          retention-days: 14

@@ -1,0 +1,244 @@
+# yaml-language-server: $schema=../../../schema/program-manifest-v1.0.json
+#
+# France — Allocation d'aide au retour à l'emploi (ARE) program manifest (v3 Phase D).
+# Bounded-duration income replacement under Code du travail Art. L5421-1 et seq.,
+# implemented via UNÉDIC convention, administered by France Travail.
+
+schema_version: "1.0"
+program_id: ei
+jurisdiction_id: jur-fr-national
+shape: unemployment_insurance
+status: active
+
+name:
+  en: Return-to-Employment Allowance (Allocation d'aide au retour à l'emploi, ARE)
+  fr: Allocation d'aide au retour à l'emploi (ARE)
+
+description:
+  en: Bounded-duration income replacement for involuntarily-unemployed workers, administered by France Travail (formerly Pôle emploi) under the UNÉDIC convention (Code du travail, Art. L5421-1 et seq.).
+  fr: Revenu de remplacement à durée limitée pour les travailleurs involontairement privés d'emploi, géré par France Travail (anciennement Pôle emploi) au titre de la convention UNÉDIC (Code du travail, Art. L5421-1 et suivants).
+
+authority_chain:
+  - id: auth-fr-ei-constitution
+    layer: constitution
+    title: Constitution de la Vᵉ République
+    citation: Constitution de 1958, Préambule (par renvoi à 1946, alinéa 11)
+    effective_date: 1958-10-04
+    url: https://www.conseil-constitutionnel.fr/le-bloc-de-constitutionnalite/texte-integral-de-la-constitution-du-4-octobre-1958-en-vigueur
+  - id: auth-fr-ei-code-travail
+    layer: act
+    title: Code du travail — Titre II (Indemnisation des travailleurs involontairement privés d'emploi)
+    citation: Code du travail, Art. L5421-1 et suivants
+    effective_date: 2008-05-01
+    url: https://www.legifrance.gouv.fr/codes/section_lc/LEGITEXT000006072050/LEGISCTA000006195800/
+    parent: auth-fr-ei-constitution
+  - id: auth-fr-ei-unedic
+    layer: regulation
+    title: Convention d'assurance chômage (UNÉDIC)
+    citation: Convention UNÉDIC du 14 avril 2017 (et avenants successifs)
+    effective_date: 2017-11-01
+    parent: auth-fr-ei-code-travail
+  - id: auth-fr-ei-france-travail
+    layer: program
+    title: France Travail (anciennement Pôle emploi)
+    citation: Code du travail, Art. L5311-1
+    parent: auth-fr-ei-code-travail
+  - id: auth-fr-ei-determination
+    layer: service
+    title: Ouverture des droits à l'allocation d'aide au retour à l'emploi
+    citation: Code du travail, Art. L5422-1 ; Convention UNÉDIC, Art. 3
+    parent: auth-fr-ei-france-travail
+
+legal_documents:
+  - id: doc-fr-ei-code-travail
+    type: statute
+    title: Code du travail — Cinquième partie (L'emploi)
+    citation: Code du travail, Livre IV, Titre II
+    effective_date: 2008-05-01
+    sections:
+      - id: sec-fr-ei-l5422-1
+        ref: Art. L5422-1
+        heading: Conditions d'attribution de l'allocation
+        text: >-
+          Ont droit à l'allocation d'assurance les travailleurs aptes au travail et recherchant un emploi qui satisfont à des conditions d'âge et d'activité antérieure ainsi qu'à toute autre condition prévue par les accords mentionnés à l'article L5422-20.
+      - id: sec-fr-ei-l5421-3
+        ref: Art. L5421-3
+        heading: Recherche active d'emploi
+        text: >-
+          Le bénéficiaire de l'allocation accomplit, à son initiative et avec l'aide du service public de l'emploi, des actes positifs et répétés de recherche d'emploi.
+      - id: sec-fr-ei-unedic-9
+        ref: Convention UNÉDIC, Art. 9
+        heading: Durée d'indemnisation
+        text: >-
+          La durée d'indemnisation est déterminée à raison d'un jour indemnisable pour chaque jour travaillé, dans la limite des durées maximales fixées par la convention en fonction de l'âge du salarié à la date de la fin du contrat de travail.
+
+rules:
+  - id: rule-ei-contribution
+    rule_type: residency_minimum
+    description: Affiliation minimale (130 jours travaillés ou 910 heures) au cours des 24 mois précédents
+    formal_expression: affiliation_days >= 130 in last 24 months
+    citation: Code du travail, Art. L5422-1 ; Convention UNÉDIC, Art. 3
+    source_document_id: doc-fr-ei-code-travail
+    source_section_ref: Art. L5422-1
+    param_key_prefix: fr-ei.rule.contribution
+    parameters:
+      min_years: { ref: fr-ei.rule.contribution.min_years }
+      home_countries: { ref: fr-ei.rule.contribution.home_countries }
+
+  - id: rule-ei-legal-status
+    rule_type: legal_status
+    description: Personne autorisée à travailler en France
+    formal_expression: "applicant.legal_status in ['citizen', 'permanent_resident']"
+    citation: Code du travail, Art. L5421-1
+    source_document_id: doc-fr-ei-code-travail
+    source_section_ref: Art. L5421-1
+    param_key_prefix: fr-ei.rule.legal-status
+    parameters:
+      accepted_statuses: { ref: fr-ei.rule.legal-status.accepted_statuses }
+
+  - id: rule-ei-evidence
+    rule_type: evidence_required
+    description: Attestation employeur destinée à France Travail
+    formal_expression: has_evidence('attestation_employeur')
+    citation: Code du travail, Art. R1234-9
+    source_document_id: doc-fr-ei-code-travail
+    source_section_ref: Art. R1234-9
+    param_key_prefix: fr-ei.rule.evidence
+    parameters:
+      required_types: { ref: fr-ei.rule.evidence.required_types }
+
+  - id: rule-ei-duration
+    rule_type: benefit_duration_bounded
+    description: Durée maximale d'indemnisation (variable selon affiliation et âge)
+    formal_expression: days = f(affiliation_days, age)
+    citation: Convention UNÉDIC, Art. 9
+    source_document_id: doc-fr-ei-code-travail
+    source_section_ref: Convention UNÉDIC, Art. 9
+    param_key_prefix: fr-ei.rule.duration
+    parameters:
+      weeks_total: { ref: fr-ei.rule.duration.weeks_total }
+      start_offset_days: { ref: fr-ei.rule.duration.start_offset_days }
+
+  - id: rule-ei-job-search
+    rule_type: active_obligation
+    description: Recherche active d'emploi auprès de France Travail
+    formal_expression: active_search AND inscription_france_travail
+    citation: Code du travail, Art. L5421-3
+    source_document_id: doc-fr-ei-code-travail
+    source_section_ref: Art. L5421-3
+    param_key_prefix: fr-ei.rule.job-search
+    parameters:
+      obligation_id: { ref: fr-ei.rule.job-search.obligation_id }
+      cadence: { ref: fr-ei.rule.job-search.cadence }
+
+demo_cases:
+  - id: demo-fr-ei-001
+    applicant:
+      id: app-fr-ei-001
+      date_of_birth: 1986-09-04
+      legal_name: Camille Bernard
+      legal_status: citizen
+      country_of_birth: FR
+    residency_periods:
+      - country: France
+        start_date: 1986-09-04
+        verified: true
+    evidence_items:
+      - id: ev-fr-ei-001-bc
+        type: birth_certificate
+        description: Acte de naissance
+        provided: true
+        verified: true
+      - id: ev-fr-ei-001-tax
+        type: tax_record
+        description: Avis d'imposition 2018-2024 + bulletins de paie
+        provided: true
+        verified: true
+      - id: ev-fr-ei-001-att
+        type: attestation_employeur
+        description: Attestation employeur destinée à France Travail
+        provided: true
+        verified: true
+
+  - id: demo-fr-ei-002
+    applicant:
+      id: app-fr-ei-002
+      date_of_birth: 1998-12-01
+      legal_name: Yann Le Roux
+      legal_status: permanent_resident
+      country_of_birth: BE
+    residency_periods:
+      - country: Belgium
+        start_date: 1998-12-01
+        end_date: 2025-09-30
+      - country: France
+        start_date: 2025-09-30
+        verified: true
+    evidence_items:
+      - id: ev-fr-ei-002-bc
+        type: birth_certificate
+        description: Acte de naissance belge
+        provided: true
+        verified: true
+      - id: ev-fr-ei-002-pr
+        type: residency_declaration
+        description: Titre de séjour
+        provided: true
+        verified: true
+      - id: ev-fr-ei-002-att
+        type: attestation_employeur
+        description: Attestation employeur (CDD courte durée)
+        provided: true
+        verified: true
+
+  - id: demo-fr-ei-003
+    applicant:
+      id: app-fr-ei-003
+      date_of_birth: 1981-04-17
+      legal_name: Sophie Martin
+      legal_status: citizen
+      country_of_birth: FR
+    residency_periods:
+      - country: France
+        start_date: 1981-04-17
+        verified: true
+    evidence_items:
+      - id: ev-fr-ei-003-bc
+        type: birth_certificate
+        description: Acte de naissance
+        provided: true
+        verified: true
+      - id: ev-fr-ei-003-tax
+        type: tax_record
+        description: Avis d'imposition 2005-2024
+        provided: true
+        verified: true
+      - id: ev-fr-ei-003-att
+        type: attestation_employeur
+        description: Attestation employeur (licenciement économique)
+        provided: true
+        verified: true
+
+  - id: demo-fr-ei-004
+    applicant:
+      id: app-fr-ei-004
+      date_of_birth: 1993-08-22
+      legal_name: Lucas Petit
+      legal_status: citizen
+      country_of_birth: FR
+    residency_periods:
+      - country: France
+        start_date: 1993-08-22
+        verified: true
+    evidence_items:
+      - id: ev-fr-ei-004-bc
+        type: birth_certificate
+        description: Acte de naissance
+        provided: true
+        verified: true
+      - id: ev-fr-ei-004-tax
+        type: tax_record
+        description: Avis d'imposition partiel
+        provided: true
+        verified: true
+      # No attestation_employeur — INSUFFICIENT_EVIDENCE

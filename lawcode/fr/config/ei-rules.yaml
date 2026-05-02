@@ -1,0 +1,37 @@
+# yaml-language-server: $schema=../../../schema/lawcode-v1.0.json
+# fr/config/ei-rules.yaml — substrate values for FR Allocations chômage (ARE) (v3 Phase D).
+
+defaults:
+  domain: rule
+  jurisdiction_id: fr-ei
+  effective_from: '1900-01-01'
+values:
+  - key: fr-ei.rule.contribution.min_years
+    value: 1
+    value_type: number
+    citation: Code du travail, Art. L5422-1 ; Convention UNÉDIC Art. 3 (130 jours ≈ 4 mois travaillés ; durée d'affiliation pondérée sur 24 mois — 1 an retenu comme baseline illustratif)
+  - key: fr-ei.rule.contribution.home_countries
+    value: [FR, FRANCE]
+    value_type: list
+  - key: fr-ei.rule.legal-status.accepted_statuses
+    value: [citizen, permanent_resident]
+    value_type: list
+  - key: fr-ei.rule.evidence.required_types
+    value: [attestation_employeur]
+    value_type: list
+    citation: Code du travail, Art. R1234-9
+  - key: fr-ei.rule.duration.weeks_total
+    value: 24
+    value_type: number
+    citation: Convention UNÉDIC, Art. 9
+    rationale: 'Illustrative midpoint — durée maximale 18-27 mois selon âge et affiliation. Real entitlement varies with age cohorts and affiliation accumulated.'
+  - key: fr-ei.rule.duration.start_offset_days
+    value: 0
+    value_type: number
+  - key: fr-ei.rule.job-search.obligation_id
+    value: fr-france-travail-active-search
+    value_type: string
+  - key: fr-ei.rule.job-search.cadence
+    value: monthly
+    value_type: string
+    citation: Code du travail, Art. L5421-3 (actes positifs et répétés)

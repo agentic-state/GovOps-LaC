@@ -1,0 +1,269 @@
+# yaml-language-server: $schema=../../../schema/program-manifest-v1.0.json
+#
+# Canada — Old Age Security program manifest (v3 Phase A migration).
+# Per ADR-014, structure (rules / authority / legal documents / demo cases) lives
+# here. Parameter values live in the ConfigValue substrate
+# (lawcode/ca/config/rules.yaml) and are referenced via {ref: '<key>'}.
+# Engine output via this manifest must be byte-identical to the seed.py path
+# until the Phase I cutover (deprecated-alias removal).
+
+schema_version: "1.0"
+program_id: oas
+jurisdiction_id: jur-ca-federal
+shape: old_age_pension
+status: active
+
+name:
+  en: Old Age Security
+  fr: Sécurité de la vieillesse
+
+description:
+  en: Federal monthly pension for residents of Canada aged 65 and over (Old Age Security Act, R.S.C. 1985, c. O-9).
+  fr: Pension mensuelle fédérale pour les résidents du Canada âgés de 65 ans et plus (Loi sur la sécurité de la vieillesse, L.R.C. 1985, ch. O-9).
+
+authority_chain:
+  - id: auth-constitution
+    layer: constitution
+    title: Constitution Act, 1867
+    citation: 30 & 31 Vict., c. 3 (U.K.), s. 91(2A)
+    effective_date: 1867-07-01
+    url: https://laws-lois.justice.gc.ca/eng/const/page-1.html
+  - id: auth-oas-act
+    layer: act
+    title: Old Age Security Act
+    citation: R.S.C., 1985, c. O-9
+    effective_date: 1985-01-01
+    url: https://laws-lois.justice.gc.ca/eng/acts/o-9/
+    parent: auth-constitution
+  - id: auth-oas-regs
+    layer: regulation
+    title: Old Age Security Regulations
+    citation: C.R.C., c. 1246
+    effective_date: 1985-01-01
+    url: https://laws-lois.justice.gc.ca/eng/regulations/c.r.c.,_c._1246/
+    parent: auth-oas-act
+  - id: auth-oas-delivery
+    layer: program
+    title: Federal Department Responsible for OAS Delivery
+    citation: Department of Employment and Social Development Act, S.C. 2005, c. 34
+    effective_date: 2005-12-12
+    parent: auth-oas-act
+  - id: auth-oas-program
+    layer: program
+    title: Old Age Security Program
+    citation: OAS Act, Part I
+    parent: auth-oas-delivery
+  - id: auth-oas-eligibility
+    layer: service
+    title: OAS Initial Eligibility Determination
+    citation: OAS Act, ss. 3-3.1
+    parent: auth-oas-program
+
+legal_documents:
+  - id: doc-oas-act
+    type: statute
+    title: Old Age Security Act
+    citation: R.S.C., 1985, c. O-9
+    effective_date: 1985-01-01
+    sections:
+      - id: sec-3-1
+        ref: s. 3(1)
+        heading: Payment of pension
+        text: >-
+          Subject to this Act and the regulations, a monthly pension may be paid to
+          every person who, being sixty-five years of age or over, has resided in Canada
+          after reaching eighteen years of age and after July 1, 1977 for periods the
+          aggregate of which is not less than ten years.
+      - id: sec-3-2
+        ref: s. 3(2)
+        heading: Amount of pension
+        text: >-
+          The amount of the pension that may be paid to a pensioner is (a) where the
+          pensioner has resided in Canada after reaching eighteen years of age and after
+          July 1, 1977 for periods the aggregate of which is not less than forty years,
+          a full pension, and (b) in any other case, a proportion of a full pension
+          equal to one-fortieth of a full pension for each complete year of residence in
+          Canada after the pensioner reached eighteen years of age.
+      - id: sec-3-1-1
+        ref: s. 3.1(1)
+        heading: Requirement for application
+        text: >-
+          No pension may be paid to any person unless an application therefor has been
+          made by or on behalf of that person and payment of the pension has been approved.
+  - id: doc-oas-regs
+    type: regulation
+    title: Old Age Security Regulations
+    citation: C.R.C., c. 1246
+    effective_date: 1985-01-01
+    sections:
+      - id: sec-reg-21
+        ref: s. 21(1)
+        heading: Evidence of age
+        text: >-
+          An applicant for a benefit shall furnish evidence of the applicant's age,
+          which evidence shall be a birth certificate or a certified copy thereof.
+
+rules:
+  - id: rule-age-65
+    rule_type: age_threshold
+    description: Applicant must be 65 years of age or older
+    formal_expression: applicant.age >= 65
+    citation: Old Age Security Act, R.S.C. 1985, c. O-9, s. 3(1)
+    source_document_id: doc-oas-act
+    source_section_ref: s. 3(1)
+    param_key_prefix: ca.rule.age-65
+    parameters:
+      min_age: { ref: ca.rule.age-65.min_age }
+
+  - id: rule-residency-10
+    rule_type: residency_minimum
+    description: Minimum 10 years of Canadian residency after age 18
+    formal_expression: canadian_residency_years_after_18 >= 10
+    citation: Old Age Security Act, R.S.C. 1985, c. O-9, s. 3(1)
+    source_document_id: doc-oas-act
+    source_section_ref: s. 3(1)
+    param_key_prefix: ca.rule.residency-10
+    parameters:
+      min_years: { ref: ca.rule.residency-10.min_years }
+      home_countries: { ref: ca.rule.residency-10.home_countries }
+
+  - id: rule-residency-pension-type
+    rule_type: residency_partial
+    description: Full pension at 40+ years; partial pension at 10-39 years (1/40 per year)
+    formal_expression: pension_ratio = min(residency_years, 40) / 40
+    citation: Old Age Security Act, R.S.C. 1985, c. O-9, s. 3(2)
+    source_document_id: doc-oas-act
+    source_section_ref: s. 3(2)
+    param_key_prefix: ca.rule.residency-pension-type
+    parameters:
+      full_years: { ref: ca.rule.residency-pension-type.full_years }
+      min_years: { ref: ca.rule.residency-pension-type.min_years }
+
+  - id: rule-legal-status
+    rule_type: legal_status
+    description: Applicant must be a Canadian citizen or permanent resident
+    formal_expression: "applicant.legal_status in ['citizen', 'permanent_resident']"
+    citation: Old Age Security Act, R.S.C. 1985, c. O-9, s. 3(1)
+    source_document_id: doc-oas-act
+    source_section_ref: s. 3(1)
+    param_key_prefix: ca.rule.legal-status
+    parameters:
+      accepted_statuses: { ref: ca.rule.legal-status.accepted_statuses }
+
+  - id: rule-evidence-age
+    rule_type: evidence_required
+    description: Evidence of age must be provided (birth certificate or equivalent)
+    formal_expression: has_evidence('birth_certificate') or has_evidence('passport')
+    citation: Old Age Security Regulations, C.R.C. c. 1246, s. 21(1)
+    source_document_id: doc-oas-regs
+    source_section_ref: s. 21(1)
+    param_key_prefix: ca.rule.evidence-age
+    parameters:
+      required_types: { ref: ca.rule.evidence-age.required_types }
+
+  - id: rule-calc-oas-amount
+    rule_type: calculation
+    description: "Monthly OAS pension amount: base × (eligible years ÷ 40)"
+    formal_expression: amount = base_monthly_amount × (min(residency_years, 40) ÷ 40)
+    citation: Old Age Security Act, R.S.C. 1985, c. O-9, ss. 7-8
+    source_document_id: doc-oas-act
+    source_section_ref: ss. 7-8
+    parameters:
+      currency: { ref: ca.calc.oas.currency }
+      period: { ref: ca.calc.oas.period }
+      formula: { include: formulas/oas-amount.yaml }
+
+demo_cases:
+  - id: demo-case-001
+    applicant:
+      id: app-001
+      date_of_birth: 1955-03-15
+      legal_name: Margaret Chen
+      legal_status: citizen
+      country_of_birth: CA
+    residency_periods:
+      - country: Canada
+        start_date: 1955-03-15
+        verified: true
+        evidence_ids: [ev-001-tax]
+    evidence_items:
+      - id: ev-001-bc
+        type: birth_certificate
+        description: Canadian birth certificate
+        provided: true
+        verified: true
+      - id: ev-001-tax
+        type: tax_record
+        description: CRA tax filing history 1973-2025
+        provided: true
+        verified: true
+
+  - id: demo-case-002
+    applicant:
+      id: app-002
+      date_of_birth: 1975-08-22
+      legal_name: David Park
+      legal_status: citizen
+      country_of_birth: CA
+    residency_periods:
+      - country: Canada
+        start_date: 1975-08-22
+        verified: true
+    evidence_items:
+      - id: ev-002-bc
+        type: birth_certificate
+        description: Canadian birth certificate
+        provided: true
+        verified: true
+      - id: ev-002-tax
+        type: tax_record
+        description: CRA tax filing history
+        provided: true
+
+  - id: demo-case-003
+    applicant:
+      id: app-003
+      date_of_birth: 1958-11-03
+      legal_name: Amara Osei
+      legal_status: permanent_resident
+      country_of_birth: GH
+    residency_periods:
+      - country: Ghana
+        start_date: 1958-11-03
+        end_date: 1993-06-01
+      - country: Canada
+        start_date: 1993-06-01
+        verified: true
+        evidence_ids: [ev-003-tax]
+    evidence_items:
+      - id: ev-003-bc
+        type: birth_certificate
+        description: Ghanaian birth certificate (translated)
+        provided: true
+        verified: true
+      - id: ev-003-tax
+        type: tax_record
+        description: CRA tax filing history 1993-2025
+        provided: true
+        verified: true
+      - id: ev-003-pr
+        type: residency_declaration
+        description: Permanent resident card
+        provided: true
+        verified: true
+
+  - id: demo-case-004
+    applicant:
+      id: app-004
+      date_of_birth: 1952-01-10
+      legal_name: Jean-Pierre Tremblay
+      legal_status: citizen
+      country_of_birth: CA
+    residency_periods:
+      - country: Canada
+        start_date: 1952-01-10
+    evidence_items:
+      - id: ev-004-tax
+        type: tax_record
+        description: CRA tax filing history
+        provided: true

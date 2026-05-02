@@ -1,0 +1,96 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/agentic-state/GovOps-LaC/schema/lawcode-v1.0.json",
+  "title": "lawcode/*.yaml file v1.0",
+  "description": "Shape of an on-disk YAML file under lawcode/. Per ADR-003 each file is a `defaults` mapping (merged into every record below) and a `values` list. The merged record must satisfy the ConfigValue v1.0 schema.",
+  "type": "object",
+  "required": ["values"],
+  "additionalProperties": false,
+  "properties": {
+    "defaults": {
+      "description": "Optional mapping merged into every record under `values`. Per-record fields override defaults.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "domain": { "type": "string" },
+        "jurisdiction_id": { "type": ["string", "null"] },
+        "value_type": {
+          "type": "string",
+          "enum": ["number", "string", "bool", "list", "object", "enum", "prompt", "formula", "template"]
+        },
+        "effective_from": {
+          "type": "string",
+          "anyOf": [
+            { "format": "date" },
+            { "format": "date-time" }
+          ]
+        },
+        "effective_to": {
+          "type": ["string", "null"],
+          "anyOf": [
+            { "type": "null" },
+            { "type": "string", "format": "date" },
+            { "type": "string", "format": "date-time" }
+          ]
+        },
+        "citation": { "type": ["string", "null"] },
+        "author": { "type": "string" },
+        "approved_by": { "type": ["string", "null"] },
+        "rationale": { "type": "string" },
+        "status": {
+          "type": "string",
+          "enum": ["draft", "pending", "approved", "rejected"]
+        },
+        "language": { "type": ["string", "null"] }
+      }
+    },
+    "values": {
+      "description": "List of ConfigValue records. Each item is merged with `defaults` and must satisfy ConfigValue v1.0.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["key"],
+        "additionalProperties": false,
+        "properties": {
+          "key": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9._-]*$",
+            "minLength": 3
+          },
+          "domain": { "type": "string" },
+          "jurisdiction_id": { "type": ["string", "null"] },
+          "value": {},
+          "value_type": {
+            "type": "string",
+            "enum": ["number", "string", "bool", "list", "object", "enum", "prompt", "formula", "template"]
+          },
+          "effective_from": {
+            "type": "string",
+            "anyOf": [
+              { "format": "date" },
+              { "format": "date-time" }
+            ]
+          },
+          "effective_to": {
+            "type": ["string", "null"],
+            "anyOf": [
+              { "type": "null" },
+              { "type": "string", "format": "date" },
+              { "type": "string", "format": "date-time" }
+            ]
+          },
+          "citation": { "type": ["string", "null"] },
+          "author": { "type": "string" },
+          "approved_by": { "type": ["string", "null"] },
+          "rationale": { "type": "string" },
+          "supersedes": { "type": ["string", "null"] },
+          "status": {
+            "type": "string",
+            "enum": ["draft", "pending", "approved", "rejected"]
+          },
+          "language": { "type": ["string", "null"] }
+        }
+      }
+    }
+  }
+}

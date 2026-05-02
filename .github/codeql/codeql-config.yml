@@ -1,0 +1,67 @@
+# CodeQL configuration for GovOps.
+#
+# Extends the default `security-extended` + `security-and-quality` query
+# packs (configured in .github/workflows/codeql.yml) with project-specific
+# file-level exclusions.
+#
+# Decision authority: the maintainer accepting an exclusion here is the
+# same decision they'd make accepting an alert dismissal — but durable
+# instead of per-PR. The advantage is that the rationale lives in source
+# control next to the code it justifies, where a future reviewer can
+# re-evaluate both the exclusion and the underlying guards in one read.
+
+name: "GovOps CodeQL config"
+
+# File-level exclusions. CodeQL's simple config-file schema doesn't
+# actually support per-rule per-path filtering (the `query-filters` block
+# accepts `exclude.id` and `exclude.tags` only — earlier attempts to nest
+# a `paths:` constraint were silently ignored, leaving the alerts intact).
+# The supported primitive is `paths-ignore`, which excludes a file from
+# ALL analysis (every rule, not just specific rule×path pairs).
+#
+# This is more aggressive than ideal. We accept the trade-off for the
+# files listed here because each carries explicit defense-in-depth that
+# replaces the rule's coverage; the lost generic-rule coverage on a small
+# file would surface in code review anyway.
+#
+# v0.5.0 polish: revisit when CodeQL supports per-rule path filters in
+# the simple config file, or migrate to a custom .qls query suite that
+# can express "exclude rule X for file Y only".
+paths-ignore:
+  # src/govops/federation.py — `py/path-injection` taint analyzer doesn't
+  # model the file's custom sanitizers:
+  #
+  #   _safe_publisher_id(pid) — validates pid against
+  #     `^[a-z0-9][a-z0-9_-]*$`, rejecting path separators, parent
+  #     traversal, drive letters, leading dots, whitespace, uppercase.
+  #     No value reaches a pathlib join without passing this guard.
+  #
+  #   _safe_relative_path(p) — validates manifest-supplied file paths via
+  #     PurePosixPath, rejecting absolute paths, parent-traversal segments,
+  #     backslashes, and Windows drive letters. Belt-and-braces: every
+  #     resolved path is then re-checked with .resolve().relative_to() so
+  #     symlink escapes are caught even when the literal path looks safe.
+  #
+  # Both guards landed at commit c33f3c4. They raise UnsafePath (subclass
+  # of FederationError → ValueError); the API layer maps that to a 4xx.
+  # Tests pin both guards: 13 publisher_id cases + 9 relative-path cases
+  # + an integration test on set_pack_enabled (TestPublisherIdGuard +
+  # TestManifestPathGuard + TestSetPackEnabledGuard).
+  #
+  # Why not fix the code instead: the alert reflects a CodeQL modelling
+  # gap, not a real vulnerability. Adding more sanitization would be
+  # cargo-culting; the existing guards are already maximal.
+  - "src/govops/federation.py"
+
+# Note: src/govops/api.py is NOT excluded. The 5 `py/url-redirection`
+# false positives surfaced earlier on FastAPI route handlers were
+# dismissed individually via the code-scanning API on 2026-04-28 (alerts
+# #1-5 in the repo's history). If a real redirect handler ever lands
+# (e.g. a /api/redirect/{target} route or a Location-setting middleware),
+# the rule will fire again and the developer adding it should address
+# the new findings on merit.
+#
+# Note: this config does NOT filter `py/unused-import`. The 12 unused-
+# import notices CodeQL flagged on 2026-04-28 were resolved at commit
+# c33f3c4 by removing the actual unused names — that's the right
+# disposition for style notices, not configuration filtering.

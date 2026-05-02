@@ -1,0 +1,21 @@
+# yaml-language-server: $schema=../../schema/lawcode-v1.0.json
+# global/config.yaml — generated from legacy_constants.py at Phase 3.2 cutover.
+# Schema: defaults + values list per ADR-003 §Mitigations.
+
+defaults:
+  domain: config
+  jurisdiction_id: global
+  effective_from: '1900-01-01'
+values:
+- key: global.config.default_language
+  value: en
+  value_type: string
+- key: global.config.supported_languages
+  value:
+    en: English
+    fr: Francais
+    pt: Portugues
+    es: Espanol
+    de: Deutsch
+    uk: Ukrainska
+  value_type: object

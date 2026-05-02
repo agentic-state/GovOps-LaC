@@ -1,0 +1,2886 @@
+{
+  "About": {
+    "de": "Über",
+    "es-MX": "Acerca de",
+    "fr": "À propos",
+    "pt-BR": "Sobre",
+    "uk": "Про проєкт"
+  },
+  "About GovOps": {
+    "de": "Über GovOps",
+    "es-MX": "Acerca de GovOps",
+    "fr": "À propos de GovOps",
+    "pt-BR": "Sobre o GovOps",
+    "uk": "Про GovOps"
+  },
+  "Acting as {user}": {
+    "de": "Handelnd als {user}",
+    "es-MX": "Actuando como {user}",
+    "fr": "Agissant en tant que {user}",
+    "pt-BR": "Atuando como {user}",
+    "uk": "Дію виконує {user}"
+  },
+  "Action failed": {
+    "de": "Aktion fehlgeschlagen",
+    "es-MX": "La acción falló",
+    "fr": "Échec de l'action",
+    "pt-BR": "A ação falhou",
+    "uk": "Дію не виконано"
+  },
+  "Active": {
+    "de": "Aktiv",
+    "es-MX": "Activo",
+    "fr": "Actif",
+    "pt-BR": "Ativo",
+    "uk": "Активний"
+  },
+  "Add another period": {
+    "de": "Weitere Periode hinzufügen",
+    "es-MX": "Agregar otro periodo",
+    "fr": "Ajouter une période",
+    "pt-BR": "Adicionar outro período",
+    "uk": "Додати ще період"
+  },
+  "Admin": {
+    "de": "Verwaltung",
+    "es-MX": "Administración",
+    "fr": "Administration",
+    "pt-BR": "Administração",
+    "uk": "Адміністрування"
+  },
+  "Aligned initiatives (aligned-initiatives.md)": {
+    "de": "Verwandte Initiativen (aligned-initiatives.md)",
+    "es-MX": "Iniciativas alineadas (aligned-initiatives.md)",
+    "fr": "Initiatives alignées (aligned-initiatives.md)",
+    "pt-BR": "Iniciativas alinhadas (aligned-initiatives.md)",
+    "uk": "Споріднені ініціативи (aligned-initiatives.md)"
+  },
+  "All": {
+    "de": "Alle",
+    "es-MX": "Todos",
+    "fr": "Tous",
+    "pt-BR": "Todos",
+    "uk": "Усі"
+  },
+  "All domains": {
+    "de": "Alle Domänen",
+    "es-MX": "Todos los dominios",
+    "fr": "Tous les domaines",
+    "pt-BR": "Todos os domínios",
+    "uk": "Усі домени"
+  },
+  "All jurisdictions": {
+    "de": "Alle Zuständigkeiten",
+    "es-MX": "Todas las jurisdicciones",
+    "fr": "Toutes les juridictions",
+    "pt-BR": "Todas as jurisdições",
+    "uk": "Усі юрисдикції"
+  },
+  "All languages": {
+    "de": "Alle Sprachen",
+    "es-MX": "Todos los idiomas",
+    "fr": "Toutes les langues",
+    "pt-BR": "Todos os idiomas",
+    "uk": "Усі мови"
+  },
+  "Allow unsigned": {
+    "de": "Unsigniert erlauben",
+    "es-MX": "Permitir sin firma",
+    "fr": "Autoriser non signé",
+    "pt-BR": "Permitir sem assinatura",
+    "uk": "Дозволити без підпису"
+  },
+  "Approvals": {
+    "de": "Freigaben",
+    "es-MX": "Aprobaciones",
+    "fr": "Approbations",
+    "pt-BR": "Aprovações",
+    "uk": "Затвердження"
+  },
+  "Approvals queue": {
+    "de": "Genehmigungswarteschlange",
+    "es-MX": "Cola de aprobaciones",
+    "fr": "File d'approbations",
+    "pt-BR": "Fila de aprovações",
+    "uk": "Черга затверджень"
+  },
+  "Approvals queue runbook": {
+    "de": "Runbook für die Genehmigungswarteschlange",
+    "es-MX": "Runbook de la cola de aprobaciones",
+    "fr": "Runbook de la file d'approbations",
+    "pt-BR": "Runbook da fila de aprovações",
+    "uk": "Runbook черги затверджень"
+  },
+  "Approve": {
+    "de": "Freigeben",
+    "es-MX": "Aprobar",
+    "fr": "Approuver",
+    "pt-BR": "Aprovar",
+    "uk": "Затвердити"
+  },
+  "Approve this draft?": {
+    "de": "Diesen Entwurf freigeben?",
+    "es-MX": "¿Aprobar este borrador?",
+    "fr": "Approuver ce brouillon ?",
+    "pt-BR": "Aprovar este rascunho?",
+    "uk": "Затвердити цю чернетку?"
+  },
+  "Approved": {
+    "de": "Freigegeben",
+    "es-MX": "Aprobado",
+    "fr": "Approuvé",
+    "pt-BR": "Aprovado",
+    "uk": "Затверджено"
+  },
+  "Approved by": {
+    "de": "Genehmigt von",
+    "es-MX": "Aprobado por",
+    "fr": "Approuvé par",
+    "pt-BR": "Aprovado por",
+    "uk": "Затверджено"
+  },
+  "Architecture decisions (ADRs/)": {
+    "de": "Architekturentscheidungen (ADRs/)",
+    "es-MX": "Decisiones de arquitectura (ADRs/)",
+    "fr": "Décisions d'architecture (ADRs/)",
+    "pt-BR": "Decisões de arquitetura (ADRs/)",
+    "uk": "Архітектурні рішення (ADRs/)"
+  },
+  "Audit publishes the record": {
+    "de": "Audit veröffentlicht den Datensatz",
+    "es-MX": "La auditoría publica el registro",
+    "fr": "L'audit publie le dossier",
+    "pt-BR": "A auditoria publica o registro",
+    "uk": "Аудит публікує запис"
+  },
+  "Author": {
+    "de": "Autor",
+    "es-MX": "Autor",
+    "fr": "Auteur",
+    "pt-BR": "Autor",
+    "uk": "Автор"
+  },
+  "Authored by a human": {
+    "de": "Von einem Menschen verfasst",
+    "es-MX": "Redactado por una persona",
+    "fr": "Rédigé par un humain",
+    "pt-BR": "Redigido por uma pessoa",
+    "uk": "Складено людиною"
+  },
+  "Authority": {
+    "de": "Autorität",
+    "es-MX": "Autoridad",
+    "fr": "Autorité",
+    "pt-BR": "Autoridade",
+    "uk": "Орган"
+  },
+  "Authority chain": {
+    "de": "Autoritätskette",
+    "es-MX": "Cadena de autoridad",
+    "fr": "Chaîne d'autorité",
+    "pt-BR": "Cadeia de autoridade",
+    "uk": "Ланцюг повноважень"
+  },
+  "Autosaved {time}": {
+    "de": "Gespeichert {time}",
+    "es-MX": "Guardado {time}",
+    "fr": "Sauvegardé {time}",
+    "pt-BR": "Salvo {time}",
+    "uk": "Збережено {time}"
+  },
+  "Back to approvals": {
+    "de": "Zurück zu den Freigaben",
+    "es-MX": "Volver a aprobaciones",
+    "fr": "Retour aux approbations",
+    "pt-BR": "Voltar às aprovações",
+    "uk": "Назад до затверджень"
+  },
+  "Back to configuration": {
+    "de": "Zurück zur Konfiguration",
+    "es-MX": "Volver a configuración",
+    "fr": "Retour à la configuration",
+    "pt-BR": "Voltar à configuração",
+    "uk": "Назад до конфігурації"
+  },
+  "Back to jurisdictions": {
+    "de": "Zurück zu den Zuständigkeiten",
+    "es-MX": "Volver a jurisdicciones",
+    "fr": "Retour aux juridictions",
+    "pt-BR": "Voltar às jurisdições",
+    "uk": "Назад до юрисдикцій"
+  },
+  "Back to search": {
+    "de": "Zurück zur Suche",
+    "es-MX": "Volver a la búsqueda",
+    "fr": "Retour à la recherche",
+    "pt-BR": "Voltar à busca",
+    "uk": "Назад до пошуку"
+  },
+  "Back to timeline": {
+    "de": "Zurück zum Verlauf",
+    "es-MX": "Volver al historial",
+    "fr": "Retour à la chronologie",
+    "pt-BR": "Voltar ao histórico",
+    "uk": "Назад до історії"
+  },
+  "Brazil": {
+    "de": "Brasilien",
+    "es-MX": "Brasil",
+    "fr": "Brésil",
+    "pt-BR": "Brasil",
+    "uk": "Бразилія"
+  },
+  "Breadcrumb": {
+    "de": "Brotkrumen-Navigation",
+    "es-MX": "Migas de pan",
+    "fr": "Fil d'Ariane",
+    "pt-BR": "Trilha de navegação",
+    "uk": "Хлібні крихти"
+  },
+  "Browse authority chain": {
+    "de": "Autoritätskette durchsuchen",
+    "es-MX": "Explorar cadena de autoridad",
+    "fr": "Parcourir la chaîne d'autorité",
+    "pt-BR": "Explorar cadeia de autoridade",
+    "uk": "Переглянути ланцюг повноважень"
+  },
+  "Browse the live registry →": {
+    "de": "Live-Register durchsuchen →",
+    "es-MX": "Explorar el registro en vivo →",
+    "fr": "Parcourir le registre en direct →",
+    "pt-BR": "Explorar o registro ao vivo →",
+    "uk": "Переглянути живий реєстр →"
+  },
+  "Calculation steps": {
+    "de": "Rechenschritte",
+    "es-MX": "Pasos del cálculo",
+    "fr": "Étapes du calcul",
+    "pt-BR": "Etapas do cálculo",
+    "uk": "Кроки розрахунку"
+  },
+  "Cancel": {
+    "de": "Abbrechen",
+    "es-MX": "Cancelar",
+    "fr": "Annuler",
+    "pt-BR": "Cancelar",
+    "uk": "Скасувати"
+  },
+  "Case-handling runbook": {
+    "de": "Runbook für die Fallbearbeitung",
+    "es-MX": "Runbook de manejo de casos",
+    "fr": "Runbook de gestion des dossiers",
+    "pt-BR": "Runbook de manejo de casos",
+    "uk": "Runbook опрацювання справ"
+  },
+  "Cases": {
+    "de": "Fälle",
+    "es-MX": "Casos",
+    "fr": "Dossiers",
+    "pt-BR": "Casos",
+    "uk": "Справи"
+  },
+  "Changes requested": {
+    "de": "Änderungen angefordert",
+    "es-MX": "Cambios solicitados",
+    "fr": "Modifications demandées",
+    "pt-BR": "Alterações solicitadas",
+    "uk": "Запитано зміни"
+  },
+  "Check eligibility": {
+    "de": "Anspruch prüfen",
+    "es-MX": "Verificar elegibilidad",
+    "fr": "Vérifier l'éligibilité",
+    "pt-BR": "Verificar elegibilidade",
+    "uk": "Перевірити право"
+  },
+  "Checking…": {
+    "de": "Prüfung läuft…",
+    "es-MX": "Verificando…",
+    "fr": "Vérification…",
+    "pt-BR": "Verificando…",
+    "uk": "Перевірка…"
+  },
+  "Choose a country.": {
+    "de": "Wählen Sie ein Land aus.",
+    "es-MX": "Elige un país.",
+    "fr": "Choisissez un pays.",
+    "pt-BR": "Escolha um país.",
+    "uk": "Оберіть країну."
+  },
+  "Choose your country": {
+    "de": "Wählen Sie Ihr Land",
+    "es-MX": "Elige tu país",
+    "fr": "Choisissez votre pays",
+    "pt-BR": "Escolha seu país",
+    "uk": "Оберіть свою країну"
+  },
+  "Citation impact": {
+    "de": "Zitatwirkung",
+    "es-MX": "Impacto de citación",
+    "fr": "Impact des citations",
+    "pt-BR": "Impacto de citação",
+    "uk": "Вплив посилання"
+  },
+  "Citation impact results": {
+    "de": "Ergebnisse der Zitatauswirkung",
+    "es-MX": "Resultados de impacto de la cita",
+    "fr": "Résultats d'impact des citations",
+    "pt-BR": "Resultados de impacto da citação",
+    "uk": "Результати впливу цитування"
+  },
+  "Citizen": {
+    "de": "Staatsbürger:in",
+    "es-MX": "Ciudadano/a",
+    "fr": "Citoyen·ne",
+    "pt-BR": "Cidadão(ã)",
+    "uk": "Громадянин(ка)"
+  },
+  "Citizen contribution": {
+    "de": "Bürgerbeitrag",
+    "es-MX": "Aportación ciudadana",
+    "fr": "Contribution citoyenne",
+    "pt-BR": "Contribuição cidadã",
+    "uk": "Внесок громадянина"
+  },
+  "Citizen receives a decision": {
+    "de": "Bürger erhält Entscheidung",
+    "es-MX": "El ciudadano recibe una decisión",
+    "fr": "Le citoyen reçoit une décision",
+    "pt-BR": "O cidadão recebe uma decisão",
+    "uk": "Громадянин отримує рішення"
+  },
+  "Citizens": {
+    "de": "Bürgerinnen und Bürger",
+    "es-MX": "Ciudadanos",
+    "fr": "Citoyens",
+    "pt-BR": "Cidadãos",
+    "uk": "Громадяни"
+  },
+  "Clear all": {
+    "de": "Alle löschen",
+    "es-MX": "Borrar todo",
+    "fr": "Tout effacer",
+    "pt-BR": "Limpar tudo",
+    "uk": "Очистити все"
+  },
+  "Clear filters": {
+    "de": "Filter zurücksetzen",
+    "es-MX": "Limpiar filtros",
+    "fr": "Effacer les filtres",
+    "pt-BR": "Limpar filtros",
+    "uk": "Скинути фільтри"
+  },
+  "Co-authored: agent draft, human ratification": {
+    "de": "Mitverfasst: Agentenentwurf, menschliche Bestätigung",
+    "es-MX": "Coautoría: borrador del agente, ratificación humana",
+    "fr": "Co-rédigé : ébauche d'agent, ratification humaine",
+    "pt-BR": "Coautoria: rascunho do agente, ratificação humana",
+    "uk": "Спільне авторство: чернетка агента, людська ратифікація"
+  },
+  "Collapse": {
+    "de": "Einklappen",
+    "es-MX": "Contraer",
+    "fr": "Réduire",
+    "pt-BR": "Recolher",
+    "uk": "Згорнути"
+  },
+  "Comment": {
+    "de": "Kommentar",
+    "es-MX": "Comentario",
+    "fr": "Commentaire",
+    "pt-BR": "Comentário",
+    "uk": "Коментар"
+  },
+  "Commit the batch": {
+    "de": "Die Charge übergeben",
+    "es-MX": "Confirmar el lote",
+    "fr": "Valider le lot",
+    "pt-BR": "Confirmar o lote",
+    "uk": "Закомітити партію"
+  },
+  "Compare": {
+    "de": "Vergleichen",
+    "es-MX": "Comparar",
+    "fr": "Comparer",
+    "pt-BR": "Comparar",
+    "uk": "Порівняти"
+  },
+  "Compare with": {
+    "de": "Vergleichen mit",
+    "es-MX": "Comparar con",
+    "fr": "Comparer avec",
+    "pt-BR": "Comparar com",
+    "uk": "Порівняти з"
+  },
+  "Compare with previous runs": {
+    "de": "Mit vorherigen Läufen vergleichen",
+    "es-MX": "Comparar con ejecuciones anteriores",
+    "fr": "Comparer aux exécutions précédentes",
+    "pt-BR": "Comparar com execuções anteriores",
+    "uk": "Порівняти з попередніми запусками"
+  },
+  "Comparing versions of {key} ({jurisdiction})": {
+    "de": "Vergleich der Versionen von {key} ({jurisdiction})",
+    "es-MX": "Comparando versiones de {key} ({jurisdiction})",
+    "fr": "Comparaison des versions de {key} ({jurisdiction})",
+    "pt-BR": "Comparando versões de {key} ({jurisdiction})",
+    "uk": "Порівняння версій {key} ({jurisdiction})"
+  },
+  "Config": {
+    "de": "Konfiguration",
+    "es-MX": "Configuración",
+    "fr": "Configuration",
+    "pt-BR": "Configuração",
+    "uk": "Конфігурація"
+  },
+  "ConfigValue diff": {
+    "de": "ConfigValue-Diff",
+    "es-MX": "Diferencia de ConfigValue",
+    "fr": "Diff ConfigValue",
+    "pt-BR": "Diff de ConfigValue",
+    "uk": "Порівняння ConfigValue"
+  },
+  "ConfigValue registry runbook": {
+    "de": "Runbook für das ConfigValue-Register",
+    "es-MX": "Runbook del registro ConfigValue",
+    "fr": "Runbook du registre ConfigValue",
+    "pt-BR": "Runbook do registro ConfigValue",
+    "uk": "Runbook реєстру ConfigValue"
+  },
+  "ConfigValue {id} not found": {
+    "de": "ConfigValue {id} nicht gefunden",
+    "es-MX": "ConfigValue {id} no encontrado",
+    "fr": "ConfigValue {id} introuvable",
+    "pt-BR": "ConfigValue {id} não encontrado",
+    "uk": "ConfigValue {id} не знайдено"
+  },
+  "Configuration registry": {
+    "de": "Konfigurationsregister",
+    "es-MX": "Registro de configuración",
+    "fr": "Registre de configuration",
+    "pt-BR": "Registro de configuração",
+    "uk": "Реєстр конфігурації"
+  },
+  "Configuration values": {
+    "de": "Konfigurationswerte",
+    "es-MX": "Valores de configuración",
+    "fr": "Valeurs de configuration",
+    "pt-BR": "Valores de configuração",
+    "uk": "Конфігураційні значення"
+  },
+  "Confirm approval": {
+    "de": "Freigabe bestätigen",
+    "es-MX": "Confirmar aprobación",
+    "fr": "Confirmer l'approbation",
+    "pt-BR": "Confirmar aprovação",
+    "uk": "Підтвердити затвердження"
+  },
+  "Confirm rejection": {
+    "de": "Ablehnung bestätigen",
+    "es-MX": "Confirmar rechazo",
+    "fr": "Confirmer le rejet",
+    "pt-BR": "Confirmar rejeição",
+    "uk": "Підтвердити відхилення"
+  },
+  "Consecutive years": {
+    "de": "Zusammenhängende Jahre",
+    "es-MX": "Años consecutivos",
+    "fr": "Années consécutives",
+    "pt-BR": "Anos consecutivos",
+    "uk": "Послідовні роки"
+  },
+  "Continue": {
+    "de": "Weiter",
+    "es-MX": "Continuar",
+    "fr": "Continuer",
+    "pt-BR": "Continuar",
+    "uk": "Продовжити"
+  },
+  "Copied": {
+    "de": "Kopiert",
+    "es-MX": "Copiada",
+    "fr": "Copié",
+    "pt-BR": "Copiada",
+    "uk": "Скопійовано"
+  },
+  "Copy formula JSON": {
+    "de": "Formel als JSON kopieren",
+    "es-MX": "Copiar fórmula (JSON)",
+    "fr": "Copier le calcul (JSON)",
+    "pt-BR": "Copiar fórmula (JSON)",
+    "uk": "Копіювати формулу (JSON)"
+  },
+  "Copy hash": {
+    "de": "Hash kopieren",
+    "es-MX": "Copiar hash",
+    "fr": "Copier le hash",
+    "pt-BR": "Copiar hash",
+    "uk": "Копіювати хеш"
+  },
+  "Copy key": {
+    "de": "Schlüssel kopieren",
+    "es-MX": "Copiar clave",
+    "fr": "Copier la clé",
+    "pt-BR": "Copiar chave",
+    "uk": "Копіювати ключ"
+  },
+  "Could not copy formula.": {
+    "de": "Formel konnte nicht kopiert werden.",
+    "es-MX": "No se pudo copiar la fórmula.",
+    "fr": "Impossible de copier le calcul.",
+    "pt-BR": "Não foi possível copiar a fórmula.",
+    "uk": "Не вдалося скопіювати формулу."
+  },
+  "Could not load ConfigValue records.": {
+    "de": "ConfigValue-Datensätze konnten nicht geladen werden.",
+    "es-MX": "No se pudieron cargar los registros ConfigValue.",
+    "fr": "Impossible de charger les enregistrements ConfigValue.",
+    "pt-BR": "Não foi possível carregar os registros ConfigValue.",
+    "uk": "Не вдалося завантажити записи ConfigValue."
+  },
+  "Could not load approvals.": {
+    "de": "Freigaben konnten nicht geladen werden.",
+    "es-MX": "No se pudieron cargar las aprobaciones.",
+    "fr": "Impossible de charger les approbations.",
+    "pt-BR": "Não foi possível carregar as aprovações.",
+    "uk": "Не вдалося завантажити затвердження."
+  },
+  "Could not load policies.": {
+    "de": "Richtlinien konnten nicht geladen werden.",
+    "es-MX": "No se pudieron cargar las políticas.",
+    "fr": "Impossible de charger les politiques.",
+    "pt-BR": "Não foi possível carregar as políticas.",
+    "uk": "Не вдалося завантажити політики."
+  },
+  "Couldn't load this program": {
+    "de": "Programm konnte nicht geladen werden",
+    "es-MX": "No se pudo cargar este programa",
+    "fr": "Impossible de charger ce programme",
+    "pt-BR": "Não foi possível carregar este programa",
+    "uk": "Не вдалося завантажити цю програму"
+  },
+  "Couldn't run the impact query": {
+    "de": "Auswirkungsanfrage konnte nicht ausgeführt werden",
+    "es-MX": "No se pudo ejecutar la consulta de impacto",
+    "fr": "Impossible d'exécuter la requête d'impact",
+    "pt-BR": "Não foi possível executar a consulta de impacto",
+    "uk": "Не вдалося виконати запит впливу"
+  },
+  "Country": {
+    "de": "Land",
+    "es-MX": "País",
+    "fr": "Pays",
+    "pt-BR": "País",
+    "uk": "Країна"
+  },
+  "Country of birth": {
+    "de": "Geburtsland",
+    "es-MX": "País de nacimiento",
+    "fr": "Pays de naissance",
+    "pt-BR": "País de nascimento",
+    "uk": "Країна народження"
+  },
+  "Cross-record comparison": {
+    "de": "Datensatzübergreifender Vergleich",
+    "es-MX": "Comparación entre registros",
+    "fr": "Comparaison entre enregistrements",
+    "pt-BR": "Comparação entre registros",
+    "uk": "Перехресне порівняння записів"
+  },
+  "Current version": {
+    "de": "Aktuelle Version",
+    "es-MX": "Versión actual",
+    "fr": "Version actuelle",
+    "pt-BR": "Versão atual",
+    "uk": "Поточна версія"
+  },
+  "Currently in effect": {
+    "de": "Derzeit in Kraft",
+    "es-MX": "Actualmente vigente",
+    "fr": "Actuellement en vigueur",
+    "pt-BR": "Em vigor atualmente",
+    "uk": "Чинна на даний час"
+  },
+  "Dark": {
+    "de": "Dunkel",
+    "es-MX": "Oscuro",
+    "fr": "Sombre",
+    "pt-BR": "Escuro",
+    "uk": "Темна"
+  },
+  "Date of birth": {
+    "de": "Geburtsdatum",
+    "es-MX": "Fecha de nacimiento",
+    "fr": "Date de naissance",
+    "pt-BR": "Data de nascimento",
+    "uk": "Дата народження"
+  },
+  "Decision": {
+    "de": "Entscheidung",
+    "es-MX": "Decisión",
+    "fr": "Décision",
+    "pt-BR": "Decisão",
+    "uk": "Рішення"
+  },
+  "Decision history": {
+    "de": "Entscheidungsverlauf",
+    "es-MX": "Historial de decisiones",
+    "fr": "Historique des décisions",
+    "pt-BR": "Histórico de decisões",
+    "uk": "Історія рішень"
+  },
+  "Decision support, not autonomous adjudication.": {
+    "de": "Entscheidungsunterstützung, keine autonome Entscheidungsfindung.",
+    "es-MX": "Apoyo a la decisión, no juicio autónomo.",
+    "fr": "Aide à la décision, pas d'arbitrage autonome.",
+    "pt-BR": "Apoio à decisão, não julgamento autônomo.",
+    "uk": "Підтримка прийняття рішень, не автономне ухвалення."
+  },
+  "Description (optional)": {
+    "de": "Beschreibung (optional)",
+    "es-MX": "Descripción (opcional)",
+    "fr": "Description (facultatif)",
+    "pt-BR": "Descrição (opcional)",
+    "uk": "Опис (необов'язково)"
+  },
+  "Destination country is required.": {
+    "de": "Zielland ist erforderlich.",
+    "es-MX": "El país de destino es obligatorio.",
+    "fr": "Le pays de destination est requis.",
+    "pt-BR": "O país de destino é obrigatório.",
+    "uk": "Країна призначення обовʼязкова."
+  },
+  "Diff": {
+    "de": "Unterschied",
+    "es-MX": "Diferencia",
+    "fr": "Différence",
+    "pt-BR": "Diferença",
+    "uk": "Відмінності"
+  },
+  "Diff view": {
+    "de": "Diff-Ansicht",
+    "es-MX": "Vista Diff",
+    "fr": "Vue Diff",
+    "pt-BR": "Visão Diff",
+    "uk": "Вид Diff"
+  },
+  "Diff vs {previous}: {delta} files": {
+    "de": "Unterschied zu {previous}: {delta} Dateien",
+    "es-MX": "Diferencia vs {previous}: {delta} archivos",
+    "fr": "Différence vs {previous} : {delta} fichiers",
+    "pt-BR": "Diferença vs {previous}: {delta} arquivos",
+    "uk": "Різниця з {previous}: {delta} файлів"
+  },
+  "Disable": {
+    "de": "Deaktivieren",
+    "es-MX": "Deshabilitar",
+    "fr": "Désactiver",
+    "pt-BR": "Desativar",
+    "uk": "Вимкнути"
+  },
+  "Disabled": {
+    "de": "Deaktiviert",
+    "es-MX": "Deshabilitado",
+    "fr": "Désactivé",
+    "pt-BR": "Desativado",
+    "uk": "Вимкнено"
+  },
+  "Discard": {
+    "de": "Verwerfen",
+    "es-MX": "Descartar",
+    "fr": "Annuler",
+    "pt-BR": "Descartar",
+    "uk": "Скасувати"
+  },
+  "Discard answers": {
+    "de": "Antworten verwerfen",
+    "es-MX": "Descartar respuestas",
+    "fr": "Effacer les réponses",
+    "pt-BR": "Descartar respostas",
+    "uk": "Скасувати відповіді"
+  },
+  "Discard your answers?": {
+    "de": "Antworten verwerfen?",
+    "es-MX": "¿Descartar tus respuestas?",
+    "fr": "Effacer vos réponses ?",
+    "pt-BR": "Descartar suas respostas?",
+    "uk": "Скасувати відповіді?"
+  },
+  "Documents you have on hand": {
+    "de": "Vorhandene Unterlagen",
+    "es-MX": "Documentos que tienes a la mano",
+    "fr": "Documents en votre possession",
+    "pt-BR": "Documentos que você tem em mãos",
+    "uk": "Документи, які у вас є"
+  },
+  "Domain": {
+    "de": "Domäne",
+    "es-MX": "Dominio",
+    "fr": "Domaine",
+    "pt-BR": "Domínio",
+    "uk": "Домен"
+  },
+  "Draft": {
+    "de": "Entwurf",
+    "es-MX": "Borrador",
+    "fr": "Brouillon",
+    "pt-BR": "Rascunho",
+    "uk": "Чернетка"
+  },
+  "Draft a ConfigValue": {
+    "de": "Einen ConfigValue entwerfen",
+    "es-MX": "Redactar un ConfigValue",
+    "fr": "Rédiger un ConfigValue",
+    "pt-BR": "Redigir um ConfigValue",
+    "uk": "Скласти ConfigValue"
+  },
+  "Draft created — pending approval": {
+    "de": "Entwurf erstellt — wartet auf Freigabe",
+    "es-MX": "Borrador creado — pendiente de aprobación",
+    "fr": "Brouillon créé — en attente d'approbation",
+    "pt-BR": "Rascunho criado — aguardando aprovação",
+    "uk": "Чернетку створено — очікує затвердження"
+  },
+  "Draft new ConfigValue": {
+    "de": "Neuen ConfigValue entwerfen",
+    "es-MX": "Borrador de nuevo ConfigValue",
+    "fr": "Rédiger un nouveau ConfigValue",
+    "pt-BR": "Novo rascunho de ConfigValue",
+    "uk": "Чернетка нового ConfigValue"
+  },
+  "Draft new version": {
+    "de": "Neue Version entwerfen",
+    "es-MX": "Redactar nueva versión",
+    "fr": "Rédiger une nouvelle version",
+    "pt-BR": "Redigir nova versão",
+    "uk": "Створити нову версію"
+  },
+  "Draft replacement for {key}": {
+    "de": "Ersatz entwerfen für {key}",
+    "es-MX": "Borrador de reemplazo para {key}",
+    "fr": "Rédiger un remplacement pour {key}",
+    "pt-BR": "Rascunho de substituição para {key}",
+    "uk": "Чернетка заміни для {key}"
+  },
+  "Drafted by an agent": {
+    "de": "Von einem Agenten verfasst",
+    "es-MX": "Redactado por un agente",
+    "fr": "Rédigé par un agent",
+    "pt-BR": "Redigido por um agente",
+    "uk": "Складено агентом"
+  },
+  "Drafted by {author} on {date}": {
+    "de": "Verfasst von {author} am {date}",
+    "es-MX": "Redactado por {author} el {date}",
+    "fr": "Rédigé par {author} le {date}",
+    "pt-BR": "Redigido por {author} em {date}",
+    "uk": "Створено {author} {date}"
+  },
+  "Edge case — Carlos Mendes": {
+    "de": "Grenzfall — Carlos Mendes",
+    "es-MX": "Caso límite — Carlos Mendes",
+    "fr": "Cas limite — Carlos Mendes",
+    "pt-BR": "Caso limite — Carlos Mendes",
+    "uk": "Граничний випадок — Carlos Mendes"
+  },
+  "Edit": {
+    "de": "Bearbeiten",
+    "es-MX": "Editar",
+    "fr": "Modifier",
+    "pt-BR": "Editar",
+    "uk": "Редагувати"
+  },
+  "Edit a prompt": {
+    "de": "Einen Prompt bearbeiten",
+    "es-MX": "Editar una indicación",
+    "fr": "Modifier une invite",
+    "pt-BR": "Editar um prompt",
+    "uk": "Редагувати промпт"
+  },
+  "Editing {key}": {
+    "de": "Bearbeiten: {key}",
+    "es-MX": "Editando {key}",
+    "fr": "Édition de {key}",
+    "pt-BR": "Editando {key}",
+    "uk": "Редагування {key}"
+  },
+  "Effective date": {
+    "de": "Stichtag",
+    "es-MX": "Fecha de vigencia",
+    "fr": "Date d'effet",
+    "pt-BR": "Data de vigência",
+    "uk": "Дата набуття чинності"
+  },
+  "Effective date is required.": {
+    "de": "Datum erforderlich.",
+    "es-MX": "Fecha de vigencia requerida.",
+    "fr": "Date d'effet requise.",
+    "pt-BR": "Data de vigência obrigatória.",
+    "uk": "Дата чинності обов'язкова."
+  },
+  "Effective from": {
+    "de": "Gültig ab",
+    "es-MX": "Vigente desde",
+    "fr": "En vigueur à partir de",
+    "pt-BR": "Vigente a partir de",
+    "uk": "Чинне з"
+  },
+  "Employer": {
+    "de": "Arbeitgeber",
+    "es-MX": "Empleador",
+    "fr": "Employeur",
+    "pt-BR": "Empregador",
+    "uk": "Роботодавець"
+  },
+  "Enable": {
+    "de": "Aktivieren",
+    "es-MX": "Habilitar",
+    "fr": "Activer",
+    "pt-BR": "Ativar",
+    "uk": "Увімкнути"
+  },
+  "Enacted": {
+    "de": "Erlassen",
+    "es-MX": "Promulgada",
+    "fr": "Adoptée",
+    "pt-BR": "Promulgada",
+    "uk": "Ухвалено"
+  },
+  "Enacted by a human authority": {
+    "de": "Von einer menschlichen Behörde erlassen",
+    "es-MX": "Promulgado por una autoridad humana",
+    "fr": "Adopté par une autorité humaine",
+    "pt-BR": "Promulgado por uma autoridade humana",
+    "uk": "Ухвалено людською владою"
+  },
+  "Encoder agents": {
+    "de": "Encoder-Agenten",
+    "es-MX": "Agentes codificadores",
+    "fr": "Agents d'encodage",
+    "pt-BR": "Agentes codificadores",
+    "uk": "Агенти-кодувальники"
+  },
+  "Encoder reads it": {
+    "de": "Encoder liest es",
+    "es-MX": "El codificador la lee",
+    "fr": "L'encodeur le lit",
+    "pt-BR": "O codificador a lê",
+    "uk": "Кодувальник його читає"
+  },
+  "Encoder runbook": {
+    "de": "Encoder-Runbook",
+    "es-MX": "Runbook del codificador",
+    "fr": "Runbook de l'encodeur",
+    "pt-BR": "Runbook do codificador",
+    "uk": "Runbook кодувальника"
+  },
+  "End date": {
+    "de": "Ende",
+    "es-MX": "Fecha de fin",
+    "fr": "Date de fin",
+    "pt-BR": "Data de término",
+    "uk": "Кінець"
+  },
+  "Engine evaluates": {
+    "de": "Engine wertet aus",
+    "es-MX": "El motor evalúa",
+    "fr": "Le moteur évalue",
+    "pt-BR": "O motor avalia",
+    "uk": "Рушій оцінює"
+  },
+  "Enter text…": {
+    "de": "Text eingeben…",
+    "es-MX": "Ingrese texto…",
+    "fr": "Saisir du texte…",
+    "pt-BR": "Digite o texto…",
+    "uk": "Введіть текст…"
+  },
+  "Enum": {
+    "de": "Aufzählung",
+    "es-MX": "Enumeración",
+    "fr": "Énumération",
+    "pt-BR": "Enumeração",
+    "uk": "Перелік"
+  },
+  "Evaluate a case": {
+    "de": "Einen Fall auswerten",
+    "es-MX": "Evaluar un caso",
+    "fr": "Évaluer un dossier",
+    "pt-BR": "Avaliar um caso",
+    "uk": "Оцінити справу"
+  },
+  "Event recorded.": {
+    "de": "Ereignis erfasst.",
+    "es-MX": "Evento registrado.",
+    "fr": "Événement enregistré.",
+    "pt-BR": "Evento registrado.",
+    "uk": "Подію записано."
+  },
+  "Event timeline": {
+    "de": "Ereignis-Zeitleiste",
+    "es-MX": "Cronología de eventos",
+    "fr": "Chronologie des événements",
+    "pt-BR": "Linha do tempo de eventos",
+    "uk": "Хронологія подій"
+  },
+  "Event type": {
+    "de": "Ereignistyp",
+    "es-MX": "Tipo de evento",
+    "fr": "Type d'événement",
+    "pt-BR": "Tipo de evento",
+    "uk": "Тип події"
+  },
+  "Evidence submitted": {
+    "de": "Eingereichte Nachweise",
+    "es-MX": "Evidencia presentada",
+    "fr": "Preuves soumises",
+    "pt-BR": "Evidência apresentada",
+    "uk": "Подані докази"
+  },
+  "Evidence type": {
+    "de": "Nachweisart",
+    "es-MX": "Tipo de evidencia",
+    "fr": "Type de preuve",
+    "pt-BR": "Tipo de evidência",
+    "uk": "Тип доказу"
+  },
+  "Evidence type is required.": {
+    "de": "Nachweistyp ist erforderlich.",
+    "es-MX": "El tipo de evidencia es obligatorio.",
+    "fr": "Le type de preuve est requis.",
+    "pt-BR": "O tipo de evidência é obrigatório.",
+    "uk": "Тип доказу обовʼязковий."
+  },
+  "Executable": {
+    "de": "Ausführbar",
+    "es-MX": "Ejecutable",
+    "fr": "Exécutable",
+    "pt-BR": "Executável",
+    "uk": "Виконуваний"
+  },
+  "Execution plan (PLAN.md)": {
+    "de": "Umsetzungsplan (PLAN.md)",
+    "es-MX": "Plan de ejecución (PLAN.md)",
+    "fr": "Plan d'exécution (PLAN.md)",
+    "pt-BR": "Plano de execução (PLAN.md)",
+    "uk": "План виконання (PLAN.md)"
+  },
+  "Expand": {
+    "de": "Ausklappen",
+    "es-MX": "Expandir",
+    "fr": "Développer",
+    "pt-BR": "Expandir",
+    "uk": "Розгорнути"
+  },
+  "Export test report (PDF)": {
+    "de": "Bericht exportieren (PDF)",
+    "es-MX": "Exportar reporte (PDF)",
+    "fr": "Exporter le rapport (PDF)",
+    "pt-BR": "Exportar relatório (PDF)",
+    "uk": "Експортувати звіт (PDF)"
+  },
+  "External": {
+    "de": "Extern",
+    "es-MX": "Externos",
+    "fr": "Externes",
+    "pt-BR": "Externos",
+    "uk": "Зовнішні"
+  },
+  "FKTE pipeline": {
+    "de": "FKTE-Pipeline",
+    "es-MX": "Pipeline FKTE",
+    "fr": "Pipeline FKTE",
+    "pt-BR": "Pipeline FKTE",
+    "uk": "Конвеєр FKTE"
+  },
+  "Failed to record event.": {
+    "de": "Ereignis konnte nicht gespeichert werden.",
+    "es-MX": "No se pudo registrar el evento.",
+    "fr": "Échec de l'enregistrement de l'événement.",
+    "pt-BR": "Falha ao registrar o evento.",
+    "uk": "Не вдалося зберегти подію."
+  },
+  "Federation": {
+    "de": "Föderation",
+    "es-MX": "Federación",
+    "fr": "Fédération",
+    "pt-BR": "Federação",
+    "uk": "Федерація"
+  },
+  "Fetch": {
+    "de": "Abrufen",
+    "es-MX": "Obtener",
+    "fr": "Récupérer",
+    "pt-BR": "Buscar",
+    "uk": "Отримати"
+  },
+  "Fetch a pack": {
+    "de": "Paket abrufen",
+    "es-MX": "Obtener un paquete",
+    "fr": "Récupérer un pack",
+    "pt-BR": "Buscar um pacote",
+    "uk": "Отримати пакет"
+  },
+  "Fetched at": {
+    "de": "Abgerufen am",
+    "es-MX": "Obtenido el",
+    "fr": "Récupéré le",
+    "pt-BR": "Buscado em",
+    "uk": "Отримано"
+  },
+  "Fetching…": {
+    "de": "Abrufen…",
+    "es-MX": "Obteniendo…",
+    "fr": "Récupération…",
+    "pt-BR": "Buscando…",
+    "uk": "Отримання…"
+  },
+  "Files": {
+    "de": "Dateien",
+    "es-MX": "Archivos",
+    "fr": "Fichiers",
+    "pt-BR": "Arquivos",
+    "uk": "Файли"
+  },
+  "Filter events by type": {
+    "de": "Ereignisse nach Typ filtern",
+    "es-MX": "Filtrar eventos por tipo",
+    "fr": "Filtrer les événements par type",
+    "pt-BR": "Filtrar eventos por tipo",
+    "uk": "Фільтрувати події за типом"
+  },
+  "Find a parameter": {
+    "de": "Einen Parameter finden",
+    "es-MX": "Encontrar un parámetro",
+    "fr": "Trouver un paramètre",
+    "pt-BR": "Encontrar um parâmetro",
+    "uk": "Знайти параметр"
+  },
+  "Five-element mapping": {
+    "de": "Fünf-Elemente-Mapping",
+    "es-MX": "Mapeo de cinco elementos",
+    "fr": "Cartographie en cinq éléments",
+    "pt-BR": "Mapeamento em cinco elementos",
+    "uk": "Мапування з п'яти елементів"
+  },
+  "Fixture batch": {
+    "de": "Fixture-Batch",
+    "es-MX": "Lote de fixture",
+    "fr": "Lot de fixture",
+    "pt-BR": "Lote de fixture",
+    "uk": "Партія фікстури"
+  },
+  "Fixture run failed": {
+    "de": "Lauf fehlgeschlagen",
+    "es-MX": "Falló la ejecución",
+    "fr": "Échec de l’exécution",
+    "pt-BR": "Falha na execução",
+    "uk": "Запуск не вдався"
+  },
+  "Format: '<'jurisdiction'>'-'<'program'>'.'<'domain'>'.'<'scope'>'.'<'param'>'": {
+    "de": "Format: '<'Jurisdiktion'>'-'<'Programm'>'.'<'Domäne'>'.'<'Bereich'>'.'<'Param'>'",
+    "es-MX": "Formato: '<'jurisdicción'>'-'<'programa'>'.'<'dominio'>'.'<'alcance'>'.'<'parám'>'",
+    "fr": "Format : '<'juridiction'>'-'<'programme'>'.'<'domaine'>'.'<'portée'>'.'<'param'>'",
+    "pt-BR": "Formato: '<'jurisdição'>'-'<'programa'>'.'<'domínio'>'.'<'escopo'>'.'<'parâm'>'",
+    "uk": "Формат: '<'юрисдикція'>'-'<'програма'>'.'<'домен'>'.'<'область'>'.'<'пар'>'"
+  },
+  "Formula copied to clipboard.": {
+    "de": "Formel in die Zwischenablage kopiert.",
+    "es-MX": "Fórmula copiada al portapapeles.",
+    "fr": "Calcul copié dans le presse-papiers.",
+    "pt-BR": "Fórmula copiada para a área de transferência.",
+    "uk": "Формулу скопійовано до буфера обміну."
+  },
+  "From": {
+    "de": "Von",
+    "es-MX": "Desde",
+    "fr": "De",
+    "pt-BR": "De",
+    "uk": "З"
+  },
+  "From country": {
+    "de": "Herkunftsland",
+    "es-MX": "País de origen",
+    "fr": "Pays d'origine",
+    "pt-BR": "País de origem",
+    "uk": "Країна походження"
+  },
+  "Germany": {
+    "de": "Deutschland",
+    "es-MX": "Alemania",
+    "fr": "Allemagne",
+    "pt-BR": "Alemanha",
+    "uk": "Німеччина"
+  },
+  "Get the prompt ratified": {
+    "de": "Den Prompt ratifizieren lassen",
+    "es-MX": "Conseguir la ratificación de la indicación",
+    "fr": "Faire ratifier l'invite",
+    "pt-BR": "Conseguir a ratificação do prompt",
+    "uk": "Отримати ратифікацію промпта"
+  },
+  "Global / cross-jurisdictional": {
+    "de": "Global / zuständigkeitsübergreifend",
+    "es-MX": "Global / interjurisdiccional",
+    "fr": "Global / inter-juridictionnel",
+    "pt-BR": "Global / interjurisdicional",
+    "uk": "Глобально / міжюрисдикційно"
+  },
+  "Go back": {
+    "de": "Zurück",
+    "es-MX": "Volver",
+    "fr": "Retour",
+    "pt-BR": "Voltar",
+    "uk": "Назад"
+  },
+  "GovOps data flow": {
+    "de": "GovOps-Datenfluss",
+    "es-MX": "Flujo de datos GovOps",
+    "fr": "Flux de données GovOps",
+    "pt-BR": "Fluxo de dados GovOps",
+    "uk": "Потік даних GovOps"
+  },
+  "Help": {
+    "de": "Hilfe",
+    "es-MX": "Ayuda",
+    "fr": "Aide",
+    "pt-BR": "Ajuda",
+    "uk": "Довідка"
+  },
+  "Hide diff": {
+    "de": "Diff ausblenden",
+    "es-MX": "Ocultar diff",
+    "fr": "Masquer le diff",
+    "pt-BR": "Ocultar diff",
+    "uk": "Сховати diff"
+  },
+  "Hide keyboard shortcuts": {
+    "de": "Tastenkürzel ausblenden",
+    "es-MX": "Ocultar atajos de teclado",
+    "fr": "Masquer les raccourcis clavier",
+    "pt-BR": "Ocultar atalhos de teclado",
+    "uk": "Сховати комбінації клавіш"
+  },
+  "Home": {
+    "de": "Start",
+    "es-MX": "Inicio",
+    "fr": "Accueil",
+    "pt-BR": "Início",
+    "uk": "Головна"
+  },
+  "How to apply": {
+    "de": "So beantragen Sie",
+    "es-MX": "Cómo solicitar",
+    "fr": "Comment postuler",
+    "pt-BR": "Como solicitar",
+    "uk": "Як подати заяву"
+  },
+  "Human-in-the-loop at every critical point.": {
+    "de": "Mensch im Entscheidungspfad an jedem kritischen Punkt.",
+    "es-MX": "Humano en el bucle en cada punto crítico.",
+    "fr": "Humain dans la boucle à chaque point critique.",
+    "pt-BR": "Humano no circuito em todo ponto crítico.",
+    "uk": "Людина в циклі в кожній критичній точці."
+  },
+  "Impact results pagination": {
+    "de": "Seitennavigation der Auswirkungsergebnisse",
+    "es-MX": "Paginación de resultados de impacto",
+    "fr": "Pagination des résultats d'impact",
+    "pt-BR": "Paginação dos resultados de impacto",
+    "uk": "Навігація сторінками результатів впливу"
+  },
+  "Imported packs": {
+    "de": "Importierte Pakete",
+    "es-MX": "Paquetes importados",
+    "fr": "Packs importés",
+    "pt-BR": "Pacotes importados",
+    "uk": "Імпортовані пакети"
+  },
+  "In-repo": {
+    "de": "Im Repository",
+    "es-MX": "En el repositorio",
+    "fr": "Dans le dépôt",
+    "pt-BR": "No repositório",
+    "uk": "У репозиторії"
+  },
+  "Inbox zero · human authority": {
+    "de": "Postfach leer · menschliche Autorität",
+    "es-MX": "Bandeja vacía · autoridad humana",
+    "fr": "Boîte vide · autorité humaine",
+    "pt-BR": "Caixa vazia · autoridade humana",
+    "uk": "Скринька порожня · людська влада"
+  },
+  "Independent prototype": {
+    "de": "Unabhängiger Prototyp",
+    "es-MX": "Prototipo independiente",
+    "fr": "Prototype indépendant",
+    "pt-BR": "Protótipo independente",
+    "uk": "Незалежний прототип"
+  },
+  "Ingest a statute": {
+    "de": "Ein Gesetz aufnehmen",
+    "es-MX": "Ingerir un estatuto",
+    "fr": "Ingérer un statut",
+    "pt-BR": "Ingerir um estatuto",
+    "uk": "Поглинути статут"
+  },
+  "Jurisdiction": {
+    "de": "Jurisdiktion",
+    "es-MX": "Jurisdicción",
+    "fr": "Juridiction",
+    "pt-BR": "Jurisdição",
+    "uk": "Юрисдикція"
+  },
+  "Jurisdiction-first authority chain": {
+    "de": "Jurisdiktionsorientierte Autoritätskette",
+    "es-MX": "Cadena de autoridad partiendo de la jurisdicción",
+    "fr": "Chaîne d'autorité partant de la juridiction",
+    "pt-BR": "Cadeia de autoridade a partir da jurisdição",
+    "uk": "Ланцюг авторитету з юрисдикції"
+  },
+  "Keep my answers": {
+    "de": "Antworten behalten",
+    "es-MX": "Conservar mis respuestas",
+    "fr": "Conserver mes réponses",
+    "pt-BR": "Manter minhas respostas",
+    "uk": "Залишити відповіді"
+  },
+  "Key": {
+    "de": "Schlüssel",
+    "es-MX": "Clave",
+    "fr": "Clé",
+    "pt-BR": "Chave",
+    "uk": "Ключ"
+  },
+  "Key (A→Z)": {
+    "de": "Schlüssel (A→Z)",
+    "es-MX": "Clave (A→Z)",
+    "fr": "Clé (A→Z)",
+    "pt-BR": "Chave (A→Z)",
+    "uk": "Ключ (А→Я)"
+  },
+  "Key (Z→A)": {
+    "de": "Schlüssel (Z→A)",
+    "es-MX": "Clave (Z→A)",
+    "fr": "Clé (Z→A)",
+    "pt-BR": "Chave (Z→A)",
+    "uk": "Ключ (Я→А)"
+  },
+  "Key is required.": {
+    "de": "Schlüssel erforderlich.",
+    "es-MX": "Clave requerida.",
+    "fr": "Clé requise.",
+    "pt-BR": "Chave obrigatória.",
+    "uk": "Ключ обов'язковий."
+  },
+  "Language": {
+    "de": "Sprache",
+    "es-MX": "Idioma",
+    "fr": "Langue",
+    "pt-BR": "Idioma",
+    "uk": "Мова"
+  },
+  "Last fetched": {
+    "de": "Zuletzt abgerufen",
+    "es-MX": "Última obtención",
+    "fr": "Dernière récupération",
+    "pt-BR": "Última busca",
+    "uk": "Останнє отримання"
+  },
+  "Last updated": {
+    "de": "Zuletzt aktualisiert",
+    "es-MX": "Última actualización",
+    "fr": "Dernière mise à jour",
+    "pt-BR": "Última atualização",
+    "uk": "Останнє оновлення"
+  },
+  "Law": {
+    "de": "Gesetz",
+    "es-MX": "Ley",
+    "fr": "Loi",
+    "pt-BR": "Lei",
+    "uk": "Закон"
+  },
+  "Law passes": {
+    "de": "Gesetz wird verabschiedet",
+    "es-MX": "La ley se aprueba",
+    "fr": "La loi est promulguée",
+    "pt-BR": "A lei é aprovada",
+    "uk": "Закон ухвалено"
+  },
+  "Leaders": {
+    "de": "Führungskräfte",
+    "es-MX": "Dirigentes",
+    "fr": "Dirigeants",
+    "pt-BR": "Líderes",
+    "uk": "Керівники"
+  },
+  "Leave": {
+    "de": "Verlassen",
+    "es-MX": "Salir",
+    "fr": "Quitter",
+    "pt-BR": "Sair",
+    "uk": "Залишити"
+  },
+  "Legal status": {
+    "de": "Rechtsstatus",
+    "es-MX": "Situación legal",
+    "fr": "Statut légal",
+    "pt-BR": "Situação legal",
+    "uk": "Правовий статус"
+  },
+  "Legal status change": {
+    "de": "Änderung des Rechtsstatus",
+    "es-MX": "Cambio de estatus legal",
+    "fr": "Changement de statut légal",
+    "pt-BR": "Mudança de status legal",
+    "uk": "Зміна правового статусу"
+  },
+  "Light": {
+    "de": "Hell",
+    "es-MX": "Claro",
+    "fr": "Clair",
+    "pt-BR": "Claro",
+    "uk": "Світла"
+  },
+  "Live legal-code artefacts (lawcode/)": {
+    "de": "Operative Rechtscode-Artefakte (lawcode/)",
+    "es-MX": "Artefactos legales operativos (lawcode/)",
+    "fr": "Artefacts juridiques opérationnels (lawcode/)",
+    "pt-BR": "Artefatos jurídicos operacionais (lawcode/)",
+    "uk": "Операційні правові артефакти (lawcode/)"
+  },
+  "Live timeline preview": {
+    "de": "Live-Vorschau der Zeitleiste",
+    "es-MX": "Vista previa de la línea de tiempo",
+    "fr": "Aperçu en direct de la chronologie",
+    "pt-BR": "Pré-visualização da linha do tempo",
+    "uk": "Попередній перегляд хронології"
+  },
+  "Load {count} more": {
+    "de": "{count} weitere laden",
+    "es-MX": "Cargar {count} más",
+    "fr": "Charger {count} de plus",
+    "pt-BR": "Carregar mais {count}",
+    "uk": "Завантажити ще {count}"
+  },
+  "Loading policies…": {
+    "de": "Richtlinien werden geladen…",
+    "es-MX": "Cargando políticas…",
+    "fr": "Chargement des politiques…",
+    "pt-BR": "Carregando políticas…",
+    "uk": "Завантаження політик…"
+  },
+  "Manifest URL": {
+    "de": "Manifest-URL",
+    "es-MX": "URL del manifiesto",
+    "fr": "URL du manifeste",
+    "pt-BR": "URL do manifesto",
+    "uk": "URL маніфесту"
+  },
+  "Met": {
+    "de": "Erfüllt",
+    "es-MX": "Cumplido",
+    "fr": "Rempli",
+    "pt-BR": "Atendido",
+    "uk": "Виконано"
+  },
+  "Metadata": {
+    "de": "Metadaten",
+    "es-MX": "Metadatos",
+    "fr": "Métadonnées",
+    "pt-BR": "Metadados",
+    "uk": "Метадані"
+  },
+  "Mexico": {
+    "de": "Mexiko",
+    "es-MX": "México",
+    "fr": "Mexique",
+    "pt-BR": "México",
+    "uk": "Мексика"
+  },
+  "More information would help": {
+    "de": "Weitere Angaben würden helfen",
+    "es-MX": "Más información ayudaría",
+    "fr": "Des informations complémentaires seraient utiles",
+    "pt-BR": "Mais informações ajudariam",
+    "uk": "Допомогли б додаткові дані"
+  },
+  "Move country": {
+    "de": "Länderwechsel",
+    "es-MX": "Cambio de país",
+    "fr": "Changement de pays",
+    "pt-BR": "Mudança de país",
+    "uk": "Зміна країни"
+  },
+  "Navigation tip": {
+    "de": "Navigationstipp",
+    "es-MX": "Consejo de navegación",
+    "fr": "Astuce de navigation",
+    "pt-BR": "Dica de navegação",
+    "uk": "Порада з навігації"
+  },
+  "Needs evidence": {
+    "de": "Nachweis fehlt",
+    "es-MX": "Faltan pruebas",
+    "fr": "Preuves manquantes",
+    "pt-BR": "Faltam provas",
+    "uk": "Бракує доказів"
+  },
+  "New evidence": {
+    "de": "Neuer Nachweis",
+    "es-MX": "Nueva evidencia",
+    "fr": "Nouvelle preuve",
+    "pt-BR": "Nova evidência",
+    "uk": "Новий доказ"
+  },
+  "New extraction": {
+    "de": "Neue Extraktion",
+    "es-MX": "Nueva extracción",
+    "fr": "Nouvelle extraction",
+    "pt-BR": "Nova extração",
+    "uk": "Нове видобування"
+  },
+  "New legal status": {
+    "de": "Neuer Rechtsstatus",
+    "es-MX": "Nuevo estatus legal",
+    "fr": "Nouveau statut légal",
+    "pt-BR": "Novo status legal",
+    "uk": "Новий правовий статус"
+  },
+  "New legal status is required.": {
+    "de": "Neuer Rechtsstatus ist erforderlich.",
+    "es-MX": "El nuevo estatus legal es obligatorio.",
+    "fr": "Le nouveau statut légal est requis.",
+    "pt-BR": "O novo status legal é obrigatório.",
+    "uk": "Новий правовий статус обовʼязковий."
+  },
+  "Newest first": {
+    "de": "Neueste zuerst",
+    "es-MX": "Más recientes",
+    "fr": "Plus récent",
+    "pt-BR": "Mais recentes",
+    "uk": "Спочатку нові"
+  },
+  "Next": {
+    "de": "Weiter",
+    "es-MX": "Siguiente",
+    "fr": "Suivant",
+    "pt-BR": "Próxima",
+    "uk": "Далі"
+  },
+  "No approvals match these filters.": {
+    "de": "Keine Freigaben entsprechen diesen Filtern.",
+    "es-MX": "Ninguna aprobación coincide con estos filtros.",
+    "fr": "Aucune approbation ne correspond à ces filtres.",
+    "pt-BR": "Nenhuma aprovação corresponde a esses filtros.",
+    "uk": "Жодне затвердження не відповідає цим фільтрам."
+  },
+  "No fixtures available": {
+    "de": "Keine Fixtures verfügbar",
+    "es-MX": "Sin fixtures disponibles",
+    "fr": "Aucune fixture disponible",
+    "pt-BR": "Sem fixtures disponíveis",
+    "uk": "Немає доступних фікстур"
+  },
+  "No items awaiting review": {
+    "de": "Keine Einträge zur Prüfung",
+    "es-MX": "No hay elementos por revisar",
+    "fr": "Aucun élément à examiner",
+    "pt-BR": "Nenhum item para revisar",
+    "uk": "Немає елементів для перевірки"
+  },
+  "No matching ConfigValue records.": {
+    "de": "Keine passenden ConfigValue-Datensätze.",
+    "es-MX": "Ningún registro ConfigValue coincide.",
+    "fr": "Aucun enregistrement ConfigValue correspondant.",
+    "pt-BR": "Nenhum registro ConfigValue corresponde.",
+    "uk": "Немає відповідних записів ConfigValue."
+  },
+  "No prompts yet": {
+    "de": "Noch keine Prompts",
+    "es-MX": "Aún no hay prompts",
+    "fr": "Aucun prompt pour l’instant",
+    "pt-BR": "Nenhum prompt ainda",
+    "uk": "Поки немає промптів"
+  },
+  "Not a hidden-reasoning AI assistant.": {
+    "de": "Kein KI-Assistent mit verborgenem Denken.",
+    "es-MX": "No es un asistente de IA con razonamiento oculto.",
+    "fr": "Pas un assistant IA au raisonnement caché.",
+    "pt-BR": "Não é um assistente de IA com raciocínio oculto.",
+    "uk": "Не AI-асистент із прихованим міркуванням."
+  },
+  "Not autonomous decision-making.": {
+    "de": "Keine autonome Entscheidungsfindung.",
+    "es-MX": "No es toma de decisiones autónoma.",
+    "fr": "Pas une prise de décision autonome.",
+    "pt-BR": "Não é tomada de decisão autônoma.",
+    "uk": "Не автономне ухвалення рішень."
+  },
+  "Not met": {
+    "de": "Nicht erfüllt",
+    "es-MX": "No cumplido",
+    "fr": "Non rempli",
+    "pt-BR": "Não atendido",
+    "uk": "Не виконано"
+  },
+  "Note (optional)": {
+    "de": "Notiz (optional)",
+    "es-MX": "Nota (opcional)",
+    "fr": "Note (facultatif)",
+    "pt-BR": "Nota (opcional)",
+    "uk": "Примітка (необов'язково)"
+  },
+  "Notice ready · SHA-256 {sha}…": {
+    "de": "Dokument bereit · SHA-256 {sha}…",
+    "es-MX": "Documento listo · SHA-256 {sha}…",
+    "fr": "Document prêt · SHA-256 {sha}…",
+    "pt-BR": "Documento pronto · SHA-256 {sha}…",
+    "uk": "Документ готовий · SHA-256 {sha}…"
+  },
+  "Now do it for real": {
+    "de": "Jetzt machen Sie es echt",
+    "es-MX": "Ahora hágalo de verdad",
+    "fr": "Maintenant, faites-le pour de vrai",
+    "pt-BR": "Agora faça de verdade",
+    "uk": "Тепер зробіть це насправді"
+  },
+  "Oldest first": {
+    "de": "Älteste zuerst",
+    "es-MX": "Más antiguos",
+    "fr": "Plus ancien",
+    "pt-BR": "Mais antigos",
+    "uk": "Спочатку старі"
+  },
+  "Onboard a new jurisdiction": {
+    "de": "Einen neuen Hoheitsbereich onboarden",
+    "es-MX": "Integrar una nueva jurisdicción",
+    "fr": "Intégrer une nouvelle juridiction",
+    "pt-BR": "Integrar uma nova jurisdição",
+    "uk": "Онбордити нову юрисдикцію"
+  },
+  "Ongoing": {
+    "de": "Laufend",
+    "es-MX": "En curso",
+    "fr": "En cours",
+    "pt-BR": "Em andamento",
+    "uk": "Триває"
+  },
+  "Open the approvals queue": {
+    "de": "Genehmigungswarteschlange öffnen",
+    "es-MX": "Abrir la cola de aprobaciones",
+    "fr": "Ouvrir la file d'approbations",
+    "pt-BR": "Abrir a fila de aprovações",
+    "uk": "Відкрити чергу затверджень"
+  },
+  "Open the encoder workspace →": {
+    "de": "Encoder-Arbeitsbereich öffnen →",
+    "es-MX": "Abrir el espacio de trabajo del codificador →",
+    "fr": "Ouvrir l'espace de travail de l'encodeur →",
+    "pt-BR": "Abrir o espaço de trabalho do codificador →",
+    "uk": "Відкрити робочий простір кодувальника →"
+  },
+  "Open the walkthrough": {
+    "de": "Rundgang öffnen",
+    "es-MX": "Abrir el recorrido",
+    "fr": "Ouvrir la démonstration",
+    "pt-BR": "Abrir a demonstração",
+    "uk": "Відкрити огляд"
+  },
+  "Operating principles": {
+    "de": "Operative Prinzipien",
+    "es-MX": "Principios operativos",
+    "fr": "Principes de fonctionnement",
+    "pt-BR": "Princípios operacionais",
+    "uk": "Операційні принципи"
+  },
+  "Operational": {
+    "de": "Operativ",
+    "es-MX": "Operativo",
+    "fr": "Opérationnel",
+    "pt-BR": "Operacional",
+    "uk": "Операційний"
+  },
+  "Operator admin runbook": {
+    "de": "Bediener-Admin-Runbook",
+    "es-MX": "Runbook de administración",
+    "fr": "Runbook administrateur",
+    "pt-BR": "Runbook administrativo",
+    "uk": "Runbook адміністратора"
+  },
+  "Origin and lineage": {
+    "de": "Ursprung und Linie",
+    "es-MX": "Origen y linaje",
+    "fr": "Origine et filiation",
+    "pt-BR": "Origem e linhagem",
+    "uk": "Походження й спадковість"
+  },
+  "Other": {
+    "de": "Andere",
+    "es-MX": "Otro",
+    "fr": "Autre",
+    "pt-BR": "Outro",
+    "uk": "Інше"
+  },
+  "Pack name": {
+    "de": "Paketname",
+    "es-MX": "Nombre del paquete",
+    "fr": "Nom du pack",
+    "pt-BR": "Nome do pacote",
+    "uk": "Назва пакета"
+  },
+  "Page {page} of {pageCount}": {
+    "de": "Seite {page} von {pageCount}",
+    "es-MX": "Página {page} de {pageCount}",
+    "fr": "Page {page} sur {pageCount}",
+    "pt-BR": "Página {page} de {pageCount}",
+    "uk": "Сторінка {page} з {pageCount}"
+  },
+  "Paid Statutory Vacation Act, 2026": {
+    "de": "Gesetz über bezahlten gesetzlichen Urlaub, 2026",
+    "es-MX": "Ley de Vacaciones Estatutarias Pagadas, 2026",
+    "fr": "Loi sur les vacances statutaires payées, 2026",
+    "pt-BR": "Lei de Férias Estatutárias Remuneradas, 2026",
+    "uk": "Закон про оплачувану статутну відпустку, 2026"
+  },
+  "Partial benefit estimate: {ratio}": {
+    "de": "Geschätzte Teilleistung: {ratio}",
+    "es-MX": "Estimación parcial del beneficio: {ratio}",
+    "fr": "Estimation de prestation partielle : {ratio}",
+    "pt-BR": "Estimativa parcial do benefício: {ratio}",
+    "uk": "Орієнтовна часткова допомога: {ratio}"
+  },
+  "Partial pension based on residency.": {
+    "de": "Teilrente auf Grundlage der Wohndauer.",
+    "es-MX": "Pensión parcial según residencia.",
+    "fr": "Pension partielle selon la résidence.",
+    "pt-BR": "Pensão parcial conforme residência.",
+    "uk": "Часткова пенсія на основі проживання."
+  },
+  "Pay rate": {
+    "de": "Vergütung",
+    "es-MX": "Tarifa de pago",
+    "fr": "Taux de rémunération",
+    "pt-BR": "Taxa de pagamento",
+    "uk": "Ставка оплати"
+  },
+  "Pending": {
+    "de": "Ausstehend",
+    "es-MX": "Pendiente",
+    "fr": "En attente",
+    "pt-BR": "Pendente",
+    "uk": "Очікує"
+  },
+  "Pending approvals": {
+    "de": "Ausstehende Freigaben",
+    "es-MX": "Aprobaciones pendientes",
+    "fr": "Approbations en attente",
+    "pt-BR": "Aprovações pendentes",
+    "uk": "Очікують затвердження"
+  },
+  "Per page": {
+    "de": "Pro Seite",
+    "es-MX": "Por página",
+    "fr": "Par page",
+    "pt-BR": "Por página",
+    "uk": "На сторінку"
+  },
+  "Permanent resident": {
+    "de": "Daueraufenthaltsberechtigt",
+    "es-MX": "Residente permanente",
+    "fr": "Résident·e permanent·e",
+    "pt-BR": "Residente permanente",
+    "uk": "Постійний резидент"
+  },
+  "Please select your legal status.": {
+    "de": "Bitte wählen Sie Ihren rechtlichen Status.",
+    "es-MX": "Selecciona tu estatus legal.",
+    "fr": "Veuillez sélectionner votre statut légal.",
+    "pt-BR": "Selecione seu status legal.",
+    "uk": "Будь ласка, оберіть ваш правовий статус."
+  },
+  "Policies": {
+    "de": "Richtlinien",
+    "es-MX": "Políticas",
+    "fr": "Politiques",
+    "pt-BR": "Políticas",
+    "uk": "Політики"
+  },
+  "Preview": {
+    "de": "Vorschau",
+    "es-MX": "Vista previa",
+    "fr": "Aperçu",
+    "pt-BR": "Pré-visualizar",
+    "uk": "Перегляд"
+  },
+  "Previous": {
+    "de": "Zurück",
+    "es-MX": "Anterior",
+    "fr": "Précédent",
+    "pt-BR": "Anterior",
+    "uk": "Назад"
+  },
+  "Previous decision (effective {date})": {
+    "de": "Vorherige Entscheidung (gültig ab {date})",
+    "es-MX": "Decisión anterior (vigente {date})",
+    "fr": "Décision précédente (en vigueur {date})",
+    "pt-BR": "Decisão anterior (vigente {date})",
+    "uk": "Попереднє рішення (чинне з {date})"
+  },
+  "Program": {
+    "de": "Programm",
+    "es-MX": "Programa",
+    "fr": "Programme",
+    "pt-BR": "Programa",
+    "uk": "Програма"
+  },
+  "Prompt admin": {
+    "de": "Prompt-Verwaltung",
+    "es-MX": "Administración de indicaciones",
+    "fr": "Administration des invites",
+    "pt-BR": "Administração de prompts",
+    "uk": "Адміністрування промптів"
+  },
+  "Prompt admin runbook": {
+    "de": "Runbook für die Prompt-Verwaltung",
+    "es-MX": "Runbook de administración de indicaciones",
+    "fr": "Runbook d'administration des invites",
+    "pt-BR": "Runbook de administração de prompts",
+    "uk": "Runbook адміністрування промптів"
+  },
+  "Prompt editor": {
+    "de": "Prompt-Editor",
+    "es-MX": "Editor de prompt",
+    "fr": "Éditeur de prompt",
+    "pt-BR": "Editor de prompt",
+    "uk": "Редактор промпта"
+  },
+  "Prompt text is required.": {
+    "de": "Prompt-Text erforderlich.",
+    "es-MX": "Texto del prompt requerido.",
+    "fr": "Le texte du prompt est requis.",
+    "pt-BR": "Texto do prompt obrigatório.",
+    "uk": "Потрібен текст промпта."
+  },
+  "Prompts as configuration": {
+    "de": "Prompts als Konfiguration",
+    "es-MX": "Prompts como configuración",
+    "fr": "Les prompts comme configuration",
+    "pt-BR": "Prompts como configuração",
+    "uk": "Промпти як конфігурація"
+  },
+  "Propose a change": {
+    "de": "Eine Änderung vorschlagen",
+    "es-MX": "Proponer un cambio",
+    "fr": "Proposer un changement",
+    "pt-BR": "Propor uma mudança",
+    "uk": "Запропонувати зміну"
+  },
+  "Proposed": {
+    "de": "Vorgeschlagen",
+    "es-MX": "Propuesto",
+    "fr": "Proposé",
+    "pt-BR": "Proposto",
+    "uk": "Запропоновано"
+  },
+  "Provenance register legend": {
+    "de": "Legende der Provenienzregister",
+    "es-MX": "Leyenda de los registros de procedencia",
+    "fr": "Légende des registres de provenance",
+    "pt-BR": "Legenda dos registros de proveniência",
+    "uk": "Легенда реєстрів провенансу"
+  },
+  "Provenance, at a glance": {
+    "de": "Provenienz auf einen Blick",
+    "es-MX": "Procedencia, de un vistazo",
+    "fr": "La provenance, en un coup d'œil",
+    "pt-BR": "Procedência, num relance",
+    "uk": "Походження з першого погляду"
+  },
+  "Public servants": {
+    "de": "Staatsbedienstete",
+    "es-MX": "Servidores públicos",
+    "fr": "Agents publics",
+    "pt-BR": "Servidores públicos",
+    "uk": "Державні службовці"
+  },
+  "Publisher": {
+    "de": "Herausgeber",
+    "es-MX": "Editor",
+    "fr": "Éditeur",
+    "pt-BR": "Editor",
+    "uk": "Видавець"
+  },
+  "Publisher id": {
+    "de": "Herausgeber-ID",
+    "es-MX": "ID del editor",
+    "fr": "Id éditeur",
+    "pt-BR": "ID do editor",
+    "uk": "ID видавця"
+  },
+  "Rationale": {
+    "de": "Begründung",
+    "es-MX": "Justificación",
+    "fr": "Justification",
+    "pt-BR": "Justificativa",
+    "uk": "Обґрунтування"
+  },
+  "Re-evaluation": {
+    "de": "Neubewertung",
+    "es-MX": "Reevaluación",
+    "fr": "Réévaluation",
+    "pt-BR": "Reavaliação",
+    "uk": "Переоцінка"
+  },
+  "Re-fetch": {
+    "de": "Erneut abrufen",
+    "es-MX": "Volver a obtener",
+    "fr": "Récupérer à nouveau",
+    "pt-BR": "Buscar novamente",
+    "uk": "Отримати знову"
+  },
+  "Read deeper": {
+    "de": "Vertiefen",
+    "es-MX": "Profundiza",
+    "fr": "Pour aller plus loin",
+    "pt-BR": "Aprofunde-se",
+    "uk": "Поглибитися"
+  },
+  "Read federation setup docs": {
+    "de": "Föderations-Einrichtungsdokumentation lesen",
+    "es-MX": "Leer documentación de federación",
+    "fr": "Lire la documentation de fédération",
+    "pt-BR": "Ler documentação de federação",
+    "uk": "Документація з налаштування федерації"
+  },
+  "Read the philosophy": {
+    "de": "Die Philosophie lesen",
+    "es-MX": "Leer la filosofía",
+    "fr": "Lire la philosophie",
+    "pt-BR": "Ler a filosofia",
+    "uk": "Прочитати філософію"
+  },
+  "Reassessment requested": {
+    "de": "Neubewertung angefordert",
+    "es-MX": "Reevaluación solicitada",
+    "fr": "Réévaluation demandée",
+    "pt-BR": "Reavaliação solicitada",
+    "uk": "Запит на переоцінку"
+  },
+  "Recent drafts": {
+    "de": "Letzte Entwürfe",
+    "es-MX": "Borradores recientes",
+    "fr": "Brouillons récents",
+    "pt-BR": "Rascunhos recentes",
+    "uk": "Останні чернетки"
+  },
+  "Record a life event": {
+    "de": "Lebensereignis erfassen",
+    "es-MX": "Registrar un evento de vida",
+    "fr": "Enregistrer un événement de vie",
+    "pt-BR": "Registrar um evento de vida",
+    "uk": "Зареєструвати життєву подію"
+  },
+  "Record event": {
+    "de": "Ereignis erfassen",
+    "es-MX": "Registrar evento",
+    "fr": "Enregistrer un événement",
+    "pt-BR": "Registrar evento",
+    "uk": "Зареєструвати подію"
+  },
+  "Record the decision": {
+    "de": "Die Entscheidung erfassen",
+    "es-MX": "Registrar la decisión",
+    "fr": "Consigner la décision",
+    "pt-BR": "Registrar a decisão",
+    "uk": "Зафіксувати рішення"
+  },
+  "Registered publishers": {
+    "de": "Registrierte Herausgeber",
+    "es-MX": "Editores registrados",
+    "fr": "Éditeurs enregistrés",
+    "pt-BR": "Editores registrados",
+    "uk": "Зареєстровані видавці"
+  },
+  "Regulation": {
+    "de": "Verordnung",
+    "es-MX": "Reglamento",
+    "fr": "Règlement",
+    "pt-BR": "Regulamento",
+    "uk": "Підзаконний акт"
+  },
+  "Reject": {
+    "de": "Ablehnen",
+    "es-MX": "Rechazar",
+    "fr": "Rejeter",
+    "pt-BR": "Rejeitar",
+    "uk": "Відхилити"
+  },
+  "Reject a draft (terminal)": {
+    "de": "Einen Entwurf ablehnen (endgültig)",
+    "es-MX": "Rechazar un borrador (terminal)",
+    "fr": "Rejeter un brouillon (terminal)",
+    "pt-BR": "Rejeitar um rascunho (terminal)",
+    "uk": "Відхилити чернетку (кінцеве)"
+  },
+  "Reject this draft?": {
+    "de": "Diesen Entwurf ablehnen?",
+    "es-MX": "¿Rechazar este borrador?",
+    "fr": "Rejeter ce brouillon ?",
+    "pt-BR": "Rejeitar este rascunho?",
+    "uk": "Відхилити цю чернетку?"
+  },
+  "Rejected": {
+    "de": "Abgelehnt",
+    "es-MX": "Rechazada",
+    "fr": "Rejetée",
+    "pt-BR": "Rejeitada",
+    "uk": "Відхилено"
+  },
+  "Remove draft {label}": {
+    "de": "Entwurf {label} entfernen",
+    "es-MX": "Eliminar borrador {label}",
+    "fr": "Supprimer le brouillon {label}",
+    "pt-BR": "Remover rascunho {label}",
+    "uk": "Видалити чернетку {label}"
+  },
+  "Reopen for review": {
+    "de": "Erneut zur Prüfung öffnen",
+    "es-MX": "Reabrir para revisión",
+    "fr": "Rouvrir pour examen",
+    "pt-BR": "Reabrir para revisão",
+    "uk": "Знову відкрити на розгляд"
+  },
+  "Replacing existing version": {
+    "de": "Ersetzt vorhandene Version",
+    "es-MX": "Reemplazo de versión existente",
+    "fr": "Remplacement d'une version existante",
+    "pt-BR": "Substituindo versão existente",
+    "uk": "Заміна існуючої версії"
+  },
+  "Request changes": {
+    "de": "Änderungen anfordern",
+    "es-MX": "Solicitar cambios",
+    "fr": "Demander des modifications",
+    "pt-BR": "Solicitar mudanças",
+    "uk": "Запитати зміни"
+  },
+  "Request changes?": {
+    "de": "Änderungen anfordern?",
+    "es-MX": "¿Solicitar cambios?",
+    "fr": "Demander des modifications ?",
+    "pt-BR": "Solicitar alterações?",
+    "uk": "Запросити зміни?"
+  },
+  "Requires dual approval": {
+    "de": "Doppelte Genehmigung",
+    "es-MX": "Requiere doble aprobación",
+    "fr": "Double approbation requise",
+    "pt-BR": "Requer dupla aprovação",
+    "uk": "Потрібне подвійне схвалення"
+  },
+  "Rerun": {
+    "de": "Erneut prüfen",
+    "es-MX": "Volver a ejecutar",
+    "fr": "Relancer",
+    "pt-BR": "Executar novamente",
+    "uk": "Запустити знову"
+  },
+  "Reseed the demo data": {
+    "de": "Demo-Daten neu säen",
+    "es-MX": "Resembrar los datos de demostración",
+    "fr": "Ré-amorcer les données de démonstration",
+    "pt-BR": "Ressemear os dados de demonstração",
+    "uk": "Повторно посіяти демо-дані"
+  },
+  "Reset form": {
+    "de": "Formular zurücksetzen",
+    "es-MX": "Restablecer formulario",
+    "fr": "Réinitialiser le formulaire",
+    "pt-BR": "Redefinir formulário",
+    "uk": "Скинути форму"
+  },
+  "Reset to current-effective": {
+    "de": "Auf aktuelle Version zurücksetzen",
+    "es-MX": "Restablecer a la versión vigente",
+    "fr": "Rétablir la version en vigueur",
+    "pt-BR": "Restaurar versão vigente",
+    "uk": "Скинути до чинної версії"
+  },
+  "Residency periods": {
+    "de": "Aufenthaltszeiten",
+    "es-MX": "Periodos de residencia",
+    "fr": "Périodes de résidence",
+    "pt-BR": "Períodos de residência",
+    "uk": "Періоди проживання"
+  },
+  "Result": {
+    "de": "Ergebnis",
+    "es-MX": "Resultado",
+    "fr": "Résultat",
+    "pt-BR": "Resultado",
+    "uk": "Результат"
+  },
+  "Retry": {
+    "de": "Erneut versuchen",
+    "es-MX": "Reintentar",
+    "fr": "Réessayer",
+    "pt-BR": "Tentar novamente",
+    "uk": "Повторити"
+  },
+  "Review and approve a draft": {
+    "de": "Einen Entwurf prüfen und genehmigen",
+    "es-MX": "Revisar y aprobar un borrador",
+    "fr": "Examiner et approuver un brouillon",
+    "pt-BR": "Revisar e aprovar um rascunho",
+    "uk": "Перевірити та затвердити чернетку"
+  },
+  "Review draft for {key}": {
+    "de": "Entwurf für {key} prüfen",
+    "es-MX": "Revisar borrador de {key}",
+    "fr": "Examen du brouillon pour {key}",
+    "pt-BR": "Revisar rascunho de {key}",
+    "uk": "Перевірка чернетки для {key}"
+  },
+  "Review proposals": {
+    "de": "Vorschläge prüfen",
+    "es-MX": "Revisar propuestas",
+    "fr": "Examiner les propositions",
+    "pt-BR": "Revisar propostas",
+    "uk": "Переглянути пропозиції"
+  },
+  "Reviewer ratifies": {
+    "de": "Prüfer ratifiziert",
+    "es-MX": "El revisor ratifica",
+    "fr": "Le réviseur ratifie",
+    "pt-BR": "O revisor ratifica",
+    "uk": "Рецензент ратифікує"
+  },
+  "Rule": {
+    "de": "Regel",
+    "es-MX": "Regla",
+    "fr": "Règle",
+    "pt-BR": "Regra",
+    "uk": "Правило"
+  },
+  "Run comparison (A vs B)": {
+    "de": "Lauf-Vergleich (A vs B)",
+    "es-MX": "Comparación (A vs B)",
+    "fr": "Comparaison (A vs B)",
+    "pt-BR": "Comparação (A vs B)",
+    "uk": "Порівняння (A vs B)"
+  },
+  "Run extraction with this prompt": {
+    "de": "Extraktion ausführen",
+    "es-MX": "Ejecutar extracción",
+    "fr": "Exécuter l’extraction",
+    "pt-BR": "Executar extração",
+    "uk": "Запустити вилучення"
+  },
+  "Running…": {
+    "de": "Läuft…",
+    "es-MX": "Ejecutando…",
+    "fr": "Exécution…",
+    "pt-BR": "Executando…",
+    "uk": "Виконання…"
+  },
+  "SPRIND Law as Code (Germany)": {
+    "de": "SPRIND Law as Code (Deutschland)",
+    "es-MX": "SPRIND Law as Code (Alemania)",
+    "fr": "SPRIND Law as Code (Allemagne)",
+    "pt-BR": "SPRIND Law as Code (Alemanha)",
+    "uk": "SPRIND Law as Code (Німеччина)"
+  },
+  "SPRIND five-element mapping (LAW-AS-CODE.md)": {
+    "de": "SPRIND Fünf-Elemente-Mapping (LAW-AS-CODE.md)",
+    "es-MX": "Mapeo SPRIND de cinco elementos (LAW-AS-CODE.md)",
+    "fr": "Cartographie SPRIND en cinq éléments (LAW-AS-CODE.md)",
+    "pt-BR": "Mapeamento SPRIND em cinco elementos (LAW-AS-CODE.md)",
+    "uk": "Мапування SPRIND з п'яти елементів (LAW-AS-CODE.md)"
+  },
+  "Save as draft": {
+    "de": "Als Entwurf speichern",
+    "es-MX": "Guardar como borrador",
+    "fr": "Enregistrer comme brouillon",
+    "pt-BR": "Salvar como rascunho",
+    "uk": "Зберегти як чернетку"
+  },
+  "Save as draft (URL)": {
+    "de": "Als Entwurf speichern (URL)",
+    "es-MX": "Guardar borrador (URL)",
+    "fr": "Enregistrer le brouillon (URL)",
+    "pt-BR": "Salvar rascunho (URL)",
+    "uk": "Зберегти чернетку (URL)"
+  },
+  "Save event": {
+    "de": "Ereignis speichern",
+    "es-MX": "Guardar evento",
+    "fr": "Enregistrer l'événement",
+    "pt-BR": "Salvar evento",
+    "uk": "Зберегти подію"
+  },
+  "Scheduled": {
+    "de": "Geplant",
+    "es-MX": "Programada",
+    "fr": "Programmée",
+    "pt-BR": "Agendada",
+    "uk": "Запланована"
+  },
+  "Search ConfigValue records": {
+    "de": "ConfigValue-Datensätze durchsuchen",
+    "es-MX": "Buscar registros ConfigValue",
+    "fr": "Rechercher des enregistrements ConfigValue",
+    "pt-BR": "Pesquisar registros ConfigValue",
+    "uk": "Шукати записи ConfigValue"
+  },
+  "Search approvals": {
+    "de": "Freigaben durchsuchen",
+    "es-MX": "Buscar en aprobaciones",
+    "fr": "Rechercher dans les approbations",
+    "pt-BR": "Buscar nas aprovações",
+    "uk": "Пошук у затвердженнях"
+  },
+  "Search by key prefix…": {
+    "de": "Nach Schlüsselpräfix suchen…",
+    "es-MX": "Buscar por prefijo de clave…",
+    "fr": "Rechercher par préfixe de clé…",
+    "pt-BR": "Pesquisar por prefixo de chave…",
+    "uk": "Пошук за префіксом ключа…"
+  },
+  "See the walkthrough": {
+    "de": "Rundgang ansehen",
+    "es-MX": "Ver el recorrido",
+    "fr": "Voir la démonstration",
+    "pt-BR": "Ver a demonstração",
+    "uk": "Дивитися огляд"
+  },
+  "Self-screen for benefits": {
+    "de": "Selbstprüfung für Leistungen",
+    "es-MX": "Pre-evaluación de beneficios",
+    "fr": "Pré-évaluation de prestations",
+    "pt-BR": "Pré-avaliação de benefícios",
+    "uk": "Самоперевірка права на допомогу"
+  },
+  "Send back": {
+    "de": "Zurücksenden",
+    "es-MX": "Devolver",
+    "fr": "Renvoyer",
+    "pt-BR": "Devolver",
+    "uk": "Повернути"
+  },
+  "Show diff vs current": {
+    "de": "Diff anzeigen",
+    "es-MX": "Mostrar diff",
+    "fr": "Afficher le diff",
+    "pt-BR": "Mostrar diff",
+    "uk": "Показати diff"
+  },
+  "Show keyboard shortcuts": {
+    "de": "Tastenkürzel anzeigen",
+    "es-MX": "Mostrar atajos de teclado",
+    "fr": "Afficher les raccourcis clavier",
+    "pt-BR": "Mostrar atalhos de teclado",
+    "uk": "Показати комбінації клавіш"
+  },
+  "Showing {shown} of {total}": {
+    "de": "{shown} von {total} angezeigt",
+    "es-MX": "Mostrando {shown} de {total}",
+    "fr": "Affichage {shown} sur {total}",
+    "pt-BR": "Mostrando {shown} de {total}",
+    "uk": "Показано {shown} з {total}"
+  },
+  "Signed": {
+    "de": "Signiert",
+    "es-MX": "Firmado",
+    "fr": "Signé",
+    "pt-BR": "Assinado",
+    "uk": "Підписано"
+  },
+  "Skip to content": {
+    "de": "Zum Inhalt springen",
+    "es-MX": "Saltar al contenido",
+    "fr": "Aller au contenu",
+    "pt-BR": "Pular para o conteúdo",
+    "uk": "Перейти до вмісту"
+  },
+  "Sort by": {
+    "de": "Sortieren nach",
+    "es-MX": "Ordenar por",
+    "fr": "Trier par",
+    "pt-BR": "Ordenar por",
+    "uk": "Сортувати за"
+  },
+  "Spain": {
+    "de": "Spanien",
+    "es-MX": "España",
+    "fr": "Espagne",
+    "pt-BR": "Espanha",
+    "uk": "Іспанія"
+  },
+  "Start date": {
+    "de": "Beginn",
+    "es-MX": "Fecha de inicio",
+    "fr": "Date de début",
+    "pt-BR": "Data de início",
+    "uk": "Початок"
+  },
+  "Start date is required.": {
+    "de": "Startdatum ist erforderlich.",
+    "es-MX": "La fecha de inicio es obligatoria.",
+    "fr": "La date de début est requise.",
+    "pt-BR": "A data de início é obrigatória.",
+    "uk": "Дата початку обов'язкова."
+  },
+  "Statute meets System": {
+    "de": "Statut trifft System",
+    "es-MX": "El estatuto se encuentra con el sistema",
+    "fr": "La loi rencontre le système",
+    "pt-BR": "O estatuto encontra o sistema",
+    "uk": "Статут зустрічає систему"
+  },
+  "Stay": {
+    "de": "Bleiben",
+    "es-MX": "Quedarse",
+    "fr": "Rester",
+    "pt-BR": "Ficar",
+    "uk": "Лишитись"
+  },
+  "Strategic vision (IDEA-GovOps-v2.0-LawAsCode.md)": {
+    "de": "Strategische Vision (IDEA-GovOps-v2.0-LawAsCode.md)",
+    "es-MX": "Visión estratégica (IDEA-GovOps-v2.0-LawAsCode.md)",
+    "fr": "Vision stratégique (IDEA-GovOps-v2.0-LawAsCode.md)",
+    "pt-BR": "Visão estratégica (IDEA-GovOps-v2.0-LawAsCode.md)",
+    "uk": "Стратегічне бачення (IDEA-GovOps-v2.0-LawAsCode.md)"
+  },
+  "Structured": {
+    "de": "Strukturiert",
+    "es-MX": "Estructurado",
+    "fr": "Structuré",
+    "pt-BR": "Estruturado",
+    "uk": "Структурований"
+  },
+  "Submit draft": {
+    "de": "Entwurf senden",
+    "es-MX": "Enviar borrador",
+    "fr": "Soumettre",
+    "pt-BR": "Enviar rascunho",
+    "uk": "Подати чернетку"
+  },
+  "Submitting…": {
+    "de": "Wird gesendet…",
+    "es-MX": "Enviando…",
+    "fr": "Envoi…",
+    "pt-BR": "Enviando…",
+    "uk": "Надсилання…"
+  },
+  "Substrate": {
+    "de": "Substrat",
+    "es-MX": "Sustrato",
+    "fr": "Substrat",
+    "pt-BR": "Substrato",
+    "uk": "Субстрат"
+  },
+  "Substrate stores it": {
+    "de": "Substrat speichert es",
+    "es-MX": "El sustrato la almacena",
+    "fr": "Le substrat le stocke",
+    "pt-BR": "O substrato a armazena",
+    "uk": "Субстрат його зберігає"
+  },
+  "Superseded": {
+    "de": "Abgelöst",
+    "es-MX": "Sustituida",
+    "fr": "Remplacée",
+    "pt-BR": "Substituída",
+    "uk": "Замінено"
+  },
+  "Swap from/to": {
+    "de": "Von/Bis tauschen",
+    "es-MX": "Intercambiar desde/hasta",
+    "fr": "Inverser de/vers",
+    "pt-BR": "Trocar de/para",
+    "uk": "Поміняти з/до"
+  },
+  "Switch the active jurisdiction": {
+    "de": "Den aktiven Hoheitsbereich wechseln",
+    "es-MX": "Cambiar la jurisdicción activa",
+    "fr": "Changer la juridiction active",
+    "pt-BR": "Mudar a jurisdição ativa",
+    "uk": "Перемкнути активну юрисдикцію"
+  },
+  "System prompt body…": {
+    "de": "System-Prompt-Inhalt…",
+    "es-MX": "Cuerpo del prompt del sistema…",
+    "fr": "Corps du prompt système…",
+    "pt-BR": "Corpo do prompt do sistema…",
+    "uk": "Текст системного запиту…"
+  },
+  "System-generated": {
+    "de": "Vom System erzeugt",
+    "es-MX": "Generado por el sistema",
+    "fr": "Généré par le système",
+    "pt-BR": "Gerado pelo sistema",
+    "uk": "Згенеровано системою"
+  },
+  "Test against a fixture": {
+    "de": "Gegen eine Fixture testen",
+    "es-MX": "Probar contra un fixture",
+    "fr": "Tester contre un fixture",
+    "pt-BR": "Testar contra um fixture",
+    "uk": "Тестувати на фікстурі"
+  },
+  "Test against fixture": {
+    "de": "Gegen Fixture testen",
+    "es-MX": "Probar contra fixture",
+    "fr": "Tester contre une fixture",
+    "pt-BR": "Testar contra fixture",
+    "uk": "Тест на фікстурі"
+  },
+  "Test report downloaded": {
+    "de": "Bericht heruntergeladen",
+    "es-MX": "Reporte descargado",
+    "fr": "Rapport téléchargé",
+    "pt-BR": "Relatório baixado",
+    "uk": "Звіт завантажено"
+  },
+  "The Agentic State paper": {
+    "de": "The Agentic State (Paper)",
+    "es-MX": "The Agentic State (paper)",
+    "fr": "The Agentic State (papier)",
+    "pt-BR": "The Agentic State (paper)",
+    "uk": "The Agentic State (paper)"
+  },
+  "The fixture run timed out.": {
+    "de": "Zeitüberschreitung.",
+    "es-MX": "Tiempo de espera agotado.",
+    "fr": "L’exécution a expiré.",
+    "pt-BR": "Tempo esgotado.",
+    "uk": "Час очікування вичерпано."
+  },
+  "The law is enacted": {
+    "de": "Das Gesetz wird erlassen",
+    "es-MX": "La ley es promulgada",
+    "fr": "La loi est promulguée",
+    "pt-BR": "A lei é promulgada",
+    "uk": "Закон ухвалено"
+  },
+  "The scenario": {
+    "de": "Das Szenario",
+    "es-MX": "El escenario",
+    "fr": "Le scénario",
+    "pt-BR": "O cenário",
+    "uk": "Сценарій"
+  },
+  "This case needs human review": {
+    "de": "Dieser Fall benötigt eine menschliche Prüfung",
+    "es-MX": "Este caso requiere revisión humana",
+    "fr": "Ce dossier nécessite un examen humain",
+    "pt-BR": "Este caso precisa de revisão humana",
+    "uk": "Цей випадок потребує людського розгляду"
+  },
+  "This is not a determination": {
+    "de": "Dies ist keine Entscheidung",
+    "es-MX": "Esto no es una resolución",
+    "fr": "Ceci n'est pas une décision",
+    "pt-BR": "Isto não é uma decisão",
+    "uk": "Це не офіційне рішення"
+  },
+  "Title": {
+    "de": "Titel",
+    "es-MX": "Título",
+    "fr": "Titre",
+    "pt-BR": "Título",
+    "uk": "Назва"
+  },
+  "To": {
+    "de": "Bis",
+    "es-MX": "Hasta",
+    "fr": "Vers",
+    "pt-BR": "Para",
+    "uk": "До"
+  },
+  "To country": {
+    "de": "Zielland",
+    "es-MX": "País de destino",
+    "fr": "Pays de destination",
+    "pt-BR": "País de destino",
+    "uk": "Країна призначення"
+  },
+  "Toggle theme": {
+    "de": "Design wechseln",
+    "es-MX": "Cambiar tema",
+    "fr": "Changer de thème",
+    "pt-BR": "Alternar tema",
+    "uk": "Перемкнути тему"
+  },
+  "Toggle this help": {
+    "de": "Diese Hilfe ein-/ausblenden",
+    "es-MX": "Mostrar / ocultar esta ayuda",
+    "fr": "Afficher / masquer cette aide",
+    "pt-BR": "Mostrar / ocultar esta ajuda",
+    "uk": "Показати / сховати цю довідку"
+  },
+  "Trace a parameter's history": {
+    "de": "Den Verlauf eines Parameters verfolgen",
+    "es-MX": "Trazar el historial de un parámetro",
+    "fr": "Tracer l'historique d'un paramètre",
+    "pt-BR": "Traçar o histórico de um parâmetro",
+    "uk": "Простежити історію параметра"
+  },
+  "Triage a new case": {
+    "de": "Einen neuen Fall triagieren",
+    "es-MX": "Triar un nuevo caso",
+    "fr": "Trier un nouveau dossier",
+    "pt-BR": "Triar um novo caso",
+    "uk": "Сортувати нову справу"
+  },
+  "Triggered by event on": {
+    "de": "Ausgelöst durch Ereignis vom",
+    "es-MX": "Desencadenado por el evento del",
+    "fr": "Déclenché par l'événement du",
+    "pt-BR": "Acionado pelo evento de",
+    "uk": "Спричинено подією від"
+  },
+  "Trust": {
+    "de": "Vertrauen",
+    "es-MX": "Confianza",
+    "fr": "Confiance",
+    "pt-BR": "Confiança",
+    "uk": "Довіра"
+  },
+  "Trusted": {
+    "de": "Vertrauenswürdig",
+    "es-MX": "Confiable",
+    "fr": "Fiable",
+    "pt-BR": "Confiável",
+    "uk": "Довірений"
+  },
+  "Try again": {
+    "de": "Erneut versuchen",
+    "es-MX": "Reintentar",
+    "fr": "Réessayer",
+    "pt-BR": "Tentar de novo",
+    "uk": "Спробувати знову"
+  },
+  "Two frameworks GovOps takes seriously": {
+    "de": "Zwei Rahmenwerke, die GovOps ernst nimmt",
+    "es-MX": "Dos marcos que GovOps toma en serio",
+    "fr": "Deux cadres que GovOps prend au sérieux",
+    "pt-BR": "Dois frameworks que o GovOps leva a sério",
+    "uk": "Два фреймворки, які GovOps бере серйозно"
+  },
+  "UI": {
+    "de": "Oberfläche",
+    "es-MX": "Interfaz",
+    "fr": "Interface",
+    "pt-BR": "Interface",
+    "uk": "Інтерфейс"
+  },
+  "Unchanged": {
+    "de": "Unverändert",
+    "es-MX": "Sin cambios",
+    "fr": "Inchangé",
+    "pt-BR": "Inalterado",
+    "uk": "Без змін"
+  },
+  "United Kingdom": {
+    "de": "Vereinigtes Königreich",
+    "es-MX": "Reino Unido",
+    "fr": "Royaume-Uni",
+    "pt-BR": "Reino Unido",
+    "uk": "Велика Британія"
+  },
+  "United States": {
+    "de": "Vereinigte Staaten",
+    "es-MX": "Estados Unidos",
+    "fr": "États-Unis",
+    "pt-BR": "Estados Unidos",
+    "uk": "Сполучені Штати"
+  },
+  "Unsaved changes": {
+    "de": "Ungespeicherte Änderungen",
+    "es-MX": "Cambios sin guardar",
+    "fr": "Modifications non enregistrées",
+    "pt-BR": "Alterações não salvas",
+    "uk": "Незбережені зміни"
+  },
+  "Unsigned (--allow-unsigned)": {
+    "de": "Unsigniert (--allow-unsigned)",
+    "es-MX": "Sin firma (--allow-unsigned)",
+    "fr": "Non signé (--allow-unsigned)",
+    "pt-BR": "Sem assinatura (--allow-unsigned)",
+    "uk": "Без підпису (--allow-unsigned)"
+  },
+  "Unsigned only": {
+    "de": "Nur unsigniert",
+    "es-MX": "Solo sin firma",
+    "fr": "Non signé seulement",
+    "pt-BR": "Apenas sem assinatura",
+    "uk": "Лише без підпису"
+  },
+  "Unstructured": {
+    "de": "Unstrukturiert",
+    "es-MX": "No estructurado",
+    "fr": "Non structuré",
+    "pt-BR": "Não estruturado",
+    "uk": "Неструктурований"
+  },
+  "Untrusted": {
+    "de": "Nicht vertrauenswürdig",
+    "es-MX": "No confiable",
+    "fr": "Non fiable",
+    "pt-BR": "Não confiável",
+    "uk": "Недовірений"
+  },
+  "Value": {
+    "de": "Wert",
+    "es-MX": "Valor",
+    "fr": "Valeur",
+    "pt-BR": "Valor",
+    "uk": "Значення"
+  },
+  "Value is required.": {
+    "de": "Wert erforderlich.",
+    "es-MX": "Valor requerido.",
+    "fr": "Valeur requise.",
+    "pt-BR": "Valor obrigatório.",
+    "uk": "Значення обов'язкове."
+  },
+  "Value must be a number.": {
+    "de": "Wert muss eine Zahl sein.",
+    "es-MX": "El valor debe ser un número.",
+    "fr": "La valeur doit être un nombre.",
+    "pt-BR": "O valor deve ser um número.",
+    "uk": "Значення має бути числом."
+  },
+  "Value must be valid JSON.": {
+    "de": "Wert muss gültiges JSON sein.",
+    "es-MX": "El valor debe ser JSON válido.",
+    "fr": "La valeur doit être un JSON valide.",
+    "pt-BR": "O valor deve ser JSON válido.",
+    "uk": "Значення має бути валідним JSON."
+  },
+  "Value type": {
+    "de": "Werttyp",
+    "es-MX": "Tipo de valor",
+    "fr": "Type de valeur",
+    "pt-BR": "Tipo de valor",
+    "uk": "Тип значення"
+  },
+  "Value unchanged.": {
+    "de": "Wert unverändert.",
+    "es-MX": "Valor sin cambios.",
+    "fr": "Valeur inchangée.",
+    "pt-BR": "Valor inalterado.",
+    "uk": "Значення без змін."
+  },
+  "Verified": {
+    "de": "Verifiziert",
+    "es-MX": "Verificado",
+    "fr": "Vérifié",
+    "pt-BR": "Verificado",
+    "uk": "Підтверджено"
+  },
+  "Version history": {
+    "de": "Versionsverlauf",
+    "es-MX": "Historial de versiones",
+    "fr": "Historique des versions",
+    "pt-BR": "Histórico de versões",
+    "uk": "Історія версій"
+  },
+  "View diff (2 selected)": {
+    "de": "Unterschied anzeigen (2 ausgewählt)",
+    "es-MX": "Ver diferencias (2 seleccionadas)",
+    "fr": "Voir la différence (2 sélectionnées)",
+    "pt-BR": "Ver diferença (2 selecionadas)",
+    "uk": "Переглянути різницю (вибрано 2)"
+  },
+  "View last run": {
+    "de": "Letzten Lauf ansehen",
+    "es-MX": "Ver última ejecución",
+    "fr": "Voir la dernière exécution",
+    "pt-BR": "Ver última execução",
+    "uk": "Переглянути останній запуск"
+  },
+  "View timeline": {
+    "de": "Verlauf anzeigen",
+    "es-MX": "Ver historial",
+    "fr": "Voir l’historique",
+    "pt-BR": "Ver histórico",
+    "uk": "Історія"
+  },
+  "Walkthrough": {
+    "de": "Rundgang",
+    "es-MX": "Recorrido",
+    "fr": "Démonstration",
+    "pt-BR": "Demonstração",
+    "uk": "Огляд"
+  },
+  "Walkthrough — paid statutory vacation": {
+    "de": "Rundgang — bezahlter gesetzlicher Urlaub",
+    "es-MX": "Recorrido — vacaciones estatutarias pagadas",
+    "fr": "Démonstration — vacances statutaires payées",
+    "pt-BR": "Demonstração — férias estatutárias remuneradas",
+    "uk": "Огляд — оплачувана статутна відпустка"
+  },
+  "What GovOps does": {
+    "de": "Was GovOps tut",
+    "es-MX": "Qué hace GovOps",
+    "fr": "Ce que fait GovOps",
+    "pt-BR": "O que o GovOps faz",
+    "uk": "Що робить GovOps"
+  },
+  "What this is NOT": {
+    "de": "Was dies NICHT ist",
+    "es-MX": "Lo que esto NO es",
+    "fr": "Ce que ce n'est PAS",
+    "pt-BR": "O que isto NÃO é",
+    "uk": "Чим це НЕ є"
+  },
+  "What you can do here": {
+    "de": "Was Sie hier tun können",
+    "es-MX": "Lo que puede hacer aquí",
+    "fr": "Ce que vous pouvez faire ici",
+    "pt-BR": "O que você pode fazer aqui",
+    "uk": "Що ви можете тут зробити"
+  },
+  "What's inside": {
+    "de": "Was drinsteckt",
+    "es-MX": "Qué hay dentro",
+    "fr": "Ce qu'il y a dedans",
+    "pt-BR": "O que há dentro",
+    "uk": "Що всередині"
+  },
+  "Who does what": {
+    "de": "Wer macht was",
+    "es-MX": "Quién hace qué",
+    "fr": "Qui fait quoi",
+    "pt-BR": "Quem faz o quê",
+    "uk": "Хто що робить"
+  },
+  "Working…": {
+    "de": "Wird verarbeitet…",
+    "es-MX": "Procesando…",
+    "fr": "En cours…",
+    "pt-BR": "Processando…",
+    "uk": "Обробка…"
+  },
+  "You appear to qualify": {
+    "de": "Sie scheinen anspruchsberechtigt",
+    "es-MX": "Pareces calificar",
+    "fr": "Vous semblez admissible",
+    "pt-BR": "Você parece se qualificar",
+    "uk": "Схоже, ви маєте право"
+  },
+  "actors and their roles": {
+    "de": "akteure und ihre rollen",
+    "es-MX": "actores y sus roles",
+    "fr": "acteurs et leurs rôles",
+    "pt-BR": "atores e seus papéis",
+    "uk": "актори та їхні ролі"
+  },
+  "added": {
+    "de": "hinzugefügt",
+    "es-MX": "añadido",
+    "fr": "ajouté",
+    "pt-BR": "adicionado",
+    "uk": "додано"
+  },
+  "agent proposals · pending review": {
+    "de": "Vorschläge des Agenten · zur Prüfung anstehend",
+    "es-MX": "propuestas del agente · pendientes de revisión",
+    "fr": "propositions de l'agent · en attente de revue",
+    "pt-BR": "propostas do agente · pendentes de revisão",
+    "uk": "пропозиції агента · очікують на перегляд"
+  },
+  "approvals queue · 4 pending": {
+    "de": "Genehmigungswarteschlange · 4 anstehend",
+    "es-MX": "cola de aprobaciones · 4 pendientes",
+    "fr": "file d'approbations · 4 en attente",
+    "pt-BR": "fila de aprovações · 4 pendentes",
+    "uk": "черга затверджень · 4 очікують"
+  },
+  "by {author}": {
+    "de": "von {author}",
+    "es-MX": "por {author}",
+    "fr": "par {author}",
+    "pt-BR": "por {author}",
+    "uk": "автор: {author}"
+  },
+  "case A · maria": {
+    "de": "fall A · maria",
+    "es-MX": "caso A · maria",
+    "fr": "cas A · maria",
+    "pt-BR": "caso A · maria",
+    "uk": "справа A · maria"
+  },
+  "case B · carlos": {
+    "de": "fall B · carlos",
+    "es-MX": "caso B · carlos",
+    "fr": "cas B · carlos",
+    "pt-BR": "caso B · carlos",
+    "uk": "справа B · carlos"
+  },
+  "citizen": {
+    "de": "bürger",
+    "es-MX": "ciudadano",
+    "fr": "citoyen",
+    "pt-BR": "cidadão",
+    "uk": "громадянин"
+  },
+  "e.g. 65": {
+    "de": "z. B. 65",
+    "es-MX": "p. ej. 65",
+    "fr": "p. ex. 65",
+    "pt-BR": "ex.: 65",
+    "uk": "напр. 65"
+  },
+  "eligible": {
+    "de": "berechtigt",
+    "es-MX": "elegible",
+    "fr": "admissible",
+    "pt-BR": "elegível",
+    "uk": "має право"
+  },
+  "fail": {
+    "de": "fehlgeschlagen",
+    "es-MX": "falla",
+    "fr": "échoue",
+    "pt-BR": "falha",
+    "uk": "не пройдено"
+  },
+  "human": {
+    "de": "mensch",
+    "es-MX": "humano",
+    "fr": "humain",
+    "pt-BR": "humano",
+    "uk": "людина"
+  },
+  "ineligible": {
+    "de": "nicht berechtigt",
+    "es-MX": "no elegible",
+    "fr": "non admissible",
+    "pt-BR": "inelegível",
+    "uk": "не має права"
+  },
+  "legislature": {
+    "de": "legislative",
+    "es-MX": "legislatura",
+    "fr": "législature",
+    "pt-BR": "legislatura",
+    "uk": "законодавство"
+  },
+  "matches search: {query}": {
+    "de": "entspricht der Suche: {query}",
+    "es-MX": "coincide con la búsqueda: {query}",
+    "fr": "correspond à la recherche : {query}",
+    "pt-BR": "corresponde à busca: {query}",
+    "uk": "збігається з пошуком: {query}"
+  },
+  "pass": {
+    "de": "bestanden",
+    "es-MX": "pasa",
+    "fr": "passe",
+    "pt-BR": "passa",
+    "uk": "пройдено"
+  },
+  "pending": {
+    "de": "anstehend",
+    "es-MX": "pendiente",
+    "fr": "en attente",
+    "pt-BR": "pendente",
+    "uk": "очікує"
+  },
+  "public record": {
+    "de": "öffentliches register",
+    "es-MX": "registro público",
+    "fr": "registre public",
+    "pt-BR": "registro público",
+    "uk": "публічний реєстр"
+  },
+  "removed": {
+    "de": "entfernt",
+    "es-MX": "eliminado",
+    "fr": "supprimé",
+    "pt-BR": "removido",
+    "uk": "видалено"
+  },
+  "review": {
+    "de": "prüfung",
+    "es-MX": "revisión",
+    "fr": "revue",
+    "pt-BR": "revisão",
+    "uk": "перегляд"
+  },
+  "runbook · operator playbook": {
+    "de": "runbook · bediener-leitfaden",
+    "es-MX": "runbook · guía operadora",
+    "fr": "runbook · guide opérateur",
+    "pt-BR": "runbook · guia operadora",
+    "uk": "runbook · посібник оператора"
+  },
+  "scenario · paid statutory vacation": {
+    "de": "szenario · bezahlter gesetzlicher urlaub",
+    "es-MX": "escenario · vacaciones estatutarias pagadas",
+    "fr": "scénario · vacances statutaires payées",
+    "pt-BR": "cenário · férias estatutárias remuneradas",
+    "uk": "сценарій · оплачувана статутна відпустка"
+  },
+  "see it work": {
+    "de": "siehe es in aktion",
+    "es-MX": "véalo funcionar",
+    "fr": "voir le fonctionnement",
+    "pt-BR": "veja funcionar",
+    "uk": "побачити в дії"
+  },
+  "statutory excerpt (illustrative)": {
+    "de": "gesetzlicher Auszug (illustrativ)",
+    "es-MX": "extracto estatutario (ilustrativo)",
+    "fr": "extrait statutaire (illustratif)",
+    "pt-BR": "trecho estatutário (ilustrativo)",
+    "uk": "статутний витяг (ілюстративний)"
+  },
+  "step {num}": {
+    "de": "Schritt {num}",
+    "es-MX": "paso {num}",
+    "fr": "étape {num}",
+    "pt-BR": "passo {num}",
+    "uk": "крок {num}"
+  },
+  "substrate": {
+    "de": "substrat",
+    "es-MX": "sustrato",
+    "fr": "substrat",
+    "pt-BR": "substrato",
+    "uk": "субстрат"
+  },
+  "substrate · approved on 2026-04-26": {
+    "de": "Substrat · genehmigt am 2026-04-26",
+    "es-MX": "sustrato · aprobado el 2026-04-26",
+    "fr": "substrat · approuvé le 2026-04-26",
+    "pt-BR": "substrato · aprovado em 2026-04-26",
+    "uk": "субстрат · затверджено 2026-04-26"
+  },
+  "to {to_status}": {
+    "de": "zu {to_status}",
+    "es-MX": "a {to_status}",
+    "fr": "vers {to_status}",
+    "pt-BR": "para {to_status}",
+    "uk": "на {to_status}"
+  },
+  "{count, number} characters": {
+    "de": "{count, number} Zeichen",
+    "es-MX": "{count, number} caracteres",
+    "fr": "{count, number} caractères",
+    "pt-BR": "{count, number} caracteres",
+    "uk": "{count, number} символів"
+  },
+  "— no comparison —": {
+    "de": "— kein Vergleich —",
+    "es-MX": "— sin comparación —",
+    "fr": "— aucune comparaison —",
+    "pt-BR": "— sem comparação —",
+    "uk": "— без порівняння —"
+  }
+}

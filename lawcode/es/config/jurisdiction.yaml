@@ -1,0 +1,14 @@
+# yaml-language-server: $schema=../../../schema/lawcode-v1.0.json
+# es/config/jurisdiction.yaml — see ca/config/jurisdiction.yaml for the
+# load-bearing comment. Substrate-resolved per govops-022.
+
+defaults:
+  domain: jurisdiction
+  jurisdiction_id: es-jub
+  effective_from: '1900-01-01'
+values:
+- key: jurisdiction.es.howto_url
+  value: 'https://www.seg-social.es/'
+  value_type: string
+  citation: 'Seguridad Social — portal nacional'
+  rationale: 'Primary citizen-facing landing for la pensión de jubilación. Substrate-resolved per govops-022.'
