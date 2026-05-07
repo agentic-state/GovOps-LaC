@@ -33,12 +33,13 @@ from govops.spa_locale import (
 )
 
 
-# Allowlist for SPA fallback asset paths. Forbids `..`, absolute paths,
-# Windows drive letters, leading dots, and any character outside the safe
-# subset. Anything that doesn't match falls through to the SPA shell --
-# never to a file lookup. This is the primary defense against CWE-22 path
-# traversal; the resolve()+relative_to() check below is belt-and-braces.
-_SAFE_SPA_ASSET_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._/\-]*$")
+# Allowlist for SPA fallback asset paths. Forbids absolute paths, Windows
+# drive letters, leading dots, and any character outside the safe subset.
+# The negative-lookahead in the head also forbids any `..` substring
+# anywhere in the path. Anything that doesn't match falls through to the
+# SPA shell -- never to a file lookup. Primary defense against CWE-22 path
+# traversal; the realpath+startswith check below is belt-and-braces.
+_SAFE_SPA_ASSET_RE = re.compile(r"^(?!.*\.\.)[A-Za-z0-9][A-Za-z0-9._/\-]*$")
 
 
 def mount_spa(app: FastAPI, dist_path: str | None = None) -> bool:
@@ -88,8 +89,10 @@ def mount_spa(app: FastAPI, dist_path: str | None = None) -> bool:
     _catalogs = _load_catalogs()
     # Cache the index.html bytes once so we don't re-read on every request.
     _index_html = index.read_text(encoding="utf-8")
-    # Resolve once for the path-traversal containment check below.
-    _base_resolved = base.resolve()
+    # Cache the os.path-normalized dist root for the containment check.
+    # Trailing separator ensures `startswith` doesn't accidentally match
+    # a sibling directory whose name shares a prefix with `_base_str`.
+    _base_str = os.path.realpath(str(base)) + os.sep
 
     # Catch-all SPA fallback. Registered LAST, after every existing
     # /api/*, /docs, /redoc, /openapi.json route — FastAPI's router
@@ -111,18 +114,13 @@ def mount_spa(app: FastAPI, dist_path: str | None = None) -> bool:
         # CWE-22 path-traversal defense in two layers:
         #   1. Allowlist regex on the raw spa_path (rejects "..", absolute,
         #      drive letters, weird chars) BEFORE any path concatenation.
-        #   2. Resolve-then-relative_to() containment check after join, in
-        #      case the regex misses something or the dist contains
-        #      symlinks pointing outside.
-        # Only paths that pass BOTH layers reach FileResponse.
+        #   2. os.path.realpath + startswith containment check after join.
+        # Only paths that pass BOTH layers reach FileResponse. The structure
+        # mirrors the GOOD example in the CodeQL py/path-injection help.
         if _SAFE_SPA_ASSET_RE.match(spa_path):
-            target = (base / spa_path).resolve()
-            try:
-                target.relative_to(_base_resolved)
-            except ValueError:
-                target = None
-            if target is not None and target.is_file():
-                return FileResponse(str(target))
+            full = os.path.realpath(os.path.join(str(base), spa_path))
+            if full.startswith(_base_str) and os.path.isfile(full):
+                return FileResponse(full)
         # SPA shell with cookie-aware <title> + <html lang> rewriting. This
         # is the runtime substitute for per-request SSR -- the prerendered
         # index.html bakes in EN, but a request with `govops-locale=fr`
