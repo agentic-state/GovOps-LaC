@@ -1,0 +1,228 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/agentic-state/GovOps-LaC/schema/program-manifest-v1.0.json",
+  "title": "Program manifest v1.0",
+  "description": "Shape of an on-disk YAML file under lawcode/<jurisdiction>/programs/<program-id>.yaml. Per ADR-014, a program manifest declares the structure of a public-sector program (its rules, authority chain, legal documents, demo cases) for one jurisdiction. Parameter values are NOT declared here — they live in the ConfigValue substrate (lawcode/<jurisdiction>/config/<program>-rules.yaml) and are referenced via `param_key_prefix` + per-parameter substrate keys. Per ADR-015, the `shape` field references a published program shape from schema/shapes/.",
+  "type": "object",
+  "required": ["schema_version", "program_id", "jurisdiction_id", "shape", "rules"],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "1.0",
+      "description": "Pinned to 1.0 for v3.0. Future major bumps require an ADR."
+    },
+    "program_id": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_-]*$",
+      "description": "Lowercase program identifier, matches the filename stem (e.g. 'oas', 'ei')."
+    },
+    "jurisdiction_id": {
+      "type": "string",
+      "pattern": "^[a-z]{2}([a-z0-9_-]*)?$",
+      "description": "Lowercase jurisdiction code, matches the parent directory under lawcode/ (e.g. 'ca', 'br', 'es', 'fr', 'de', 'ua', 'jp')."
+    },
+    "shape": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]*$",
+      "description": "References a published shape under schema/shapes/<shape>.yaml or a local shape under lawcode/<jur>/_shapes/<shape>.yaml. The shape declares which rule_types are allowed/required and which evaluator runs."
+    },
+    "shape_version": {
+      "type": "string",
+      "pattern": "^v?\\d+\\.\\d+(\\.\\d+)?$",
+      "description": "Semver pin to a specific shape version. Defaults to the latest published version when omitted."
+    },
+    "status": {
+      "type": "string",
+      "enum": ["active", "deprecated", "superseded"],
+      "default": "active"
+    },
+    "name": {
+      "type": "object",
+      "description": "Localized program name keyed by IETF language tag (en, fr, pt-BR, es-MX, de, uk).",
+      "patternProperties": {
+        "^[a-z]{2}(-[A-Z]{2})?$": { "type": "string", "minLength": 1 }
+      },
+      "additionalProperties": false
+    },
+    "description": {
+      "type": "object",
+      "description": "Localized one-paragraph program description, same key shape as `name`.",
+      "patternProperties": {
+        "^[a-z]{2}(-[A-Z]{2})?$": { "type": "string", "minLength": 1 }
+      },
+      "additionalProperties": false
+    },
+    "authority_chain": {
+      "type": "array",
+      "description": "Ordered chain of authority references from constitution down to service. Mirrors the AuthorityReference model in src/govops/models.py.",
+      "items": {
+        "type": "object",
+        "required": ["id", "layer", "title", "citation"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string", "pattern": "^[a-z][a-z0-9_-]*$" },
+          "layer": {
+            "type": "string",
+            "enum": ["constitution", "act", "regulation", "policy", "program", "service"]
+          },
+          "title": { "type": "string", "minLength": 1 },
+          "citation": { "type": "string", "minLength": 1 },
+          "effective_date": { "type": "string", "format": "date" },
+          "url": { "type": "string", "format": "uri" },
+          "parent": { "type": "string", "description": "id of the parent authority in the chain" }
+        }
+      }
+    },
+    "legal_documents": {
+      "type": "array",
+      "description": "Statutes, regulations, policy manuals, and guidance documents this program cites.",
+      "items": {
+        "type": "object",
+        "required": ["id", "type", "title", "citation"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string", "pattern": "^[a-z][a-z0-9_-]*$" },
+          "type": {
+            "type": "string",
+            "enum": ["statute", "regulation", "policy_manual", "guidance"]
+          },
+          "title": { "type": "string", "minLength": 1 },
+          "citation": { "type": "string", "minLength": 1 },
+          "effective_date": { "type": "string", "format": "date" },
+          "sections": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["ref"],
+              "additionalProperties": false,
+              "properties": {
+                "id": { "type": "string" },
+                "ref": { "type": "string", "minLength": 1, "description": "e.g. 's. 3(1)(a)'" },
+                "heading": { "type": "string" },
+                "text": { "type": "string" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "rules": {
+      "type": "array",
+      "description": "Formalized rules for this program. Each rule's parameters are either substrate references ({ ref: '<key>' }) or includes ({ include: '<file>' }) — never literal values. Per ADR-014, structure lives here, values live in the substrate.",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "rule_type", "description", "citation"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string", "pattern": "^[a-z][a-z0-9_-]*$" },
+          "rule_type": {
+            "type": "string",
+            "enum": [
+              "age_threshold",
+              "residency_minimum",
+              "residency_partial",
+              "legal_status",
+              "evidence_required",
+              "exclusion",
+              "calculation",
+              "benefit_duration_bounded",
+              "active_obligation"
+            ],
+            "description": "Must be in the rule_types_allowed list of the declared shape. The last two are introduced in Phase C (ADR-017) for the unemployment_insurance shape."
+          },
+          "description": { "type": "string", "minLength": 1 },
+          "formal_expression": { "type": "string" },
+          "citation": { "type": "string", "minLength": 1 },
+          "source_document_id": { "type": "string", "description": "References a document in `legal_documents`." },
+          "source_section_ref": { "type": "string" },
+          "param_key_prefix": {
+            "type": "string",
+            "description": "Substrate key prefix for this rule's parameters. The engine concatenates '.{param_name}' to look up each parameter's effective value at the case's evaluation_date.",
+            "pattern": "^[a-z][a-z0-9._-]*$"
+          },
+          "parameters": {
+            "type": "object",
+            "description": "Per-parameter substrate references or includes. Literal values are NOT permitted (use ConfigValue records for values).",
+            "additionalProperties": {
+              "oneOf": [
+                {
+                  "type": "object",
+                  "required": ["ref"],
+                  "additionalProperties": false,
+                  "properties": {
+                    "ref": { "type": "string", "description": "Substrate key, e.g. 'ca.rule.age-65.min_age'." }
+                  }
+                },
+                {
+                  "type": "object",
+                  "required": ["include"],
+                  "additionalProperties": false,
+                  "properties": {
+                    "include": { "type": "string", "description": "Sibling-relative path to a YAML/JSON file (e.g. 'formulas/oas-amount.yaml'). Used for formula AST trees per ADR-011." }
+                  }
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    "demo_cases": {
+      "type": "array",
+      "description": "Demonstration cases shipped with the program. Each case must exercise a distinct decision path (eligible/ineligible/partial/insufficient_evidence/escalate).",
+      "items": {
+        "type": "object",
+        "required": ["id", "applicant"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string", "pattern": "^[a-z][a-z0-9_-]*$" },
+          "applicant": {
+            "type": "object",
+            "required": ["date_of_birth"],
+            "additionalProperties": false,
+            "properties": {
+              "id": { "type": "string" },
+              "date_of_birth": { "type": "string", "format": "date" },
+              "legal_name": { "type": "string" },
+              "legal_status": { "type": "string", "enum": ["citizen", "permanent_resident", "other", ""] },
+              "country_of_birth": { "type": "string" }
+            }
+          },
+          "residency_periods": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["country", "start_date"],
+              "additionalProperties": false,
+              "properties": {
+                "country": { "type": "string" },
+                "start_date": { "type": "string", "format": "date" },
+                "end_date": { "type": ["string", "null"], "format": "date" },
+                "verified": { "type": "boolean", "default": false },
+                "evidence_ids": { "type": "array", "items": { "type": "string" } }
+              }
+            }
+          },
+          "evidence_items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["type"],
+              "additionalProperties": false,
+              "properties": {
+                "id": { "type": "string" },
+                "type": { "type": "string", "description": "Evidence type, e.g. 'birth_certificate', 'tax_record'." },
+                "description": { "type": "string" },
+                "provided": { "type": "boolean", "default": true },
+                "verified": { "type": "boolean", "default": false },
+                "source_reference": { "type": "string" }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

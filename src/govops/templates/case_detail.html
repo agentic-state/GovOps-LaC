@@ -1,0 +1,194 @@
+{% extends "base.html" %}
+{% block title %}GovOps - {{ t('dashboard.case_id') }} {{ case.id }}{% endblock %}
+{% block content %}
+<p class="mb-2"><a href="/cases?lang={{ lang }}">&larr; {{ t('common.back_to_cases') }}</a></p>
+
+<div class="grid-2">
+    <div>
+        <div class="card">
+            <h2>{{ t('case.applicant_profile') }}</h2>
+            <table>
+                <tr><td><strong>{{ t('dashboard.case_id') }}</strong></td><td>{{ case.id }}</td></tr>
+                <tr><td><strong>{{ t('dashboard.applicant') }}</strong></td><td>{{ case.applicant.legal_name }}</td></tr>
+                <tr><td><strong>{{ t('dashboard.dob') }}</strong></td><td>{{ case.applicant.date_of_birth }}</td></tr>
+                <tr><td><strong>{{ t('dashboard.legal_status') }}</strong></td><td>{{ case.applicant.legal_status | title }}</td></tr>
+                <tr>
+                    <td><strong>{{ t('common.status') }}</strong></td>
+                    <td>
+                        {% if case.status.value == "intake" %}
+                            <span class="badge badge-muted">{{ t('status.intake') }}</span>
+                        {% elif case.status.value == "recommendation_ready" %}
+                            <span class="badge badge-info">{{ t('status.recommendation_ready') }}</span>
+                        {% elif case.status.value == "decided" %}
+                            <span class="badge badge-success">{{ t('status.decided') }}</span>
+                        {% elif case.status.value == "escalated" %}
+                            <span class="badge badge-warning">{{ t('status.escalated') }}</span>
+                        {% else %}
+                            <span class="badge badge-muted">{{ case.status.value }}</span>
+                        {% endif %}
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="card">
+            <h2>{{ t('case.residency_history') }}</h2>
+            {% if case.residency_periods %}
+            <table>
+                <thead><tr><th>Country</th><th>From</th><th>To</th><th>Verified</th></tr></thead>
+                <tbody>
+                {% for p in case.residency_periods %}
+                <tr>
+                    <td>{{ p.country }}</td>
+                    <td>{{ p.start_date }}</td>
+                    <td>{{ p.end_date or "Present" }}</td>
+                    <td>{% if p.verified %}<span class="badge badge-success">Yes</span>{% else %}<span class="badge badge-warning">No</span>{% endif %}</td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <p class="text-muted">No residency/contribution periods recorded.</p>
+            {% endif %}
+        </div>
+
+        <div class="card">
+            <h2>{{ t('case.evidence') }}</h2>
+            {% if case.evidence_items %}
+            <table>
+                <thead><tr><th>Type</th><th>Description</th><th>Provided</th><th>Verified</th></tr></thead>
+                <tbody>
+                {% for e in case.evidence_items %}
+                <tr>
+                    <td>{{ e.evidence_type | replace("_", " ") | title }}</td>
+                    <td>{{ e.description }}</td>
+                    <td>{% if e.provided %}<span class="badge badge-success">Yes</span>{% else %}<span class="badge badge-danger">No</span>{% endif %}</td>
+                    <td>{% if e.verified %}<span class="badge badge-success">Yes</span>{% else %}<span class="badge badge-warning">No</span>{% endif %}</td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <p class="text-muted">No evidence items recorded.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <div>
+        {% if not recommendation %}
+        <div class="card">
+            <h2>{{ t('common.evaluate') }}</h2>
+            <p class="text-sm mb-2">Run the deterministic rule engine against this case.</p>
+            <form method="POST" action="/cases/{{ case.id }}/evaluate?lang={{ lang }}">
+                <button type="submit" class="btn btn-primary">{{ t('common.evaluate') }}</button>
+            </form>
+        </div>
+        {% else %}
+        <div class="card">
+            <h2>{{ t('case.recommendation') }}</h2>
+            <div class="mb-2">
+                {% if recommendation.outcome.value == "eligible" %}
+                    <span class="badge badge-success" style="font-size:1rem; padding:0.3rem 1rem;">{{ t('outcome.eligible') }}</span>
+                    {% if recommendation.pension_type == "full" %}
+                        <span class="badge badge-success">Full ({{ recommendation.partial_ratio }})</span>
+                    {% else %}
+                        <span class="badge badge-info">Partial ({{ recommendation.partial_ratio }})</span>
+                    {% endif %}
+                {% elif recommendation.outcome.value == "ineligible" %}
+                    <span class="badge badge-danger" style="font-size:1rem; padding:0.3rem 1rem;">{{ t('outcome.ineligible') }}</span>
+                {% elif recommendation.outcome.value == "insufficient_evidence" %}
+                    <span class="badge badge-warning" style="font-size:1rem; padding:0.3rem 1rem;">{{ t('outcome.insufficient_evidence') }}</span>
+                {% elif recommendation.outcome.value == "escalate" %}
+                    <span class="badge badge-warning" style="font-size:1rem; padding:0.3rem 1rem;">{{ t('outcome.escalate') }}</span>
+                {% endif %}
+            </div>
+
+            <h3 class="mt-2">{{ t('case.rule_assessment') }}</h3>
+            {% for ev in recommendation.rule_evaluations %}
+            <div class="rule-eval {{ ev.outcome.value }}">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <strong>{{ ev.rule_description }}</strong>
+                    {% if ev.outcome.value == "satisfied" %}
+                        <span class="badge badge-success">{{ t('outcome.pass') }}</span>
+                    {% elif ev.outcome.value == "not_satisfied" %}
+                        <span class="badge badge-danger">{{ t('outcome.fail') }}</span>
+                    {% elif ev.outcome.value == "insufficient_evidence" %}
+                        <span class="badge badge-warning">{{ t('outcome.needs_evidence') }}</span>
+                    {% else %}
+                        <span class="badge badge-muted">N/A</span>
+                    {% endif %}
+                </div>
+                <p class="text-sm mt-1">{{ ev.detail }}</p>
+                <p class="citation">{{ ev.citation }}</p>
+            </div>
+            {% endfor %}
+
+            {% if recommendation.missing_evidence %}
+            <h3 class="mt-2">{{ t('case.missing_evidence') }}</h3>
+            <ul class="text-sm" style="padding-left:1.2rem;">
+                {% for m in recommendation.missing_evidence %}
+                <li>{{ m }}</li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+        </div>
+
+        {% if not reviews %}
+        <div class="card">
+            <h2>{{ t('case.human_review') }}</h2>
+            <form method="POST" action="/cases/{{ case.id }}/review?lang={{ lang }}">
+                <div class="mb-1">
+                    <label class="text-sm"><strong>{{ t('review.decision') }}</strong></label>
+                    <select name="action">
+                        <option value="approve">{{ t('review.approve') }}</option>
+                        <option value="modify">{{ t('review.modify') }}</option>
+                        <option value="reject">{{ t('review.reject') }}</option>
+                        <option value="request_info">{{ t('review.request_info') }}</option>
+                        <option value="escalate">{{ t('review.escalate') }}</option>
+                    </select>
+                </div>
+                <div class="mb-1">
+                    <label class="text-sm"><strong>{{ t('review.rationale') }}</strong></label>
+                    <textarea name="rationale" placeholder="..."></textarea>
+                </div>
+                <button type="submit" class="btn btn-success">{{ t('review.submit') }}</button>
+            </form>
+        </div>
+        {% else %}
+        <div class="card">
+            <h2>{{ t('case.human_review') }}</h2>
+            {% for r in reviews %}
+            <div class="rule-eval satisfied">
+                <strong>{{ r.action.value | replace("_", " ") | title }}</strong>
+                <span class="text-sm text-muted"> {{ r.reviewer }} &mdash; {{ r.timestamp.strftime("%Y-%m-%d %H:%M UTC") }}</span>
+                {% if r.rationale %}
+                <p class="text-sm mt-1">{{ r.rationale }}</p>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% endif %}
+
+        <div class="card">
+            <h2>{{ t('case.audit_trail') }}</h2>
+            {% if audit_trail %}
+            <table>
+                <thead><tr><th>Time</th><th>Event</th><th>Actor</th><th>Detail</th></tr></thead>
+                <tbody>
+                {% for entry in audit_trail %}
+                <tr>
+                    <td class="text-sm">{{ entry.timestamp.strftime("%H:%M:%S") }}</td>
+                    <td><span class="badge badge-muted">{{ entry.event_type }}</span></td>
+                    <td class="text-sm">{{ entry.actor }}</td>
+                    <td class="text-sm">{{ entry.detail }}</td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+            {% endif %}
+            <p class="mt-1"><a href="/cases/{{ case.id }}/audit-view?lang={{ lang }}" class="btn btn-primary btn-sm">{{ t('case.full_audit') }}</a></p>
+        </div>
+    </div>
+</div>
+{% endblock %}

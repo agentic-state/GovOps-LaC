@@ -1,0 +1,39 @@
+# yaml-language-server: $schema=../../../schema/lawcode-v1.0.json
+# ca/config/ei-rules.yaml — substrate values for CA Employment Insurance (v3 Phase D).
+# Schema: defaults + values list per ADR-003.
+
+defaults:
+  domain: rule
+  jurisdiction_id: ca-ei
+  effective_from: '1900-01-01'
+values:
+  - key: ca-ei.rule.contribution.min_years
+    value: 1
+    value_type: number
+    citation: Employment Insurance Act, S.C. 1996, c. 23, s. 7(2)
+  - key: ca-ei.rule.contribution.home_countries
+    value: [CA, CANADA, CAN]
+    value_type: list
+  - key: ca-ei.rule.legal-status.accepted_statuses
+    value: [citizen, permanent_resident]
+    value_type: list
+    citation: Employment Insurance Act, S.C. 1996, c. 23, s. 6(1)
+  - key: ca-ei.rule.evidence.required_types
+    value: [record_of_employment]
+    value_type: list
+    citation: Employment Insurance Act, S.C. 1996, c. 23, s. 50(1)
+  - key: ca-ei.rule.duration.weeks_total
+    value: 35
+    value_type: number
+    citation: Employment Insurance Act, S.C. 1996, c. 23, s. 12(2)
+    rationale: 'Illustrative midpoint of the 14-45 week range; real entitlement depends on insurable hours and regional unemployment rate per Schedule I.'
+  - key: ca-ei.rule.duration.start_offset_days
+    value: 0
+    value_type: number
+  - key: ca-ei.rule.job-search.obligation_id
+    value: ei-job-search
+    value_type: string
+  - key: ca-ei.rule.job-search.cadence
+    value: biweekly
+    value_type: string
+    citation: Employment Insurance Act, S.C. 1996, c. 23, s. 50(5) (biweekly reporting)

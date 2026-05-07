@@ -1,0 +1,14 @@
+# yaml-language-server: $schema=../../../schema/lawcode-v1.0.json
+# br/config/jurisdiction.yaml — see ca/config/jurisdiction.yaml for the
+# load-bearing comment. Substrate-resolved per govops-022.
+
+defaults:
+  domain: jurisdiction
+  jurisdiction_id: br-inss
+  effective_from: '1900-01-01'
+values:
+- key: jurisdiction.br.howto_url
+  value: 'https://www.gov.br/inss/pt-br'
+  value_type: string
+  citation: 'Instituto Nacional do Seguro Social — INSS portal'
+  rationale: 'Primary citizen-facing landing for Aposentadoria por Idade. Substrate-resolved per govops-022.'

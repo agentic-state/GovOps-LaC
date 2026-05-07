@@ -1,0 +1,243 @@
+# yaml-language-server: $schema=../../../schema/program-manifest-v1.0.json
+#
+# Brazil — Seguro-Desemprego program manifest (v3 Phase D).
+# Federal benefit for formal-employment workers dismissed without cause,
+# under Lei nº 7.998/1990. Disclaimer: legislative text used illustratively.
+
+schema_version: "1.0"
+program_id: ei
+jurisdiction_id: jur-br-federal
+shape: unemployment_insurance
+status: active
+
+name:
+  en: Unemployment Insurance (Seguro-Desemprego)
+  pt-BR: Seguro-Desemprego
+
+description:
+  en: Federal benefit for workers dismissed without cause from formal employment, providing 3-5 monthly parcels under Lei nº 7.998/1990.
+  pt-BR: Benefício federal para trabalhadores demitidos sem justa causa de emprego formal, com 3 a 5 parcelas mensais conforme a Lei nº 7.998/1990.
+
+authority_chain:
+  - id: auth-br-ei-constitution
+    layer: constitution
+    title: Constituição da República Federativa do Brasil de 1988
+    citation: CF/1988, Art. 7º, II; Art. 201, III
+    effective_date: 1988-10-05
+    url: https://www.planalto.gov.br/ccivil_03/constituicao/constituicao.htm
+  - id: auth-br-ei-lei-7998
+    layer: act
+    title: Lei do Programa do Seguro-Desemprego
+    citation: Lei nº 7.998/1990
+    effective_date: 1990-01-11
+    url: https://www.planalto.gov.br/ccivil_03/leis/l7998.htm
+    parent: auth-br-ei-constitution
+  - id: auth-br-ei-fat
+    layer: program
+    title: Fundo de Amparo ao Trabalhador (FAT)
+    citation: Lei nº 7.998/1990, Art. 10
+    parent: auth-br-ei-lei-7998
+  - id: auth-br-ei-mte
+    layer: program
+    title: Ministério do Trabalho — Sistema Nacional de Emprego (SINE)
+    citation: Lei nº 7.998/1990, Art. 18
+    parent: auth-br-ei-fat
+  - id: auth-br-ei-determination
+    layer: service
+    title: Concessão do Seguro-Desemprego
+    citation: Lei nº 7.998/1990, Arts. 3º-7º
+    parent: auth-br-ei-mte
+
+legal_documents:
+  - id: doc-br-ei-lei-7998
+    type: statute
+    title: Lei do Programa do Seguro-Desemprego
+    citation: Lei nº 7.998/1990
+    effective_date: 1990-01-11
+    sections:
+      - id: sec-br-ei-3
+        ref: Art. 3º
+        heading: Requisitos
+        text: >-
+          Terá direito à percepção do seguro-desemprego o trabalhador dispensado sem justa causa que comprovar ter recebido salários por pelo menos 12 meses nos últimos 18 meses imediatamente anteriores à data de dispensa, na primeira solicitação.
+      - id: sec-br-ei-4
+        ref: Art. 4º
+        heading: Número de parcelas
+        text: >-
+          O seguro-desemprego será concedido ao trabalhador desempregado por período máximo variável de três a cinco meses, de forma contínua ou alternada, a cada período aquisitivo.
+      - id: sec-br-ei-7
+        ref: Art. 7º
+        heading: Inscrição no SINE
+        text: >-
+          O beneficiário deverá manter sua inscrição atualizada no Sistema Nacional de Emprego (SINE) e comparecer às convocações para programas de qualificação profissional e de recolocação no mercado de trabalho.
+
+rules:
+  - id: rule-ei-contribution
+    rule_type: residency_minimum
+    description: Mínimo de 12 meses de emprego formal nos 18 meses anteriores à dispensa
+    formal_expression: formal_employment_months >= 12 in last 18 months
+    citation: Lei nº 7.998/1990, Art. 3º
+    source_document_id: doc-br-ei-lei-7998
+    source_section_ref: Art. 3º
+    param_key_prefix: br-ei.rule.contribution
+    parameters:
+      min_years: { ref: br-ei.rule.contribution.min_years }
+      home_countries: { ref: br-ei.rule.contribution.home_countries }
+
+  - id: rule-ei-legal-status
+    rule_type: legal_status
+    description: Trabalhador autorizado a exercer atividade laboral no Brasil
+    formal_expression: "applicant.legal_status in ['citizen', 'permanent_resident']"
+    citation: CF/1988, Art. 5º, XIII; Lei nº 7.998/1990
+    source_document_id: doc-br-ei-lei-7998
+    source_section_ref: Art. 3º
+    param_key_prefix: br-ei.rule.legal-status
+    parameters:
+      accepted_statuses: { ref: br-ei.rule.legal-status.accepted_statuses }
+
+  - id: rule-ei-evidence
+    rule_type: evidence_required
+    description: Termo de rescisão de contrato de trabalho (CTPS) ou comprovante equivalente
+    formal_expression: has_evidence('ctps_dismissal')
+    citation: Lei nº 7.998/1990, Art. 8º
+    source_document_id: doc-br-ei-lei-7998
+    source_section_ref: Art. 8º
+    param_key_prefix: br-ei.rule.evidence
+    parameters:
+      required_types: { ref: br-ei.rule.evidence.required_types }
+
+  - id: rule-ei-duration
+    rule_type: benefit_duration_bounded
+    description: Número máximo de parcelas (3 a 5) — duração equivalente em semanas
+    formal_expression: weeks = parcels * 4 (illustrative)
+    citation: Lei nº 7.998/1990, Art. 4º
+    source_document_id: doc-br-ei-lei-7998
+    source_section_ref: Art. 4º
+    param_key_prefix: br-ei.rule.duration
+    parameters:
+      weeks_total: { ref: br-ei.rule.duration.weeks_total }
+      start_offset_days: { ref: br-ei.rule.duration.start_offset_days }
+
+  - id: rule-ei-job-search
+    rule_type: active_obligation
+    description: Manutenção da inscrição ativa no SINE e participação em programas de recolocação
+    formal_expression: SINE_registration_active AND attendance_required
+    citation: Lei nº 7.998/1990, Art. 7º
+    source_document_id: doc-br-ei-lei-7998
+    source_section_ref: Art. 7º
+    param_key_prefix: br-ei.rule.job-search
+    parameters:
+      obligation_id: { ref: br-ei.rule.job-search.obligation_id }
+      cadence: { ref: br-ei.rule.job-search.cadence }
+
+demo_cases:
+  - id: demo-br-ei-001
+    applicant:
+      id: app-br-ei-001
+      date_of_birth: 1988-04-12
+      legal_name: João Silva
+      legal_status: citizen
+      country_of_birth: BR
+    residency_periods:
+      - country: Brazil
+        start_date: 1988-04-12
+        verified: true
+    evidence_items:
+      - id: ev-br-ei-001-bc
+        type: birth_certificate
+        description: Certidão de nascimento
+        provided: true
+        verified: true
+      - id: ev-br-ei-001-tax
+        type: tax_record
+        description: CTPS digital com vínculos 2017-2025
+        provided: true
+        verified: true
+      - id: ev-br-ei-001-rescisao
+        type: ctps_dismissal
+        description: Termo de rescisão sem justa causa
+        provided: true
+        verified: true
+
+  - id: demo-br-ei-002
+    applicant:
+      id: app-br-ei-002
+      date_of_birth: 1995-11-30
+      legal_name: Maria Oliveira
+      legal_status: permanent_resident
+      country_of_birth: PT
+    residency_periods:
+      - country: Portugal
+        start_date: 1995-11-30
+        end_date: 2025-09-15
+      - country: Brazil
+        start_date: 2025-09-15
+        verified: true
+    evidence_items:
+      - id: ev-br-ei-002-bc
+        type: birth_certificate
+        description: Certidão de nascimento portuguesa
+        provided: true
+        verified: true
+      - id: ev-br-ei-002-pr
+        type: residency_declaration
+        description: Registro Nacional Migratório (RNM)
+        provided: true
+        verified: true
+      - id: ev-br-ei-002-rescisao
+        type: ctps_dismissal
+        description: Termo de rescisão de contrato curto
+        provided: true
+        verified: true
+
+  - id: demo-br-ei-003
+    applicant:
+      id: app-br-ei-003
+      date_of_birth: 1980-07-08
+      legal_name: Carla Santos
+      legal_status: citizen
+      country_of_birth: BR
+    residency_periods:
+      - country: Brazil
+        start_date: 1980-07-08
+        verified: true
+    evidence_items:
+      - id: ev-br-ei-003-bc
+        type: birth_certificate
+        description: Certidão de nascimento
+        provided: true
+        verified: true
+      - id: ev-br-ei-003-tax
+        type: tax_record
+        description: CTPS digital com vínculos 2005-2025
+        provided: true
+        verified: true
+      - id: ev-br-ei-003-rescisao
+        type: ctps_dismissal
+        description: Termo de rescisão sem justa causa
+        provided: true
+        verified: true
+
+  - id: demo-br-ei-004
+    applicant:
+      id: app-br-ei-004
+      date_of_birth: 1992-02-20
+      legal_name: Pedro Costa
+      legal_status: citizen
+      country_of_birth: BR
+    residency_periods:
+      - country: Brazil
+        start_date: 1992-02-20
+        verified: true
+    evidence_items:
+      - id: ev-br-ei-004-bc
+        type: birth_certificate
+        description: Certidão de nascimento
+        provided: true
+        verified: true
+      - id: ev-br-ei-004-tax
+        type: tax_record
+        description: CTPS digital
+        provided: true
+        verified: true
+      # No ctps_dismissal — INSUFFICIENT_EVIDENCE

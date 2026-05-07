@@ -1,0 +1,35 @@
+# yaml-language-server: $schema=../../../schema/lawcode-v1.0.json
+# de/config/rules.yaml — generated from legacy_constants.py at Phase 3.2 cutover.
+# Schema: defaults + values list per ADR-003 §Mitigations.
+
+defaults:
+  domain: rule
+  jurisdiction_id: de-drv
+  effective_from: '1900-01-01'
+values:
+- key: de.rule.age.min_age
+  value: 67
+  value_type: number
+- key: de.rule.beitragszeit.full_years
+  value: 45
+  value_type: number
+- key: de.rule.beitragszeit.min_years
+  value: 5
+  value_type: number
+- key: de.rule.evidence.required_types
+  value:
+  - birth_certificate
+  value_type: list
+- key: de.rule.status.accepted_statuses
+  value:
+  - citizen
+  - permanent_resident
+  value_type: list
+- key: de.rule.wartezeit.home_countries
+  value:
+  - DE
+  - GERMANY
+  value_type: list
+- key: de.rule.wartezeit.min_years
+  value: 5
+  value_type: number

@@ -1,0 +1,29 @@
+# yaml-language-server: $schema=../../schema/lawcode-v1.0.json
+# lawcode/global/trusted_keys.yaml — federation trust allowlist (Phase 8 / ADR-009).
+#
+# Each entry is a ConfigValue under domain=federation. The key shape is
+# `global.federation.trusted_key.<publisher_id>`; the value is an object
+# carrying the publisher's base64-encoded Ed25519 public key plus
+# free-form notes.
+#
+# Trust is local and explicit. To trust a new publisher:
+#
+#   1. Obtain the publisher's public_key_b64 (a 32-byte Ed25519 public
+#      key, base64-encoded — see `govops.federation.generate_keypair`
+#      for how publishers produce it).
+#   2. Open a PR adding an entry here. The PR is the audit trail of the
+#      trust decision.
+#   3. Add the publisher to lawcode/REGISTRY.yaml so the fetch CLI can
+#      find their manifest URL.
+#
+# The default ship is empty — operators who want to federate add entries
+# in their own forks. There is no central authority shipping trust on
+# everyone's behalf.
+
+defaults:
+  domain: federation
+  jurisdiction_id: global
+  effective_from: '1900-01-01'
+  value_type: object
+
+values: []
