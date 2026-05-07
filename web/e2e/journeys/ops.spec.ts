@@ -37,6 +37,13 @@ test.describe("[J40] Admin — manual GC trigger", () => {
 
 test.describe("[J41] LLM proxy passthrough", () => {
   test("POST /api/llm/chat with a tiny prompt returns content (or rate-limit/4xx)", async ({ request }) => {
+    // Per RUNBOOK: "manual-only" -- the proxy returns 503 when no provider is
+    // configured (the CI default). Skip unless an env var explicitly opts in,
+    // mirroring J38's "skip when not actionable" posture for federation.
+    test.skip(
+      !process.env.GOVOPS_LLM_PROVIDER && !process.env.E2E_LLM_LIVE,
+      "no LLM provider configured (set GOVOPS_LLM_PROVIDER or E2E_LLM_LIVE=1 to exercise)",
+    );
     const api = await backend(request);
     const r = await api.llmChat({
       messages: [{ role: "user", content: "ping" }],
