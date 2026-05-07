@@ -322,6 +322,19 @@ class TestEnableDisableEndpoints:
         r = client.post("/api/admin/federation/packs/nonexistent/enable")
         assert r.status_code == 404
 
+    def test_enable_unsafe_publisher_id_returns_4xx(self, client):
+        # Regression: bench J38 used a leading-underscore id which fails the
+        # safe-id regex and raises UnsafePath. Before the fix the handler only
+        # caught FileNotFoundError, so UnsafePath surfaced as 500.
+        r = client.post("/api/admin/federation/packs/__bench_unknown__/enable")
+        assert r.status_code >= 400
+        assert r.status_code < 500
+
+    def test_disable_unsafe_publisher_id_returns_4xx(self, client):
+        r = client.post("/api/admin/federation/packs/__bench_unknown__/disable")
+        assert r.status_code >= 400
+        assert r.status_code < 500
+
 
 # ---------------------------------------------------------------------------
 # Admin token gate (env-var driven). When GOVOPS_ADMIN_TOKEN is unset

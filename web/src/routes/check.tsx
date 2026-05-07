@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, Outlet, useChildMatches } from "@tanstack/react-router";
 import { useState } from "react";
 import { useIntl } from "react-intl";
 import { runCheck } from "@/lib/api";
@@ -12,7 +12,7 @@ import { ProvenanceRibbon } from "@/components/govops/ProvenanceRibbon";
 import { t, localeFromMatches } from "@/lib/head-i18n";
 
 export const Route = createFileRoute("/check")({
-  component: CheckPage,
+  component: CheckLayout,
   head: ({ matches }) => {
     const l = localeFromMatches(matches);
     return {
@@ -23,6 +23,15 @@ export const Route = createFileRoute("/check")({
     };
   },
 });
+
+function CheckLayout() {
+  // When a child route (e.g. /check/life-event) is active, render only the
+  // Outlet — the child supplies its own page. Otherwise render the landing
+  // form. Mirrors the screen.tsx pattern.
+  const childMatches = useChildMatches();
+  if (childMatches.length > 0) return <Outlet />;
+  return <CheckPage />;
+}
 
 const ACTIVE_JURISDICTIONS = ["ca", "br", "es", "fr", "de", "ua", "jp"] as const;
 

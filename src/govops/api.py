@@ -262,11 +262,27 @@ app = FastAPI(
 # v2.1 hosted-demo middleware stack. Order matters: rate-limit FIRST (cheapest
 # to evaluate, blocks abuse before we do any work), then demo-mode header.
 # Both are no-ops when their env vars are unset, so local dev sees no change.
+# CORS goes LAST so it ends up outermost -- preflight OPTIONS must be answered
+# before rate-limit/demo-mode see it.
+from fastapi.middleware.cors import CORSMiddleware  # noqa: E402
 from govops.rate_limit import RateLimitMiddleware  # noqa: E402
 from govops.demo_mode import DemoModeMiddleware  # noqa: E402
 
 app.add_middleware(DemoModeMiddleware)
 app.add_middleware(RateLimitMiddleware)
+
+# CORS for the documented two-process dev workflow (FastAPI + Vite dev server
+# on different ports) and for the E2E suite (uncommon ports per
+# web/playwright.config.ts). Production / HF deploy serves frontend and
+# backend from the same origin, so this regex never matches there. Localhost
+# CORS is safe -- only processes already on the machine can match.
+app.add_middleware(
+    CORSMiddleware,
+    allow_origin_regex=r"^https?://(127\.0\.0\.1|localhost)(:\d+)?$",
+    allow_methods=["*"],
+    allow_headers=["*"],
+    allow_credentials=False,
+)
 
 templates = Jinja2Templates(directory=str(TEMPLATES_DIR))
 if STATIC_DIR.exists():
@@ -933,13 +949,18 @@ def admin_gc(token: str | None = None, max_age_days: int = 7):
 
 
 def _set_pack_enabled_response(publisher_id: str, *, enabled: bool) -> dict:
-    from govops.federation import set_pack_enabled
+    from govops.federation import FederationError, set_pack_enabled
 
     _, _, federated_dir = _federation_paths()
     try:
         changed = set_pack_enabled(federated_dir, publisher_id, enabled)
     except FileNotFoundError as exc:
         raise HTTPException(404, str(exc)) from exc
+    except FederationError as exc:
+        # UnsafePath (publisher_id failed the safe-id regex, e.g. leading
+        # underscore) and any other fail-closed federation error must surface
+        # as 4xx, not 500. Mirrors the fetch endpoint's posture above.
+        raise HTTPException(400, str(exc)) from exc
     return {"publisher_id": publisher_id, "enabled": enabled, "changed": changed}
 
 
