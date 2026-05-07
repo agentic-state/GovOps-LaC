@@ -20,9 +20,16 @@ from __future__ import annotations
 import os
 from pathlib import Path
 
-from fastapi import FastAPI, HTTPException
-from fastapi.responses import FileResponse
+from fastapi import FastAPI, HTTPException, Request
+from fastapi.responses import FileResponse, HTMLResponse
 from fastapi.staticfiles import StaticFiles
+
+from govops.spa_locale import (
+    _load_catalogs,
+    _normalize_locale,
+    parse_locale_cookie,
+    rewrite_html_for_locale,
+)
 
 
 def mount_spa(app: FastAPI, dist_path: str | None = None) -> bool:
@@ -67,13 +74,19 @@ def mount_spa(app: FastAPI, dist_path: str | None = None) -> bool:
             name="spa-assets",
         )
 
+    # Load i18n catalogs once at mount time. Empty dict if the web tree
+    # isn't available -- the rewriter falls through to the EN default.
+    _catalogs = _load_catalogs()
+    # Cache the index.html bytes once so we don't re-read on every request.
+    _index_html = index.read_text(encoding="utf-8")
+
     # Catch-all SPA fallback. Registered LAST, after every existing
     # /api/*, /docs, /redoc, /openapi.json route — FastAPI's router
     # tries routes in registration order, so prior routes take
     # precedence and only paths that don't match anything else hit
     # this fallback.
     @app.get("/{spa_path:path}", include_in_schema=False)
-    async def _spa_fallback(spa_path: str):
+    async def _spa_fallback(spa_path: str, request: Request):
         # Defensive: if a literal /api or /docs path somehow reached
         # here (route registration order broken), 404 instead of
         # serving the SPA shell. Never return HTML to an API caller.
@@ -87,7 +100,16 @@ def mount_spa(app: FastAPI, dist_path: str | None = None) -> bool:
         target = base / spa_path
         if target.is_file():
             return FileResponse(str(target))
-        # Otherwise serve the SPA shell — TanStack Router handles routing.
-        return FileResponse(str(index))
+        # SPA shell with cookie-aware <title> + <html lang> rewriting. This
+        # is the runtime substitute for per-request SSR -- the prerendered
+        # index.html bakes in EN, but a request with `govops-locale=fr`
+        # gets FR-localized head() metadata so SEO/social-share/first-paint
+        # all see the visitor's locale (M02 contract).
+        cookie_locale = parse_locale_cookie(request.headers.get("cookie"))
+        accept_language = request.headers.get("accept-language")
+        locale = _normalize_locale(cookie_locale or accept_language)
+        path_for_title = "/" + spa_path.lstrip("/")
+        body = rewrite_html_for_locale(_index_html, path_for_title, locale, _catalogs)
+        return HTMLResponse(content=body)
 
     return True
