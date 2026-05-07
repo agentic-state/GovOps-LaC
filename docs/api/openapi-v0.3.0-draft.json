@@ -22,6 +22,43 @@
         }
       }
     },
+    "/api/llm/chat": {
+      "post": {
+        "summary": "Llm Chat",
+        "description": "Proxy a chat-completion request through the configured provider chain.\n\nReturns a minimal subset of the OpenAI Chat Completions response shape:\n    { provider, model, content, elapsed_ms }\n\n503 when no provider is configured; 502 when every provider in the chain\nfails. Rate-limited at the middleware layer.",
+        "operationId": "llm_chat_api_llm_chat_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LLMChatRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/jurisdiction/{jur_code}": {
       "post": {
         "summary": "Switch Jurisdiction",
@@ -199,6 +236,7 @@
     "/api/cases/{case_id}/evaluate": {
       "post": {
         "summary": "Evaluate Case",
+        "description": "Run the rule engine against the case (ADR-018 — cross-program).\n\nBackward compatible: callers that POST with no body keep getting the\nsame `{\"recommendation\": ...}` shape they did pre-v3. v3 callers also\nreceive `program_evaluations` (one Recommendation per program) and\n`warnings` (cross-program interaction notes).",
         "operationId": "evaluate_case_api_cases__case_id__evaluate_post",
         "parameters": [
           {
@@ -211,6 +249,23 @@
             }
           }
         ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "anyOf": [
+                  {
+                    "$ref": "#/components/schemas/EvaluateRequest"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Body"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -696,6 +751,61 @@
                 }
               ],
               "title": "X-Govops-Admin-Token"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/gc": {
+      "post": {
+        "summary": "Admin Gc",
+        "description": "Force a GC sweep of user-created records older than max_age_days.\n\nToken-gated via the DEMO_ADMIN_TOKEN env var. When the token is unset\non the server, the endpoint returns 403 (the demo deploy MUST set\nDEMO_ADMIN_TOKEN to use this).\n\nReturns the count of deleted ConfigValue records and a timestamp. Safe\nto call any time — the underlying SQL is idempotent (cutoff is\nmonotonic, deleted rows can't be deleted twice). The same function is\nfired daily at 03:00 UTC by the APScheduler in `gc_scheduler`; the\nadmin endpoint exists for \"clean the demo before a presentation\"\nmoments.",
+        "operationId": "admin_gc_api_admin_gc_post",
+        "parameters": [
+          {
+            "name": "token",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Token"
+            }
+          },
+          {
+            "name": "max_age_days",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 7,
+              "title": "Max Age Days"
             }
           }
         ],
@@ -1310,6 +1420,54 @@
         }
       }
     },
+    "/api/programs/{program_id}/compare": {
+      "get": {
+        "summary": "Compare Program",
+        "description": "Cross-jurisdiction comparison surface for a single program (Phase F).\n\nLoads each jurisdiction's manifest at `lawcode/<code>/programs/{program_id}.yaml`\ndirectly from disk — independent of which jurisdiction is currently\nseeded into `store`, so a comparison call doesn't disrupt operator\nstate. Resolved parameter values come through the substrate (refs are\nresolved at manifest load time per ADR-014).\n\nQuery parameters:\n  - `jurisdictions`: comma-separated jur codes (default: all 7).\n\nResponse shape:\n  ```\n  {\n    \"program_id\": \"ei\",\n    \"shape\": \"unemployment_insurance\" | None,\n    \"jurisdictions\": [\n      {\n        \"code\": \"ca\",\n        \"label\": \"Government of Canada\",\n        \"available\": true,\n        \"name\": {\"en\": ..., \"fr\": ...},\n        \"description\": {...},\n        \"shape\": \"unemployment_insurance\",\n        \"authority_chain\": [...],\n        \"rules\": [...]\n      },\n      {\n        \"code\": \"jp\",\n        \"label\": \"Nihon-koku\",\n        \"available\": false,\n        \"unavailable_reason\": \"...\"\n      },\n      ...\n    ],\n    \"comparison\": {\n      \"rule_ids\": [...],\n      \"rows\": [\n        {\n          \"rule_id\": \"rule-ei-contribution\",\n          \"rule_type\": \"residency_minimum\",\n          \"citation_per_jurisdiction\": {\"ca\": \"...\", ...},\n          \"description_per_jurisdiction\": {\"ca\": \"...\", ...},\n          \"parameters\": {\n            \"min_years\": {\"ca\": 1, \"br\": 1.5, ...}\n          }\n        },\n        ...\n      ]\n    }\n  }\n  ```",
+        "operationId": "compare_program_api_programs__program_id__compare_get",
+        "parameters": [
+          {
+            "name": "program_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Program Id"
+            }
+          },
+          {
+            "name": "jurisdictions",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "Jurisdictions"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/screen": {
       "post": {
         "summary": "Screen",
@@ -1332,6 +1490,45 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ScreenResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/check": {
+      "post": {
+        "summary": "Check",
+        "description": "Multi-program citizen check (v3 Phase G — citizen entry surface).\n\nEvaluates every program available for the jurisdiction (OAS + EI in\nCA/BR/ES/FR/DE/UA, OAS only in JP) against the citizen's declared\nfacts and returns one result per program. Privacy posture is identical\nto `POST /api/screen` — no case row, no audit entry, no PII echoed.\n\nOptional `programs: [...]` body field restricts evaluation to a subset;\nunknown program ids → 400.",
+        "operationId": "check_api_check_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CheckRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CheckResponse"
                 }
               }
             }
@@ -1918,6 +2115,291 @@
         ],
         "title": "CaseEventRequest"
       },
+      "CheckActiveObligation": {
+        "properties": {
+          "obligation_id": {
+            "type": "string",
+            "title": "Obligation Id"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description"
+          },
+          "citation": {
+            "type": "string",
+            "title": "Citation"
+          },
+          "cadence": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cadence"
+          }
+        },
+        "type": "object",
+        "required": [
+          "obligation_id",
+          "description",
+          "citation"
+        ],
+        "title": "CheckActiveObligation",
+        "description": "Forward-looking obligation surfaced to the citizen (ADR-017)."
+      },
+      "CheckBenefitPeriod": {
+        "properties": {
+          "start_date": {
+            "type": "string",
+            "title": "Start Date"
+          },
+          "end_date": {
+            "type": "string",
+            "title": "End Date"
+          },
+          "weeks_total": {
+            "type": "integer",
+            "title": "Weeks Total"
+          },
+          "weeks_remaining": {
+            "type": "integer",
+            "title": "Weeks Remaining"
+          },
+          "citations": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Citations"
+          }
+        },
+        "type": "object",
+        "required": [
+          "start_date",
+          "end_date",
+          "weeks_total",
+          "weeks_remaining"
+        ],
+        "title": "CheckBenefitPeriod",
+        "description": "Citizen-facing projection of a bounded eligibility period (ADR-017)."
+      },
+      "CheckEvidence": {
+        "properties": {
+          "dob": {
+            "type": "boolean",
+            "title": "Dob",
+            "default": false
+          },
+          "residency": {
+            "type": "boolean",
+            "title": "Residency",
+            "default": false
+          },
+          "job_loss": {
+            "type": "boolean",
+            "title": "Job Loss",
+            "default": false
+          }
+        },
+        "type": "object",
+        "title": "CheckEvidence",
+        "description": "Citizen-facing checkbox state for the multi-program check (Phase G).\n\n``job_loss`` is the v3 addition that unlocks Employment Insurance\neligibility paths — when checked, the engine sees the per-jurisdiction\nEI evidence type (`record_of_employment` for CA, `arbeitsbescheinigung`\nfor DE, etc.) injected automatically. The citizen does not need to know\nthe local term."
+      },
+      "CheckProgramResult": {
+        "properties": {
+          "program_id": {
+            "type": "string",
+            "title": "Program Id"
+          },
+          "program_name": {
+            "type": "string",
+            "title": "Program Name"
+          },
+          "shape": {
+            "type": "string",
+            "title": "Shape"
+          },
+          "outcome": {
+            "type": "string",
+            "title": "Outcome"
+          },
+          "pension_type": {
+            "type": "string",
+            "title": "Pension Type",
+            "default": ""
+          },
+          "partial_ratio": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Partial Ratio"
+          },
+          "rule_results": {
+            "items": {
+              "$ref": "#/components/schemas/ScreenRuleResult"
+            },
+            "type": "array",
+            "title": "Rule Results"
+          },
+          "missing_evidence": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Missing Evidence"
+          },
+          "benefit_amount": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ScreenBenefitAmount"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "benefit_period": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CheckBenefitPeriod"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "active_obligations": {
+            "items": {
+              "$ref": "#/components/schemas/CheckActiveObligation"
+            },
+            "type": "array",
+            "title": "Active Obligations"
+          }
+        },
+        "type": "object",
+        "required": [
+          "program_id",
+          "program_name",
+          "shape",
+          "outcome"
+        ],
+        "title": "CheckProgramResult"
+      },
+      "CheckRequest": {
+        "properties": {
+          "jurisdiction_id": {
+            "type": "string",
+            "title": "Jurisdiction Id"
+          },
+          "date_of_birth": {
+            "type": "string",
+            "format": "date",
+            "title": "Date Of Birth"
+          },
+          "legal_status": {
+            "type": "string",
+            "title": "Legal Status"
+          },
+          "country_of_birth": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Country Of Birth"
+          },
+          "residency_periods": {
+            "items": {
+              "$ref": "#/components/schemas/ScreenResidencyPeriod"
+            },
+            "type": "array",
+            "title": "Residency Periods"
+          },
+          "evidence_present": {
+            "$ref": "#/components/schemas/CheckEvidence"
+          },
+          "programs": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Programs"
+          },
+          "evaluation_date": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Evaluation Date"
+          }
+        },
+        "type": "object",
+        "required": [
+          "jurisdiction_id",
+          "date_of_birth",
+          "legal_status"
+        ],
+        "title": "CheckRequest"
+      },
+      "CheckResponse": {
+        "properties": {
+          "jurisdiction_id": {
+            "type": "string",
+            "title": "Jurisdiction Id"
+          },
+          "jurisdiction_label": {
+            "type": "string",
+            "title": "Jurisdiction Label"
+          },
+          "evaluation_date": {
+            "type": "string",
+            "title": "Evaluation Date"
+          },
+          "programs": {
+            "items": {
+              "$ref": "#/components/schemas/CheckProgramResult"
+            },
+            "type": "array",
+            "title": "Programs"
+          },
+          "disclaimer": {
+            "type": "string",
+            "title": "Disclaimer",
+            "default": "This is decision support, not a determination. Apply through the program for an official decision."
+          }
+        },
+        "type": "object",
+        "required": [
+          "jurisdiction_id",
+          "jurisdiction_label",
+          "evaluation_date",
+          "programs"
+        ],
+        "title": "CheckResponse"
+      },
       "CreateConfigValueRequest": {
         "properties": {
           "domain": {
@@ -2024,6 +2506,27 @@
         ],
         "title": "DecisionOutcome"
       },
+      "EvaluateRequest": {
+        "properties": {
+          "programs": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Programs"
+          }
+        },
+        "type": "object",
+        "title": "EvaluateRequest",
+        "description": "Optional cross-program selector for the evaluate endpoint (ADR-018).\n\n`programs` lists the program ids to run. Omit (or send empty) to run\nevery program registered for the case's jurisdiction. Unknown ids\nreturn HTTP 400."
+      },
       "EventType": {
         "type": "string",
         "enum": [
@@ -2046,6 +2549,32 @@
         },
         "type": "object",
         "title": "HTTPValidationError"
+      },
+      "LLMChatRequest": {
+        "properties": {
+          "messages": {
+            "items": {
+              "$ref": "#/components/schemas/_ChatMessage"
+            },
+            "type": "array",
+            "title": "Messages"
+          },
+          "max_tokens": {
+            "type": "integer",
+            "title": "Max Tokens",
+            "default": 1024
+          },
+          "temperature": {
+            "type": "number",
+            "title": "Temperature",
+            "default": 0.2
+          }
+        },
+        "type": "object",
+        "required": [
+          "messages"
+        ],
+        "title": "LLMChatRequest"
       },
       "ReviewAction": {
         "type": "string",
@@ -2367,6 +2896,24 @@
           "template"
         ],
         "title": "ValueType"
+      },
+      "_ChatMessage": {
+        "properties": {
+          "role": {
+            "type": "string",
+            "title": "Role"
+          },
+          "content": {
+            "type": "string",
+            "title": "Content"
+          }
+        },
+        "type": "object",
+        "required": [
+          "role",
+          "content"
+        ],
+        "title": "_ChatMessage"
       },
       "govops__api__ReviewRequest__1": {
         "properties": {
