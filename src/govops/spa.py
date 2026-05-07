@@ -18,6 +18,7 @@ the default `/app/web/dist/client` matches the Dockerfile layout.
 from __future__ import annotations
 
 import os
+import re
 from pathlib import Path
 
 from fastapi import FastAPI, HTTPException, Request
@@ -30,6 +31,14 @@ from govops.spa_locale import (
     parse_locale_cookie,
     rewrite_html_for_locale,
 )
+
+
+# Allowlist for SPA fallback asset paths. Forbids `..`, absolute paths,
+# Windows drive letters, leading dots, and any character outside the safe
+# subset. Anything that doesn't match falls through to the SPA shell --
+# never to a file lookup. This is the primary defense against CWE-22 path
+# traversal; the resolve()+relative_to() check below is belt-and-braces.
+_SAFE_SPA_ASSET_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._/\-]*$")
 
 
 def mount_spa(app: FastAPI, dist_path: str | None = None) -> bool:
@@ -99,19 +108,21 @@ def mount_spa(app: FastAPI, dist_path: str | None = None) -> bool:
         }:
             raise HTTPException(status_code=404)
         # Specific files in dist/ root (favicon, brand assets, robots.txt).
-        # Resolve before checking is_file() to collapse any ".." traversal,
-        # then assert containment in `base` -- without this, a request like
-        # GET /../../etc/passwd would bypass the dist root via Path
-        # concatenation. CWE-22 / CodeQL py/path-injection.
-        target = (base / spa_path).resolve()
-        try:
-            target.relative_to(_base_resolved)
-        except ValueError:
-            # Resolved path escapes the dist root -- treat as not-found
-            # rather than leaking that the path was rejected.
-            target = None
-        if target is not None and target.is_file():
-            return FileResponse(str(target))
+        # CWE-22 path-traversal defense in two layers:
+        #   1. Allowlist regex on the raw spa_path (rejects "..", absolute,
+        #      drive letters, weird chars) BEFORE any path concatenation.
+        #   2. Resolve-then-relative_to() containment check after join, in
+        #      case the regex misses something or the dist contains
+        #      symlinks pointing outside.
+        # Only paths that pass BOTH layers reach FileResponse.
+        if _SAFE_SPA_ASSET_RE.match(spa_path):
+            target = (base / spa_path).resolve()
+            try:
+                target.relative_to(_base_resolved)
+            except ValueError:
+                target = None
+            if target is not None and target.is_file():
+                return FileResponse(str(target))
         # SPA shell with cookie-aware <title> + <html lang> rewriting. This
         # is the runtime substitute for per-request SSR -- the prerendered
         # index.html bakes in EN, but a request with `govops-locale=fr`
