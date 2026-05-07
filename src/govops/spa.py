@@ -79,6 +79,8 @@ def mount_spa(app: FastAPI, dist_path: str | None = None) -> bool:
     _catalogs = _load_catalogs()
     # Cache the index.html bytes once so we don't re-read on every request.
     _index_html = index.read_text(encoding="utf-8")
+    # Resolve once for the path-traversal containment check below.
+    _base_resolved = base.resolve()
 
     # Catch-all SPA fallback. Registered LAST, after every existing
     # /api/*, /docs, /redoc, /openapi.json route — FastAPI's router
@@ -97,8 +99,18 @@ def mount_spa(app: FastAPI, dist_path: str | None = None) -> bool:
         }:
             raise HTTPException(status_code=404)
         # Specific files in dist/ root (favicon, brand assets, robots.txt).
-        target = base / spa_path
-        if target.is_file():
+        # Resolve before checking is_file() to collapse any ".." traversal,
+        # then assert containment in `base` -- without this, a request like
+        # GET /../../etc/passwd would bypass the dist root via Path
+        # concatenation. CWE-22 / CodeQL py/path-injection.
+        target = (base / spa_path).resolve()
+        try:
+            target.relative_to(_base_resolved)
+        except ValueError:
+            # Resolved path escapes the dist root -- treat as not-found
+            # rather than leaking that the path was rejected.
+            target = None
+        if target is not None and target.is_file():
             return FileResponse(str(target))
         # SPA shell with cookie-aware <title> + <html lang> rewriting. This
         # is the runtime substitute for per-request SSR -- the prerendered

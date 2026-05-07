@@ -294,3 +294,21 @@ def test_spa_fallback_does_not_rewrite_static_files(spa_dist):
     # No HTML rewriting on a plain-text asset.
     assert "User-agent" in r.text
     assert "<html" not in r.text
+
+
+def test_spa_fallback_rejects_path_traversal_outside_dist(tmp_path: Path, spa_dist):
+    # Path-traversal regression test (CodeQL py/path-injection). Drop a
+    # sensitive file OUTSIDE the dist root; the SPA fallback must NOT
+    # serve it even when the URL contains "..".
+    secret = tmp_path / "secret.txt"
+    secret.write_text("this should never leak", encoding="utf-8")
+    app = FastAPI()
+    assert mount_spa(app, dist_path=str(spa_dist)) is True
+    client = TestClient(app)
+    # Try to escape the dist via "../secret.txt". With the containment
+    # check this falls through to the SPA shell (HTML), not the secret.
+    r = client.get("/../secret.txt", follow_redirects=True)
+    assert r.status_code == 200
+    # Must serve the SPA shell, NOT the secret content.
+    assert "this should never leak" not in r.text
+    assert "<html" in r.text
