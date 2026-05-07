@@ -32,8 +32,25 @@ type LocaleContext = {
 
 const LocaleCtx = createContext<LocaleContext | null>(null);
 
+function readLocaleCookie(): Locale | null {
+  if (typeof document === "undefined") return null;
+  const match = document.cookie
+    .split(";")
+    .map((c) => c.trim())
+    .find((c) => c.startsWith(`${STORAGE_KEY}=`));
+  if (!match) return null;
+  const raw = decodeURIComponent(match.slice(STORAGE_KEY.length + 1));
+  return raw in messagesByLocale ? (raw as Locale) : null;
+}
+
 function detectInitialLocale(): Locale {
   if (typeof window === "undefined") return "en";
+  // Cookie is canonical -- setLocale() writes both cookie + localStorage, and
+  // SSR's getSsrLocale reads the cookie. The cookie is the only source the
+  // server can also see, so it must be checked first to keep SSR and client
+  // agreeing on the same locale.
+  const cookie = readLocaleCookie();
+  if (cookie) return cookie;
   const stored = window.localStorage.getItem(STORAGE_KEY) as Locale | null;
   if (stored && stored in messagesByLocale) return stored;
   const navFull = window.navigator.language; // e.g. "es-MX", "pt-BR", "de-DE"
