@@ -92,6 +92,11 @@ COPY schema/ ./schema/
 # Workers output and isn't loaded at runtime). 3-4 MB total.
 COPY --from=web-builder /build/web/dist/client/ /app/web/dist/client/
 
+# i18n catalogs the locale-aware HTML rewriter needs at request time
+# (govops.spa_locale._load_catalogs reads these to localize <title> +
+# <html lang> from the `govops-locale` cookie). ~600 KB total.
+COPY web/src/messages/ /app/web/src/messages/
+
 # HF Spaces persistent disk path (paid Spaces only; free Spaces re-hydrate
 # from lawcode/ on cold boot per ADR-010).
 RUN mkdir -p /data
