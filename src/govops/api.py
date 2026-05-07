@@ -933,13 +933,18 @@ def admin_gc(token: str | None = None, max_age_days: int = 7):
 
 
 def _set_pack_enabled_response(publisher_id: str, *, enabled: bool) -> dict:
-    from govops.federation import set_pack_enabled
+    from govops.federation import FederationError, set_pack_enabled
 
     _, _, federated_dir = _federation_paths()
     try:
         changed = set_pack_enabled(federated_dir, publisher_id, enabled)
     except FileNotFoundError as exc:
         raise HTTPException(404, str(exc)) from exc
+    except FederationError as exc:
+        # UnsafePath (publisher_id failed the safe-id regex, e.g. leading
+        # underscore) and any other fail-closed federation error must surface
+        # as 4xx, not 500. Mirrors the fetch endpoint's posture above.
+        raise HTTPException(400, str(exc)) from exc
     return {"publisher_id": publisher_id, "enabled": enabled, "changed": changed}
 
 
