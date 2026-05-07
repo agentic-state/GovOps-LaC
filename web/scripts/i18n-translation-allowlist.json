@@ -58,7 +58,11 @@
       "home.modules.audit.title",
       "home.modules.eyebrow",
       "nav.console",
-      "prompts.row.versions"
+      "prompts.row.versions",
+      "compare.ruleType.exclusion",
+      "check.form.jurisdiction.ca",
+      "check.form.jurisdiction.fr",
+      "check.form.jurisdiction.ua"
     ],
     "de": [
       "config.filter.domain.prompt",
@@ -84,7 +88,9 @@
       "home.modules.audit.title",
       "home.modules.encoder.title",
       "home.modules.engine.title",
-      "home.modules.schema.title"
+      "home.modules.schema.title",
+      "check.form.jurisdiction.ua",
+      "check.form.jurisdiction.jp"
     ],
     "es-MX": [
       "config.filter.jurisdiction.global",
