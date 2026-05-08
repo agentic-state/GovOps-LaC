@@ -25,11 +25,20 @@ const BASE = import.meta.env.SSR
  * Set VITE_API_BASE_URL to point at a deployed endpoint; otherwise consumers
  * should fall back to mock data (the FastAPI dev server is not reachable from
  * the cloud preview).
+ *
+ * Has a 15-second default timeout so a hung backend surfaces as an error
+ * instead of leaving the UI spinning forever (which is what caused the
+ * 2026-05-07 "approvals never come back" report). Callers may pass their
+ * own AbortSignal via init.signal to override.
  */
+export const FETCHER_DEFAULT_TIMEOUT_MS = 15_000;
+
 export async function fetcher<T = unknown>(path: string, init?: RequestInit): Promise<T> {
   const url = path.startsWith("http") ? path : `${BASE}${path.startsWith("/") ? path : `/${path}`}`;
+  const signal = init?.signal ?? AbortSignal.timeout(FETCHER_DEFAULT_TIMEOUT_MS);
   const res = await fetch(url, {
     ...init,
+    signal,
     headers: { "Content-Type": "application/json", ...(init?.headers ?? {}) },
   });
   if (!res.ok) throw new Error(`Request failed: ${res.status} ${res.statusText}`);

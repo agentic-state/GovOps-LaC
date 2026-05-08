@@ -4,6 +4,7 @@ import { FormattedDate, useIntl } from "react-intl";
 import { ApprovalActions } from "@/components/govops/ApprovalActions";
 import { CurrentVsProposed } from "@/components/govops/CurrentVsProposed";
 import { ProvenanceRibbon } from "@/components/govops/ProvenanceRibbon";
+import { ResolvedNotice } from "@/components/govops/ResolvedNotice";
 import { ValueDiff } from "@/components/govops/ValueDiff";
 import { JurisdictionChip } from "@/components/govops/JurisdictionChip";
 import { ValueTypeBadge } from "@/components/govops/ValueTypeBadge";
@@ -196,7 +197,11 @@ function ApprovalDetailPage() {
         </div>
 
         <div>
-          <ApprovalActions cv={proposed} onResolved={onResolved} />
+          {proposed.status === "draft" || proposed.status === "pending" ? (
+            <ApprovalActions cv={proposed} onResolved={onResolved} />
+          ) : (
+            <ResolvedNotice status={proposed.status} />
+          )}
         </div>
       </div>
     </div>
