@@ -1,0 +1,837 @@
+# yaml-language-server: $schema=../../schema/lawcode-v1.0.json
+# global/ui-labels.yaml — generated from legacy_constants.py at Phase 3.2 cutover.
+# Schema: defaults + values list per ADR-003 §Mitigations.
+
+defaults:
+  domain: ui
+  jurisdiction_id: global
+  effective_from: '1900-01-01'
+values:
+- key: ui.label.case.applicant_profile.de
+  value: Antragstellerprofil
+  value_type: string
+- key: ui.label.case.applicant_profile.en
+  value: Applicant Profile
+  value_type: string
+- key: ui.label.case.applicant_profile.es
+  value: Perfil del solicitante
+  value_type: string
+- key: ui.label.case.applicant_profile.fr
+  value: Profil du demandeur
+  value_type: string
+- key: ui.label.case.applicant_profile.pt
+  value: Perfil do requerente
+  value_type: string
+- key: ui.label.case.applicant_profile.uk
+  value: Профiль заявника
+  value_type: string
+- key: ui.label.case.audit_trail.de
+  value: Prüfpfad
+  value_type: string
+- key: ui.label.case.audit_trail.en
+  value: Audit Trail
+  value_type: string
+- key: ui.label.case.audit_trail.es
+  value: Pista de auditoria
+  value_type: string
+- key: ui.label.case.audit_trail.fr
+  value: Piste d'audit
+  value_type: string
+- key: ui.label.case.audit_trail.pt
+  value: Trilha de auditoria
+  value_type: string
+- key: ui.label.case.audit_trail.uk
+  value: Аудиторський слiд
+  value_type: string
+- key: ui.label.case.evidence.de
+  value: Nachweise
+  value_type: string
+- key: ui.label.case.evidence.en
+  value: Evidence
+  value_type: string
+- key: ui.label.case.evidence.es
+  value: Evidencias
+  value_type: string
+- key: ui.label.case.evidence.fr
+  value: Preuves
+  value_type: string
+- key: ui.label.case.evidence.pt
+  value: Evidencias
+  value_type: string
+- key: ui.label.case.evidence.uk
+  value: Докази
+  value_type: string
+- key: ui.label.case.full_audit.de
+  value: Vollständiges Prüfpaket
+  value_type: string
+- key: ui.label.case.full_audit.en
+  value: Full Audit Package
+  value_type: string
+- key: ui.label.case.full_audit.es
+  value: Paquete de auditoria completo
+  value_type: string
+- key: ui.label.case.full_audit.fr
+  value: Dossier d'audit complet
+  value_type: string
+- key: ui.label.case.full_audit.pt
+  value: Pacote de auditoria completo
+  value_type: string
+- key: ui.label.case.full_audit.uk
+  value: Повний аудиторський пакет
+  value_type: string
+- key: ui.label.case.human_review.de
+  value: Menschliche Prüfung
+  value_type: string
+- key: ui.label.case.human_review.en
+  value: Human Review
+  value_type: string
+- key: ui.label.case.human_review.es
+  value: Revision humana
+  value_type: string
+- key: ui.label.case.human_review.fr
+  value: Revision humaine
+  value_type: string
+- key: ui.label.case.human_review.pt
+  value: Revisao humana
+  value_type: string
+- key: ui.label.case.human_review.uk
+  value: Перевiрка людиною
+  value_type: string
+- key: ui.label.case.missing_evidence.de
+  value: Fehlende Nachweise
+  value_type: string
+- key: ui.label.case.missing_evidence.en
+  value: Missing Evidence
+  value_type: string
+- key: ui.label.case.missing_evidence.es
+  value: Evidencias faltantes
+  value_type: string
+- key: ui.label.case.missing_evidence.fr
+  value: Preuves manquantes
+  value_type: string
+- key: ui.label.case.missing_evidence.pt
+  value: Evidencias ausentes
+  value_type: string
+- key: ui.label.case.missing_evidence.uk
+  value: Вiдсутнi докази
+  value_type: string
+- key: ui.label.case.recommendation.de
+  value: Empfehlung
+  value_type: string
+- key: ui.label.case.recommendation.en
+  value: Recommendation
+  value_type: string
+- key: ui.label.case.recommendation.es
+  value: Recomendacion
+  value_type: string
+- key: ui.label.case.recommendation.fr
+  value: Recommandation
+  value_type: string
+- key: ui.label.case.recommendation.pt
+  value: Recomendacao
+  value_type: string
+- key: ui.label.case.recommendation.uk
+  value: Рекомендацiя
+  value_type: string
+- key: ui.label.case.residency_history.de
+  value: Aufenthaltshistorie
+  value_type: string
+- key: ui.label.case.residency_history.en
+  value: Residency History
+  value_type: string
+- key: ui.label.case.residency_history.es
+  value: Historial de residencia
+  value_type: string
+- key: ui.label.case.residency_history.fr
+  value: Historique de residence
+  value_type: string
+- key: ui.label.case.residency_history.pt
+  value: Historico de residencia
+  value_type: string
+- key: ui.label.case.residency_history.uk
+  value: Iсторiя проживання
+  value_type: string
+- key: ui.label.case.rule_assessment.de
+  value: Regel-für-Regel-Bewertung
+  value_type: string
+- key: ui.label.case.rule_assessment.en
+  value: Rule-by-Rule Assessment
+  value_type: string
+- key: ui.label.case.rule_assessment.es
+  value: Evaluacion regla por regla
+  value_type: string
+- key: ui.label.case.rule_assessment.fr
+  value: Evaluation regle par regle
+  value_type: string
+- key: ui.label.case.rule_assessment.pt
+  value: Avaliacao regra por regra
+  value_type: string
+- key: ui.label.case.rule_assessment.uk
+  value: Оцiнка за правилами
+  value_type: string
+- key: ui.label.common.back_to_cases.de
+  value: Zurück zu den Fällen
+  value_type: string
+- key: ui.label.common.back_to_cases.en
+  value: Back to cases
+  value_type: string
+- key: ui.label.common.back_to_cases.es
+  value: Volver a casos
+  value_type: string
+- key: ui.label.common.back_to_cases.fr
+  value: Retour aux dossiers
+  value_type: string
+- key: ui.label.common.back_to_cases.pt
+  value: Voltar aos casos
+  value_type: string
+- key: ui.label.common.back_to_cases.uk
+  value: Назад до справ
+  value_type: string
+- key: ui.label.common.evaluate.de
+  value: Fall bewerten
+  value_type: string
+- key: ui.label.common.evaluate.en
+  value: Evaluate Case
+  value_type: string
+- key: ui.label.common.evaluate.es
+  value: Evaluar caso
+  value_type: string
+- key: ui.label.common.evaluate.fr
+  value: Evaluer le dossier
+  value_type: string
+- key: ui.label.common.evaluate.pt
+  value: Avaliar caso
+  value_type: string
+- key: ui.label.common.evaluate.uk
+  value: Оцiнити справу
+  value_type: string
+- key: ui.label.common.jurisdiction.de
+  value: Rechtsgebiet
+  value_type: string
+- key: ui.label.common.jurisdiction.en
+  value: Jurisdiction
+  value_type: string
+- key: ui.label.common.jurisdiction.es
+  value: Jurisdiccion
+  value_type: string
+- key: ui.label.common.jurisdiction.fr
+  value: Juridiction
+  value_type: string
+- key: ui.label.common.jurisdiction.pt
+  value: Jurisdicao
+  value_type: string
+- key: ui.label.common.jurisdiction.uk
+  value: Юрисдикцiя
+  value_type: string
+- key: ui.label.common.status.de
+  value: Status
+  value_type: string
+- key: ui.label.common.status.en
+  value: Status
+  value_type: string
+- key: ui.label.common.status.es
+  value: Estado
+  value_type: string
+- key: ui.label.common.status.fr
+  value: Statut
+  value_type: string
+- key: ui.label.common.status.pt
+  value: Estado
+  value_type: string
+- key: ui.label.common.status.uk
+  value: Статус
+  value_type: string
+- key: ui.label.common.view.de
+  value: Ansehen
+  value_type: string
+- key: ui.label.common.view.en
+  value: View
+  value_type: string
+- key: ui.label.common.view.es
+  value: Ver
+  value_type: string
+- key: ui.label.common.view.fr
+  value: Voir
+  value_type: string
+- key: ui.label.common.view.pt
+  value: Ver
+  value_type: string
+- key: ui.label.common.view.uk
+  value: Переглянути
+  value_type: string
+- key: ui.label.dashboard.actions.de
+  value: Aktionen
+  value_type: string
+- key: ui.label.dashboard.actions.en
+  value: Actions
+  value_type: string
+- key: ui.label.dashboard.actions.es
+  value: Acciones
+  value_type: string
+- key: ui.label.dashboard.actions.fr
+  value: Actions
+  value_type: string
+- key: ui.label.dashboard.actions.pt
+  value: Acoes
+  value_type: string
+- key: ui.label.dashboard.actions.uk
+  value: Дii
+  value_type: string
+- key: ui.label.dashboard.active_cases.de
+  value: Aktive Fälle
+  value_type: string
+- key: ui.label.dashboard.active_cases.en
+  value: Active Cases
+  value_type: string
+- key: ui.label.dashboard.active_cases.es
+  value: Casos activos
+  value_type: string
+- key: ui.label.dashboard.active_cases.fr
+  value: Dossiers actifs
+  value_type: string
+- key: ui.label.dashboard.active_cases.pt
+  value: Casos ativos
+  value_type: string
+- key: ui.label.dashboard.active_cases.uk
+  value: Активнi справи
+  value_type: string
+- key: ui.label.dashboard.applicant.de
+  value: Antragsteller
+  value_type: string
+- key: ui.label.dashboard.applicant.en
+  value: Applicant
+  value_type: string
+- key: ui.label.dashboard.applicant.es
+  value: Solicitante
+  value_type: string
+- key: ui.label.dashboard.applicant.fr
+  value: Demandeur
+  value_type: string
+- key: ui.label.dashboard.applicant.pt
+  value: Requerente
+  value_type: string
+- key: ui.label.dashboard.applicant.uk
+  value: Заявник
+  value_type: string
+- key: ui.label.dashboard.case_id.de
+  value: Fall-ID
+  value_type: string
+- key: ui.label.dashboard.case_id.en
+  value: Case ID
+  value_type: string
+- key: ui.label.dashboard.case_id.es
+  value: ID del caso
+  value_type: string
+- key: ui.label.dashboard.case_id.fr
+  value: No de dossier
+  value_type: string
+- key: ui.label.dashboard.case_id.pt
+  value: ID do caso
+  value_type: string
+- key: ui.label.dashboard.case_id.uk
+  value: ID справи
+  value_type: string
+- key: ui.label.dashboard.dob.de
+  value: Geburtsdatum
+  value_type: string
+- key: ui.label.dashboard.dob.en
+  value: Date of Birth
+  value_type: string
+- key: ui.label.dashboard.dob.es
+  value: Fecha de nacimiento
+  value_type: string
+- key: ui.label.dashboard.dob.fr
+  value: Date de naissance
+  value_type: string
+- key: ui.label.dashboard.dob.pt
+  value: Data de nascimento
+  value_type: string
+- key: ui.label.dashboard.dob.uk
+  value: Дата народження
+  value_type: string
+- key: ui.label.dashboard.legal_status.de
+  value: Rechtsstatus
+  value_type: string
+- key: ui.label.dashboard.legal_status.en
+  value: Legal Status
+  value_type: string
+- key: ui.label.dashboard.legal_status.es
+  value: Situacion legal
+  value_type: string
+- key: ui.label.dashboard.legal_status.fr
+  value: Statut juridique
+  value_type: string
+- key: ui.label.dashboard.legal_status.pt
+  value: Situacao legal
+  value_type: string
+- key: ui.label.dashboard.legal_status.uk
+  value: Правовий статус
+  value_type: string
+- key: ui.label.dashboard.title.de
+  value: Fallübersicht
+  value_type: string
+- key: ui.label.dashboard.title.en
+  value: Case Dashboard
+  value_type: string
+- key: ui.label.dashboard.title.es
+  value: Panel de casos
+  value_type: string
+- key: ui.label.dashboard.title.fr
+  value: Tableau de bord des dossiers
+  value_type: string
+- key: ui.label.dashboard.title.pt
+  value: Painel de casos
+  value_type: string
+- key: ui.label.dashboard.title.uk
+  value: Панель справ
+  value_type: string
+- key: ui.label.footer.license.de
+  value: Offenes öffentliches Gut (Apache 2.0)
+  value_type: string
+- key: ui.label.footer.license.en
+  value: Open Public Good (Apache 2.0)
+  value_type: string
+- key: ui.label.footer.license.es
+  value: Bien publico abierto (Apache 2.0)
+  value_type: string
+- key: ui.label.footer.license.fr
+  value: Bien public ouvert (Apache 2.0)
+  value_type: string
+- key: ui.label.footer.license.pt
+  value: Bem publico aberto (Apache 2.0)
+  value_type: string
+- key: ui.label.footer.license.uk
+  value: Вiдкрите суспiльне благо (Apache 2.0)
+  value_type: string
+- key: ui.label.footer.tagline.de
+  value: Richtliniengesteuerte Dienstleistungsmaschine
+  value_type: string
+- key: ui.label.footer.tagline.en
+  value: Policy-Driven Service Delivery Machine
+  value_type: string
+- key: ui.label.footer.tagline.es
+  value: Maquina de prestacion de servicios impulsada por politicas
+  value_type: string
+- key: ui.label.footer.tagline.fr
+  value: Machine de prestation de services axee sur les politiques
+  value_type: string
+- key: ui.label.footer.tagline.pt
+  value: Maquina de prestacao de servicos orientada por politicas
+  value_type: string
+- key: ui.label.footer.tagline.uk
+  value: Полiтично-орiєнтована машина надання послуг
+  value_type: string
+- key: ui.label.nav.about.de
+  value: Info
+  value_type: string
+- key: ui.label.nav.about.en
+  value: About
+  value_type: string
+- key: ui.label.nav.about.es
+  value: Acerca de
+  value_type: string
+- key: ui.label.nav.about.fr
+  value: A propos
+  value_type: string
+- key: ui.label.nav.about.pt
+  value: Sobre
+  value_type: string
+- key: ui.label.nav.about.uk
+  value: Про нас
+  value_type: string
+- key: ui.label.nav.api.de
+  value: API
+  value_type: string
+- key: ui.label.nav.api.en
+  value: API
+  value_type: string
+- key: ui.label.nav.api.es
+  value: API
+  value_type: string
+- key: ui.label.nav.api.fr
+  value: API
+  value_type: string
+- key: ui.label.nav.api.pt
+  value: API
+  value_type: string
+- key: ui.label.nav.api.uk
+  value: API
+  value_type: string
+- key: ui.label.nav.authority.de
+  value: Autoritätskette
+  value_type: string
+- key: ui.label.nav.authority.en
+  value: Authority Chain
+  value_type: string
+- key: ui.label.nav.authority.es
+  value: Cadena de autoridad
+  value_type: string
+- key: ui.label.nav.authority.fr
+  value: Chaine d'autorite
+  value_type: string
+- key: ui.label.nav.authority.pt
+  value: Cadeia de autoridade
+  value_type: string
+- key: ui.label.nav.authority.uk
+  value: Ланцюг повноважень
+  value_type: string
+- key: ui.label.nav.cases.de
+  value: Fälle
+  value_type: string
+- key: ui.label.nav.cases.en
+  value: Cases
+  value_type: string
+- key: ui.label.nav.cases.es
+  value: Casos
+  value_type: string
+- key: ui.label.nav.cases.fr
+  value: Dossiers
+  value_type: string
+- key: ui.label.nav.cases.pt
+  value: Casos
+  value_type: string
+- key: ui.label.nav.cases.uk
+  value: Справи
+  value_type: string
+- key: ui.label.outcome.eligible.de
+  value: BERECHTIGT
+  value_type: string
+- key: ui.label.outcome.eligible.en
+  value: ELIGIBLE
+  value_type: string
+- key: ui.label.outcome.eligible.es
+  value: ELEGIBLE
+  value_type: string
+- key: ui.label.outcome.eligible.fr
+  value: ADMISSIBLE
+  value_type: string
+- key: ui.label.outcome.eligible.pt
+  value: ELEGIVEL
+  value_type: string
+- key: ui.label.outcome.eligible.uk
+  value: ПРИДАТНИЙ
+  value_type: string
+- key: ui.label.outcome.escalate.de
+  value: ESKALIEREN
+  value_type: string
+- key: ui.label.outcome.escalate.en
+  value: ESCALATE
+  value_type: string
+- key: ui.label.outcome.escalate.es
+  value: ESCALAR
+  value_type: string
+- key: ui.label.outcome.escalate.fr
+  value: A TRANSMETTRE
+  value_type: string
+- key: ui.label.outcome.escalate.pt
+  value: ESCALAR
+  value_type: string
+- key: ui.label.outcome.escalate.uk
+  value: ПЕРЕДАТИ
+  value_type: string
+- key: ui.label.outcome.fail.de
+  value: FEHLGESCHLAGEN
+  value_type: string
+- key: ui.label.outcome.fail.en
+  value: FAIL
+  value_type: string
+- key: ui.label.outcome.fail.es
+  value: FALLO
+  value_type: string
+- key: ui.label.outcome.fail.fr
+  value: NON CONFORME
+  value_type: string
+- key: ui.label.outcome.fail.pt
+  value: REPROVADO
+  value_type: string
+- key: ui.label.outcome.fail.uk
+  value: НЕ ПРОЙДЕНО
+  value_type: string
+- key: ui.label.outcome.ineligible.de
+  value: NICHT BERECHTIGT
+  value_type: string
+- key: ui.label.outcome.ineligible.en
+  value: INELIGIBLE
+  value_type: string
+- key: ui.label.outcome.ineligible.es
+  value: NO ELEGIBLE
+  value_type: string
+- key: ui.label.outcome.ineligible.fr
+  value: INADMISSIBLE
+  value_type: string
+- key: ui.label.outcome.ineligible.pt
+  value: INELEGIVEL
+  value_type: string
+- key: ui.label.outcome.ineligible.uk
+  value: НЕПРИДАТНИЙ
+  value_type: string
+- key: ui.label.outcome.insufficient_evidence.de
+  value: UNZUREICHENDE NACHWEISE
+  value_type: string
+- key: ui.label.outcome.insufficient_evidence.en
+  value: INSUFFICIENT EVIDENCE
+  value_type: string
+- key: ui.label.outcome.insufficient_evidence.es
+  value: EVIDENCIA INSUFICIENTE
+  value_type: string
+- key: ui.label.outcome.insufficient_evidence.fr
+  value: PREUVES INSUFFISANTES
+  value_type: string
+- key: ui.label.outcome.insufficient_evidence.pt
+  value: EVIDENCIAS INSUFICIENTES
+  value_type: string
+- key: ui.label.outcome.insufficient_evidence.uk
+  value: НЕДОСТАТНЬО ДОКАЗIВ
+  value_type: string
+- key: ui.label.outcome.needs_evidence.de
+  value: NACHWEIS ERFORDERLICH
+  value_type: string
+- key: ui.label.outcome.needs_evidence.en
+  value: NEEDS EVIDENCE
+  value_type: string
+- key: ui.label.outcome.needs_evidence.es
+  value: NECESITA EVIDENCIA
+  value_type: string
+- key: ui.label.outcome.needs_evidence.fr
+  value: PREUVES REQUISES
+  value_type: string
+- key: ui.label.outcome.needs_evidence.pt
+  value: NECESSITA EVIDENCIA
+  value_type: string
+- key: ui.label.outcome.needs_evidence.uk
+  value: ПОТРIБНI ДОКАЗИ
+  value_type: string
+- key: ui.label.outcome.pass.de
+  value: BESTANDEN
+  value_type: string
+- key: ui.label.outcome.pass.en
+  value: PASS
+  value_type: string
+- key: ui.label.outcome.pass.es
+  value: APROBADO
+  value_type: string
+- key: ui.label.outcome.pass.fr
+  value: CONFORME
+  value_type: string
+- key: ui.label.outcome.pass.pt
+  value: APROVADO
+  value_type: string
+- key: ui.label.outcome.pass.uk
+  value: ПРОЙДЕНО
+  value_type: string
+- key: ui.label.review.approve.de
+  value: Empfehlung genehmigen
+  value_type: string
+- key: ui.label.review.approve.en
+  value: Approve recommendation
+  value_type: string
+- key: ui.label.review.approve.es
+  value: Aprobar recomendacion
+  value_type: string
+- key: ui.label.review.approve.fr
+  value: Approuver la recommandation
+  value_type: string
+- key: ui.label.review.approve.pt
+  value: Aprovar recomendacao
+  value_type: string
+- key: ui.label.review.approve.uk
+  value: Затвердити рекомендацiю
+  value_type: string
+- key: ui.label.review.decision.de
+  value: Entscheidung
+  value_type: string
+- key: ui.label.review.decision.en
+  value: Decision
+  value_type: string
+- key: ui.label.review.decision.es
+  value: Decision
+  value_type: string
+- key: ui.label.review.decision.fr
+  value: Decision
+  value_type: string
+- key: ui.label.review.decision.pt
+  value: Decisao
+  value_type: string
+- key: ui.label.review.decision.uk
+  value: Рiшення
+  value_type: string
+- key: ui.label.review.escalate.de
+  value: An Vorgesetzten eskalieren
+  value_type: string
+- key: ui.label.review.escalate.en
+  value: Escalate to supervisor
+  value_type: string
+- key: ui.label.review.escalate.es
+  value: Escalar al supervisor
+  value_type: string
+- key: ui.label.review.escalate.fr
+  value: Transmettre au superviseur
+  value_type: string
+- key: ui.label.review.escalate.pt
+  value: Escalar para supervisor
+  value_type: string
+- key: ui.label.review.escalate.uk
+  value: Передати керiвнику
+  value_type: string
+- key: ui.label.review.modify.de
+  value: Ergebnis ändern
+  value_type: string
+- key: ui.label.review.modify.en
+  value: Modify outcome
+  value_type: string
+- key: ui.label.review.modify.es
+  value: Modificar resultado
+  value_type: string
+- key: ui.label.review.modify.fr
+  value: Modifier le resultat
+  value_type: string
+- key: ui.label.review.modify.pt
+  value: Modificar resultado
+  value_type: string
+- key: ui.label.review.modify.uk
+  value: Змiнити результат
+  value_type: string
+- key: ui.label.review.rationale.de
+  value: Begründung
+  value_type: string
+- key: ui.label.review.rationale.en
+  value: Rationale
+  value_type: string
+- key: ui.label.review.rationale.es
+  value: Justificacion
+  value_type: string
+- key: ui.label.review.rationale.fr
+  value: Justification
+  value_type: string
+- key: ui.label.review.rationale.pt
+  value: Justificativa
+  value_type: string
+- key: ui.label.review.rationale.uk
+  value: Обгрунтування
+  value_type: string
+- key: ui.label.review.reject.de
+  value: Empfehlung ablehnen
+  value_type: string
+- key: ui.label.review.reject.en
+  value: Reject recommendation
+  value_type: string
+- key: ui.label.review.reject.es
+  value: Rechazar recomendacion
+  value_type: string
+- key: ui.label.review.reject.fr
+  value: Rejeter la recommandation
+  value_type: string
+- key: ui.label.review.reject.pt
+  value: Rejeitar recomendacao
+  value_type: string
+- key: ui.label.review.reject.uk
+  value: Вiдхилити рекомендацiю
+  value_type: string
+- key: ui.label.review.request_info.de
+  value: Weitere Informationen anfordern
+  value_type: string
+- key: ui.label.review.request_info.en
+  value: Request more information
+  value_type: string
+- key: ui.label.review.request_info.es
+  value: Solicitar mas informacion
+  value_type: string
+- key: ui.label.review.request_info.fr
+  value: Demander plus d'informations
+  value_type: string
+- key: ui.label.review.request_info.pt
+  value: Solicitar mais informacoes
+  value_type: string
+- key: ui.label.review.request_info.uk
+  value: Запросити додаткову iнформацiю
+  value_type: string
+- key: ui.label.review.submit.de
+  value: Prüfung einreichen
+  value_type: string
+- key: ui.label.review.submit.en
+  value: Submit Review
+  value_type: string
+- key: ui.label.review.submit.es
+  value: Enviar revision
+  value_type: string
+- key: ui.label.review.submit.fr
+  value: Soumettre la revision
+  value_type: string
+- key: ui.label.review.submit.pt
+  value: Enviar revisao
+  value_type: string
+- key: ui.label.review.submit.uk
+  value: Надiслати перевiрку
+  value_type: string
+- key: ui.label.status.decided.de
+  value: Entschieden
+  value_type: string
+- key: ui.label.status.decided.en
+  value: Decided
+  value_type: string
+- key: ui.label.status.decided.es
+  value: Decidido
+  value_type: string
+- key: ui.label.status.decided.fr
+  value: Decide
+  value_type: string
+- key: ui.label.status.decided.pt
+  value: Decidido
+  value_type: string
+- key: ui.label.status.decided.uk
+  value: Вирiшено
+  value_type: string
+- key: ui.label.status.escalated.de
+  value: Eskaliert
+  value_type: string
+- key: ui.label.status.escalated.en
+  value: Escalated
+  value_type: string
+- key: ui.label.status.escalated.es
+  value: Escalado
+  value_type: string
+- key: ui.label.status.escalated.fr
+  value: Transmis
+  value_type: string
+- key: ui.label.status.escalated.pt
+  value: Escalado
+  value_type: string
+- key: ui.label.status.escalated.uk
+  value: Передано
+  value_type: string
+- key: ui.label.status.intake.de
+  value: Eingang
+  value_type: string
+- key: ui.label.status.intake.en
+  value: Intake
+  value_type: string
+- key: ui.label.status.intake.es
+  value: Recepcion
+  value_type: string
+- key: ui.label.status.intake.fr
+  value: Reception
+  value_type: string
+- key: ui.label.status.intake.pt
+  value: Entrada
+  value_type: string
+- key: ui.label.status.intake.uk
+  value: Прийом
+  value_type: string
+- key: ui.label.status.recommendation_ready.de
+  value: Empfehlung bereit
+  value_type: string
+- key: ui.label.status.recommendation_ready.en
+  value: Recommendation Ready
+  value_type: string
+- key: ui.label.status.recommendation_ready.es
+  value: Recomendacion lista
+  value_type: string
+- key: ui.label.status.recommendation_ready.fr
+  value: Recommandation prete
+  value_type: string
+- key: ui.label.status.recommendation_ready.pt
+  value: Recomendacao pronta
+  value_type: string
+- key: ui.label.status.recommendation_ready.uk
+  value: Рекомендацiя готова
+  value_type: string

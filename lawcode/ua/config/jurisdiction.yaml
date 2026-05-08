@@ -1,0 +1,14 @@
+# yaml-language-server: $schema=../../../schema/lawcode-v1.0.json
+# ua/config/jurisdiction.yaml — see ca/config/jurisdiction.yaml for the
+# load-bearing comment. Substrate-resolved per govops-022.
+
+defaults:
+  domain: jurisdiction
+  jurisdiction_id: ua-pfu
+  effective_from: '1900-01-01'
+values:
+- key: jurisdiction.ua.howto_url
+  value: 'https://www.pfu.gov.ua/'
+  value_type: string
+  citation: 'Pensiinyi fond Ukrainy (PFU) — official portal'
+  rationale: 'Primary citizen-facing landing for pensiia za vikom. Substrate-resolved per govops-022.'

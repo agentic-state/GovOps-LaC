@@ -1,0 +1,37 @@
+# yaml-language-server: $schema=../../../schema/lawcode-v1.0.json
+# br/config/ei-rules.yaml — substrate values for BR Seguro-Desemprego (v3 Phase D).
+
+defaults:
+  domain: rule
+  jurisdiction_id: br-ei
+  effective_from: '1900-01-01'
+values:
+  - key: br-ei.rule.contribution.min_years
+    value: 1
+    value_type: number
+    citation: Lei nº 7.998/1990, Art. 3º (12 meses ≈ 1 ano)
+  - key: br-ei.rule.contribution.home_countries
+    value: [BR, BRAZIL, BRASIL]
+    value_type: list
+  - key: br-ei.rule.legal-status.accepted_statuses
+    value: [citizen, permanent_resident]
+    value_type: list
+  - key: br-ei.rule.evidence.required_types
+    value: [ctps_dismissal]
+    value_type: list
+    citation: Lei nº 7.998/1990, Art. 8º
+  - key: br-ei.rule.duration.weeks_total
+    value: 16
+    value_type: number
+    citation: Lei nº 7.998/1990, Art. 4º
+    rationale: 'Illustrative — 4 parcelas × ~4 semanas. Real entitlement is 3-5 monthly parcelas conforme tempo de serviço.'
+  - key: br-ei.rule.duration.start_offset_days
+    value: 0
+    value_type: number
+  - key: br-ei.rule.job-search.obligation_id
+    value: br-sine-active-search
+    value_type: string
+  - key: br-ei.rule.job-search.cadence
+    value: monthly
+    value_type: string
+    citation: Lei nº 7.998/1990, Art. 7º

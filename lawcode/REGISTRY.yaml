@@ -1,0 +1,25 @@
+# lawcode/REGISTRY.yaml — federation registry (Phase 8 / ADR-009).
+#
+# Each entry in `values` declares a third-party lawcode publisher this
+# operator chooses to fetch from. Trust is granted *separately* via
+# lawcode/global/trusted_keys.yaml — being in the registry is necessary
+# but not sufficient; an entry without a matching trusted public key is
+# fail-closed when fetched (see ADR-009).
+#
+# Schema (registry entries are NOT ConfigValue records — REGISTRY.yaml is
+# excluded from the substrate validator):
+#
+#   - publisher_id: "<unique-id>"
+#     name: "Human-readable name"
+#     manifest_url: "https://...../manifest.yaml"
+#     file_base_url: "https://...../"   # optional; default = manifest URL's parent
+#     notes: "..."
+#
+# To add a publisher:
+#   1. Open a PR adding an entry here.
+#   2. Add a trusted public key entry in lawcode/global/trusted_keys.yaml
+#      (or pass --allow-unsigned to govops fetch for sandbox use).
+#   3. Run `govops fetch <publisher_id>`. The pack lands in
+#      lawcode/.federated/<publisher_id>/ and is hydrated at next startup.
+
+values: []

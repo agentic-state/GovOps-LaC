@@ -1,0 +1,35 @@
+# yaml-language-server: $schema=../../../schema/lawcode-v1.0.json
+# ua/config/rules.yaml — generated from legacy_constants.py at Phase 3.2 cutover.
+# Schema: defaults + values list per ADR-003 §Mitigations.
+
+defaults:
+  domain: rule
+  jurisdiction_id: ua-pfu
+  effective_from: '1900-01-01'
+values:
+- key: ua.rule.age.min_age
+  value: 60
+  value_type: number
+- key: ua.rule.evidence.required_types
+  value:
+  - birth_certificate
+  value_type: list
+- key: ua.rule.status.accepted_statuses
+  value:
+  - citizen
+  - permanent_resident
+  value_type: list
+- key: ua.rule.stazh-calc.full_years
+  value: 35
+  value_type: number
+- key: ua.rule.stazh-calc.min_years
+  value: 25
+  value_type: number
+- key: ua.rule.stazh-min.home_countries
+  value:
+  - UA
+  - UKRAINE
+  value_type: list
+- key: ua.rule.stazh-min.min_years
+  value: 25
+  value_type: number
