@@ -36,12 +36,16 @@ test.describe("Mutation flow — list invalidation + status-gated detail", () =>
       rationale: "approve-flow invalidation test",
     });
 
+    // Locate the draft via its detail-page link href (canonical identifier
+    // in the DOM; ApprovalRow renders the key + status, not the id).
+    const draftLink = page.locator(`a[href*="/config/approvals/${draft.id}"]`);
+
     await page.goto("/config/approvals");
     await expect(page.getByRole("heading", { name: /pending approvals/i })).toBeVisible();
-    await expect(page.getByText(draft.id)).toBeVisible({ timeout: 10_000 });
+    await expect(draftLink).toHaveCount(1, { timeout: 10_000 });
 
     await page.goto(`/config/approvals/${draft.id}`);
-    await expect(page.getByRole("heading", { name: /decision/i })).toBeVisible();
+    await expect(page.getByRole("heading", { name: /^decision$/i })).toBeVisible();
 
     // Drive the UI: expand if collapsed, fill the comment, click Approve,
     // then confirm.
@@ -55,7 +59,9 @@ test.describe("Mutation flow — list invalidation + status-gated detail", () =>
 
     // Mutation completes -> router invalidate -> nav -> queue refetches.
     await page.waitForURL("**/config/approvals", { timeout: 10_000 });
-    await expect(page.getByText(draft.id)).toHaveCount(0, { timeout: 10_000 });
+    // The draft link must be gone from the list (this is the load-bearing
+    // invalidation assertion — it would fail without router.invalidate()).
+    await expect(draftLink).toHaveCount(0, { timeout: 10_000 });
   });
 
   test("[J48] visiting /config/approvals/{id} for an already-approved record shows the resolved notice, not action buttons", async ({
