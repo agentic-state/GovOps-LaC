@@ -46,32 +46,32 @@ test.describe("[M07] Submit a new ConfigValue draft via the UI form", () => {
     await expect(page.getByRole("heading", { name: /draft new configvalue/i })).toBeVisible();
 
     // Key (mono input).
-    await page.getByLabel(/^key$/i).fill(uniqueKey);
+    await page.getByLabel(/^key\b/i).fill(uniqueKey);
 
     // Jurisdiction is a shadcn Select; click trigger then option.
-    await page.getByLabel(/^jurisdiction$/i).click();
+    await page.getByLabel(/^jurisdiction\b/i).click();
     await page.getByRole("option", { name: /^ca-oas$/i }).click();
 
     // Domain defaults to "rule" but pin it explicitly so a future seed
     // change does not silently break the test.
-    await page.getByLabel(/^domain$/i).click();
+    await page.getByLabel(/^domain\b/i).click();
     await page.getByRole("option", { name: /^rule$/i }).click();
 
     // Value type: number.
-    await page.getByLabel(/^value type$/i).click();
+    await page.getByLabel(/^value type\b/i).click();
     await page.getByRole("option", { name: /^number$/i }).click();
 
     // Effective from -- native datetime-local input. Format: YYYY-MM-DDTHH:mm
     await page.locator('input[type="datetime-local"]').fill("2030-01-01T00:00");
 
     // Value (number type renders <input type="number">).
-    await page.getByLabel(/^value$/i).fill("65");
+    await page.getByLabel(/^value\b/i).fill("65");
 
     // Citation (rule-domain requires it).
-    await page.getByLabel(/^citation$/i).fill("OAS Act, s. 3(1)");
+    await page.getByLabel(/^citation\b/i).fill("OAS Act, s. 3(1)");
 
     // Rationale (>= 20 chars).
-    await page.getByLabel(/^rationale$/i).fill(VALID_RATIONALE);
+    await page.getByLabel(/^rationale\b/i).fill(VALID_RATIONALE);
 
     // Submit.
     await page.getByRole("button", { name: /^submit draft$/i }).click();
@@ -108,9 +108,9 @@ test.describe("[M08] Save-as-draft pushes form state into the URL", () => {
     await expect(page.getByRole("heading", { name: /draft new configvalue/i })).toBeVisible();
 
     // Fill a few representative fields.
-    await page.getByLabel(/^key$/i).fill(seedKey);
-    await page.getByLabel(/^citation$/i).fill("OAS Act, s. 3(1)");
-    await page.getByLabel(/^rationale$/i).fill(
+    await page.getByLabel(/^key\b/i).fill(seedKey);
+    await page.getByLabel(/^citation\b/i).fill("OAS Act, s. 3(1)");
+    await page.getByLabel(/^rationale\b/i).fill(
       "M08 save-as-draft -- verifies URL state hydration round-trip.",
     );
 
@@ -132,7 +132,7 @@ test.describe("[M08] Save-as-draft pushes form state into the URL", () => {
     // Reload from the same URL -- fields hydrate from the search params, no
     // backend round-trip required.
     await page.reload();
-    await expect(page.getByLabel(/^key$/i)).toHaveValue(seedKey);
-    await expect(page.getByLabel(/^citation$/i)).toHaveValue("OAS Act, s. 3(1)");
+    await expect(page.getByLabel(/^key\b/i)).toHaveValue(seedKey);
+    await expect(page.getByLabel(/^citation\b/i)).toHaveValue("OAS Act, s. 3(1)");
   });
 });
