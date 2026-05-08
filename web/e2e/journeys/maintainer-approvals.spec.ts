@@ -23,6 +23,29 @@ import { backend } from "../fixtures/api";
 
 const COMMENT_OK = "out of scope for this jurisdiction";
 
+/**
+ * Per-test draft cleanup so we don't pollute the demo-seed queue across
+ * sequential browser projects. With workers=1 + reuseExistingServer=false,
+ * a single backend handles all 3 browsers in series; drafts created in
+ * chromium remain visible when webkit runs J20 ("demo-seed visible on
+ * first load") and push the demo rows past the page-size cutoff.
+ *
+ * Each test that creates a draft pushes its id here; afterEach rejects
+ * any still-pending ones (idempotent at the API level).
+ */
+const draftsToCleanup: string[] = [];
+test.afterEach(async ({ request }) => {
+  const api = await backend(request);
+  while (draftsToCleanup.length > 0) {
+    const id = draftsToCleanup.pop()!;
+    try {
+      await api.reject(id, "e2e-cleanup", "auto cleanup after test");
+    } catch {
+      /* already-resolved or already-removed -- fine */
+    }
+  }
+});
+
 test.describe("[M03] Reject a draft via the UI", () => {
   test("reject from detail panel removes record from queue + detail page renders 'Already rejected'", async ({
     page,
@@ -39,6 +62,7 @@ test.describe("[M03] Reject a draft via the UI", () => {
       author: "e2e-author",
       rationale: "M03 reject UI flow",
     });
+    draftsToCleanup.push(draft.id);
     const draftLink = page.locator(`a[href*="/config/approvals/${draft.id}"]`);
 
     await page.goto(`/config/approvals/${draft.id}`);
@@ -77,6 +101,7 @@ test.describe("[M04] Request changes via the UI", () => {
       author: "e2e-author",
       rationale: "M04 request-changes UI flow",
     });
+    draftsToCleanup.push(draft.id);
     const draftLink = page.locator(`a[href*="/config/approvals/${draft.id}"]`);
 
     await page.goto(`/config/approvals/${draft.id}`);
@@ -122,6 +147,7 @@ test.describe("[M05] Self-approval blocked at the UI", () => {
       author: "e2e-self-author",
       rationale: "M05 self-approval block UI flow",
     });
+    draftsToCleanup.push(draft.id);
 
     await page.goto(`/config/approvals/${draft.id}`);
     await expect(page.getByRole("heading", { name: /^decision$/i })).toBeVisible();
@@ -155,6 +181,7 @@ test.describe("[M06] Keyboard shortcut Cmd/Ctrl+Enter opens the approve confirma
       author: "e2e-author",
       rationale: "M06 keyboard shortcut flow",
     });
+    draftsToCleanup.push(draft.id);
 
     await page.goto(`/config/approvals/${draft.id}`);
     await expect(page.getByRole("heading", { name: /^decision$/i })).toBeVisible();
@@ -163,9 +190,15 @@ test.describe("[M06] Keyboard shortcut Cmd/Ctrl+Enter opens the approve confirma
     if (await expand.isVisible().catch(() => false)) await expand.click();
 
     await page.getByLabel(/^comment$/i).focus();
-    // The hook listens on window for Cmd/Ctrl+Enter; Playwright's keyboard
-    // API generates the right modifier per platform automatically.
-    await page.keyboard.press("ControlOrMeta+Enter");
+    // The hook detects Mac via `navigator.platform` -- which webkit reports
+    // as MacIntel even on Linux CI hosts. Playwright's "ControlOrMeta"
+    // resolves to the OS the browser is running on, not the page's idea of
+    // the platform, so we read isMac() from the page itself and send the
+    // matching modifier.
+    const isPageMac = await page.evaluate(
+      () => /Mac|iPhone|iPad|iPod/.test(navigator.platform),
+    );
+    await page.keyboard.press(isPageMac ? "Meta+Enter" : "Control+Enter");
 
     await expect(page.getByRole("button", { name: /^confirm approval$/i })).toBeVisible({
       timeout: 5_000,
@@ -190,6 +223,7 @@ test.describe("[M13] Status filter narrows the approvals queue", () => {
       author: "e2e-author",
       rationale: "M13 filter UI flow",
     });
+    draftsToCleanup.push(draft.id);
     const draftLink = page.locator(`a[href*="/config/approvals/${draft.id}"]`);
 
     await page.goto("/config/approvals");
@@ -224,6 +258,7 @@ test.describe("[M14] Search narrows the approvals queue", () => {
       author: "e2e-author",
       rationale: "M14 search UI flow",
     });
+    draftsToCleanup.push(draft.id);
     const draftLink = page.locator(`a[href*="/config/approvals/${draft.id}"]`);
 
     await page.goto("/config/approvals");
