@@ -64,8 +64,10 @@ test.describe("[M07] Submit a new ConfigValue draft via the UI form", () => {
     // Effective from -- native datetime-local input. Format: YYYY-MM-DDTHH:mm
     await page.locator('input[type="datetime-local"]').fill("2030-01-01T00:00");
 
-    // Value (number type renders <input type="number">).
-    await page.getByLabel(/^value\b/i).fill("65");
+    // Value (number type renders <input type="number">). Negative
+    // lookahead so we do not collide with the "Value type" Select label
+    // that shares the same word stem.
+    await page.getByLabel(/^value(?!\s*type)/i).fill("65");
 
     // Citation (rule-domain requires it).
     await page.getByLabel(/^citation\b/i).fill("OAS Act, s. 3(1)");
