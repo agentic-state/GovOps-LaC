@@ -10,6 +10,7 @@ import { ValueDiff } from "@/components/govops/ValueDiff";
 import { ProvenanceRibbon } from "@/components/govops/ProvenanceRibbon";
 import { RouteError } from "@/components/govops/RouteError";
 import { resolveCurrentConfigValue, createConfigValue } from "@/lib/api";
+import { useInvalidateAfterMutation } from "@/lib/router-invalidate";
 import { getCurrentUser } from "@/lib/currentUser";
 import {
   validatePromptKey,
@@ -42,6 +43,7 @@ function PromptEditPage() {
   const intl = useIntl();
   const { key, jurisdictionId } = Route.useParams();
   const nav = useNavigate();
+  const invalidate = useInvalidateAfterMutation();
   const jurisdictionForApi = jurisdictionId === "global" ? null : jurisdictionId;
 
   // ── Layout: ≥1024 → three-column grid, < 1024 → tabs.
@@ -154,6 +156,9 @@ function PromptEditPage() {
       } catch {
         /* ignore */
       }
+      // Prompts list + approvals queue both refetch on next render so the
+      // new draft is visible if the user navigates back.
+      await invalidate();
       toast.success(intl.formatMessage({ id: "draft.success" }));
       nav({ to: "/config/approvals/$id", params: { id: cv.id } });
     } catch (err) {
