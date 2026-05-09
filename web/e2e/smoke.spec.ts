@@ -168,24 +168,29 @@ test("[M05] help drawer: Help button opens a sheet with route-aware content", as
 test("[J32] encoder: approving a proposal locks the Approve/Modify/Reject buttons; Reopen replaces Annotate", async ({
   page,
 }) => {
-  // The seeded encoding example puts a batch with pending proposals on /encode.
-  await page.goto("/encode");
+  // Submit a fresh manual batch so the test always operates on a brand-
+  // new pending proposal -- robust to state pollution from other browsers
+  // running the same test against a shared in-memory backend.
+  const marker = `j32.${Date.now()}.${Math.random().toString(36).slice(2, 6)}`;
+  await page.goto("/encode/new");
+  await page.getByLabel(/document title/i).fill(`E2E J32 ${marker}`);
+  await page.getByLabel(/document citation/i).fill(`e2e.j32.${marker}`);
+  await page.getByRole("radio", { name: /^manual$/i }).check();
+  await page.getByLabel(/statutory text/i).fill(
+    "An Act respecting the Old Age Security framework.\n\nSection 3.\nA person who has attained sixty-five years of age is eligible to receive a monthly pension.",
+  );
+  await page.getByRole("button", { name: /extract proposals/i }).click();
+  await page.waitForURL(/\/encode\/[^/]+$/, { timeout: 15_000 });
   await page.waitForLoadState("networkidle");
 
-  // Each batch list item is itself a link to /encode/{batchId} (excluding
-  // the /encode/new "new extraction" link).
-  const firstBatchLink = page.locator('a[href^="/encode/"]:not([href="/encode/new"])').first();
-  if (!(await firstBatchLink.isVisible().catch(() => false))) {
-    test.skip(true, "no encoding batch fixture available in this run");
-  }
-  await firstBatchLink.click();
-  await page.waitForLoadState("networkidle");
-
-  // Find the first proposal card and its Approve button.
+  // The freshly-submitted batch has exactly one pending proposal.
   const approveButton = page
-    .getByRole("button", { name: /^Approve$|^Approuver|^Aprobar|^Aprovar|^Genehmigen|^Затверд/i })
-    .first();
-  await expect(approveButton).toBeEnabled();
+    .getByRole("article")
+    .first()
+    .getByRole("button", {
+      name: /^Approve$|^Approuver|^Aprobar|^Aprovar|^Genehmigen|^Затверд/i,
+    });
+  await expect(approveButton).toBeEnabled({ timeout: 10_000 });
 
   await approveButton.click();
   // Either the click drives the backend update, or the mock fallback flips the
