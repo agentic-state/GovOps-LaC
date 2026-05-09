@@ -14,6 +14,7 @@ Every approval records who approved it and when.
 from __future__ import annotations
 
 import json
+import re
 import uuid
 from datetime import datetime, timezone
 from enum import Enum
@@ -342,21 +343,65 @@ async def extract_rules_with_llm(
     )
 
 
+_SECTION_HEADING_RE = re.compile(r"(?im)^\s*Section\s+(\d+)\b\.?\s*$")
+
+
 def extract_rules_manual(batch: EncodingBatch) -> list[RuleProposal]:
-    """Create empty proposals for manual encoding (no LLM)."""
+    """Create empty proposals for manual encoding (no LLM).
+
+    The default behaviour is one proposal per batch -- legacy callers
+    (test_encoder.py) rely on this. When the input text contains two or
+    more ``Section N.`` heading lines, each section becomes its own
+    proposal so reviewers can act on them independently. This is what
+    LO-013 wired up so the encoder UI E07/E08/E09 (bulk approve, bulk
+    reject, status filter) are exercisable end-to-end.
+    """
+    sections = _split_into_sections(batch.input_text)
+    if len(sections) < 2:
+        return [_make_manual_proposal(batch, batch.input_text, "(manual entry)")]
     return [
-        RuleProposal(
-            batch_id=batch.id,
-            source_text=batch.input_text[:500],
-            source_section_ref="(manual entry)",
-            proposed_rule=LegalRule(
-                source_document_id=f"doc-{batch.jurisdiction_id}",
-                source_section_ref="",
-                rule_type=RuleType.AGE_THRESHOLD,
-                description="(enter rule description)",
-                formal_expression="(enter expression)",
-                citation=batch.document_citation,
-                parameters={},
-            ),
-        )
+        _make_manual_proposal(batch, body, ref)
+        for ref, body in sections
     ]
+
+
+def _split_into_sections(text: str) -> list[tuple[str, str]]:
+    """Split ``text`` on lines that start with ``Section N.``.
+
+    Returns a list of ``(section_ref, section_body)`` tuples. The body
+    includes the heading line itself (so reviewers see provenance in
+    the proposal source_text). When no section headings are found, the
+    list is empty and the caller falls back to single-proposal mode.
+    """
+    matches = list(_SECTION_HEADING_RE.finditer(text))
+    if len(matches) < 2:
+        return []
+    out: list[tuple[str, str]] = []
+    for i, m in enumerate(matches):
+        start = m.start()
+        end = matches[i + 1].start() if i + 1 < len(matches) else len(text)
+        section_ref = f"Section {m.group(1)}"
+        body = text[start:end].strip()
+        out.append((section_ref, body))
+    return out
+
+
+def _make_manual_proposal(
+    batch: EncodingBatch,
+    section_body: str,
+    section_ref: str,
+) -> RuleProposal:
+    return RuleProposal(
+        batch_id=batch.id,
+        source_text=section_body[:500],
+        source_section_ref=section_ref,
+        proposed_rule=LegalRule(
+            source_document_id=f"doc-{batch.jurisdiction_id}",
+            source_section_ref="",
+            rule_type=RuleType.AGE_THRESHOLD,
+            description="(enter rule description)",
+            formal_expression="(enter expression)",
+            citation=batch.document_citation,
+            parameters={},
+        ),
+    )

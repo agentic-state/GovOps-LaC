@@ -21,12 +21,50 @@
  */
 
 import { test, expect } from "@playwright/test";
+import { expectNoCriticalAxeViolations } from "../fixtures/a11y";
 
 const SAMPLE_STATUTORY_TEXT = `An Act respecting the Old Age Security framework.
 
 Section 3.
 A person who has attained sixty-five years of age is eligible to receive
 a monthly pension.`;
+
+/**
+ * Multi-section sample text -- LO-013. The encoder's manual extractor
+ * splits on ``Section N.`` headings and produces one proposal per
+ * section when there are two or more. Used by E07/E08/E09 which need
+ * multi-select / filter narrowing to be exercisable.
+ */
+const MULTI_SECTION_STATUTORY_TEXT = `An Act respecting the Old Age Security framework.
+
+Section 3.
+A person who has attained sixty-five years of age is eligible to receive
+a monthly pension.
+
+Section 4.
+The pension is payable on the first day of each month.
+
+Section 5.
+A recipient who returns to gainful employment shall notify the Minister
+within thirty days.`;
+
+async function submitMultiSectionBatch(
+  page: import("@playwright/test").Page,
+  marker: string,
+): Promise<string> {
+  await page.goto("/encode/new");
+  await expect(page.getByRole("heading", { name: /new extraction/i })).toBeVisible();
+
+  await page.getByLabel(/document title/i).fill(`E2E encoder ${marker}`);
+  await page.getByLabel(/document citation/i).fill(`e2e.encoder.${marker}`);
+  await page.getByRole("radio", { name: /^manual$/i }).check();
+  await page.getByLabel(/statutory text/i).fill(MULTI_SECTION_STATUTORY_TEXT);
+
+  await page.getByRole("button", { name: /extract proposals/i }).click();
+
+  await page.waitForURL(/\/encode\/[^/]+$/, { timeout: 15_000 });
+  return new URL(page.url()).pathname.split("/").pop()!;
+}
 
 /**
  * Drive the IngestForm. Returns the new batch id parsed from the URL.
@@ -87,6 +125,12 @@ test.describe("[E04] Approve a single proposal via UI ProposalCard", () => {
 
     await firstCard.getByRole("button", { name: /^approve$/i }).click();
     await expect(firstCard.getByText(/^Approved$/i).first()).toBeVisible({ timeout: 5_000 });
+
+    // LO-012: post-mutation a11y on the encoder review page after the
+    // status pill flips. Encoder DOM is busy (cards + bulk actions +
+    // diff drawer) so this is the spec where a critical-violation
+    // regression is most likely to surface first.
+    await expectNoCriticalAxeViolations(page, "encoder-approve-proposal");
   });
 });
 
@@ -121,21 +165,76 @@ test.describe("[E06] Modify a proposal via UI", () => {
 });
 
 test.describe("[E07] Bulk-approve via BulkActionBar", () => {
-  test.fixme("manual mode produces 1 proposal so multi-select is impossible -- needs LO-013 multi-proposal fixture", () => {
-    // After a fixture / extraction mode produces multi-proposal manual
-    // batches, drive the BulkActionBar selection + approve and unfixme.
+  // LO-013 RESOLVED in L8.4: extract_rules_manual splits on
+  // "Section N." headings and produces one proposal per section.
+  // The MULTI_SECTION sample yields 3 proposals.
+  test("select 2 proposals -> click 'Approve all' -> both flip to Approved", async ({
+    page,
+  }) => {
+    await submitMultiSectionBatch(page, `e07.${Date.now()}`);
+    await expect(page.getByRole("heading", { name: /review proposals/i })).toBeVisible();
+
+    const cards = page.getByRole("article");
+    await expect(cards).toHaveCount(3, { timeout: 10_000 });
+
+    // Select the first two proposals via the per-card checkbox.
+    await cards.nth(0).getByRole("checkbox", { name: /select proposal/i }).check();
+    await cards.nth(1).getByRole("checkbox", { name: /select proposal/i }).check();
+
+    // BulkActionBar appears (sticky region with role=region aria-label "Bulk actions").
+    const bulkRegion = page.getByRole("region", { name: /bulk actions/i });
+    await expect(bulkRegion).toBeVisible();
+    await bulkRegion.getByRole("button", { name: /^approve all$/i }).click();
+
+    // The selected pair flips to Approved; the third stays Pending.
+    await expect(cards.nth(0).getByText(/^Approved$/i).first()).toBeVisible({ timeout: 10_000 });
+    await expect(cards.nth(1).getByText(/^Approved$/i).first()).toBeVisible();
+    await expect(cards.nth(2).getByText(/^Pending$/i).first()).toBeVisible();
   });
 });
 
 test.describe("[E08] Bulk-reject via BulkActionBar", () => {
-  test.fixme("manual mode produces 1 proposal -- needs LO-013 multi-proposal fixture", () => {
-    // Same gating as E07.
+  test("select 2 proposals -> click 'Reject all' -> both flip to Rejected", async ({ page }) => {
+    await submitMultiSectionBatch(page, `e08.${Date.now()}`);
+    const cards = page.getByRole("article");
+    await expect(cards).toHaveCount(3, { timeout: 10_000 });
+
+    await cards.nth(0).getByRole("checkbox", { name: /select proposal/i }).check();
+    await cards.nth(1).getByRole("checkbox", { name: /select proposal/i }).check();
+
+    const bulkRegion = page.getByRole("region", { name: /bulk actions/i });
+    await bulkRegion.getByRole("button", { name: /^reject all$/i }).click();
+
+    await expect(cards.nth(0).getByText(/^Rejected$/i).first()).toBeVisible({ timeout: 10_000 });
+    await expect(cards.nth(1).getByText(/^Rejected$/i).first()).toBeVisible();
+    await expect(cards.nth(2).getByText(/^Pending$/i).first()).toBeVisible();
   });
 });
 
 test.describe("[E09] Filter proposals by status chip", () => {
-  test.fixme("needs >=2 proposals to verify narrowing -- LO-013 multi-proposal fixture", () => {
-    // Same gating as E07.
+  test("approving one proposal then toggling the 'Pending' chip narrows to 2 cards", async ({
+    page,
+  }) => {
+    await submitMultiSectionBatch(page, `e09.${Date.now()}`);
+    const cards = page.getByRole("article");
+    await expect(cards).toHaveCount(3, { timeout: 10_000 });
+
+    // Approve the first card so it lands as 'approved' status.
+    await cards.first().getByRole("button", { name: /^approve$/i }).click();
+    await expect(cards.first().getByText(/^Approved$/i).first()).toBeVisible({ timeout: 5_000 });
+
+    // Filter chips are additive: empty set = no filter; selecting
+    // 'Pending' narrows the visible list to pending-only. Each chip is
+    // a button with aria-pressed (encode.$batchId.tsx). The chip label
+    // matches the proposal_status.{key} i18n string. Scope the locator
+    // to a button with aria-pressed so we don't accidentally hit the
+    // per-card 'Approved' status pill (which is a span).
+    const pendingChip = page.locator('button[aria-pressed]', { hasText: /^Pending$/ }).first();
+    await pendingChip.click();
+    await expect(pendingChip).toHaveAttribute("aria-pressed", "true");
+
+    // Now only the 2 still-Pending cards render.
+    await expect(cards).toHaveCount(2, { timeout: 5_000 });
   });
 });
 

@@ -244,6 +244,11 @@ async def lifespan(app: FastAPI):
     # approvals queue on first load. GOVOPS_SEED_DEMO=1 turns it on.
     if os.environ.get("GOVOPS_SEED_DEMO") == "1":
         _seed_demo_drafts()
+    # LO-006: federation surfaces need a publisher + imported pack to be
+    # exercisable end-to-end. GOVOPS_SEED_FEDERATION_DEMO=1 + GOVOPS_LAWCODE_DIR
+    # together write a stub seed into a sandbox dir (never the on-repo tree).
+    from govops.federation_seed import maybe_seed_federation_demo
+    maybe_seed_federation_demo()
     # v2.1 — start the daily GC scheduler when GOVOPS_DEMO_MODE=1.
     # No-op for local dev (env unset). See govops.gc_scheduler.
     from govops.gc_scheduler import start_scheduler, shutdown_scheduler

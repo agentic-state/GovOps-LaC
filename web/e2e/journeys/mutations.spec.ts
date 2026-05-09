@@ -18,6 +18,7 @@
 
 import { test, expect } from "@playwright/test";
 import { backend } from "../fixtures/api";
+import { expectNoCriticalAxeViolations } from "../fixtures/a11y";
 
 test.describe("Mutation flow — list invalidation + status-gated detail", () => {
   test("[J47] approving via the UI removes the record from the queue without a hard reload", async ({
@@ -62,6 +63,10 @@ test.describe("Mutation flow — list invalidation + status-gated detail", () =>
     // The draft link must be gone from the list (this is the load-bearing
     // invalidation assertion — it would fail without router.invalidate()).
     await expect(draftLink).toHaveCount(0, { timeout: 10_000 });
+
+    // LO-012: post-mutation a11y. The approvals queue has rerendered;
+    // assert no critical axe violations leak into the post-mutation DOM.
+    await expectNoCriticalAxeViolations(page, "approve-then-list-refetch");
   });
 
   test("[J48] visiting /config/approvals/{id} for an already-approved record shows the resolved notice, not action buttons", async ({
