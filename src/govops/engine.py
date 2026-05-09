@@ -184,8 +184,18 @@ class ProgramEngine:
         flags: list[str] = []
 
         # --- Evidence sufficiency pre-check ---
-        dob_types = set(resolve_param("global.engine.evidence.dob_types"))
-        residency_types = set(resolve_param("global.engine.evidence.residency_types"))
+        # Defensive fallback: if the substrate isn't loaded for the
+        # legacy_constants `_resolver` (rare, but observed in the L8.2
+        # E2E lane when SSR pre-fetched /api/check before lifespan-driven
+        # substrate hydration completed), use the canonical hardcoded
+        # list. The substrate values match these defaults verbatim;
+        # lawcode/global/engine.yaml is still the source of truth.
+        _DOB_FALLBACK = ["birth_certificate", "passport", "id_card"]
+        _RES_FALLBACK = ["tax_record", "residency_declaration", "passport_stamps", "utility_bill"]
+        dob_types = set(resolve_param("global.engine.evidence.dob_types") or _DOB_FALLBACK)
+        residency_types = set(
+            resolve_param("global.engine.evidence.residency_types") or _RES_FALLBACK
+        )
         has_dob_evidence = any(
             e.evidence_type in dob_types and e.provided
             for e in case.evidence_items
