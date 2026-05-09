@@ -1,30 +1,23 @@
 /**
  * Encoder persona -- UI-driven coverage of the encoding pipeline.
  *
- * V1 BLOCKER surfaced: the FastAPI backend exposes only Jinja HTML routes
- * for /encode/...; the JSON endpoints the React frontend calls
- * (POST /api/encode/batches, GET /api/encode/batches/{id}, /review,
- * /bulk-review, /commit) DO NOT EXIST. The React app silently catches the
- * 404 and falls back to a browser-local in-memory BATCHES mock. As a
- * result, no encoder action persists server-side and a page reload resets
- * the mock. Tracked as PLAN-p61-test-coverage.md leftover LO-002 (block
- * severity, fix in L8).
+ * LO-002 (V1 block) RESOLVED in L8.2: the JSON endpoints for the encoder
+ * pipeline now exist on the FastAPI backend (POST /api/encode/batches,
+ * GET /api/encode/batches, GET /api/encode/batches/{id},
+ * POST /api/encode/batches/{id}/proposals/{pid}/review,
+ * POST /api/encode/batches/{id}/bulk-review,
+ * POST /api/encode/batches/{id}/commit). The React frontend now persists
+ * server-side; a page reload preserves state.
  *
- * Implication for these tests: every action must happen within one
- * continuous browser session. We CANNOT page.goto('/encode') after a
- * submit (that resets BATCHES), and we cannot use the API to set up
- * state for a second test. The tests below either (a) drive the full
- * UI path inside one session, or (b) are marked test.fixme until
- * LO-002 closes.
- *
- *   E02 + E10 New batch via /encode/new + Source-text disclosure
- *   E03 LLM mode -- DEFERRED (PLAN section 11)
- *   E04 Approve a single proposal via UI ProposalCard
- *   E05 Reject a single proposal -- fixme (LO-002)
- *   E06 Modify a proposal -- fixme (LO-002)
- *   E07/E08 Bulk approve/reject -- fixme (manual mode produces 1 proposal)
- *   E09 Filter by status chip -- fixme (LO-002 + needs >=2 proposals)
- *   E11 Commit a batch -- fixme (LO-002 + needs working /authority refresh)
+ *   E02 + E10 New batch via /encode/new + source-text disclosure -- active
+ *   E03 LLM mode -- still skipped (needs LLM-stub fixture; PLAN section 11)
+ *   E04 Approve a single proposal -- active
+ *   E05 Reject a single proposal -- active (post-LO-002)
+ *   E06 Modify a proposal -- active (post-LO-002)
+ *   E07/E08 Bulk approve/reject -- still fixme (manual mode produces 1
+ *     proposal; multi-proposal fixture needed -- separate from LO-002)
+ *   E09 Filter by status chip -- still fixme (needs >=2 proposals)
+ *   E11 Commit a batch -- active (post-LO-002)
  */
 
 import { test, expect } from "@playwright/test";
@@ -104,7 +97,7 @@ test.describe("[E03] LLM-mode ingest", () => {
 });
 
 test.describe("[E05] Reject a single proposal via UI", () => {
-  test.fixme("blocked on LO-002 -- mock-only mode persists state but tests can run", async ({
+  test("submit a manual batch, reject the first proposal, verify status pill flips", async ({
     page,
   }) => {
     await submitNewManualBatch(page, `e05.${Date.now()}`);
@@ -115,7 +108,7 @@ test.describe("[E05] Reject a single proposal via UI", () => {
 });
 
 test.describe("[E06] Modify a proposal via UI", () => {
-  test.fixme("blocked on LO-002 -- mock-only mode persists state but tests can run", async ({
+  test("submit a manual batch, modify the first proposal, verify it lands as Modified", async ({
     page,
   }) => {
     await submitNewManualBatch(page, `e06.${Date.now()}`);
@@ -128,34 +121,43 @@ test.describe("[E06] Modify a proposal via UI", () => {
 });
 
 test.describe("[E07] Bulk-approve via BulkActionBar", () => {
-  test.fixme("blocked on LO-002 + manual mode produces 1 proposal so multi-select is impossible", () => {
-    // After LO-002 closes AND a fixture mode produces multi-proposal manual
-    // batches, restore from the previous test draft and unfixme.
+  test.fixme("manual mode produces 1 proposal so multi-select is impossible -- needs LO-013 multi-proposal fixture", () => {
+    // After a fixture / extraction mode produces multi-proposal manual
+    // batches, drive the BulkActionBar selection + approve and unfixme.
   });
 });
 
 test.describe("[E08] Bulk-reject via BulkActionBar", () => {
-  test.fixme("blocked on LO-002 + manual mode produces 1 proposal", () => {
+  test.fixme("manual mode produces 1 proposal -- needs LO-013 multi-proposal fixture", () => {
     // Same gating as E07.
   });
 });
 
 test.describe("[E09] Filter proposals by status chip", () => {
-  test.fixme("blocked on LO-002 + needs >=2 proposals to verify narrowing", () => {
+  test.fixme("needs >=2 proposals to verify narrowing -- LO-013 multi-proposal fixture", () => {
     // Same gating as E07.
   });
 });
 
 test.describe("[E11] Commit a batch -- approved proposals land on /authority", () => {
-  test.fixme("blocked on LO-002 -- commit hits a 404 and silently mock-resolves; /authority refresh shows nothing", () => {
-    // Once the JSON API endpoints land, restore:
-    //   await submitNewManualBatch(page, `e11.${Date.now()}`);
-    //   const firstCard = page.getByRole("article").first();
-    //   await firstCard.getByRole("button", { name: /^approve$/i }).click();
-    //   await expect(firstCard.getByText(/^Approved$/i).first()).toBeVisible();
-    //   await page.getByRole("button", { name: /commit to engine/i }).click();
-    //   await page.getByRole("button", { name: /^commit/i }).last().click();
-    //   await page.waitForURL("**/authority**", { timeout: 15_000 });
-    //   await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+  test("approve a proposal, commit, and verify the redirect lands on /authority", async ({
+    page,
+  }) => {
+    await submitNewManualBatch(page, `e11.${Date.now()}`);
+    const firstCard = page.getByRole("article").first();
+    await firstCard.getByRole("button", { name: /^approve$/i }).click();
+    await expect(firstCard.getByText(/^Approved$/i).first()).toBeVisible({ timeout: 5_000 });
+
+    // The Commit-trigger button (in the page header) AND the confirm
+    // button (inside the dialog) both render the i18n'd "Commit to
+    // engine" label per CommitConfirmDialog.tsx. Disambiguate by
+    // scoping the second click to the dialog role.
+    await page.getByRole("button", { name: /commit to engine/i }).first().click();
+    const dialog = page.getByRole("dialog");
+    await expect(dialog).toBeVisible({ timeout: 5_000 });
+    await dialog.getByRole("button", { name: /commit to engine/i }).click();
+
+    await page.waitForURL(/\/authority/, { timeout: 15_000 });
+    await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
   });
 });

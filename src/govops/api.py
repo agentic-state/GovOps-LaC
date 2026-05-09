@@ -760,6 +760,232 @@ def encode_emit_yaml(batch_id: str):
 
 
 # ---------------------------------------------------------------------------
+# Encoder JSON API (mirrors the Jinja /encode/* HTML routes)
+#
+# Pre-LO-002 the React /encode UI's calls to /api/encode/batches all 404'd
+# and silently fell back to a browser-local mock, so encoder state was
+# never persisted server-side. These endpoints close that gap.
+# ---------------------------------------------------------------------------
+
+
+def _proposal_to_json(p) -> dict:
+    """Flatten a backend RuleProposal -> the React RuleProposal shape.
+
+    The backend nests the rule under ``proposed_rule`` (a LegalRule); the
+    React side expects a flat shape with rule_type/description/etc.
+    """
+    rule = p.proposed_rule
+    return {
+        "id": p.id,
+        "rule_type": rule.rule_type.value if hasattr(rule.rule_type, "value") else rule.rule_type,
+        "description": rule.description,
+        "formal_expression": rule.formal_expression,
+        "citation": rule.citation,
+        "parameters": dict(rule.parameters or {}),
+        "status": p.status.value if hasattr(p.status, "value") else p.status,
+        "notes": p.reviewer_notes or "",
+        "reviewer": p.reviewed_by or None,
+        "reviewed_at": p.reviewed_at.isoformat() if p.reviewed_at else None,
+        "source_section_ref": p.source_section_ref or "",
+    }
+
+
+def _batch_audit_json(batch_id: str) -> list[dict]:
+    return [
+        {
+            "timestamp": e.timestamp.isoformat(),
+            "batch_id": e.batch_id,
+            "event": e.event,
+            "actor": e.actor,
+            "detail": e.detail,
+            "data": dict(e.data or {}),
+        }
+        for e in encoding_store.audit
+        if e.batch_id == batch_id
+    ]
+
+
+def _batch_to_json(b) -> dict:
+    return {
+        "id": b.id,
+        "jurisdiction_id": b.jurisdiction_id,
+        "document_title": b.document_title,
+        "document_citation": b.document_citation,
+        "source_url": None,
+        "input_text": b.input_text,
+        "method": b.extraction_method or "manual",
+        "proposals": [_proposal_to_json(p) for p in b.proposals],
+        "audit": _batch_audit_json(b.id),
+        "created_at": b.created_at.isoformat(),
+    }
+
+
+def _batch_summary_json(b) -> dict:
+    counts: dict[str, int] = {"pending": 0, "approved": 0, "edited": 0, "rejected": 0}
+    for p in b.proposals:
+        s = p.status.value if hasattr(p.status, "value") else str(p.status)
+        counts[s] = counts.get(s, 0) + 1
+    return {
+        "id": b.id,
+        "jurisdiction_id": b.jurisdiction_id,
+        "document_title": b.document_title,
+        "document_citation": b.document_citation,
+        "method": b.extraction_method or "manual",
+        "counts": counts,
+        "created_at": b.created_at.isoformat(),
+    }
+
+
+@app.get("/api/encode/batches")
+def api_list_encoding_batches():
+    """List encoding batches as summaries -- newest first."""
+    batches = sorted(
+        encoding_store.batches.values(),
+        key=lambda b: b.created_at,
+        reverse=True,
+    )
+    return [_batch_summary_json(b) for b in batches]
+
+
+@app.get("/api/encode/batches/{batch_id}")
+def api_get_encoding_batch(batch_id: str):
+    batch = encoding_store.batches.get(batch_id)
+    if not batch:
+        raise HTTPException(404, f"batch {batch_id!r} not found")
+    return _batch_to_json(batch)
+
+
+@app.post("/api/encode/batches")
+async def api_create_encoding_batch(request: Request):
+    body = await request.json()
+    document_title = str(body.get("document_title", "")).strip()
+    document_citation = str(body.get("document_citation", "")).strip()
+    input_text = str(body.get("input_text", "")).strip()
+    method = str(body.get("method", "manual"))
+    api_key = str(body.get("api_key", "") or "")
+
+    if not document_title or not input_text:
+        raise HTTPException(400, "document_title and input_text are required")
+
+    jur_code = _current_jur_code()
+    batch = encoding_store.create_batch(
+        jurisdiction_id=jur_code,
+        document_title=document_title,
+        document_citation=document_citation,
+        input_text=input_text,
+    )
+
+    if method == "llm" and api_key:
+        try:
+            (
+                proposals,
+                prompt,
+                raw_response,
+                user_prompt_key,
+                system_prompt_key,
+            ) = await extract_rules_with_llm(batch, api_key=api_key)
+            encoding_store.add_proposals(
+                batch.id,
+                proposals,
+                method="llm:claude",
+                prompt=prompt,
+                raw_response=raw_response,
+                prompt_key=user_prompt_key,
+                system_prompt_key=system_prompt_key,
+            )
+        except Exception as e:
+            proposals = extract_rules_manual(batch)
+            encoding_store.add_proposals(
+                batch.id,
+                proposals,
+                method="manual:llm-fallback",
+                raw_response=f"LLM extraction failed: {e}",
+            )
+    else:
+        proposals = extract_rules_manual(batch)
+        encoding_store.add_proposals(batch.id, proposals, method="manual")
+
+    return _batch_to_json(batch)
+
+
+@app.post("/api/encode/batches/{batch_id}/proposals/{proposal_id}/review")
+async def api_review_encoding_proposal(batch_id: str, proposal_id: str, request: Request):
+    body = await request.json()
+    status_str = str(body.get("status", "approved"))
+    notes = str(body.get("notes", "") or "")
+    overrides = body.get("overrides") or {}
+
+    try:
+        status = ProposalStatus(status_str)
+    except ValueError:
+        raise HTTPException(400, f"unknown status {status_str!r}") from None
+
+    batch = encoding_store.batches.get(batch_id)
+    if not batch:
+        raise HTTPException(404, f"batch {batch_id!r} not found")
+    proposal = next((p for p in batch.proposals if p.id == proposal_id), None)
+    if not proposal:
+        raise HTTPException(404, f"proposal {proposal_id!r} not found")
+
+    if overrides:
+        rule = proposal.proposed_rule
+        if "description" in overrides:
+            rule.description = str(overrides["description"])
+        if "formal_expression" in overrides:
+            rule.formal_expression = str(overrides["formal_expression"])
+        if "citation" in overrides:
+            rule.citation = str(overrides["citation"])
+        if "parameters" in overrides and isinstance(overrides["parameters"], dict):
+            rule.parameters = dict(overrides["parameters"])
+
+    encoding_store.review_proposal(
+        batch_id, proposal_id, status=status, reviewer="expert", notes=notes,
+    )
+    proposal = next((p for p in batch.proposals if p.id == proposal_id), proposal)
+    return _proposal_to_json(proposal)
+
+
+@app.post("/api/encode/batches/{batch_id}/bulk-review")
+async def api_bulk_review_encoding_proposals(batch_id: str, request: Request):
+    body = await request.json()
+    proposal_ids = body.get("proposal_ids") or []
+    status_str = str(body.get("status", "approved"))
+    notes = str(body.get("notes", "") or "")
+
+    try:
+        status = ProposalStatus(status_str)
+    except ValueError:
+        raise HTTPException(400, f"unknown status {status_str!r}") from None
+
+    batch = encoding_store.batches.get(batch_id)
+    if not batch:
+        raise HTTPException(404, f"batch {batch_id!r} not found")
+
+    target_ids = set(str(pid) for pid in proposal_ids) if proposal_ids else None
+    updated = []
+    for p in batch.proposals:
+        if target_ids is not None and p.id not in target_ids:
+            continue
+        if p.status != ProposalStatus.PENDING:
+            continue
+        encoding_store.review_proposal(
+            batch_id, p.id, status=status, reviewer="expert (bulk)", notes=notes,
+        )
+        updated.append(p)
+
+    return {"updated": [_proposal_to_json(p) for p in updated]}
+
+
+@app.post("/api/encode/batches/{batch_id}/commit")
+def api_commit_encoding_batch(batch_id: str):
+    batch = encoding_store.batches.get(batch_id)
+    if not batch:
+        raise HTTPException(404, f"batch {batch_id!r} not found")
+    approved_rules = encoding_store.get_approved_rules(batch_id)
+    return {"committed_rule_ids": [r.id for r in approved_rules]}
+
+
+# ---------------------------------------------------------------------------
 # Admin federation surface (Phase 8 / ADR-009)
 # Read-mostly endpoints powering /admin/federation per govops-020. The
 # trust-decision authoring stays as a YAML PR per ADR-009; these endpoints
