@@ -21,6 +21,7 @@ import { Route as AuthorityRouteImport } from './routes/authority'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as ScreenJurisdictionIdRouteImport } from './routes/screen.$jurisdictionId'
 import { Route as EncodeNewRouteImport } from './routes/encode.new'
 import { Route as EncodeBatchIdRouteImport } from './routes/encode.$batchId'
@@ -95,6 +96,11 @@ const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminRoute,
 } as any)
 const ScreenJurisdictionIdRoute = ScreenJurisdictionIdRouteImport.update({
   id: '/$jurisdictionId',
@@ -192,6 +198,7 @@ export interface FileRoutesByFullPath {
   '/encode/$batchId': typeof EncodeBatchIdRoute
   '/encode/new': typeof EncodeNewRoute
   '/screen/$jurisdictionId': typeof ScreenJurisdictionIdRoute
+  '/admin/': typeof AdminIndexRoute
   '/config/$key/$jurisdictionId': typeof ConfigKeyJurisdictionIdRoute
   '/config/approvals/$id': typeof ConfigApprovalsIdRoute
   '/config/prompts/$key/$jurisdictionId/edit': typeof ConfigPromptsKeyJurisdictionIdEditRoute
@@ -199,7 +206,6 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
-  '/admin': typeof AdminRouteWithChildren
   '/authority': typeof AuthorityRoute
   '/cases': typeof CasesRouteWithChildren
   '/check': typeof CheckRouteWithChildren
@@ -220,6 +226,7 @@ export interface FileRoutesByTo {
   '/encode/$batchId': typeof EncodeBatchIdRoute
   '/encode/new': typeof EncodeNewRoute
   '/screen/$jurisdictionId': typeof ScreenJurisdictionIdRoute
+  '/admin': typeof AdminIndexRoute
   '/config/$key/$jurisdictionId': typeof ConfigKeyJurisdictionIdRoute
   '/config/approvals/$id': typeof ConfigApprovalsIdRoute
   '/config/prompts/$key/$jurisdictionId/edit': typeof ConfigPromptsKeyJurisdictionIdEditRoute
@@ -249,6 +256,7 @@ export interface FileRoutesById {
   '/encode/$batchId': typeof EncodeBatchIdRoute
   '/encode/new': typeof EncodeNewRoute
   '/screen/$jurisdictionId': typeof ScreenJurisdictionIdRoute
+  '/admin/': typeof AdminIndexRoute
   '/config/$key/$jurisdictionId': typeof ConfigKeyJurisdictionIdRoute
   '/config/approvals/$id': typeof ConfigApprovalsIdRoute
   '/config/prompts/$key/$jurisdictionId/edit': typeof ConfigPromptsKeyJurisdictionIdEditRoute
@@ -279,6 +287,7 @@ export interface FileRouteTypes {
     | '/encode/$batchId'
     | '/encode/new'
     | '/screen/$jurisdictionId'
+    | '/admin/'
     | '/config/$key/$jurisdictionId'
     | '/config/approvals/$id'
     | '/config/prompts/$key/$jurisdictionId/edit'
@@ -286,7 +295,6 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/about'
-    | '/admin'
     | '/authority'
     | '/cases'
     | '/check'
@@ -307,6 +315,7 @@ export interface FileRouteTypes {
     | '/encode/$batchId'
     | '/encode/new'
     | '/screen/$jurisdictionId'
+    | '/admin'
     | '/config/$key/$jurisdictionId'
     | '/config/approvals/$id'
     | '/config/prompts/$key/$jurisdictionId/edit'
@@ -335,6 +344,7 @@ export interface FileRouteTypes {
     | '/encode/$batchId'
     | '/encode/new'
     | '/screen/$jurisdictionId'
+    | '/admin/'
     | '/config/$key/$jurisdictionId'
     | '/config/approvals/$id'
     | '/config/prompts/$key/$jurisdictionId/edit'
@@ -442,6 +452,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/': {
+      id: '/admin/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/screen/$jurisdictionId': {
       id: '/screen/$jurisdictionId'
       path: '/$jurisdictionId'
@@ -545,10 +562,12 @@ declare module '@tanstack/react-router' {
 
 interface AdminRouteChildren {
   AdminFederationRoute: typeof AdminFederationRoute
+  AdminIndexRoute: typeof AdminIndexRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
   AdminFederationRoute: AdminFederationRoute,
+  AdminIndexRoute: AdminIndexRoute,
 }
 
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
