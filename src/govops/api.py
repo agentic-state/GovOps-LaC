@@ -768,6 +768,22 @@ def encode_emit_yaml(batch_id: str):
 # ---------------------------------------------------------------------------
 
 
+# Backend ProposalStatus enum vs React string-literal type:
+#   backend EDITED ("edited") <-> React "modified"
+# Bridge them at the JSON boundary so neither side has to know.
+_BACKEND_TO_REACT_STATUS = {"edited": "modified"}
+_REACT_TO_BACKEND_STATUS = {"modified": "edited"}
+
+
+def _react_status(backend_status) -> str:
+    raw = backend_status.value if hasattr(backend_status, "value") else str(backend_status)
+    return _BACKEND_TO_REACT_STATUS.get(raw, raw)
+
+
+def _backend_status(react_status: str) -> str:
+    return _REACT_TO_BACKEND_STATUS.get(react_status, react_status)
+
+
 def _proposal_to_json(p) -> dict:
     """Flatten a backend RuleProposal -> the React RuleProposal shape.
 
@@ -782,7 +798,7 @@ def _proposal_to_json(p) -> dict:
         "formal_expression": rule.formal_expression,
         "citation": rule.citation,
         "parameters": dict(rule.parameters or {}),
-        "status": p.status.value if hasattr(p.status, "value") else p.status,
+        "status": _react_status(p.status),
         "notes": p.reviewer_notes or "",
         "reviewer": p.reviewed_by or None,
         "reviewed_at": p.reviewed_at.isoformat() if p.reviewed_at else None,
@@ -821,9 +837,10 @@ def _batch_to_json(b) -> dict:
 
 
 def _batch_summary_json(b) -> dict:
-    counts: dict[str, int] = {"pending": 0, "approved": 0, "edited": 0, "rejected": 0}
+    # React expects keys: pending / approved / modified / rejected.
+    counts: dict[str, int] = {"pending": 0, "approved": 0, "modified": 0, "rejected": 0}
     for p in b.proposals:
-        s = p.status.value if hasattr(p.status, "value") else str(p.status)
+        s = _react_status(p.status)
         counts[s] = counts.get(s, 0) + 1
     return {
         "id": b.id,
@@ -916,7 +933,7 @@ async def api_review_encoding_proposal(batch_id: str, proposal_id: str, request:
     overrides = body.get("overrides") or {}
 
     try:
-        status = ProposalStatus(status_str)
+        status = ProposalStatus(_backend_status(status_str))
     except ValueError:
         raise HTTPException(400, f"unknown status {status_str!r}") from None
 
@@ -953,7 +970,7 @@ async def api_bulk_review_encoding_proposals(batch_id: str, request: Request):
     notes = str(body.get("notes", "") or "")
 
     try:
-        status = ProposalStatus(status_str)
+        status = ProposalStatus(_backend_status(status_str))
     except ValueError:
         raise HTTPException(400, f"unknown status {status_str!r}") from None
 
