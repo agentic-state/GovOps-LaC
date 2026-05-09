@@ -63,14 +63,22 @@ function PromptEditPage() {
   const currentLoading = false;
 
   // ── Editor value: hydrate from localStorage, fall back to current text.
+  //
+  // LO-001 (b) fix: the saved-draft hydration runs once (gated on
+  // `hydrated`), but when no draft is saved, the editor mirrors
+  // `current` continuously so a post-mount refetch (e.g. SSR served
+  // a stale value, then the loader re-resolves) updates the editor.
+  // Pre-fix the `!hydrated` guard prevented the second update and
+  // the editor stayed empty when the SSR-side fetcher fell back to
+  // a null value (the prompt-domain keys aren't in MOCK_CONFIG_VALUES).
   const [value, setValue] = useState<string>("");
   const [hydrated, setHydrated] = useState(false);
   useEffect(() => {
-    if (currentLoading || hydrated) return;
+    if (currentLoading) return;
     try {
       const saved = window.localStorage.getItem(draftStorageKey(key, jurisdictionId));
       if (saved !== null) {
-        setValue(saved);
+        if (!hydrated) setValue(saved);
       } else {
         setValue(String(current?.value ?? ""));
       }

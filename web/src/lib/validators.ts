@@ -1,6 +1,12 @@
 import type { ValueType } from "./types";
 
-export const KEY_REGEX = /^[a-z0-9]+(-[a-z0-9]+)*(\.[a-z0-9]+(-[a-z0-9]+)*)+$/;
+// Each dot-separated segment may contain lowercase letters, digits, hyphens,
+// and underscores. Underscores are common in seeded prompt keys
+// (e.g. `global.prompt.encoder.extraction_user_template`) and rule
+// parameter names (`min_age`, `home_countries`). The backend has no
+// regex constraint here -- this validator is purely a UX guard for
+// user-typed keys.
+export const KEY_REGEX = /^[a-z0-9]+([_-][a-z0-9]+)*(\.[a-z0-9]+([_-][a-z0-9]+)*)+$/;
 
 /** Returns an i18n message id, or null if valid. */
 export function validateKey(key: string): string | null {
