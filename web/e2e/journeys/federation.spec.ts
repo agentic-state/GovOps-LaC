@@ -30,7 +30,13 @@ test.describe("[J34] Federation — registry view", () => {
   test("/admin/federation UI renders without an error boundary", async ({ page }) => {
     const r = await page.goto("/admin/federation");
     expect(r?.status(), "/admin/federation HTTP status").toBeLessThan(400);
-    await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+    // Assert by name (not just any h1). Pre-LO-008 the page rendered
+    // the parent /admin Operator-overview body via a missing <Outlet />,
+    // and a generic h1-visible check passed for over a month before the
+    // bug was caught.
+    await expect(page.getByRole("heading", { level: 1, name: /federation/i })).toBeVisible({
+      timeout: 10_000,
+    });
   });
 });
 

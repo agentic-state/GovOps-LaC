@@ -435,7 +435,14 @@ import type {
 export async function listFederationRegistry(): Promise<{
   entries: FederationRegistryEntry[];
 }> {
-  return fetcher("/api/admin/federation/registry");
+  // Backend route returns {"publishers": [...]} (see src/govops/api.py:827).
+  // The React side has always read r.entries; this thin adapter bridges
+  // the two without churning every callsite. Pre-LO-007 the page rendered
+  // an empty registry against the live backend even when populated.
+  const raw = await fetcher<{ publishers: FederationRegistryEntry[] }>(
+    "/api/admin/federation/registry",
+  );
+  return { entries: raw.publishers ?? [] };
 }
 
 export async function listFederationPacks(): Promise<{ packs: FederationPack[] }> {

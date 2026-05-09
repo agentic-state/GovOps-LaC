@@ -55,13 +55,20 @@ function listFiles(dir, suffix) {
  *   compare.$programId.tsx -> /compare/$programId
  *   index.tsx -> /
  *   __root.tsx -> (skip)
+ *   admin.index.tsx -> /admin (the parent's index path, not /admin/index)
  *   config.prompts.$key.$jurisdictionId.edit.tsx -> /config/prompts/$key/$jurisdictionId/edit
  */
 function routePathFromFilename(filename) {
   const base = basename(filename, ".tsx");
   if (base === "__root") return null;
   if (base === "index") return "/";
-  return "/" + base.split(".").join("/");
+  // TanStack flat-dot: a trailing ".index" segment is the parent's
+  // index path. admin.index.tsx -> /admin (not /admin/index).
+  const segs = base.split(".");
+  if (segs.length > 1 && segs[segs.length - 1] === "index") {
+    segs.pop();
+  }
+  return "/" + segs.join("/");
 }
 
 /**
