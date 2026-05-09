@@ -774,6 +774,23 @@ def encode_emit_yaml(batch_id: str):
 _BACKEND_TO_REACT_STATUS = {"edited": "modified"}
 _REACT_TO_BACKEND_STATUS = {"modified": "edited"}
 
+# React EncodeMethod is a closed enum: "manual" | "llm:claude" |
+# "manual:llm-fallback". Backend can also emit "example:pre-loaded"
+# (from seed_encoding_example) and "llm:openai" historically. Normalize
+# unknowns to "manual" so the React MethodChip's lookup table never
+# yields undefined (which crashes the page with a formatjs runtime
+# "An `id` must be provided" error and broke /encode list rendering
+# pre-fix).
+_REACT_KNOWN_METHODS = {"manual", "llm:claude", "manual:llm-fallback"}
+
+
+def _react_method(backend_method: str) -> str:
+    if backend_method in _REACT_KNOWN_METHODS:
+        return backend_method
+    if backend_method.startswith("llm:"):
+        return "llm:claude"
+    return "manual"
+
 
 def _react_status(backend_status) -> str:
     raw = backend_status.value if hasattr(backend_status, "value") else str(backend_status)
@@ -829,7 +846,7 @@ def _batch_to_json(b) -> dict:
         "document_citation": b.document_citation,
         "source_url": None,
         "input_text": b.input_text,
-        "method": b.extraction_method or "manual",
+        "method": _react_method(b.extraction_method or "manual"),
         "proposals": [_proposal_to_json(p) for p in b.proposals],
         "audit": _batch_audit_json(b.id),
         "created_at": b.created_at.isoformat(),
@@ -847,7 +864,7 @@ def _batch_summary_json(b) -> dict:
         "jurisdiction_id": b.jurisdiction_id,
         "document_title": b.document_title,
         "document_citation": b.document_citation,
-        "method": b.extraction_method or "manual",
+        "method": _react_method(b.extraction_method or "manual"),
         "counts": counts,
         "created_at": b.created_at.isoformat(),
     }
