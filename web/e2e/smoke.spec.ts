@@ -181,10 +181,24 @@ test("[J32] encoder: approving a proposal locks the Approve/Modify/Reject button
   await firstBatchLink.click();
   await page.waitForLoadState("networkidle");
 
-  // Find the first proposal card and its Approve button.
-  const approveButton = page
-    .getByRole("button", { name: /^Approve$|^Approuver|^Aprobar|^Aprovar|^Genehmigen|^Затверд/i })
-    .first();
+  // Find the first ENABLED Approve button. The seeded batch carries a mix
+  // of statuses (proposal[0] + proposal[1] are pre-approved for the demo;
+  // proposal[2] is the PENDING one the test should drive). Pre-LO-002 the
+  // mock fallback returned an all-pending batch so .first() happened to be
+  // enabled; with the real backend in place we need to scope to the
+  // pending card explicitly.
+  const approveButtons = page.getByRole("button", {
+    name: /^Approve$|^Approuver|^Aprobar|^Aprovar|^Genehmigen|^Затверд/i,
+  });
+  const allCount = await approveButtons.count();
+  let approveButton = approveButtons.first();
+  for (let i = 0; i < allCount; i++) {
+    const candidate = approveButtons.nth(i);
+    if (await candidate.isEnabled().catch(() => false)) {
+      approveButton = candidate;
+      break;
+    }
+  }
   await expect(approveButton).toBeEnabled();
 
   await approveButton.click();
