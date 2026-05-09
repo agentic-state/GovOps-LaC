@@ -172,34 +172,30 @@ test("[J32] encoder: approving a proposal locks the Approve/Modify/Reject button
   await page.goto("/encode");
   await page.waitForLoadState("networkidle");
 
-  // Each batch list item is itself a link to /encode/{batchId} (excluding
-  // the /encode/new "new extraction" link).
-  const firstBatchLink = page.locator('a[href^="/encode/"]:not([href="/encode/new"])').first();
-  if (!(await firstBatchLink.isVisible().catch(() => false))) {
+  // Target the SEED batch by its document title (stable: "Sections 3(1)
+  // and 3(2)") rather than .first()/.last() over the list. Test-created
+  // batches from earlier specs and mock-fallback batches both pollute the
+  // list ordering; only the seed is guaranteed to have a pending proposal
+  // ([2] is pending; [0] and [1] are pre-approved for the demo).
+  const seedBatchLink = page
+    .locator('a[href^="/encode/"]:not([href="/encode/new"])')
+    .filter({ hasText: /Sections 3\(1\) and 3\(2\)/i })
+    .first();
+  if (!(await seedBatchLink.isVisible().catch(() => false))) {
     test.skip(true, "no encoding batch fixture available in this run");
   }
-  await firstBatchLink.click();
+  await seedBatchLink.click();
   await page.waitForLoadState("networkidle");
 
-  // Find the first ENABLED Approve button. The seeded batch carries a mix
-  // of statuses (proposal[0] + proposal[1] are pre-approved for the demo;
-  // proposal[2] is the PENDING one the test should drive). Pre-LO-002 the
-  // mock fallback returned an all-pending batch so .first() happened to be
-  // enabled; with the real backend in place we need to scope to the
-  // pending card explicitly.
-  const approveButtons = page.getByRole("button", {
+  // The seed batch renders 3 proposal articles: proposal[0] and [1] are
+  // pre-approved (rendered first), proposal[2] is the pending one
+  // (always rendered last). Use .last() to get a stable reference that
+  // survives the Pending -> Approved transition.
+  const pendingCard = page.getByRole("article").last();
+  const approveButton = pendingCard.getByRole("button", {
     name: /^Approve$|^Approuver|^Aprobar|^Aprovar|^Genehmigen|^Затверд/i,
   });
-  const allCount = await approveButtons.count();
-  let approveButton = approveButtons.first();
-  for (let i = 0; i < allCount; i++) {
-    const candidate = approveButtons.nth(i);
-    if (await candidate.isEnabled().catch(() => false)) {
-      approveButton = candidate;
-      break;
-    }
-  }
-  await expect(approveButton).toBeEnabled();
+  await expect(approveButton).toBeEnabled({ timeout: 10_000 });
 
   await approveButton.click();
   // Either the click drives the backend update, or the mock fallback flips the

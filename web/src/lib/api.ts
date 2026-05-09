@@ -12,13 +12,13 @@
 //      to FastAPI; in local dev with cross-origin (vite :8080, FastAPI
 //      :8000) BASE must be the absolute URL of the FastAPI process.
 //
-// The SSR branch ALWAYS uses 127.0.0.1:8000 because that's where FastAPI
-// listens in both deploy targets we support. Browser branch honours
-// VITE_API_BASE_URL when set (empty string allowed → relative URLs), falls
-// back to 127.0.0.1:8000 for the local dev case.
-const BASE = import.meta.env.SSR
-  ? "http://127.0.0.1:8000"
-  : ((import.meta.env.VITE_API_BASE_URL as string | undefined) ?? "http://127.0.0.1:8000");
+// Both branches honour VITE_API_BASE_URL when set (empty string is a valid
+// "use relative URLs" value for browser-side same-origin deploys). LO-001
+// fix: pre-LO-001 the SSR branch hardcoded :8000, which made E2E test
+// runs always fall back to mock data on the SSR pass (uvicorn binds to
+// the playwright-config port, not :8000).
+const BASE =
+  (import.meta.env.VITE_API_BASE_URL as string | undefined) ?? "http://127.0.0.1:8000";
 
 /**
  * Minimal fetch wrapper for the GovOps FastAPI backend.
