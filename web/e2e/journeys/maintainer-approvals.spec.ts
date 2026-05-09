@@ -20,6 +20,7 @@
 
 import { test, expect } from "@playwright/test";
 import { backend } from "../fixtures/api";
+import { expectNoCriticalAxeViolations } from "../fixtures/a11y";
 
 const COMMENT_OK = "out of scope for this jurisdiction";
 
@@ -82,6 +83,9 @@ test.describe("[M03] Reject a draft via the UI", () => {
     await page.goto(`/config/approvals/${draft.id}`);
     await expect(page.getByRole("heading", { name: /already rejected/i })).toBeVisible();
     await expect(page.getByRole("heading", { name: /^decision$/i })).toHaveCount(0);
+
+    // LO-012: post-mutation a11y on the resolved-notice page.
+    await expectNoCriticalAxeViolations(page, "reject-then-resolved-notice");
   });
 });
 

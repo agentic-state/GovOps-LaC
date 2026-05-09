@@ -45,6 +45,12 @@ export default defineConfig({
       env: {
         GOVOPS_DB_PATH: process.env.E2E_DB_PATH ?? "var/govops-e2e.db",
         GOVOPS_SEED_DEMO: "1",
+        // LO-006: seed a synthetic publisher + imported pack so the
+        // federation admin surface is exercisable end-to-end. The seed
+        // writes into GOVOPS_LAWCODE_DIR ONLY (never the on-repo lawcode/
+        // tree); api.py:_federation_paths() consults this var first.
+        GOVOPS_SEED_FEDERATION_DEMO: "1",
+        GOVOPS_LAWCODE_DIR: process.env.E2E_LAWCODE_DIR ?? "var/govops-e2e-lawcode",
       },
     },
     {
