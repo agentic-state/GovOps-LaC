@@ -168,33 +168,28 @@ test("[M05] help drawer: Help button opens a sheet with route-aware content", as
 test("[J32] encoder: approving a proposal locks the Approve/Modify/Reject buttons; Reopen replaces Annotate", async ({
   page,
 }) => {
-  // The seeded encoding example puts a batch with pending proposals on /encode.
-  await page.goto("/encode");
+  // Submit a fresh manual batch so the test always operates on a brand-
+  // new pending proposal -- robust to state pollution from other browsers
+  // running the same test against a shared in-memory backend.
+  const marker = `j32.${Date.now()}.${Math.random().toString(36).slice(2, 6)}`;
+  await page.goto("/encode/new");
+  await page.getByLabel(/document title/i).fill(`E2E J32 ${marker}`);
+  await page.getByLabel(/document citation/i).fill(`e2e.j32.${marker}`);
+  await page.getByRole("radio", { name: /^manual$/i }).check();
+  await page.getByLabel(/statutory text/i).fill(
+    "An Act respecting the Old Age Security framework.\n\nSection 3.\nA person who has attained sixty-five years of age is eligible to receive a monthly pension.",
+  );
+  await page.getByRole("button", { name: /extract proposals/i }).click();
+  await page.waitForURL(/\/encode\/[^/]+$/, { timeout: 15_000 });
   await page.waitForLoadState("networkidle");
 
-  // Target the SEED batch by its document title (stable: "Sections 3(1)
-  // and 3(2)") rather than .first()/.last() over the list. Test-created
-  // batches from earlier specs and mock-fallback batches both pollute the
-  // list ordering; only the seed is guaranteed to have a pending proposal
-  // ([2] is pending; [0] and [1] are pre-approved for the demo).
-  const seedBatchLink = page
-    .locator('a[href^="/encode/"]:not([href="/encode/new"])')
-    .filter({ hasText: /Sections 3\(1\) and 3\(2\)/i })
-    .first();
-  if (!(await seedBatchLink.isVisible().catch(() => false))) {
-    test.skip(true, "no encoding batch fixture available in this run");
-  }
-  await seedBatchLink.click();
-  await page.waitForLoadState("networkidle");
-
-  // The seed batch renders 3 proposal articles: proposal[0] and [1] are
-  // pre-approved (rendered first), proposal[2] is the pending one
-  // (always rendered last). Use .last() to get a stable reference that
-  // survives the Pending -> Approved transition.
-  const pendingCard = page.getByRole("article").last();
-  const approveButton = pendingCard.getByRole("button", {
-    name: /^Approve$|^Approuver|^Aprobar|^Aprovar|^Genehmigen|^Затверд/i,
-  });
+  // The freshly-submitted batch has exactly one pending proposal.
+  const approveButton = page
+    .getByRole("article")
+    .first()
+    .getByRole("button", {
+      name: /^Approve$|^Approuver|^Aprobar|^Aprovar|^Genehmigen|^Затверд/i,
+    });
   await expect(approveButton).toBeEnabled({ timeout: 10_000 });
 
   await approveButton.click();
