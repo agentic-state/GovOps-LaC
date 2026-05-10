@@ -44,7 +44,11 @@ class TestManifestLoad:
         assert program.shape == "old_age_pension"
         assert program.jurisdiction_id == "jur-ca-federal"
         assert program.status == "active"
-        assert program.name["en"] == "Old Age Security"
+        # v3.1 Lane 2b: name aligned to JURISDICTION_REGISTRY['ca'].program_name
+        # so the YAML manifest is byte-identical-equivalent to the running pack.
+        # The "(OAS)" suffix in the en label matches the program_name string the
+        # engine has carried since v2; pre-v3.1 it sat only in Python.
+        assert program.name["en"] == "Old Age Security (OAS)"
         assert program.name["fr"] == "Sécurité de la vieillesse"
 
     def test_load_missing_path_raises(self):

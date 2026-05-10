@@ -1,0 +1,206 @@
+# yaml-language-server: $schema=../../../schema/program-manifest-v1.0.json
+#
+# UA -- OAS program manifest (v3.1 Lane 2b migration from src/govops/jurisdictions.py).
+# Per ADR-014, structure (rules / authority / legal documents / demo
+# cases) lives here. Parameter values live in the ConfigValue substrate
+# (lawcode/ua/config/oas-rules.yaml) and are referenced
+# via {ref: '<key>'}. ADR-020 (lawcode-as-discovery) reads this file
+# at startup to register the program with the running engine.
+
+schema_version: '1.0'
+program_id: oas
+jurisdiction_id: jur-ua-national
+shape: old_age_pension
+status: active
+name:
+  uk: Pensiia za vikom (PFU)
+authority_chain:
+- id: auth-ua-constitution
+  layer: constitution
+  title: Konstytutsiia Ukrainy
+  citation: Konstytutsiia Ukrainy, st. 46
+  effective_date: '1996-06-28'
+  url: https://zakon.rada.gov.ua/laws/show/254%D0%BA/96-%D0%B2%D1%80
+- id: auth-ua-pension-law
+  layer: act
+  title: Zakon Ukrainy 'Pro zahalnooboviazkove derzhavne pensiine strakhuvannia'
+  citation: Zakon No. 1058-IV vid 09.07.2003
+  effective_date: '2004-01-01'
+  url: https://zakon.rada.gov.ua/laws/show/1058-15
+  parent: auth-ua-constitution
+- id: auth-ua-pfu
+  layer: program
+  title: Pensiinyi fond Ukrainy (PFU)
+  citation: Zakon No. 1058-IV, Rozdil VIII
+  parent: auth-ua-pension-law
+- id: auth-ua-pension-age
+  layer: service
+  title: Pensiia za vikom (starosna pensiia)
+  citation: Zakon No. 1058-IV, st. 26
+  parent: auth-ua-pfu
+legal_documents:
+- id: doc-ua-pension-law
+  type: statute
+  title: Zakon Ukrainy 'Pro zahalnooboviazkove derzhavne pensiine strakhuvannia'
+  citation: Zakon No. 1058-IV vid 09.07.2003
+  effective_date: '2004-01-01'
+  sections:
+  - id: sec-ua-st26
+    ref: st. 26
+    heading: Umovy pryznachennia pensii za vikom
+    text: Pravo na pensiiu za vikom maie osoba, yaka dosiahla 60 rokiv ta maie strakhovyi stazh ne menshe 25 rokiv (choloviky) abo 20 rokiv (zhinky) na 1 sichnia 2028 roku.
+  - id: sec-ua-st28
+    ref: st. 28
+    heading: Rozmir pensii za vikom
+    text: 'Rozmir pensii za vikom vyznachaietsia za formuloiu: P = Zs x Ks x Kv, de Zs - zarobitna plata, Ks - koefitsiient strakhovoho stazhu, Kv - koefitsiient viku.'
+rules:
+- id: rule-ua-age
+  rule_type: age_threshold
+  description: 'Pensiinyi vik: 60 rokiv'
+  formal_expression: age >= 60
+  citation: Zakon No. 1058-IV, st. 26
+  source_document_id: doc-ua-pension-law
+  source_section_ref: st. 26
+  param_key_prefix: ua.rule.age
+  parameters:
+    min_age:
+      ref: ua.rule.age.min_age
+- id: rule-ua-stazh-min
+  rule_type: residency_minimum
+  description: 'Minimalnyi strakhovyi stazh: 25 rokiv (choloviky)'
+  formal_expression: contribution_years >= 25
+  citation: Zakon No. 1058-IV, st. 26
+  source_document_id: doc-ua-pension-law
+  source_section_ref: st. 26
+  param_key_prefix: ua.rule.stazh-min
+  parameters:
+    min_years:
+      ref: ua.rule.stazh-min.min_years
+    home_countries:
+      ref: ua.rule.stazh-min.home_countries
+- id: rule-ua-stazh-calc
+  rule_type: residency_partial
+  description: Povna pensiia z 35+ rokamy stazhu; proportsionalna z 25-34 rokamy
+  formal_expression: pension_ratio = min(contribution_years, 35) / 35
+  citation: Zakon No. 1058-IV, st. 28
+  source_document_id: doc-ua-pension-law
+  source_section_ref: st. 28
+  param_key_prefix: ua.rule.stazh-calc
+  parameters:
+    full_years:
+      ref: ua.rule.stazh-calc.full_years
+    min_years:
+      ref: ua.rule.stazh-calc.min_years
+- id: rule-ua-status
+  rule_type: legal_status
+  description: Hromadianyn Ukrainy abo osoba z postiinymy pravom na prozhyvannia
+  formal_expression: legal_status in ['citizen', 'permanent_resident']
+  citation: Zakon No. 1058-IV, st. 4
+  source_document_id: doc-ua-pension-law
+  source_section_ref: st. 26
+  param_key_prefix: ua.rule.status
+  parameters:
+    accepted_statuses:
+      ref: ua.rule.status.accepted_statuses
+- id: rule-ua-evidence
+  rule_type: evidence_required
+  description: Pasport hromadianyna Ukrainy abo svidotstvo pro narodzhennia
+  formal_expression: has_evidence('birth_certificate') or has_evidence('passport')
+  citation: Zakon No. 1058-IV, st. 45
+  source_document_id: doc-ua-pension-law
+  source_section_ref: st. 26
+  param_key_prefix: ua.rule.evidence
+  parameters:
+    required_types:
+      ref: ua.rule.evidence.required_types
+demo_cases:
+- id: demo-ua-001
+  applicant:
+    id: app-ua-001
+    date_of_birth: '1960-04-22'
+    legal_name: Oleksandr Kovalenko
+    legal_status: citizen
+    country_of_birth: UA
+  residency_periods:
+  - country: Ukraine
+    start_date: '1960-04-22'
+    verified: true
+  evidence_items:
+  - id: 8cc749606363
+    type: birth_certificate
+    description: Svidotstvo pro narodzhennia
+    provided: true
+    verified: true
+  - id: 0e67134dc430
+    type: tax_record
+    description: Dovidka pro strakhovyi stazh PFU 1980-2025
+    provided: true
+    verified: true
+- id: demo-ua-002
+  applicant:
+    id: app-ua-002
+    date_of_birth: '1978-12-05'
+    legal_name: Nataliia Shevchenko
+    legal_status: citizen
+    country_of_birth: UA
+  residency_periods:
+  - country: Ukraine
+    start_date: '1978-12-05'
+    verified: true
+  evidence_items:
+  - id: 846758d82f83
+    type: birth_certificate
+    description: Svidotstvo pro narodzhennia
+    provided: true
+    verified: true
+  - id: 2863a27f56d5
+    type: tax_record
+    description: Dovidka PFU
+    provided: true
+- id: demo-ua-003
+  applicant:
+    id: app-ua-003
+    date_of_birth: '1959-07-18'
+    legal_name: Vasyl Bondarenko
+    legal_status: citizen
+    country_of_birth: UA
+  residency_periods:
+  - country: Ukraine
+    start_date: '1959-07-18'
+    end_date: '2005-01-01'
+  - country: Poland
+    start_date: '2005-01-01'
+    end_date: '2015-06-01'
+  - country: Ukraine
+    start_date: '2015-06-01'
+    verified: true
+  evidence_items:
+  - id: b274bd9b0d6f
+    type: birth_certificate
+    description: Svidotstvo pro narodzhennia
+    provided: true
+    verified: true
+  - id: 032fc5514cf7
+    type: tax_record
+    description: Dovidka PFU (neповна)
+    provided: true
+    verified: true
+  - id: 9fef9060eeb4
+    type: residency_declaration
+    description: Dovidka pro prozhyvannia
+    provided: true
+- id: demo-ua-004
+  applicant:
+    id: app-ua-004
+    date_of_birth: '1955-02-28'
+    legal_name: Halyna Tkachenko
+    legal_status: citizen
+    country_of_birth: UA
+  residency_periods:
+  - country: Ukraine
+    start_date: '1955-02-28'
+  evidence_items:
+  - id: ed4fce169ad1
+    type: tax_record
+    description: Dovidka PFU (chastkova)
+    provided: true
