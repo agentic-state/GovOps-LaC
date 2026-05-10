@@ -1,6 +1,19 @@
 # yaml-language-server: $schema=../../../schema/lawcode-v1.0.json
 # br/config/jurisdiction.yaml — see ca/config/jurisdiction.yaml for the
 # load-bearing comment. Substrate-resolved per govops-022.
+# Per ADR-019 the `jurisdiction:` block declares identity for the
+# lawcode-as-discovery loader (ADR-020).
+
+jurisdiction:
+  id: jur-br-federal
+  country: BR
+  level: federal
+  parent_id: null
+  name:
+    pt: Republica Federativa do Brasil
+  legal_tradition: Civil law (Romano-Germanic)
+  language_regime: Portuguese
+  default_language: pt
 
 defaults:
   domain: jurisdiction

@@ -262,13 +262,26 @@ def test_metadata_invalid_id_pattern_fails():
         assert errors, f"must reject id={bad!r}"
 
 
-def test_metadata_invalid_legal_tradition_fails():
-    """legal_tradition is an enum -- arbitrary strings rejected."""
+def test_metadata_legal_tradition_is_free_form():
+    """legal_tradition is free-form per ADR-019 Amendment 2026-05-10 so the
+    7 jurisdictions' prose strings round-trip through the schema unchanged.
+    Empty strings remain rejected to keep the field meaningful."""
     file_validator = Draft202012Validator(_load(LAWCODE_SCHEMA_PATH))
+    for prose in (
+        "common_law",
+        "Bijural (common law / civil law)",
+        "Civil law (Romano-Germanic)",
+        "Civil law (Japanese hybrid; German + French + post-war common-law influence)",
+    ):
+        meta = _wellformed_metadata()
+        meta["legal_tradition"] = prose
+        errors = list(file_validator.iter_errors({"jurisdiction": meta}))
+        assert not errors, f"prose {prose!r} must validate: {[e.message for e in errors]}"
+    # Empty string still rejected by minLength: 1
     meta = _wellformed_metadata()
-    meta["legal_tradition"] = "Roman-Germanic"  # not in enum
+    meta["legal_tradition"] = ""
     errors = list(file_validator.iter_errors({"jurisdiction": meta}))
-    assert errors, "must reject legal_tradition outside enum"
+    assert errors, "empty legal_tradition must be rejected"
 
 
 def test_metadata_invalid_level_fails():
