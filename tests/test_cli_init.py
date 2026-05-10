@@ -119,6 +119,53 @@ class TestInitHappyPath:
 
 
 # ---------------------------------------------------------------------------
+# init_jurisdiction — ADR-019 jurisdiction-metadata block
+# ---------------------------------------------------------------------------
+
+
+class TestInitEmitsJurisdictionMetadata:
+    """Per ADR-019 the scaffolded jurisdiction.yaml carries a top-level
+    `jurisdiction:` block alongside the ConfigValue defaults/values, so the
+    lawcode-as-discovery loader (ADR-020) can register the new jurisdiction
+    without a Python edit."""
+
+    def _load_yaml(self, path: Path) -> dict:
+        import yaml
+        with path.open("r", encoding="utf-8") as fh:
+            return yaml.safe_load(fh)
+
+    def test_jurisdiction_yaml_has_metadata_block(self, tmp_path: Path):
+        init_jurisdiction("pl", lawcode_dir=tmp_path)
+        doc = self._load_yaml(tmp_path / "pl" / "jurisdiction.yaml")
+        assert "jurisdiction" in doc, "scaffold must emit ADR-019 metadata block"
+
+    def test_metadata_block_carries_required_fields(self, tmp_path: Path):
+        init_jurisdiction("pl", lawcode_dir=tmp_path)
+        meta = self._load_yaml(tmp_path / "pl" / "jurisdiction.yaml")["jurisdiction"]
+        for field in ("id", "country", "level", "name", "default_language"):
+            assert field in meta, f"metadata block must carry {field!r}"
+        assert meta["id"] == "jur-pl-national"
+        assert meta["country"] == "PL"
+        assert "en" in meta["name"]
+
+    def test_scaffolded_metadata_validates_against_lawcode_schema(self, tmp_path: Path):
+        """Round-trip the scaffold through the schema validator: a fresh
+        `govops init` output passes the Phase 5 gate without edits."""
+        import json
+        from jsonschema import Draft202012Validator
+
+        init_jurisdiction("pl", lawcode_dir=tmp_path)
+        doc = self._load_yaml(tmp_path / "pl" / "jurisdiction.yaml")
+
+        schema_path = REPO_ROOT / "schema" / "lawcode-v1.0.json"
+        with schema_path.open("r", encoding="utf-8") as fh:
+            schema = json.load(fh)
+        validator = Draft202012Validator(schema)
+        errors = list(validator.iter_errors(doc))
+        assert not errors, [e.message for e in errors]
+
+
+# ---------------------------------------------------------------------------
 # init_jurisdiction — refusal posture
 # ---------------------------------------------------------------------------
 

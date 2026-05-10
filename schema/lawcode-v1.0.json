@@ -2,11 +2,64 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://github.com/agentic-state/GovOps-LaC/schema/lawcode-v1.0.json",
   "title": "lawcode/*.yaml file v1.0",
-  "description": "Shape of an on-disk YAML file under lawcode/. Per ADR-003 each file is a `defaults` mapping (merged into every record below) and a `values` list. The merged record must satisfy the ConfigValue v1.0 schema.",
+  "description": "Shape of an on-disk YAML file under lawcode/. Per ADR-003 each file is a `defaults` mapping (merged into every record below) and a `values` list. The merged record must satisfy the ConfigValue v1.0 schema. Per ADR-019, an optional `jurisdiction` block at the top of a file declares jurisdiction-level identity (id, country, level, name, legal tradition, language regime, default language) used by the running engine to register a jurisdiction at startup; this block is structurally distinct from ConfigValue records.",
   "type": "object",
-  "required": ["values"],
+  "anyOf": [
+    { "required": ["values"] },
+    { "required": ["jurisdiction"] }
+  ],
   "additionalProperties": false,
+  "$defs": {
+    "jurisdictionMetadata": {
+      "description": "Jurisdiction-level identity block per ADR-019. Used by the lawcode-as-discovery loader (ADR-020) to register a jurisdiction without a Python edit.",
+      "type": "object",
+      "required": ["id", "country", "level", "name", "default_language"],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "description": "Stable jurisdiction identifier (e.g. jur-ca-federal). Pattern aligns with authority-chain ids per ADR-014.",
+          "type": "string",
+          "pattern": "^jur-[a-z][a-z0-9-]+$"
+        },
+        "country": {
+          "description": "ISO 3166-1 alpha-2 country code, uppercase.",
+          "type": "string",
+          "pattern": "^[A-Z]{2}$"
+        },
+        "level": {
+          "description": "Government level the jurisdiction operates at.",
+          "type": "string",
+          "enum": ["federal", "national", "provincial", "state", "regional", "municipal"]
+        },
+        "parent_id": {
+          "description": "Parent jurisdiction id for sub-national jurisdictions; null or absent for top-level.",
+          "type": ["string", "null"]
+        },
+        "name": {
+          "description": "Display name keyed by IETF language tag. At least one entry required; en strongly recommended.",
+          "type": "object",
+          "minProperties": 1,
+          "additionalProperties": { "type": "string" }
+        },
+        "legal_tradition": {
+          "description": "Primary legal tradition. `bijural` denotes mixed common-law / civil-law systems (e.g. Canada).",
+          "type": "string",
+          "enum": ["common_law", "civil_law", "bijural", "mixed", "religious", "customary"]
+        },
+        "language_regime": {
+          "description": "Free-form description of the language regime; short canonical keys preferred (e.g. en+fr, es-only, multi).",
+          "type": "string"
+        },
+        "default_language": {
+          "description": "IETF tag for the default UI language when no preference is set.",
+          "type": "string",
+          "pattern": "^[a-z]{2}(-[A-Z]{2})?$"
+        }
+      }
+    }
+  },
   "properties": {
+    "jurisdiction": { "$ref": "#/$defs/jurisdictionMetadata" },
     "defaults": {
       "description": "Optional mapping merged into every record under `values`. Per-record fields override defaults.",
       "type": "object",
