@@ -4,6 +4,7 @@ import { useState } from "react";
 import { DraftConfigForm } from "@/components/govops/DraftConfigForm";
 import { RecentDrafts } from "@/components/govops/RecentDrafts";
 import { createConfigValue, getConfigValue } from "@/lib/api";
+import { useInvalidateAfterMutation } from "@/lib/router-invalidate";
 import { MOCK_CONFIG_VALUES } from "@/lib/mock-config-values";
 import type { ConfigValue, CreateConfigValueRequest } from "@/lib/types";
 import { RouteError } from "@/components/govops/RouteError";
@@ -57,6 +58,7 @@ export const Route = createFileRoute("/config/draft")({
 function DraftPage() {
   const search = Route.useSearch();
   const nav = useNavigate();
+  const invalidate = useInvalidateAfterMutation();
   const [submitting, setSubmitting] = useState(false);
   const prior: ConfigValue | null = Route.useLoaderData();
 
@@ -64,6 +66,9 @@ function DraftPage() {
     setSubmitting(true);
     try {
       const created = await createConfigValue(body);
+      // The new draft adds to the approvals queue and the key timeline;
+      // both are TanStack-router loaders, so invalidate before nav.
+      await invalidate();
       nav({
         to: "/config/$key/$jurisdictionId",
         params: {

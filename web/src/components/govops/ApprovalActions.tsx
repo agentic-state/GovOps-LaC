@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { approveConfigValue, rejectConfigValue, requestChangesConfigValue } from "@/lib/api";
 import { getCurrentUser } from "@/lib/currentUser";
+import { useInvalidateAfterMutation } from "@/lib/router-invalidate";
 import type { ConfigValue } from "@/lib/types";
 import { ConfirmActionDialog, type ApprovalAction } from "./ConfirmActionDialog";
 import { useApprovalDraft } from "./approval/useApprovalDraft";
@@ -32,6 +33,7 @@ export function ApprovalActions({
   onResolved: (resolution: ApprovalAction) => void;
 }) {
   const intl = useIntl();
+  const invalidate = useInvalidateAfterMutation();
   const { comment, setComment, expanded, setExpanded, showHelp, setShowHelp, clearComment } =
     useApprovalDraft(cv.id);
 
@@ -83,6 +85,10 @@ export function ApprovalActions({
         toast.success(intl.formatMessage({ id: "approvals.success.rejected" }));
       }
       clearComment();
+      // Invalidate router-cached loaders so the approvals list, this detail
+      // page, and any timeline page that mentions this key all refetch on
+      // their next render — closes the 2026-05-07 stale-list bug.
+      await invalidate();
       onResolved(pending);
     } catch (err) {
       toast.error(

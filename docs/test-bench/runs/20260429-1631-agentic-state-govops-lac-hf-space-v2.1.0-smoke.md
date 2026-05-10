@@ -342,6 +342,62 @@ If any line fails: check Space status at https://huggingface.co/spaces/agentic-s
 
 ---
 
+## Post-smoke-test bugs caught and fixed
+
+The first 35-test pass was clean against the API endpoints, but a manual browser pass through the app surfaced two bugs the curl-only test missed (lesson: parameterised UI routes need their own pass; static `/cases` is not the same as `/cases/demo-case-001`).
+
+### Bug 1 — `/cases/demo-case-001` returned 500 (SSR loader couldn't reach the API)
+
+**Symptom**: clicking a case from the `/cases` list route loaded a 500-status SSR page; the React app never mounted; the inline `$_TSR.e` payload contained `Error("Case demo-case-001 not found")`.
+
+**Reproduction**:
+```bash
+curl -i "$BASE/cases/demo-case-001"  # → HTTP/1.1 500 Internal Server Error
+```
+
+**Root cause**: The earlier `VITE_API_BASE_URL=""` fix (commit `fc19f64`) made browser-side fetches use same-origin relative URLs (correct, since Vite's dev proxy forwards `/api/*` to FastAPI). But the same `BASE=""` was also being read by the **server-side SSR Node process** when it pre-rendered route loaders, and Node's `fetch()` cannot resolve relative URLs. The route loader threw, the boundary returned "not found".
+
+**Fix** (commit `f3c1a64`, `web/src/lib/api.ts`): branch on `import.meta.env.SSR`. Server-side always uses `http://127.0.0.1:8000` (FastAPI on container loopback); browser-side honours `VITE_API_BASE_URL` (empty → relative).
+
+```ts
+const BASE = import.meta.env.SSR
+  ? "http://127.0.0.1:8000"
+  : ((import.meta.env.VITE_API_BASE_URL as string | undefined) ?? "http://127.0.0.1:8000");
+```
+
+**After**: `/cases/demo-case-001` returns HTTP 200, 23 KB, with the full SSR-rendered case detail. Confirmed via `curl -s "$BASE/cases/demo-case-001" | grep -o "Margaret Chen"` (the demo case's applicant name) — present.
+
+### Bug 2 — `/screen/jp` returned 404 (frontend allowlist trailing backend)
+
+**Symptom**: visiting `/screen/jp` rendered the "404 Page not found" component instead of the JP self-screening form.
+
+**Root cause**: The backend `JURISDICTION_REGISTRY` has 7 jurisdictions including JP (added 2026-04-28), but the frontend `SCREEN_JURISDICTIONS` allowlist in `web/src/lib/types.ts` still had 6. The route loader for `/screen/$jurisdictionId` calls `notFound()` if the param isn't in the allowlist.
+
+**Fix** (commit `f3c1a64`):
+- `web/src/lib/types.ts` — added `"jp"` to the const array
+- `web/src/routes/screen.tsx` — added JP entry to `JURISDICTION_LABELS` (display "日本")
+- `web/src/routes/screen.$jurisdictionId.tsx` — added JP entry to `PROGRAM_LABELS` (the network-failure fallback map)
+
+**After**: `/screen/jp` returns HTTP 200, 13 KB, "Kosei Nenkin Hoken (Employees' Pension Insurance)" rendered. Substrate-resolved `howto_url` points at https://www.nenkin.go.jp/.
+
+### Re-test of all parameterised routes (post-fix)
+
+```
+/cases/demo-case-001 → 200 23,323 bytes
+/screen/ca           → 200 13,419 bytes
+/screen/br           → 200 13,401 bytes
+/screen/jp           → 200 13,417 bytes  ← was 404
+/screen/fr           → 200 13,369 bytes
+/config/approvals    → 200 367,700 bytes  ← was 31,593 (SSR now hydrating full data; previously silent failure)
+/config/prompts      → 200 368,224 bytes  ← was 24,759 (same)
+```
+
+The `/config/*` size jump is the SSR fix landing for real — these pages render all 567+ ConfigValue records server-side. Sub-second response is still acceptable; if it becomes a UX cost later, the right move is server-side pagination on the `/api/config/values` shape rather than client-side virtualisation.
+
+**Lesson**: future deploy smoke tests should explicitly cover one parameterised route per route-pattern. The 11-route static list isn't enough.
+
+---
+
 ## See also
 
 - **DEPLOY.md** — end-to-end recipe (HF account → Space → push → keys)

@@ -48,9 +48,24 @@ COPY web/ ./
 # Run only the load-bearing prebuild step (route-tree generator). Skip the
 # i18n validators — they're CI quality gates and can fail on translation
 # debt without affecting whether the build itself produces a valid artifact.
-RUN node scripts/clean-route-tree.mjs \
- && npx vite build \
- && node scripts/check-route-tree-duplicates.mjs
+#
+# VITE_API_BASE_URL="" is load-bearing: vite inlines this env var AT BUILD
+# TIME into the client bundle. Without it the bundle bakes in the api.ts
+# fallback http://127.0.0.1:8000 — which from a visitor's browser hits
+# THEIR localhost, not the HF container. Result: every API fetch from
+# the browser fails with "Failed to fetch".
+#
+# The original v2.1 fix (commit fc19f64) set this env var on the supervisor
+# script that ran `npm run dev`. When the Dockerfile pivoted from vite-dev
+# at runtime to vite-build at build time (commit 35fb187), the env var
+# didn't follow into the build RUN. Re-applied here.
+#
+# Empty string = browser uses same-origin relative URLs (/api/...). Those
+# hit the FastAPI process inside the same uvicorn container directly.
+RUN VITE_API_BASE_URL="" node scripts/clean-route-tree.mjs \
+ && VITE_API_BASE_URL="" npx vite build \
+ && node scripts/check-route-tree-duplicates.mjs \
+ && node scripts/check-bundle-no-localhost.mjs
 
 # ============================================================================
 # Stage 2: Python runtime — single uvicorn process
@@ -76,6 +91,11 @@ COPY schema/ ./schema/
 # Built SPA from stage 1 (client bundles only — dist/server/ is the unused
 # Workers output and isn't loaded at runtime). 3-4 MB total.
 COPY --from=web-builder /build/web/dist/client/ /app/web/dist/client/
+
+# i18n catalogs the locale-aware HTML rewriter needs at request time
+# (govops.spa_locale._load_catalogs reads these to localize <title> +
+# <html lang> from the `govops-locale` cookie). ~600 KB total.
+COPY web/src/messages/ /app/web/src/messages/
 
 # HF Spaces persistent disk path (paid Spaces only; free Spaces re-hydrate
 # from lawcode/ on cold boot per ADR-010).

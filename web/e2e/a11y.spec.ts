@@ -32,7 +32,7 @@ const A11Y_ROUTES = [
 const STRICT = process.env.E2E_A11Y_STRICT === "1";
 
 for (const path of A11Y_ROUTES) {
-  test(`a11y: ${path} (WCAG 2.1 AA)`, async ({ page }) => {
+  test(`[M01] a11y: ${path} (WCAG 2.1 AA)`, async ({ page }) => {
     await page.goto(path);
     // Let any client hydration finish
     await page.waitForLoadState("networkidle");

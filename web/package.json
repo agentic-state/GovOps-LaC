@@ -1,6 +1,6 @@
 {
   "name": "govops-web",
-  "version": "2.0.0",
+  "version": "3.0.0",
   "private": true,
   "sideEffects": false,
   "type": "module",
@@ -19,6 +19,7 @@
     "check:i18n:translation": "node scripts/check-i18n-translation.mjs",
     "check:i18n:impact": "node scripts/check-impact-i18n.mjs",
     "check:route-tree": "node scripts/check-route-tree-duplicates.mjs",
+    "check:coverage": "node scripts/check-journey-coverage.mjs",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
@@ -26,7 +27,11 @@
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:debug": "playwright test --debug",
     "test:e2e:report": "playwright show-report",
-    "test:e2e:install": "playwright install chromium firefox webkit --with-deps"
+    "test:e2e:install": "playwright install chromium firefox webkit --with-deps",
+    "bench:hf": "TEST_BENCH_TARGET=https://agentic-state-govops-lac.hf.space playwright test --config=playwright.deploy.config.ts && node scripts/build-run-record.mjs",
+    "bench:local": "TEST_BENCH_TARGET=http://127.0.0.1:8000 playwright test --config=playwright.deploy.config.ts && node scripts/build-run-record.mjs",
+    "bench:custom": "playwright test --config=playwright.deploy.config.ts && node scripts/build-run-record.mjs",
+    "bench:record": "node scripts/build-run-record.mjs"
   },
   "dependencies": {
     "@cloudflare/vite-plugin": "^1.25.5",

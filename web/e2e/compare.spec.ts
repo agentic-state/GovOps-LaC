@@ -13,7 +13,7 @@
 import { test, expect } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 
-test.describe("/compare/ei", () => {
+test.describe("[J17] /compare/ei", () => {
   test("renders the headline comparison table with all six active jurisdictions", async ({
     page,
   }) => {

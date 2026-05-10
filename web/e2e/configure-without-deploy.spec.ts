@@ -33,7 +33,7 @@ const SCREEN_PAYLOAD_BASE = {
   evidence_present: { dob: true, residency: true },
 };
 
-test.describe("Configure-without-deploy — citizen surface honours dated supersession", () => {
+test.describe("[J27] Configure-without-deploy — citizen surface honours dated supersession", () => {
   test("/api/screen returns pre-supersession amount for 2025-06-01 evaluation", async ({
     request,
   }) => {

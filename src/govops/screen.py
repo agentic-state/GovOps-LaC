@@ -46,6 +46,14 @@ from govops.programs import Program, load_program_manifest
 _LAWCODE_DIR = Path(__file__).resolve().parent.parent.parent / "lawcode"
 
 
+# Programs v3 supports as canonical shapes. "Unknown" for /api/check 400
+# validation means "not in this set" -- regardless of which jurisdiction has
+# a manifest. JP has no EI manifest by design (architectural control), but
+# "ei" is still a globally-known program; asking for it on JP returns
+# programs=[] rather than 400. New programs land here when their shape ships.
+_GLOBAL_KNOWN_PROGRAMS: frozenset[str] = frozenset({"oas", "ei"})
+
+
 SCREENING_DISCLAIMER = (
     "This is decision support, not a determination. "
     "Apply through the program for an official decision."
@@ -609,13 +617,17 @@ def run_check(
     available = _discover_citizen_programs(req.jurisdiction_id, pack)
 
     if req.programs:
-        available_ids = {p.program_id for p in available}
-        unknown = [p for p in req.programs if p not in available_ids]
+        # Globally-known program IDs (every program shape v3 supports).
+        # Filtering to a known-but-unavailable program (e.g. "ei" for JP --
+        # the v3 architectural control) returns programs=[], not 400, so the
+        # citizen-side surface can render a graceful no-program-here message.
+        # 400 is reserved for genuinely-unknown program IDs (typos, removed
+        # programs) so callers still catch contract violations.
+        unknown = [p for p in req.programs if p not in _GLOBAL_KNOWN_PROGRAMS]
         if unknown:
             raise ValueError(
-                f"Unknown program(s) for jurisdiction "
-                f"{req.jurisdiction_id!r}: {unknown}. "
-                f"Available: {sorted(available_ids)}"
+                f"Unknown program(s): {unknown}. "
+                f"Known: {sorted(_GLOBAL_KNOWN_PROGRAMS)}"
             )
         selected = [p for p in available if p.program_id in set(req.programs)]
     else:

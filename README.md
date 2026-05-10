@@ -25,15 +25,15 @@ For GitHub-only readers, jump past it to the heading below.
 
 GovOps turns authoritative governance sources into coherent, traceable, executable service logic. It is a disciplined construction approach for systems whose true specification lives outside the codebase — in statutes, regulations, and policy.
 
-**Law-as-Code v2.0** has shipped: every statutory value (thresholds, accepted statuses, calculation coefficients, prompts) lives as a dated `ConfigValue` record. Behaviour changes are configuration writes, not deploys. A case evaluated against 2025 still resolves with 2025's substrate even after the rules change in 2026. A second repo can publish its own jurisdiction with an Ed25519-signed manifest and federate into a GovOps deployment.
+**Two layers ship today.** The **Law-as-Code substrate** (v2.0) puts every statutory value -- thresholds, accepted statuses, calculation coefficients, prompts -- as a dated `ConfigValue` record. Behaviour changes are configuration writes, not deploys; a case evaluated against 2025 still resolves with 2025's substrate after the rules change in 2026. The **Program-as-Primitive layer** (v3.0) adds two canonical programs (Old Age Security and Employment Insurance) across the supported jurisdictions, a cross-program evaluation API with interaction warnings, a government-leader comparison surface (`/compare`), a citizen entry surface (`/check`), and an adoption substrate (`govops init <iso-code>` + `docker compose up` + plain-language sidecars). A second repo can publish its own jurisdiction with an Ed25519-signed manifest and federate in.
 
 This is an open public-good contribution: a working MVP demo other contributors can fork to build whatever else they need.
 
-**Project home**: [agentic-state.github.io/GovOps-LaC](https://agentic-state.github.io/GovOps-LaC/) · **Source**: [github.com/agentic-state/GovOps-LaC](https://github.com/agentic-state/GovOps-LaC) · **Live demo (v2.1)**: [huggingface.co/spaces/agentic-state/govops-lac](https://huggingface.co/spaces/agentic-state/govops-lac) — _free-tier; first load may take ~30s if idle_
+**Project home**: [agentic-state.github.io/GovOps-LaC](https://agentic-state.github.io/GovOps-LaC/) · **Source**: [github.com/agentic-state/GovOps-LaC](https://github.com/agentic-state/GovOps-LaC) · **Live demo**: [huggingface.co/spaces/agentic-state/govops-lac](https://huggingface.co/spaces/agentic-state/govops-lac) — _free-tier; first load may take ~30s if idle_
 
 <p align="center">
-  <a href="https://agentic-state.github.io/GovOps-LaC/"><img src="docs/screenshots/v2/01-home.png" alt="GovOps product home — three registers (agent-drafted, human-ratified, citizen-auditable) summarise the v2.0 thesis." width="900"></a>
-  <br><sub><i>The product home — captured from the live v0.4.0 dev server. <a href="https://agentic-state.github.io/GovOps-LaC/">Full gallery on the project home page →</a></i></sub>
+  <a href="https://agentic-state.github.io/GovOps-LaC/"><img src="docs/screenshots/v2/01-home.png" alt="GovOps product home — three registers (agent-drafted, human-ratified, citizen-auditable) summarise the Law-as-Code thesis." width="900"></a>
+  <br><sub><i>The product home — three registers: agent-drafted, human-ratified, citizen-auditable. <a href="https://agentic-state.github.io/GovOps-LaC/">Full gallery on the project home page →</a></i></sub>
 </p>
 
 ---
@@ -48,13 +48,15 @@ This is an open public-good contribution: a working MVP demo other contributors 
 | **Government / contributor** | Fork the repo, drop in your jurisdiction's YAML, run. 7 reference jurisdictions × 6 locales already shipped. | [`CONTRIBUTING.md`](CONTRIBUTING.md) |
 | **Researcher / SPRIND-curious** | A working reference implementation against the SPRIND "Law as Code" framework's 5 elements, plus a 6th GovOps adds (versioned interpretive apparatus) | [`docs/design/LAW-AS-CODE.md`](docs/design/LAW-AS-CODE.md) |
 
-For build history and accepted backlog: [`PLAN.md`](PLAN.md). For load-bearing decisions: [`docs/design/ADRs/`](docs/design/ADRs/).
+This README describes what is currently implemented. For load-bearing decisions: [`docs/design/ADRs/`](docs/design/ADRs/). For per-release notes: [`CHANGELOG.md`](CHANGELOG.md). For build history: git log + tags. The roadmap (operational plans for v2 / v3 / v4) lives in the workspace memory, not in this repo, per the maintainer's visibility rule.
 
 ---
 
 ## Quick Start
 
-GovOps v2.0 has **two surfaces** during local development. The modern v2 UI is what visitors see in the screenshots; the legacy Jinja UI is preserved as a no-build-step fallback.
+The fastest path to seeing GovOps run is the **hosted demo** at [huggingface.co/spaces/agentic-state/govops-lac](https://huggingface.co/spaces/agentic-state/govops-lac) (free tier; ~30 s cold start). It's the same FastAPI + React surface you'd run locally, with the demo seed turned on.
+
+For local development, GovOps has two surfaces. The React UI is what visitors see in the screenshots; the legacy Jinja UI is preserved as a no-build-step fallback.
 
 ```bash
 git clone https://github.com/agentic-state/GovOps-LaC.git
@@ -62,19 +64,19 @@ cd GovOps-LaC
 pip install -e ".[dev]"
 ```
 
-**Start both surfaces** (two terminals, ~30s setup each):
+**Start both surfaces** (two terminals, ~30 s setup each):
 
 ```bash
 # Terminal 1 — backend API + legacy Jinja UI fallback
 govops-demo                            # http://127.0.0.1:8000
 
-# Terminal 2 — the v2 React/TanStack/shadcn UI (what's in the screenshots)
+# Terminal 2 — the React/TanStack/shadcn UI (what's in the screenshots)
 cd web && npm install && npm run dev   # http://localhost:8080
 ```
 
-Open **http://localhost:8080** for the v2 experience (23 routes, 6 locales, parchment-on-ink theme). The Jinja UI at `:8000` is the v0 / v1 fallback retained for "no Node toolchain" demos and is clearly labelled as such.
+Open **http://localhost:8080** for the modern experience (23 routes, 6 locales, parchment-on-ink theme). The Jinja UI at `:8000` is retained for "no Node toolchain" demos and is clearly labelled as such.
 
-> **Coming in v2.1**: a single hosted demo URL collapses both surfaces into one process via Docker (FastAPI serves the built React SPA + the JSON API + an LLM proxy). See `memory/v2_1_hosted_demo_plan.md`.
+If you'd rather skip the toolchain entirely: `docker compose up` brings the same two-process demo up on any Docker host. See [Add your country in 5 minutes](#add-your-country-in-5-minutes-v3--adoption-substrate) below.
 
 No database server, no cloud, no API keys. Embedded SQLite handles the substrate.
 
@@ -275,7 +277,7 @@ The demo exposes both a web UI and a JSON API.
 | GET | `/api/legal-documents` | Browse source legislation |
 | GET | `/api/cases` | List all cases |
 | GET | `/api/cases/{id}` | Get case with recommendation |
-| POST | `/api/cases/{id}/evaluate` | Run the rule engine |
+| POST | `/api/cases/{id}/evaluate` | Run the rule engine. Accepts optional `programs: [...]` body to evaluate multiple programs in one round trip; returns `program_evaluations` + interaction `warnings` per ADR-018 (v3) |
 | POST | `/api/cases/{id}/review` | Submit human review action |
 | GET | `/api/cases/{id}/audit` | Full audit package |
 | GET | `/api/cases/{id}/notice` | Render decision notice (Phase 10C) |
@@ -286,6 +288,9 @@ The demo exposes both a web UI and a JSON API.
 | GET | `/api/impact` | Citation impact across all jurisdictions (Phase 7) |
 | POST | `/api/screen` | Citizen self-screening, no PII echo (Phase 10A) |
 | POST | `/api/screen/notice` | Self-screen decision notice (Phase 10C) |
+| **POST** | **`/api/check`** | **v3** multi-program citizen entry; same privacy posture as `/api/screen` |
+| **GET** | **`/api/programs/{id}/compare`** | **v3** cross-jurisdiction comparison (`?jurisdictions=ca,fr,de` filter) |
+| **GET** | **`/api/programs/{id}/interactions`** | **v3** static metadata for cross-program rules involving this program |
 | GET | `/api/config/values` | Browse `ConfigValue` records (Law-as-Code v2.0) |
 | GET | `/api/config/resolve` | Resolve a key at an `evaluation_date` |
 | GET | `/api/config/versions` | Supersession chain for a key |
@@ -293,6 +298,12 @@ The demo exposes both a web UI and a JSON API.
 | POST | `/api/config/values/{id}/approve` | Approve a draft (dual approval per ADR-008) |
 | POST | `/api/config/values/{id}/request-changes` | Send a draft back |
 | POST | `/api/config/values/{id}/reject` | Reject a draft |
+| POST | `/api/encode/batches` | Create a new encoding batch (manual or LLM mode) |
+| GET | `/api/encode/batches` | List recent encoding batches |
+| GET | `/api/encode/batches/{id}` | Get a batch with its proposals |
+| POST | `/api/encode/batches/{id}/proposals/{pid}/review` | Review (approve / reject / modify) a single proposal |
+| POST | `/api/encode/batches/{id}/bulk-review` | Bulk approve or reject |
+| POST | `/api/encode/batches/{id}/commit` | Commit approved proposals to the rule set |
 | POST | `/api/encode/batches/{id}/emit-yaml` | Encoder commits approved batch to lawcode YAML |
 | GET | `/api/admin/federation/registry` | Federation publisher allowlist (Phase 8) |
 | GET | `/api/admin/federation/packs` | Fetched lawcode packs |
@@ -315,18 +326,22 @@ The demo exposes both a web UI and a JSON API.
 
 | Path | Description |
 | --- | --- |
-| `/` | Landing — Law-as-Code v2.0 hero, console dropdown into the operator surfaces |
+| `/` | Landing — three registers (agent-drafted, human-ratified, citizen-auditable) |
 | `/about` | What GovOps is, SPRIND framing, FKTE pipeline, authority chain, "what this is not" |
-| `/cases` | Case dashboard with event timeline + benefit-amount card on case detail |
+| `/cases`, `/cases/:caseId` | Officer surface: case dashboard, event timeline, benefit-amount card, life-event submission (`NewEventForm`) |
 | `/authority` | Authority chain browser |
-| `/encode` | Rule encoding pipeline (legislative text → proposals → review → YAML emission) |
+| `/encode`, `/encode/new`, `/encode/:batchId` | Rule encoding pipeline (legislative text → proposals → review → YAML emission, persisted server-side per batch) |
 | `/impact` | Citation impact across all jurisdictions (Phase 7) |
 | `/screen`, `/screen/:jurisdiction` | Citizen self-screening — no PII storage, no case row (Phase 10A) |
+| `/check`, `/check/life-event?event=...` | **v3** citizen entry: declare a few facts, see every program you may qualify for; life-event reassessment for bounded-duration benefits |
+| `/compare/:programId` | **v3** government-leader cross-jurisdiction comparison surface with chip-group jurisdiction filter and program-interactions panel |
 | `/config` (+ `/timeline`, `/diff`, `/draft`, `/approvals`, `/prompts`) | ConfigValue admin (search, supersession, draft, dual approval, prompt management) |
 | `/admin` | Operator surface — seeded data, federation registry, runbook |
 | `/admin/federation` | Federation registry + signed pack management (Phase 8) |
 | `/walkthrough` | Guided tour of the substrate-as-truth flow |
 | `/policies` | Privacy + data handling notice |
+
+A global jurisdiction switcher in the header persists the operator's preferred jurisdiction across surfaces (added in L8.5).
 
 The legacy Jinja UI (served at http://127.0.0.1:8000) is preserved as a no-build-step fallback covering `/`, `/cases`, `/authority`, `/encode`, `/admin`, `/mvp`. Interactive API docs: http://127.0.0.1:8000/docs
 
@@ -367,7 +382,7 @@ pip install -e ".[dev]"
 pytest -v
 ```
 
-640 backend tests covering (all green on Python 3.10/3.11/3.12):
+678 backend tests covering (all green on Python 3.10 / 3.11 / 3.12):
 - Rule engine unit tests (all decision paths, edge cases, residency calculation)
 - Determinism verification (identical inputs = identical outputs)
 - Authority traceability (every rule has a statutory citation)
@@ -425,7 +440,7 @@ docs/
 
 ### Law-as-Code v2.0
 
-Every business value (thresholds, accepted statuses, UI labels, LLM prompts) lives as a dated `ConfigValue` record under [lawcode/](lawcode/). The on-disk shape is locked by [schema/lawcode-v1.0.json](schema/lawcode-v1.0.json); each merged record satisfies [schema/configvalue-v1.0.json](schema/configvalue-v1.0.json). CI runs `python scripts/validate_lawcode.py` on every push, so a malformed YAML breaks the build before merge. Track the live execution plan in [PLAN.md](PLAN.md).
+Every business value (thresholds, accepted statuses, UI labels, LLM prompts) lives as a dated `ConfigValue` record under [lawcode/](lawcode/). The on-disk shape is locked by [schema/lawcode-v1.0.json](schema/lawcode-v1.0.json); each merged record satisfies [schema/configvalue-v1.0.json](schema/configvalue-v1.0.json). CI runs `python scripts/validate_lawcode.py` on every push, so a malformed YAML breaks the build before merge.
 
 ---
 

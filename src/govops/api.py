@@ -244,6 +244,11 @@ async def lifespan(app: FastAPI):
     # approvals queue on first load. GOVOPS_SEED_DEMO=1 turns it on.
     if os.environ.get("GOVOPS_SEED_DEMO") == "1":
         _seed_demo_drafts()
+    # LO-006: federation surfaces need a publisher + imported pack to be
+    # exercisable end-to-end. GOVOPS_SEED_FEDERATION_DEMO=1 + GOVOPS_LAWCODE_DIR
+    # together write a stub seed into a sandbox dir (never the on-repo tree).
+    from govops.federation_seed import maybe_seed_federation_demo
+    maybe_seed_federation_demo()
     # v2.1 — start the daily GC scheduler when GOVOPS_DEMO_MODE=1.
     # No-op for local dev (env unset). See govops.gc_scheduler.
     from govops.gc_scheduler import start_scheduler, shutdown_scheduler
@@ -262,11 +267,27 @@ app = FastAPI(
 # v2.1 hosted-demo middleware stack. Order matters: rate-limit FIRST (cheapest
 # to evaluate, blocks abuse before we do any work), then demo-mode header.
 # Both are no-ops when their env vars are unset, so local dev sees no change.
+# CORS goes LAST so it ends up outermost -- preflight OPTIONS must be answered
+# before rate-limit/demo-mode see it.
+from fastapi.middleware.cors import CORSMiddleware  # noqa: E402
 from govops.rate_limit import RateLimitMiddleware  # noqa: E402
 from govops.demo_mode import DemoModeMiddleware  # noqa: E402
 
 app.add_middleware(DemoModeMiddleware)
 app.add_middleware(RateLimitMiddleware)
+
+# CORS for the documented two-process dev workflow (FastAPI + Vite dev server
+# on different ports) and for the E2E suite (uncommon ports per
+# web/playwright.config.ts). Production / HF deploy serves frontend and
+# backend from the same origin, so this regex never matches there. Localhost
+# CORS is safe -- only processes already on the machine can match.
+app.add_middleware(
+    CORSMiddleware,
+    allow_origin_regex=r"^https?://(127\.0\.0\.1|localhost)(:\d+)?$",
+    allow_methods=["*"],
+    allow_headers=["*"],
+    allow_credentials=False,
+)
 
 templates = Jinja2Templates(directory=str(TEMPLATES_DIR))
 if STATIC_DIR.exists():
@@ -744,6 +765,266 @@ def encode_emit_yaml(batch_id: str):
 
 
 # ---------------------------------------------------------------------------
+# Encoder JSON API (mirrors the Jinja /encode/* HTML routes)
+#
+# Pre-LO-002 the React /encode UI's calls to /api/encode/batches all 404'd
+# and silently fell back to a browser-local mock, so encoder state was
+# never persisted server-side. These endpoints close that gap.
+# ---------------------------------------------------------------------------
+
+
+# Backend ProposalStatus enum vs React string-literal type:
+#   backend EDITED ("edited") <-> React "modified"
+# Bridge them at the JSON boundary so neither side has to know.
+_BACKEND_TO_REACT_STATUS = {"edited": "modified"}
+_REACT_TO_BACKEND_STATUS = {"modified": "edited"}
+
+# React EncodeMethod is a closed enum: "manual" | "llm:claude" |
+# "manual:llm-fallback". Backend can also emit "example:pre-loaded"
+# (from seed_encoding_example) and "llm:openai" historically. Normalize
+# unknowns to "manual" so the React MethodChip's lookup table never
+# yields undefined (which crashes the page with a formatjs runtime
+# "An `id` must be provided" error and broke /encode list rendering
+# pre-fix).
+_REACT_KNOWN_METHODS = {"manual", "llm:claude", "manual:llm-fallback"}
+
+
+def _react_method(backend_method: str) -> str:
+    if backend_method in _REACT_KNOWN_METHODS:
+        return backend_method
+    if backend_method.startswith("llm:"):
+        return "llm:claude"
+    return "manual"
+
+
+def _react_status(backend_status) -> str:
+    raw = backend_status.value if hasattr(backend_status, "value") else str(backend_status)
+    return _BACKEND_TO_REACT_STATUS.get(raw, raw)
+
+
+def _backend_status(react_status: str) -> str:
+    return _REACT_TO_BACKEND_STATUS.get(react_status, react_status)
+
+
+def _proposal_to_json(p) -> dict:
+    """Flatten a backend RuleProposal -> the React RuleProposal shape.
+
+    The backend nests the rule under ``proposed_rule`` (a LegalRule); the
+    React side expects a flat shape with rule_type/description/etc.
+    """
+    rule = p.proposed_rule
+    return {
+        "id": p.id,
+        "rule_type": rule.rule_type.value if hasattr(rule.rule_type, "value") else rule.rule_type,
+        "description": rule.description,
+        "formal_expression": rule.formal_expression,
+        "citation": rule.citation,
+        "parameters": dict(rule.parameters or {}),
+        "status": _react_status(p.status),
+        "notes": p.reviewer_notes or "",
+        "reviewer": p.reviewed_by or None,
+        "reviewed_at": p.reviewed_at.isoformat() if p.reviewed_at else None,
+        "source_section_ref": p.source_section_ref or "",
+    }
+
+
+def _batch_audit_json(batch_id: str) -> list[dict]:
+    return [
+        {
+            "timestamp": e.timestamp.isoformat(),
+            "batch_id": e.batch_id,
+            "event": e.event,
+            "actor": e.actor,
+            "detail": e.detail,
+            "data": dict(e.data or {}),
+        }
+        for e in encoding_store.audit
+        if e.batch_id == batch_id
+    ]
+
+
+def _batch_to_json(b) -> dict:
+    return {
+        "id": b.id,
+        "jurisdiction_id": b.jurisdiction_id,
+        "document_title": b.document_title,
+        "document_citation": b.document_citation,
+        "source_url": None,
+        "input_text": b.input_text,
+        "method": _react_method(b.extraction_method or "manual"),
+        "proposals": [_proposal_to_json(p) for p in b.proposals],
+        "audit": _batch_audit_json(b.id),
+        "created_at": b.created_at.isoformat(),
+    }
+
+
+def _batch_summary_json(b) -> dict:
+    # React expects keys: pending / approved / modified / rejected.
+    counts: dict[str, int] = {"pending": 0, "approved": 0, "modified": 0, "rejected": 0}
+    for p in b.proposals:
+        s = _react_status(p.status)
+        counts[s] = counts.get(s, 0) + 1
+    return {
+        "id": b.id,
+        "jurisdiction_id": b.jurisdiction_id,
+        "document_title": b.document_title,
+        "document_citation": b.document_citation,
+        "method": _react_method(b.extraction_method or "manual"),
+        "counts": counts,
+        "created_at": b.created_at.isoformat(),
+    }
+
+
+@app.get("/api/encode/batches")
+def api_list_encoding_batches():
+    """List encoding batches as summaries -- newest first."""
+    batches = sorted(
+        encoding_store.batches.values(),
+        key=lambda b: b.created_at,
+        reverse=True,
+    )
+    return [_batch_summary_json(b) for b in batches]
+
+
+@app.get("/api/encode/batches/{batch_id}")
+def api_get_encoding_batch(batch_id: str):
+    batch = encoding_store.batches.get(batch_id)
+    if not batch:
+        raise HTTPException(404, f"batch {batch_id!r} not found")
+    return _batch_to_json(batch)
+
+
+@app.post("/api/encode/batches")
+async def api_create_encoding_batch(request: Request):
+    body = await request.json()
+    document_title = str(body.get("document_title", "")).strip()
+    document_citation = str(body.get("document_citation", "")).strip()
+    input_text = str(body.get("input_text", "")).strip()
+    method = str(body.get("method", "manual"))
+    api_key = str(body.get("api_key", "") or "")
+
+    if not document_title or not input_text:
+        raise HTTPException(400, "document_title and input_text are required")
+
+    jur_code = _current_jur_code()
+    batch = encoding_store.create_batch(
+        jurisdiction_id=jur_code,
+        document_title=document_title,
+        document_citation=document_citation,
+        input_text=input_text,
+    )
+
+    if method == "llm" and api_key:
+        try:
+            (
+                proposals,
+                prompt,
+                raw_response,
+                user_prompt_key,
+                system_prompt_key,
+            ) = await extract_rules_with_llm(batch, api_key=api_key)
+            encoding_store.add_proposals(
+                batch.id,
+                proposals,
+                method="llm:claude",
+                prompt=prompt,
+                raw_response=raw_response,
+                prompt_key=user_prompt_key,
+                system_prompt_key=system_prompt_key,
+            )
+        except Exception as e:
+            proposals = extract_rules_manual(batch)
+            encoding_store.add_proposals(
+                batch.id,
+                proposals,
+                method="manual:llm-fallback",
+                raw_response=f"LLM extraction failed: {e}",
+            )
+    else:
+        proposals = extract_rules_manual(batch)
+        encoding_store.add_proposals(batch.id, proposals, method="manual")
+
+    return _batch_to_json(batch)
+
+
+@app.post("/api/encode/batches/{batch_id}/proposals/{proposal_id}/review")
+async def api_review_encoding_proposal(batch_id: str, proposal_id: str, request: Request):
+    body = await request.json()
+    status_str = str(body.get("status", "approved"))
+    notes = str(body.get("notes", "") or "")
+    overrides = body.get("overrides") or {}
+
+    try:
+        status = ProposalStatus(_backend_status(status_str))
+    except ValueError:
+        raise HTTPException(400, f"unknown status {status_str!r}") from None
+
+    batch = encoding_store.batches.get(batch_id)
+    if not batch:
+        raise HTTPException(404, f"batch {batch_id!r} not found")
+    proposal = next((p for p in batch.proposals if p.id == proposal_id), None)
+    if not proposal:
+        raise HTTPException(404, f"proposal {proposal_id!r} not found")
+
+    if overrides:
+        rule = proposal.proposed_rule
+        if "description" in overrides:
+            rule.description = str(overrides["description"])
+        if "formal_expression" in overrides:
+            rule.formal_expression = str(overrides["formal_expression"])
+        if "citation" in overrides:
+            rule.citation = str(overrides["citation"])
+        if "parameters" in overrides and isinstance(overrides["parameters"], dict):
+            rule.parameters = dict(overrides["parameters"])
+
+    encoding_store.review_proposal(
+        batch_id, proposal_id, status=status, reviewer="expert", notes=notes,
+    )
+    proposal = next((p for p in batch.proposals if p.id == proposal_id), proposal)
+    return _proposal_to_json(proposal)
+
+
+@app.post("/api/encode/batches/{batch_id}/bulk-review")
+async def api_bulk_review_encoding_proposals(batch_id: str, request: Request):
+    body = await request.json()
+    proposal_ids = body.get("proposal_ids") or []
+    status_str = str(body.get("status", "approved"))
+    notes = str(body.get("notes", "") or "")
+
+    try:
+        status = ProposalStatus(_backend_status(status_str))
+    except ValueError:
+        raise HTTPException(400, f"unknown status {status_str!r}") from None
+
+    batch = encoding_store.batches.get(batch_id)
+    if not batch:
+        raise HTTPException(404, f"batch {batch_id!r} not found")
+
+    target_ids = set(str(pid) for pid in proposal_ids) if proposal_ids else None
+    updated = []
+    for p in batch.proposals:
+        if target_ids is not None and p.id not in target_ids:
+            continue
+        if p.status != ProposalStatus.PENDING:
+            continue
+        encoding_store.review_proposal(
+            batch_id, p.id, status=status, reviewer="expert (bulk)", notes=notes,
+        )
+        updated.append(p)
+
+    return {"updated": [_proposal_to_json(p) for p in updated]}
+
+
+@app.post("/api/encode/batches/{batch_id}/commit")
+def api_commit_encoding_batch(batch_id: str):
+    batch = encoding_store.batches.get(batch_id)
+    if not batch:
+        raise HTTPException(404, f"batch {batch_id!r} not found")
+    approved_rules = encoding_store.get_approved_rules(batch_id)
+    return {"committed_rule_ids": [r.id for r in approved_rules]}
+
+
+# ---------------------------------------------------------------------------
 # Admin federation surface (Phase 8 / ADR-009)
 # Read-mostly endpoints powering /admin/federation per govops-020. The
 # trust-decision authoring stays as a YAML PR per ADR-009; these endpoints
@@ -933,13 +1214,18 @@ def admin_gc(token: str | None = None, max_age_days: int = 7):
 
 
 def _set_pack_enabled_response(publisher_id: str, *, enabled: bool) -> dict:
-    from govops.federation import set_pack_enabled
+    from govops.federation import FederationError, set_pack_enabled
 
     _, _, federated_dir = _federation_paths()
     try:
         changed = set_pack_enabled(federated_dir, publisher_id, enabled)
     except FileNotFoundError as exc:
         raise HTTPException(404, str(exc)) from exc
+    except FederationError as exc:
+        # UnsafePath (publisher_id failed the safe-id regex, e.g. leading
+        # underscore) and any other fail-closed federation error must surface
+        # as 4xx, not 500. Mirrors the fetch endpoint's posture above.
+        raise HTTPException(400, str(exc)) from exc
     return {"publisher_id": publisher_id, "enabled": enabled, "changed": changed}
 
 
@@ -1427,6 +1713,24 @@ def _compare_jurisdiction_label(jur_code: str) -> str:
     if pack is None:
         return jur_code.upper()
     return pack.jurisdiction.name
+
+
+@app.get("/api/programs/{program_id}/interactions")
+def program_interactions_endpoint(program_id: str):
+    """Static metadata about cross-program interaction rules involving this program.
+
+    Backs the InteractionsPanel on /compare/{program_id} (LO-009 / leader
+    surface). Returns one entry per registered rule that mentions
+    ``program_id`` in its ``programs`` list. The metadata is independent of
+    any case context -- operators can see which other programs interact with
+    this one without running a cross-program evaluation. The runtime
+    detection still happens through ``detect_program_interactions`` on the
+    case-evaluation path; this endpoint is intentionally a separate read of
+    the same registry.
+    """
+    from govops.program_interactions import list_interactions_for
+
+    return {"program_id": program_id, "interactions": list_interactions_for(program_id)}
 
 
 @app.get("/api/programs/{program_id}/compare")

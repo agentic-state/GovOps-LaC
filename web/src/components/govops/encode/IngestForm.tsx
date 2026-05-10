@@ -3,10 +3,12 @@ import { useNavigate } from "@tanstack/react-router";
 import { useIntl } from "react-intl";
 import { Button } from "@/components/ui/button";
 import { createEncodingBatch } from "@/lib/api";
+import { useInvalidateAfterMutation } from "@/lib/router-invalidate";
 
 export function IngestForm() {
   const intl = useIntl();
   const navigate = useNavigate();
+  const invalidate = useInvalidateAfterMutation();
   const [title, setTitle] = useState("");
   const [citation, setCitation] = useState("");
   const [sourceUrl, setSourceUrl] = useState("");
@@ -56,6 +58,9 @@ export function IngestForm() {
       }
       // Clear API key from memory immediately.
       setApiKey("");
+      // /encode list has a loader; invalidate so the new batch appears
+      // when the user navigates back.
+      await invalidate();
       navigate({ to: "/encode/$batchId", params: { batchId: batch.id } });
     } catch (err) {
       setErrorMsg(err instanceof Error ? err.message : "Failed to create batch");

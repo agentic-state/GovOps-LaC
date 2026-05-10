@@ -10,6 +10,7 @@ import { ValueDiff } from "@/components/govops/ValueDiff";
 import { ProvenanceRibbon } from "@/components/govops/ProvenanceRibbon";
 import { RouteError } from "@/components/govops/RouteError";
 import { resolveCurrentConfigValue, createConfigValue } from "@/lib/api";
+import { useInvalidateAfterMutation } from "@/lib/router-invalidate";
 import { getCurrentUser } from "@/lib/currentUser";
 import {
   validatePromptKey,
@@ -42,6 +43,7 @@ function PromptEditPage() {
   const intl = useIntl();
   const { key, jurisdictionId } = Route.useParams();
   const nav = useNavigate();
+  const invalidate = useInvalidateAfterMutation();
   const jurisdictionForApi = jurisdictionId === "global" ? null : jurisdictionId;
 
   // ── Layout: ≥1024 → three-column grid, < 1024 → tabs.
@@ -61,14 +63,22 @@ function PromptEditPage() {
   const currentLoading = false;
 
   // ── Editor value: hydrate from localStorage, fall back to current text.
+  //
+  // LO-001 (b) fix: the saved-draft hydration runs once (gated on
+  // `hydrated`), but when no draft is saved, the editor mirrors
+  // `current` continuously so a post-mount refetch (e.g. SSR served
+  // a stale value, then the loader re-resolves) updates the editor.
+  // Pre-fix the `!hydrated` guard prevented the second update and
+  // the editor stayed empty when the SSR-side fetcher fell back to
+  // a null value (the prompt-domain keys aren't in MOCK_CONFIG_VALUES).
   const [value, setValue] = useState<string>("");
   const [hydrated, setHydrated] = useState(false);
   useEffect(() => {
-    if (currentLoading || hydrated) return;
+    if (currentLoading) return;
     try {
       const saved = window.localStorage.getItem(draftStorageKey(key, jurisdictionId));
       if (saved !== null) {
-        setValue(saved);
+        if (!hydrated) setValue(saved);
       } else {
         setValue(String(current?.value ?? ""));
       }
@@ -154,6 +164,9 @@ function PromptEditPage() {
       } catch {
         /* ignore */
       }
+      // Prompts list + approvals queue both refetch on next render so the
+      // new draft is visible if the user navigates back.
+      await invalidate();
       toast.success(intl.formatMessage({ id: "draft.success" }));
       nav({ to: "/config/approvals/$id", params: { id: cv.id } });
     } catch (err) {

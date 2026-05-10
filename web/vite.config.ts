@@ -46,8 +46,12 @@ export default defineConfig({
         ".hf.space",
       ],
       proxy: {
+        // Target is env-overridable so the E2E suite (uncommon ports per
+        // playwright.config.ts) can point the dev-server proxy at its
+        // ephemeral backend. Default :8000 matches the documented two-process
+        // local dev workflow (govops-demo on :8000 + vite dev).
         "/api": {
-          target: "http://127.0.0.1:8000",
+          target: process.env.VITE_API_BASE_URL || "http://127.0.0.1:8000",
           changeOrigin: true,
         },
       },

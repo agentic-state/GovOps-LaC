@@ -14,11 +14,15 @@
 import { test, expect } from "@playwright/test";
 import { backend } from "./fixtures/api";
 
-const SCENARIO_KEY = `e2e.admin-flow.ca-oas.age-65.min_age`;
+// Run-unique key so the bench stays clean against shared targets (HF Space).
+// A fixed key would surface as already-approved on the second run because
+// /config/approvals only shows DRAFT records — the test would then fail
+// looking for a draft that no longer exists.
+const SCENARIO_KEY = `e2e.admin-flow.ca-oas.age-65.min_age.${Date.now()}`;
 const SCENARIO_JUR = "ca-oas";
 
 test.describe("Phase 6 admin flow — configure-without-deploy", () => {
-  test("draft lifecycle reflects in UI; resolve flips at the boundary", async ({
+  test("[J24] draft lifecycle reflects in UI; resolve flips at the boundary", async ({
     page,
     request,
   }) => {
@@ -100,7 +104,7 @@ test.describe("Phase 6 admin flow — configure-without-deploy", () => {
     });
   });
 
-  test("demo-seeded approvals queue is non-empty on first load", async ({ page }) => {
+  test("[J20] demo-seeded approvals queue is non-empty on first load", async ({ page }) => {
     await page.goto("/config/approvals");
     await page.screenshot({
       path: "test-results/screenshots/demo-seed-queue.png",

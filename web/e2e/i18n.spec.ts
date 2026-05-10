@@ -20,7 +20,7 @@ async function openLanguageMenu(page: import("@playwright/test").Page) {
   await expect(page.getByRole("listbox")).toBeVisible({ timeout: 5_000 });
 }
 
-test("language selector lists all 6 GovOps locales", async ({ page }) => {
+test("[M03] language selector lists all 6 GovOps locales", async ({ page }) => {
   await page.goto("/");
   await page.waitForLoadState("networkidle");
   await openLanguageMenu(page);
@@ -38,7 +38,7 @@ test("language selector lists all 6 GovOps locales", async ({ page }) => {
   }
 });
 
-test("switching to French changes a known nav label", async ({ page }) => {
+test("[M03] switching to French changes a known nav label", async ({ page }) => {
   await page.goto("/");
   await page.waitForLoadState("networkidle");
   await openLanguageMenu(page);

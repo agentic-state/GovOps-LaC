@@ -3,6 +3,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useIntl } from "react-intl";
 import { ChevronLeft, ChevronDown } from "lucide-react";
 import { bulkReviewProposals, commitBatch, getEncodingBatch, reviewProposal } from "@/lib/api";
+import { useInvalidateAfterMutation } from "@/lib/router-invalidate";
 import type { EncodingBatch, ProposalStatus, RuleProposal } from "@/lib/types";
 import { ProposalCard } from "@/components/govops/encode/ProposalCard";
 import { BulkActionBar } from "@/components/govops/encode/BulkActionBar";
@@ -30,6 +31,7 @@ export const Route = createFileRoute("/encode/$batchId")({
 function BatchReviewPage() {
   const intl = useIntl();
   const navigate = useNavigate();
+  const invalidate = useInvalidateAfterMutation();
   const initial = (Route.useLoaderData() as { batch: EncodingBatch }).batch;
   const [batch, setBatch] = useState<EncodingBatch>(initial);
   const [activeStatuses, setActiveStatuses] = useState<Set<ProposalStatus>>(new Set());
@@ -120,6 +122,9 @@ function BatchReviewPage() {
         { count: committed_rule_ids.length },
       ),
     );
+    // /authority and /encode list both have TanStack loaders; invalidate
+    // so the just-committed rules show up on next render.
+    await invalidate();
     navigate({ to: "/authority" });
   };
 

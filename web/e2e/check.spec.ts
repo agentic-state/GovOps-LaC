@@ -12,7 +12,7 @@
 import { test, expect } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 
-test.describe("/check entry", () => {
+test.describe("[J03] /check entry", () => {
   test("renders the form with heading + jurisdiction selector", async ({ page }) => {
     await page.goto("/check");
     await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
@@ -60,7 +60,7 @@ test.describe("/check entry", () => {
   });
 });
 
-test.describe("/check/life-event", () => {
+test.describe("[J04] /check/life-event", () => {
   test("CA + job_loss renders the bounded-benefit timeline", async ({ page }) => {
     await page.goto("/check/life-event?jurisdiction=ca&event=job_loss");
     await page.waitForLoadState("networkidle");
