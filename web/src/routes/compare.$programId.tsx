@@ -1,14 +1,42 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useIntl } from "react-intl";
-import { compareProgram } from "@/lib/api";
+import { compareProgram, listProgramInteractions } from "@/lib/api";
 import type {
   CompareJurisdiction,
   CompareProgramResponse,
   CompareRow,
+  ProgramInteractionMeta,
 } from "@/lib/types";
 import { ProvenanceRibbon } from "@/components/govops/ProvenanceRibbon";
 import { t, localeFromMatches } from "@/lib/head-i18n";
+
+const ALL_JURISDICTIONS = ["ca", "br", "es", "fr", "de", "ua", "jp"] as const;
+type JurCode = (typeof ALL_JURISDICTIONS)[number];
+
+const JUR_QUERY_PARAM = "jurisdictions";
+
+function parseJurisdictionsQuery(search: string): JurCode[] {
+  const params = new URLSearchParams(search);
+  const raw = params.get(JUR_QUERY_PARAM);
+  if (!raw) return [];
+  const known = new Set<string>(ALL_JURISDICTIONS);
+  return raw
+    .split(",")
+    .map((s) => s.trim().toLowerCase())
+    .filter((s) => known.has(s)) as JurCode[];
+}
+
+function writeJurisdictionsQuery(selected: JurCode[]): void {
+  if (typeof window === "undefined") return;
+  const url = new URL(window.location.href);
+  if (selected.length === 0) {
+    url.searchParams.delete(JUR_QUERY_PARAM);
+  } else {
+    url.searchParams.set(JUR_QUERY_PARAM, selected.join(","));
+  }
+  window.history.replaceState({}, "", url.toString());
+}
 
 export const Route = createFileRoute("/compare/$programId")({
   component: ComparePage,
@@ -27,16 +55,26 @@ function ComparePage() {
   const { programId } = Route.useParams();
   const intl = useIntl();
   const [data, setData] = useState<CompareProgramResponse | null>(null);
+  const [interactions, setInteractions] = useState<ProgramInteractionMeta[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Initial filter state from the URL so a deep link survives a refresh.
+  // Empty array == no filter applied (server returns all available jurisdictions).
+  const [selectedJurs, setSelectedJurs] = useState<JurCode[]>(() =>
+    typeof window === "undefined" ? [] : parseJurisdictionsQuery(window.location.search),
+  );
 
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
     setError(null);
-    compareProgram(programId)
-      .then((r) => {
-        if (!cancelled) setData(r);
+    const filter = selectedJurs.length > 0 ? (selectedJurs as string[]) : undefined;
+    Promise.all([compareProgram(programId, filter), listProgramInteractions(programId)])
+      .then(([cmp, ix]) => {
+        if (cancelled) return;
+        setData(cmp);
+        setInteractions(ix.interactions);
       })
       .catch((e) => {
         if (!cancelled) setError(e instanceof Error ? e.message : String(e));
@@ -47,7 +85,20 @@ function ComparePage() {
     return () => {
       cancelled = true;
     };
-  }, [programId]);
+  }, [programId, selectedJurs]);
+
+  const toggleJur = (code: JurCode) => {
+    setSelectedJurs((prev) => {
+      const next = prev.includes(code) ? prev.filter((c) => c !== code) : [...prev, code];
+      writeJurisdictionsQuery(next);
+      return next;
+    });
+  };
+
+  const clearJurs = () => {
+    setSelectedJurs([]);
+    writeJurisdictionsQuery([]);
+  };
 
   return (
     <section aria-labelledby="compare-heading" className="space-y-8">
@@ -73,6 +124,13 @@ function ComparePage() {
         </div>
       </header>
 
+      <JurisdictionFilter
+        selected={selectedJurs}
+        onToggle={toggleJur}
+        onClear={clearJurs}
+        allLabels={data?.jurisdictions}
+      />
+
       {error && (
         <div
           role="alert"
@@ -92,12 +150,97 @@ function ComparePage() {
         </p>
       )}
 
-      {data && <ComparisonContent data={data} />}
+      {data && <ComparisonContent data={data} interactions={interactions} />}
     </section>
   );
 }
 
-function ComparisonContent({ data }: { data: CompareProgramResponse }) {
+function JurisdictionFilter({
+  selected,
+  onToggle,
+  onClear,
+  allLabels,
+}: {
+  selected: JurCode[];
+  onToggle: (code: JurCode) => void;
+  onClear: () => void;
+  allLabels: CompareProgramResponse["jurisdictions"] | undefined;
+}) {
+  const intl = useIntl();
+  const labelByCode = useMemo(() => {
+    const m = new Map<string, string>();
+    for (const j of allLabels ?? []) m.set(j.code, j.label);
+    return m;
+  }, [allLabels]);
+
+  return (
+    <fieldset
+      data-testid="compare-jurisdiction-filter"
+      aria-labelledby="compare-jurisdiction-filter-legend"
+      className="rounded-md border border-border bg-surface p-4"
+    >
+      <legend
+        id="compare-jurisdiction-filter-legend"
+        className="px-2 text-xs uppercase tracking-[0.18em] text-foreground-subtle"
+      >
+        {intl.formatMessage({ id: "compare.filter.legend" })}
+      </legend>
+      <div className="flex flex-wrap items-center gap-2">
+        {ALL_JURISDICTIONS.map((code) => {
+          const active = selected.includes(code);
+          const label = labelByCode.get(code) ?? code.toUpperCase();
+          return (
+            <button
+              key={code}
+              type="button"
+              onClick={() => onToggle(code)}
+              aria-pressed={active}
+              data-testid={`compare-jur-chip-${code}`}
+              className={`rounded-full border px-3 py-1 text-xs transition-colors ${
+                active
+                  ? "border-transparent bg-foreground text-background"
+                  : "border-border bg-surface text-foreground-muted hover:text-foreground"
+              }`}
+              style={{ fontFamily: "var(--font-mono)" }}
+            >
+              {code.toUpperCase()}
+              <span className="sr-only">
+                {" — "}
+                {label}
+              </span>
+            </button>
+          );
+        })}
+        {selected.length > 0 && (
+          <button
+            type="button"
+            onClick={onClear}
+            data-testid="compare-jur-clear"
+            className="ms-2 text-xs text-foreground-muted underline underline-offset-2 hover:text-foreground"
+          >
+            {intl.formatMessage({ id: "compare.filter.clear" })}
+          </button>
+        )}
+      </div>
+      <p className="mt-2 text-xs text-foreground-muted">
+        {selected.length === 0
+          ? intl.formatMessage({ id: "compare.filter.help.all" })
+          : intl.formatMessage(
+              { id: "compare.filter.help.subset" },
+              { count: selected.length },
+            )}
+      </p>
+    </fieldset>
+  );
+}
+
+function ComparisonContent({
+  data,
+  interactions,
+}: {
+  data: CompareProgramResponse;
+  interactions: ProgramInteractionMeta[];
+}) {
   const intl = useIntl();
   const available = data.jurisdictions.filter((j) => j.available);
   const unavailable = data.jurisdictions.filter((j) => !j.available);
@@ -121,8 +264,73 @@ function ComparisonContent({ data }: { data: CompareProgramResponse }) {
         <ComparisonTable data={data} />
       )}
 
+      <InteractionsPanel interactions={interactions} />
+
       {unavailable.length > 0 && <ExclusionPanel jurisdictions={unavailable} />}
     </div>
+  );
+}
+
+function InteractionsPanel({ interactions }: { interactions: ProgramInteractionMeta[] }) {
+  const intl = useIntl();
+  return (
+    <section
+      aria-labelledby="compare-interactions-heading"
+      className="space-y-4"
+      data-testid="compare-interactions"
+    >
+      <h2
+        id="compare-interactions-heading"
+        className="text-2xl tracking-tight text-foreground"
+        style={{ fontFamily: "var(--font-serif)", fontWeight: 600 }}
+      >
+        {intl.formatMessage({ id: "compare.interactions.heading" })}
+      </h2>
+      <p className="text-sm text-foreground-muted">
+        {intl.formatMessage({ id: "compare.interactions.lede" })}
+      </p>
+      {interactions.length === 0 ? (
+        <p
+          role="status"
+          className="rounded-md border border-border bg-surface-sunken p-4 text-sm text-foreground-muted"
+          data-testid="compare-interactions-empty"
+        >
+          {intl.formatMessage({ id: "compare.interactions.empty" })}
+        </p>
+      ) : (
+        <ul className="space-y-3">
+          {interactions.map((ix) => (
+            <li
+              key={ix.id}
+              className="rounded-md border border-border bg-surface p-4"
+              data-testid={`compare-interaction-${ix.id}`}
+            >
+              <div className="flex flex-wrap items-baseline gap-3">
+                <span
+                  className="text-xs uppercase tracking-[0.15em] text-foreground-subtle"
+                  style={{ fontFamily: "var(--font-mono)" }}
+                >
+                  {ix.severity}
+                </span>
+                <span
+                  className="text-xs text-foreground"
+                  style={{ fontFamily: "var(--font-mono)" }}
+                >
+                  {ix.programs.join(" + ")}
+                </span>
+              </div>
+              <p className="mt-2 text-sm text-foreground">{ix.description}</p>
+              <p
+                className="mt-2 text-xs text-foreground-subtle"
+                style={{ fontFamily: "var(--font-mono)" }}
+              >
+                {ix.citation}
+              </p>
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
   );
 }
 

@@ -475,7 +475,12 @@ export async function setFederationPackEnabled(
 
 // ---- Cross-jurisdiction program comparison (Phase F) -----------------------
 
-import type { CheckRequest, CheckResponse, CompareProgramResponse } from "./types";
+import type {
+  CheckRequest,
+  CheckResponse,
+  CompareProgramResponse,
+  ProgramInteractionsResponse,
+} from "./types";
 
 export async function compareProgram(
   programId: string,
@@ -486,6 +491,14 @@ export async function compareProgram(
     : "";
   return fetcher<CompareProgramResponse>(
     `/api/programs/${encodeURIComponent(programId)}/compare${qs}`,
+  );
+}
+
+export async function listProgramInteractions(
+  programId: string,
+): Promise<ProgramInteractionsResponse> {
+  return fetcher<ProgramInteractionsResponse>(
+    `/api/programs/${encodeURIComponent(programId)}/interactions`,
   );
 }
 

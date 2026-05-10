@@ -92,6 +92,47 @@ _RULES: list[InteractionRule] = [
 ]
 
 
+# Static metadata about each registered rule. Keyed by the rule function so a
+# rule registration update auto-propagates. The metadata is what the
+# /api/programs/{id}/interactions endpoint surfaces to the leader-comparison
+# UI -- it is intentionally separate from the runtime rule body so a rule can
+# document the program-pair without depending on any case context.
+_RULE_METADATA: dict[InteractionRule, dict[str, object]] = {
+    _oas_ei_dual_eligibility: {
+        "id": "oas_ei_dual_eligibility",
+        "severity": "info",
+        "programs": ["oas", "ei"],
+        "description": (
+            "When a single applicant qualifies for both Old Age Security "
+            "(lifetime monthly pension) and Employment Insurance (bounded "
+            "contributory benefit), the two programs operate on independent "
+            "statutory bases and may be claimed concurrently."
+        ),
+        "citation": (
+            "OAS Act + jurisdiction-specific EI statute "
+            "(see per-program citations)."
+        ),
+    },
+}
+
+
+def list_interactions_for(program_id: str) -> list[dict[str, object]]:
+    """Return static metadata for every registered rule that mentions program_id.
+
+    Used by the leader-facing comparison surface (/compare/{program_id}) so
+    operators can see which OTHER programs interact with this one without
+    needing a case context. Order matches the rule registry's order (insertion).
+    """
+    out: list[dict[str, object]] = []
+    for rule in _RULES:
+        meta = _RULE_METADATA.get(rule)
+        if meta is None:
+            continue
+        if program_id in (meta.get("programs") or []):
+            out.append(meta)
+    return out
+
+
 def detect_program_interactions(
     recommendations: list[Recommendation],
     jurisdiction_id: str = "",
