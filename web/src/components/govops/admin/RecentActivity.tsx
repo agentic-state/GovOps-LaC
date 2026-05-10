@@ -40,6 +40,7 @@ export function RecentActivity({ events }: { events: ActivityEvent[] }) {
                 <a
                   href={e.source.to}
                   className="ms-auto text-xs underline-offset-2 hover:underline"
+                  data-testid="recent-activity-relative-time"
                 >
                   {relative(intl, e.timestamp)}
                 </a>
