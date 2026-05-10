@@ -5,7 +5,7 @@ Two JSON Schemas (Draft 2020-12) define the on-disk shape of every dated `Config
 | File | Describes |
 | --- | --- |
 | [`configvalue-v1.0.json`](configvalue-v1.0.json) | A **single** record. Mirrors the SQLModel in [`src/govops/config.py`](../src/govops/config.py). |
-| [`lawcode-v1.0.json`](lawcode-v1.0.json) | A YAML **file** under `lawcode/` — `defaults` + `values:` array. Each item, after merging defaults, must satisfy `configvalue-v1.0.json`. |
+| [`lawcode-v1.0.json`](lawcode-v1.0.json) | A YAML **file** under `lawcode/` — `defaults` + `values:` array (each item, after merging defaults, must satisfy `configvalue-v1.0.json`), plus an optional `jurisdiction:` block per [ADR-019](../docs/design/ADRs/ADR-019-lawcode-jurisdiction-metadata.md) declaring jurisdiction-level identity (id, country, level, name, legal tradition, language regime, default language). The `jurisdiction:` block is structurally distinct from ConfigValue records and is read by the lawcode-as-discovery loader (ADR-020) at startup. |
 
 ## How CI uses them
 

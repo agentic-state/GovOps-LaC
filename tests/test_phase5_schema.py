@@ -186,6 +186,119 @@ def test_prompt_records_require_approver(tmp_path):
 
 
 # ---------------------------------------------------------------------------
+# ADR-019 — jurisdiction-metadata block at the top of a lawcode YAML file
+# ---------------------------------------------------------------------------
+
+
+def _wellformed_metadata() -> dict:
+    return {
+        "id": "jur-pl-national",
+        "country": "PL",
+        "level": "national",
+        "parent_id": None,
+        "name": {"en": "Poland", "pl": "Polska"},
+        "legal_tradition": "civil_law",
+        "language_regime": "pl",
+        "default_language": "en",
+    }
+
+
+def test_lawcode_with_jurisdiction_metadata_validates():
+    """A lawcode file carrying both `jurisdiction:` and `values:` validates."""
+    file_validator = Draft202012Validator(_load(LAWCODE_SCHEMA_PATH))
+    doc = {
+        "jurisdiction": _wellformed_metadata(),
+        "defaults": {"domain": "ui", "jurisdiction_id": "pl-oas", "effective_from": "1900-01-01"},
+        "values": [{"key": "jurisdiction.pl.label.en", "value": "Poland", "value_type": "string"}],
+    }
+    errors = list(file_validator.iter_errors(doc))
+    assert not errors, [e.message for e in errors]
+
+
+def test_metadata_only_lawcode_file_validates():
+    """A jurisdiction.yaml file with ONLY the metadata block (no values) validates -- the
+    metadata-only file is what `govops init` may emit when a contributor wants identity
+    separated from substrate values."""
+    file_validator = Draft202012Validator(_load(LAWCODE_SCHEMA_PATH))
+    doc = {"jurisdiction": _wellformed_metadata()}
+    errors = list(file_validator.iter_errors(doc))
+    assert not errors, [e.message for e in errors]
+
+
+def test_empty_lawcode_file_fails():
+    """A file with neither `values` nor `jurisdiction` is meaningless and must fail."""
+    file_validator = Draft202012Validator(_load(LAWCODE_SCHEMA_PATH))
+    errors = list(file_validator.iter_errors({"defaults": {"domain": "ui"}}))
+    assert errors, "must reject a file with no values and no jurisdiction block"
+
+
+def test_metadata_missing_required_field_fails():
+    """Every required field in the metadata block is gated."""
+    file_validator = Draft202012Validator(_load(LAWCODE_SCHEMA_PATH))
+    for missing in ("id", "country", "level", "name", "default_language"):
+        meta = _wellformed_metadata()
+        del meta[missing]
+        errors = list(file_validator.iter_errors({"jurisdiction": meta}))
+        assert errors, f"must reject metadata missing {missing!r}"
+
+
+def test_metadata_invalid_country_code_fails():
+    """Country code must be ISO 3166-1 alpha-2, uppercase."""
+    file_validator = Draft202012Validator(_load(LAWCODE_SCHEMA_PATH))
+    for bad in ("pl", "POL", "P1", ""):
+        meta = _wellformed_metadata()
+        meta["country"] = bad
+        errors = list(file_validator.iter_errors({"jurisdiction": meta}))
+        assert errors, f"must reject country={bad!r}"
+
+
+def test_metadata_invalid_id_pattern_fails():
+    """Jurisdiction id must match the jur-<slug> pattern."""
+    file_validator = Draft202012Validator(_load(LAWCODE_SCHEMA_PATH))
+    for bad in ("ca-federal", "JUR-CA-FEDERAL", "jur-", "jur-CA"):
+        meta = _wellformed_metadata()
+        meta["id"] = bad
+        errors = list(file_validator.iter_errors({"jurisdiction": meta}))
+        assert errors, f"must reject id={bad!r}"
+
+
+def test_metadata_invalid_legal_tradition_fails():
+    """legal_tradition is an enum -- arbitrary strings rejected."""
+    file_validator = Draft202012Validator(_load(LAWCODE_SCHEMA_PATH))
+    meta = _wellformed_metadata()
+    meta["legal_tradition"] = "Roman-Germanic"  # not in enum
+    errors = list(file_validator.iter_errors({"jurisdiction": meta}))
+    assert errors, "must reject legal_tradition outside enum"
+
+
+def test_metadata_invalid_level_fails():
+    """level is an enum."""
+    file_validator = Draft202012Validator(_load(LAWCODE_SCHEMA_PATH))
+    meta = _wellformed_metadata()
+    meta["level"] = "country"  # not in enum
+    errors = list(file_validator.iter_errors({"jurisdiction": meta}))
+    assert errors, "must reject level outside enum"
+
+
+def test_metadata_name_requires_at_least_one_locale():
+    """name: must carry at least one locale entry."""
+    file_validator = Draft202012Validator(_load(LAWCODE_SCHEMA_PATH))
+    meta = _wellformed_metadata()
+    meta["name"] = {}
+    errors = list(file_validator.iter_errors({"jurisdiction": meta}))
+    assert errors, "must reject empty name mapping"
+
+
+def test_metadata_unknown_field_fails():
+    """additionalProperties: false on the metadata block catches typos."""
+    file_validator = Draft202012Validator(_load(LAWCODE_SCHEMA_PATH))
+    meta = _wellformed_metadata()
+    meta["unknown_field"] = "anything"
+    errors = list(file_validator.iter_errors({"jurisdiction": meta}))
+    assert errors, "must reject unknown field on metadata block"
+
+
+# ---------------------------------------------------------------------------
 # CLI entry point: scripts/validate_lawcode.py exits 0 on the live tree
 # ---------------------------------------------------------------------------
 
