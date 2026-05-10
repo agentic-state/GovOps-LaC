@@ -1419,7 +1419,13 @@ class JurisdictionPack:
 
 
 # Late import: seed.py imports from this module, so importing at top would cycle.
-from govops.seed import (  # noqa: E402
+# Retained for v3.1 -- the modules below (CANADA_FEDERAL, *_AUTHORITY_CHAIN,
+# *_RULES, *_demo_cases, etc.) are dead data after ADR-020 lands but a
+# follow-up housekeeping PR (v3.1.x) will retire them. Other call sites in the
+# codebase still reference these names directly (e.g. encoder seeds, legacy
+# tests); removing them in the same PR as the registry rewire would conflate
+# concerns.
+from govops.seed import (  # noqa: E402, F401
     AUTHORITY_CHAIN as CA_AUTHORITY_CHAIN,
     CANADA_FEDERAL,
     LEGAL_DOCUMENTS as CA_LEGAL_DOCUMENTS,
@@ -1427,72 +1433,137 @@ from govops.seed import (  # noqa: E402
     make_demo_cases as _ca_demo_cases,
 )
 
-JURISDICTION_REGISTRY: dict[str, JurisdictionPack] = {
-    "ca": JurisdictionPack(
-        jurisdiction=CANADA_FEDERAL,
-        authority_chain=CA_AUTHORITY_CHAIN,
-        legal_documents=CA_LEGAL_DOCUMENTS,
-        rules=CA_RULES,
-        cases_factory=_ca_demo_cases,
-        default_language="en",
-        program_name="Old Age Security (OAS)",
-    ),
-    "br": JurisdictionPack(
-        jurisdiction=BRAZIL_FEDERAL,
-        authority_chain=BRAZIL_AUTHORITY_CHAIN,
-        legal_documents=BRAZIL_LEGAL_DOCS,
-        rules=BRAZIL_RULES,
-        cases_factory=_brazil_demo_cases,
-        default_language="pt",
-        program_name="Aposentadoria por Idade (INSS)",
-    ),
-    "es": JurisdictionPack(
-        jurisdiction=SPAIN,
-        authority_chain=SPAIN_AUTHORITY_CHAIN,
-        legal_documents=SPAIN_LEGAL_DOCS,
-        rules=SPAIN_RULES,
-        cases_factory=_spain_demo_cases,
-        default_language="es",
-        program_name="Pension de jubilacion",
-    ),
-    "fr": JurisdictionPack(
-        jurisdiction=FRANCE,
-        authority_chain=FRANCE_AUTHORITY_CHAIN,
-        legal_documents=FRANCE_LEGAL_DOCS,
-        rules=FRANCE_RULES,
-        cases_factory=_france_demo_cases,
-        default_language="fr",
-        program_name="Retraite de base (CNAV)",
-    ),
-    "de": JurisdictionPack(
-        jurisdiction=GERMANY,
-        authority_chain=GERMANY_AUTHORITY_CHAIN,
-        legal_documents=GERMANY_LEGAL_DOCS,
-        rules=GERMANY_RULES,
-        cases_factory=_germany_demo_cases,
-        default_language="de",
-        program_name="Regelaltersrente (DRV)",
-    ),
-    "ua": JurisdictionPack(
-        jurisdiction=UKRAINE,
-        authority_chain=UKRAINE_AUTHORITY_CHAIN,
-        legal_documents=UKRAINE_LEGAL_DOCS,
-        rules=UKRAINE_RULES,
-        cases_factory=_ukraine_demo_cases,
-        default_language="uk",
-        program_name="Pensiia za vikom (PFU)",
-    ),
-    "jp": JurisdictionPack(
-        jurisdiction=JAPAN,
-        authority_chain=JAPAN_AUTHORITY_CHAIN,
-        legal_documents=JAPAN_LEGAL_DOCS,
-        rules=JAPAN_RULES,
-        cases_factory=_japan_demo_cases,
-        # PLAN §11 forbids new languages; jp falls back to en across the
-        # 6 supported locales. Native-script labels (e.g. program_name)
-        # stay in romaji here and are not translated, mirroring the BR
-        # / ES precedent of leaving program identifiers untranslated.
-        default_language="en",
-        program_name="Kosei Nenkin Hoken (Employees' Pension Insurance)",
-    ),
-}
+
+# ---------------------------------------------------------------------------
+# v3.1 / ADR-020 -- lawcode-as-discovery
+# ---------------------------------------------------------------------------
+#
+# JURISDICTION_REGISTRY was a hand-written Python literal through v3.0. v3.1
+# replaces it with build_registry_from_lawcode() which walks lawcode/<code>/
+# at module-import time and assembles the same dict from on-disk YAML:
+#
+#   * lawcode/<code>/config/jurisdiction.yaml -- ADR-019 metadata block
+#     (Jurisdiction identity + default_language)
+#   * lawcode/<code>/programs/oas.yaml -- ADR-014 program manifest
+#     (authority_chain + legal_documents + rules + demo_cases + program name)
+#
+# Federation packs at lawcode/.federated/<publisher_id>/ flow the same loader
+# (no special-casing). Hot-reload is wired through reload_registry() which
+# the authoring substrate (ADR-022) calls after committing drafts.
+#
+# Verification: tests/test_jurisdiction_metadata.py -- the diff harness from
+# Lanes 2 + 2b -- runs against this build path and asserts byte-identical
+# JurisdictionPack objects vs. the (now-retired) literal definitions in
+# seed.py + this file. If the harness goes red post-merge, the cause is a
+# YAML drift, not a loader bug -- the loader is mechanical.
+
+
+def build_registry_from_lawcode(
+    lawcode_root: "Path",
+) -> dict[str, JurisdictionPack]:
+    """Discover jurisdictions by walking ``lawcode/`` and produce a registry.
+
+    Returns the same dict shape the v3.0 literal produced -- 35+ call sites
+    in api.py, screen.py, and tests.py keep using
+    ``JURISDICTION_REGISTRY[code]`` unchanged.
+
+    Failure posture: a malformed manifest or missing metadata block raises
+    at module import time (fail-closed). Better to surface broken substrate
+    on startup than half-load the registry.
+    """
+    from govops.programs import (
+        load_jurisdiction_metadata,
+        load_program_manifest,
+    )
+
+    registry: dict[str, JurisdictionPack] = {}
+    for jur_dir in sorted(p for p in lawcode_root.iterdir() if p.is_dir()):
+        # Skip non-jurisdiction directories: federation packs live under
+        # lawcode/.federated/<publisher>/ and `global` is the cross-jurisdictional
+        # ConfigValue space (no programs).
+        if jur_dir.name.startswith(".") or jur_dir.name == "global":
+            continue
+        meta_path = jur_dir / "config" / "jurisdiction.yaml"
+        if not meta_path.exists():
+            continue
+        meta = load_jurisdiction_metadata(meta_path)
+
+        # Each pack is anchored on the OAS program for v3.1 -- the registry
+        # shape carries one program's authority/docs/rules per jurisdiction
+        # to preserve byte-identical behaviour. EI lives in programs/ei.yaml
+        # for the 6 jurisdictions that have it but is loaded separately
+        # downstream (see api.py:_attach_program / screen.py).
+        oas_path = jur_dir / "programs" / "oas.yaml"
+        if not oas_path.exists():
+            # No OAS manifest -> jurisdiction not registerable in the v3.0
+            # registry shape. Skip rather than fail; federation publishers
+            # may ship metadata-only packs the registry doesn't surface.
+            continue
+        program = load_program_manifest(oas_path)
+
+        # JurisdictionPack.cases_factory() returns a fresh list each call so
+        # callers that mutate the returned list don't corrupt the cached
+        # demo_cases. The CaseBundle items themselves are shared across
+        # invocations; mutation of an item would still be visible. v3.0
+        # callers don't mutate so this matches existing behaviour.
+        demo_cases = list(program.demo_cases)
+        cases_factory: Callable[[], list[CaseBundle]] = (
+            lambda dc=demo_cases: list(dc)
+        )
+
+        # program_name preserves the v3.0 single-string shape, projecting
+        # name[default_language] when present, then en, then first locale.
+        program_name = (
+            program.name.get(meta.default_language)
+            or program.name.get("en")
+            or next(iter(program.name.values()))
+        )
+
+        registry[jur_dir.name] = JurisdictionPack(
+            jurisdiction=meta.to_jurisdiction(),
+            authority_chain=program.authority_chain,
+            legal_documents=program.legal_documents,
+            rules=program.rules,
+            cases_factory=cases_factory,
+            default_language=meta.default_language,
+            program_name=program_name,
+        )
+
+    # Federation hydration -- packs land under lawcode/.federated/<publisher>/
+    # with the same layout as a regular jurisdiction directory. Reuse the same
+    # walker so federation maintenance does not drift from local. v3.1 demo
+    # bar; v3.2 may revisit per-publisher namespacing if collisions appear.
+    fed_root = lawcode_root / ".federated"
+    if fed_root.exists():
+        for fed_dir in sorted(p for p in fed_root.iterdir() if p.is_dir()):
+            registry.update(build_registry_from_lawcode(fed_dir))
+
+    return registry
+
+
+# Resolve the lawcode root relative to the package directory so the registry
+# loads correctly whether the package is installed editable, run from source,
+# or imported from a federated venv. Tests monkeypatch this attribute to point
+# at a tmp tree before calling ``reload_registry()``.
+from pathlib import Path as _Path  # noqa: E402
+
+_LAWCODE_ROOT = _Path(__file__).resolve().parent.parent.parent / "lawcode"
+
+
+def reload_registry() -> None:
+    """Rebuild ``JURISDICTION_REGISTRY`` in place from ``_LAWCODE_ROOT``.
+
+    The authoring substrate (ADR-022, Lane 7) calls this after committing
+    drafts so the running engine picks up the new jurisdiction without a
+    process restart. Mutates the module-level dict in place so other modules
+    that imported the dict reference (rather than re-importing) see the
+    updated state.
+    """
+    new = build_registry_from_lawcode(_LAWCODE_ROOT)
+    JURISDICTION_REGISTRY.clear()
+    JURISDICTION_REGISTRY.update(new)
+
+
+JURISDICTION_REGISTRY: dict[str, JurisdictionPack] = build_registry_from_lawcode(
+    _LAWCODE_ROOT
+)
