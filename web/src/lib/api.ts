@@ -300,12 +300,17 @@ export async function resolveCurrentConfigValue(
 
 // ---- Authority chain (govops-010) ------------------------------------------
 
-export async function getAuthorityChain(): Promise<{
+export async function getAuthorityChain(jurisdictionId?: string): Promise<{
   jurisdiction: Jurisdiction;
   chain: AuthorityReference[];
 }> {
+  // v3.1 L4: optional jurisdictionId scopes the response so the /authority
+  // route's picker drives a single backend without server-side state mutation.
+  const url = jurisdictionId
+    ? `/api/authority-chain?jurisdiction_id=${encodeURIComponent(jurisdictionId)}`
+    : "/api/authority-chain";
   try {
-    return await fetcher("/api/authority-chain");
+    return await fetcher(url);
   } catch {
     return { jurisdiction: MOCK_JURISDICTION, chain: MOCK_AUTHORITY_CHAIN };
   }

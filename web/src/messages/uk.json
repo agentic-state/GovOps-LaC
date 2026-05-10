@@ -1173,5 +1173,7 @@
  "check.lifeEvent.scenario.event": "Життєва подія",
  "check.lifeEvent.event.job_loss": "Втрата роботи",
  "check.lifeEvent.noEi": "{jurisdiction} наразі не пропонує цю виплату через цю систему. Спробуйте іншу юрисдикцію або скористайтеся вхідною перевіркою для повного списку програм.",
- "check.lifeEvent.backToEntry": "← Назад до вхідної перевірки"
+ "check.lifeEvent.backToEntry": "← Назад до вхідної перевірки",
+ "authority.jurisdiction.picker.label": "Yurysdyktsiia",
+ "cases.review.rationale.too_short": "Minimum 20 symvoliv"
 }

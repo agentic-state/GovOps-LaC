@@ -25,10 +25,18 @@ export function ReviewActionForm({
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   const valid = rationale.trim().length >= 20;
+  // v3.1 L6 Bug 3: surface a validation hint inline. Pre-v3.1 the submit
+  // button was disabled silently when rationale < 20 chars; the form looked
+  // broken. Now the button is always enabled and submit attempts with a
+  // too-short rationale set errorMsg to the i18n hint.
+  const tooShort = rationale.length > 0 && !valid;
 
   const handle = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!valid) return;
+    if (!valid) {
+      setErrorMsg(intl.formatMessage({ id: "cases.review.rationale.too_short" }));
+      return;
+    }
     setSubmitting(true);
     setErrorMsg(null);
     try {
@@ -97,6 +105,11 @@ export function ReviewActionForm({
           className="w-full rounded-md border border-border bg-surface px-3 py-2 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         />
         <span className="block text-xs text-foreground-muted">{rationale.trim().length} / 20+</span>
+        {tooShort && (
+          <p className="text-xs" style={{ color: "var(--verdict-rejected)" }}>
+            {intl.formatMessage({ id: "cases.review.rationale.too_short" })}
+          </p>
+        )}
       </label>
       <div className="flex items-center justify-between gap-2">
         {errorMsg ? (
@@ -106,7 +119,7 @@ export function ReviewActionForm({
         ) : (
           <span />
         )}
-        <Button type="submit" variant="authority" disabled={!valid || submitting}>
+        <Button type="submit" variant="authority" disabled={submitting}>
           {intl.formatMessage({
             id: submitting ? "cases.review.submitting" : "cases.review.submit",
           })}

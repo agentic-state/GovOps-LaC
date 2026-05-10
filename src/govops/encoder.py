@@ -62,6 +62,11 @@ class EncodingBatch(BaseModel):
     """A batch of rule proposals from one encoding session."""
     id: str = Field(default_factory=_new_id)
     created_at: datetime = Field(default_factory=_utcnow)
+    # v3.1 L6 / Bug 4: committed_at gates re-commit attempts. The JSON commit
+    # endpoint at /api/encode/batches/{id}/commit returns 409 when this is set,
+    # so re-clicking "Commit to engine" after a successful commit is rejected
+    # rather than silently re-running. None = uncommitted.
+    committed_at: Optional[datetime] = None
     jurisdiction_id: str = ""
     document_title: str = ""
     document_citation: str = ""

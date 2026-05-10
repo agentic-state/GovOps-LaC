@@ -1173,5 +1173,7 @@
  "check.lifeEvent.scenario.event": "Lebensereignis",
  "check.lifeEvent.event.job_loss": "Job verloren",
  "check.lifeEvent.noEi": "{jurisdiction} bietet diese Leistung derzeit nicht über den Rahmen an. Probieren Sie einen anderen Rechtsraum aus oder nutzen Sie die Einstiegsprüfung für die vollständige Programmliste.",
- "check.lifeEvent.backToEntry": "← Zurück zur Einstiegsprüfung"
+ "check.lifeEvent.backToEntry": "← Zurück zur Einstiegsprüfung",
+ "authority.jurisdiction.picker.label": "Gerichtsbarkeit",
+ "cases.review.rationale.too_short": "Mindestens 20 Zeichen"
 }
