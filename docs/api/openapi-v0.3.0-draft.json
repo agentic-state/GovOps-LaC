@@ -1608,6 +1608,44 @@
         }
       }
     },
+    "/api/programs/{program_id}/interactions": {
+      "get": {
+        "summary": "Program Interactions Endpoint",
+        "description": "Static metadata about cross-program interaction rules involving this program.\n\nBacks the InteractionsPanel on /compare/{program_id} (LO-009 / leader\nsurface). Returns one entry per registered rule that mentions\n``program_id`` in its ``programs`` list. The metadata is independent of\nany case context -- operators can see which other programs interact with\nthis one without running a cross-program evaluation. The runtime\ndetection still happens through ``detect_program_interactions`` on the\ncase-evaluation path; this endpoint is intentionally a separate read of\nthe same registry.",
+        "operationId": "program_interactions_endpoint_api_programs__program_id__interactions_get",
+        "parameters": [
+          {
+            "name": "program_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Program Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/programs/{program_id}/compare": {
       "get": {
         "summary": "Compare Program",

@@ -1715,6 +1715,24 @@ def _compare_jurisdiction_label(jur_code: str) -> str:
     return pack.jurisdiction.name
 
 
+@app.get("/api/programs/{program_id}/interactions")
+def program_interactions_endpoint(program_id: str):
+    """Static metadata about cross-program interaction rules involving this program.
+
+    Backs the InteractionsPanel on /compare/{program_id} (LO-009 / leader
+    surface). Returns one entry per registered rule that mentions
+    ``program_id`` in its ``programs`` list. The metadata is independent of
+    any case context -- operators can see which other programs interact with
+    this one without running a cross-program evaluation. The runtime
+    detection still happens through ``detect_program_interactions`` on the
+    case-evaluation path; this endpoint is intentionally a separate read of
+    the same registry.
+    """
+    from govops.program_interactions import list_interactions_for
+
+    return {"program_id": program_id, "interactions": list_interactions_for(program_id)}
+
+
 @app.get("/api/programs/{program_id}/compare")
 def compare_program(
     program_id: str,

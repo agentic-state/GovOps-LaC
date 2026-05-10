@@ -48,8 +48,11 @@ test.describe("[M07] Submit a new ConfigValue draft via the UI form", () => {
     // Key (mono input).
     await page.getByLabel(/^key\b/i).fill(uniqueKey);
 
-    // Jurisdiction is a shadcn Select; click trigger then option.
-    await page.getByLabel(/^jurisdiction\b/i).click();
+    // Jurisdiction is a shadcn Select; click trigger then option. Scope to
+    // the form because LO-010 added a global jurisdiction switcher in the
+    // header that also has aria-label="Jurisdiction".
+    const draftForm = page.getByRole("form", { name: /draft new configvalue/i });
+    await draftForm.getByLabel(/^jurisdiction\b/i).click();
     await page.getByRole("option", { name: /^ca-oas$/i }).click();
 
     // Domain defaults to "rule" but pin it explicitly so a future seed

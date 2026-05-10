@@ -5,6 +5,7 @@ import { ChevronDown, Menu } from "lucide-react";
 import { Wordmark } from "./Wordmark";
 import { ThemeToggle } from "./ThemeToggle";
 import { LanguageSwitcher } from "./LanguageSwitcher";
+import { GlobalJurisdictionSwitcher } from "./GlobalJurisdictionSwitcher";
 import { HelpDrawer } from "./HelpDrawer";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
 import {
@@ -98,6 +99,7 @@ export function Masthead() {
 
         <div className="ms-auto flex items-center gap-3">
           <div className="hidden items-center gap-3 md:flex">
+            <GlobalJurisdictionSwitcher />
             <LanguageSwitcher />
             <ThemeToggle />
             <HelpDrawer />
@@ -149,7 +151,8 @@ export function Masthead() {
                   </Link>
                 ))}
               </nav>
-              <div className="mt-6 flex items-center gap-3 border-t border-border pt-4">
+              <div className="mt-6 flex flex-wrap items-center gap-3 border-t border-border pt-4">
+                <GlobalJurisdictionSwitcher />
                 <LanguageSwitcher />
                 <ThemeToggle />
                 <HelpDrawer />

@@ -607,3 +607,19 @@ export interface CheckResponse {
   programs: CheckProgramResult[];
   disclaimer: string;
 }
+
+// ---- Program interaction metadata (LO-009) -----------------------------------
+// Backs the InteractionsPanel on /compare/{program_id}.
+
+export interface ProgramInteractionMeta {
+  id: string;
+  severity: "info" | "warning" | "blocker";
+  programs: string[];
+  description: string;
+  citation: string;
+}
+
+export interface ProgramInteractionsResponse {
+  program_id: string;
+  interactions: ProgramInteractionMeta[];
+}
