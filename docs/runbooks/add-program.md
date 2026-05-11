@@ -109,9 +109,11 @@ govops docs lawcode/<jur>/programs/<new-program-id>.yaml
 
 This produces `<new-program-id>.md` next to the YAML — a non-coder-readable description of what the program does and what each rule means. Always regenerate after manifest changes.
 
-#### A4 — Add demo cases
+#### A4 — Add demo cases (in the manifest, not in Python)
 
-In `src/govops/jurisdictions.py`, the demo cases for the jurisdiction need to be extended to cover the new program. Add 4 cases (eligible-full, ineligible, partial, insufficient_evidence) following the per-jurisdiction `_<country>_demo_cases()` pattern. Each case can be evaluated against multiple programs — the engine returns per-program results when given `programs: [list]`.
+Since v3.1 L2b, demo cases live in the program manifest at `lawcode/<jur>/programs/<new-program-id>.yaml` under a top-level `demo_cases:` key — **not** in `src/govops/jurisdictions.py`. See `lawcode/ca/programs/oas.yaml` for the canonical structure, or any of the 6 jurisdictions migrated by L2b (`lawcode/{br,es,fr,de,ua,jp}/programs/oas.yaml`) for working examples.
+
+Add 4 cases (eligible-full, ineligible, partial, insufficient_evidence) following the existing pattern. Each case can be evaluated against multiple programs — the engine returns per-program results when given `programs: [list]`.
 
 #### A5 — Register cross-program interactions
 
@@ -231,7 +233,7 @@ If the program needs to be removed:
 git rm lawcode/<jur>/programs/<new-program-id>.yaml
 git rm lawcode/<jur>/programs/<new-program-id>.md
 git rm lawcode/<jur>/config/<new-program-id>-rules.yaml
-# Edit src/govops/jurisdictions.py to remove demo cases
+# Demo cases are inside the manifest above and disappear with the rm.
 # Edit src/govops/program_interactions.py to remove interactions
 git rm tests/test_<new-program-id>*.py
 git rm web/e2e/journeys/<new-program-id>*.spec.ts
@@ -254,4 +256,4 @@ For a new SHAPE that needs to be removed: that's a much bigger deal because the 
 
 ## Last validated
 
-- **Pending** — this runbook documents the conventions visible across the OAS / EI shape implementations and ADR-014/015/017. The next program added (Path A) or shape introduced (Path B) will be the first end-to-end run.
+- **2026-05-11** — runbook updated for v3.1 demo-cases-in-manifest (L2b). The OAS / EI shape implementations across the 7 jurisdictions are the working reference for Path A; ADR-014/015/017 remain the locked design contracts.

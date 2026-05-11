@@ -61,7 +61,7 @@ class TestInitHappyPath:
     def test_files_land_under_jurisdiction_directory(self, tmp_path: Path):
         init_jurisdiction("mx", lawcode_dir=tmp_path)
         base = tmp_path / "mx"
-        assert (base / "jurisdiction.yaml").exists()
+        assert (base / "config" / "jurisdiction.yaml").exists()
         assert (base / "programs" / "oas.yaml").exists()
         assert (base / "programs" / "oas.md").exists()
         assert (base / "programs" / "ei.yaml").exists()
@@ -136,12 +136,14 @@ class TestInitEmitsJurisdictionMetadata:
 
     def test_jurisdiction_yaml_has_metadata_block(self, tmp_path: Path):
         init_jurisdiction("pl", lawcode_dir=tmp_path)
-        doc = self._load_yaml(tmp_path / "pl" / "jurisdiction.yaml")
+        doc = self._load_yaml(tmp_path / "pl" / "config" / "jurisdiction.yaml")
         assert "jurisdiction" in doc, "scaffold must emit ADR-019 metadata block"
 
     def test_metadata_block_carries_required_fields(self, tmp_path: Path):
         init_jurisdiction("pl", lawcode_dir=tmp_path)
-        meta = self._load_yaml(tmp_path / "pl" / "jurisdiction.yaml")["jurisdiction"]
+        meta = self._load_yaml(
+            tmp_path / "pl" / "config" / "jurisdiction.yaml"
+        )["jurisdiction"]
         for field in ("id", "country", "level", "name", "default_language"):
             assert field in meta, f"metadata block must carry {field!r}"
         assert meta["id"] == "jur-pl-national"
@@ -155,7 +157,7 @@ class TestInitEmitsJurisdictionMetadata:
         from jsonschema import Draft202012Validator
 
         init_jurisdiction("pl", lawcode_dir=tmp_path)
-        doc = self._load_yaml(tmp_path / "pl" / "jurisdiction.yaml")
+        doc = self._load_yaml(tmp_path / "pl" / "config" / "jurisdiction.yaml")
 
         schema_path = REPO_ROOT / "schema" / "lawcode-v1.0.json"
         with schema_path.open("r", encoding="utf-8") as fh:
@@ -163,6 +165,39 @@ class TestInitEmitsJurisdictionMetadata:
         validator = Draft202012Validator(schema)
         errors = list(validator.iter_errors(doc))
         assert not errors, [e.message for e in errors]
+
+
+# ---------------------------------------------------------------------------
+# init_jurisdiction -> registry loader round-trip (regression guard)
+# ---------------------------------------------------------------------------
+
+
+class TestInitLoaderRoundTrip:
+    """A fresh ``govops init`` must produce a jurisdiction the
+    ``build_registry_from_lawcode`` loader can discover. Pre-fix the
+    scaffolder wrote ``lawcode/<code>/jurisdiction.yaml`` while the loader
+    read ``lawcode/<code>/config/jurisdiction.yaml`` -- silently producing
+    a jurisdiction the running app could not see. This test pins the
+    handoff so the v3.0 adoption gap stays closed.
+    """
+
+    @_skip_in_strict_mode
+    def test_scaffolded_jurisdiction_is_discoverable_after_init(
+        self, tmp_path: Path
+    ):
+        from govops.jurisdictions import build_registry_from_lawcode
+
+        # OAS-only scaffold so the loader's "must have programs/oas.yaml"
+        # gate is satisfied. EI is optional in the discovery path.
+        init_jurisdiction("pl", shapes=["oas"], lawcode_dir=tmp_path)
+        registry = build_registry_from_lawcode(tmp_path)
+        assert "pl" in registry, (
+            "scaffolded jurisdiction must appear in the registry; "
+            "cli_init + loader paths have drifted apart"
+        )
+        pack = registry["pl"]
+        assert pack.jurisdiction.id == "jur-pl-national"
+        assert pack.jurisdiction.country == "PL"
 
 
 # ---------------------------------------------------------------------------
