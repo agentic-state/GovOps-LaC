@@ -1,0 +1,227 @@
+# yaml-language-server: $schema=../../../schema/program-manifest-v1.0.json
+#
+# JP -- OAS program manifest (v3.1 Lane 2b migration from src/govops/jurisdictions.py).
+# Per ADR-014, structure (rules / authority / legal documents / demo
+# cases) lives here. Parameter values live in the ConfigValue substrate
+# (lawcode/jp/config/oas-rules.yaml) and are referenced
+# via {ref: '<key>'}. ADR-020 (lawcode-as-discovery) reads this file
+# at startup to register the program with the running engine.
+
+schema_version: '1.0'
+program_id: oas
+jurisdiction_id: jur-jp-national
+shape: old_age_pension
+status: active
+name:
+  en: Kosei Nenkin Hoken (Employees' Pension Insurance)
+authority_chain:
+- id: auth-jp-constitution
+  layer: constitution
+  title: Nihon-koku Kenpo (Constitution of Japan)
+  citation: Kenpo, Art. 25 (right to maintain minimum standards of living)
+  effective_date: '1947-05-03'
+  url: https://elaws.e-gov.go.jp/document?lawid=321CONSTITUTION
+- id: auth-jp-kokumin-nenkin-ho
+  layer: act
+  title: Kokumin Nenkin Ho (National Pension Act)
+  citation: Showa 34-nen Horitsu Dai 141-go (1959 Act No. 141)
+  effective_date: '1961-04-01'
+  url: https://elaws.e-gov.go.jp/document?lawid=334AC0000000141
+  parent: auth-jp-constitution
+- id: auth-jp-kosei-nenkin-ho
+  layer: act
+  title: Kosei Nenkin Hoken Ho (Employees' Pension Insurance Act)
+  citation: Showa 29-nen Horitsu Dai 115-go (1954 Act No. 115)
+  effective_date: '1954-05-19'
+  url: https://elaws.e-gov.go.jp/document?lawid=329AC0000000115
+  parent: auth-jp-constitution
+- id: auth-jp-act-84-2017
+  layer: act
+  title: Heisei 29-nen Horitsu Dai 84-go (Act No. 84, 2017) — qualifying-period reduction
+  citation: Heisei 29-nen Horitsu Dai 84-go
+  effective_date: '2017-08-01'
+  parent: auth-jp-constitution
+- id: auth-jp-nenkin-kiko
+  layer: program
+  title: Nihon Nenkin Kiko (Japan Pension Service)
+  citation: Nihon Nenkin Kiko Ho (2007 Act No. 109)
+  parent: auth-jp-kosei-nenkin-ho
+- id: auth-jp-rourei-kiso
+  layer: service
+  title: Rourei Kiso Nenkin / Rourei Kosei Nenkin (Old-age Basic + Employees' Pension)
+  citation: Kokumin Nenkin Ho, Art. 26; Kosei Nenkin Hoken Ho, Art. 42
+  parent: auth-jp-nenkin-kiko
+legal_documents:
+- id: doc-jp-kokumin-nenkin
+  type: statute
+  title: Kokumin Nenkin Ho (National Pension Act)
+  citation: Showa 34-nen Horitsu Dai 141-go
+  effective_date: '1961-04-01'
+  sections:
+  - id: sec-jp-kn-art26
+    ref: Art. 26
+    heading: Rourei kiso nenkin no shikyu yoken (Old-age Basic Pension eligibility)
+    text: Rourei kiso nenkin wa, hokenryo nofu zumi kikan to hokenryo menjo kikan o gassan shita kikan ga 10-nen ijo de aru mono ga 65-sai ni tasshita toki ni, sono mono ni shikyu suru. (Heisei 29-nen Horitsu Dai 84-go ni yori 25-nen kara 10-nen ni tanshuku.)
+  - id: sec-jp-kn-art27
+    ref: Art. 27
+    heading: Rourei kiso nenkin no gaku (Old-age Basic Pension amount)
+    text: Rourei kiso nenkin no gaku wa, hokenryo nofu kikan ga 480-getsu (40-nen) ni tassuru baai ni mangaku to shi, sore yori mijikai kikan ni tsuite wa kikan ni hirei shita gaku to suru. Reiwa 8-nendo no mangaku wa tsukigaku 70,608-en (Showa 31-nen 4-gatsu 2-nichi iko umare no baai).
+- id: doc-jp-kosei-nenkin
+  type: statute
+  title: Kosei Nenkin Hoken Ho (Employees' Pension Insurance Act)
+  citation: Showa 29-nen Horitsu Dai 115-go
+  effective_date: '1954-05-19'
+  sections:
+  - id: sec-jp-kn-art42
+    ref: Art. 42
+    heading: Rourei kosei nenkin no shikyu yoken (Old-age Employees' Pension eligibility)
+    text: Rourei kosei nenkin wa, hihokensha kikan o yusuru mono ga Kokumin Nenkin Ho no rourei kiso nenkin no jukyu shikaku o ete, 65-sai ni tasshita toki ni shikyu suru.
+rules:
+- id: rule-jp-age
+  rule_type: age_threshold
+  description: 'Standard pensionable age: 65'
+  formal_expression: age >= 65
+  citation: Kokumin Nenkin Ho, Art. 26; Kosei Nenkin Hoken Ho, Art. 42
+  source_document_id: doc-jp-kokumin-nenkin
+  source_section_ref: Art. 26
+  param_key_prefix: jp.rule.age
+  parameters:
+    min_age:
+      ref: jp.rule.age.min_age
+- id: rule-jp-contribution
+  rule_type: residency_minimum
+  description: 'Minimum qualifying period: 10 years (reduced from 25 by Act No. 84, 2017)'
+  formal_expression: contribution_years >= 10
+  citation: Kokumin Nenkin Ho, Art. 26; Heisei 29-nen Horitsu Dai 84-go
+  source_document_id: doc-jp-kokumin-nenkin
+  source_section_ref: Art. 26
+  param_key_prefix: jp.rule.contribution
+  parameters:
+    min_years:
+      ref: jp.rule.contribution.min_years
+    home_countries:
+      ref: jp.rule.contribution.home_countries
+- id: rule-jp-contribution-calc
+  rule_type: residency_partial
+  description: Full pension at 40 years (480 months); proportional between 10 and 40 years
+  formal_expression: pension_ratio = min(contribution_years, 40) / 40
+  citation: Kokumin Nenkin Ho, Art. 27
+  source_document_id: doc-jp-kokumin-nenkin
+  source_section_ref: Art. 27
+  param_key_prefix: jp.rule.contribution-calc
+  parameters:
+    full_years:
+      ref: jp.rule.contribution-calc.full_years
+    min_years:
+      ref: jp.rule.contribution-calc.min_years
+- id: rule-jp-status
+  rule_type: legal_status
+  description: 'Hihokensha of the Japanese pension system (proxy: legal_status)'
+  formal_expression: legal_status in ['citizen', 'permanent_resident']
+  citation: Kokumin Nenkin Ho, Art. 7; Kosei Nenkin Hoken Ho, Art. 9
+  source_document_id: doc-jp-kosei-nenkin
+  source_section_ref: Art. 9
+  param_key_prefix: jp.rule.status
+  parameters:
+    accepted_statuses:
+      ref: jp.rule.status.accepted_statuses
+- id: rule-jp-evidence
+  rule_type: evidence_required
+  description: Birth certificate (koseki tohon)
+  formal_expression: has_evidence('birth_certificate')
+  citation: Kokumin Nenkin Ho Sekorei kisoku, Art. 16; Kosei Nenkin Hoken Ho Sekorei kisoku, Art. 30
+  source_document_id: doc-jp-kokumin-nenkin
+  source_section_ref: Art. 16 (Sekorei kisoku) / Kosei Nenkin Hoken Ho Sekorei kisoku Art. 30
+  param_key_prefix: jp.rule.evidence
+  parameters:
+    required_types:
+      ref: jp.rule.evidence.required_types
+demo_cases:
+- id: demo-jp-001
+  applicant:
+    id: app-jp-001
+    date_of_birth: '1958-11-04'
+    legal_name: Tanaka Hiroshi
+    legal_status: citizen
+    country_of_birth: JP
+  residency_periods:
+  - country: Japan
+    start_date: '1958-11-04'
+    verified: true
+  evidence_items:
+  - id: b7f09dfa8343
+    type: birth_certificate
+    description: Koseki tohon
+    provided: true
+    verified: true
+  - id: 7a16c5e8a46d
+    type: tax_record
+    description: Nenkin teikibin (Nihon Nenkin Kiko) 1980-2025
+    provided: true
+    verified: true
+- id: demo-jp-002
+  applicant:
+    id: app-jp-002
+    date_of_birth: '1981-02-19'
+    legal_name: Sato Yuki
+    legal_status: citizen
+    country_of_birth: JP
+  residency_periods:
+  - country: Japan
+    start_date: '1981-02-19'
+    verified: true
+  evidence_items:
+  - id: edac490f613b
+    type: birth_certificate
+    description: Koseki tohon
+    provided: true
+    verified: true
+  - id: e950f47e1541
+    type: tax_record
+    description: Nenkin teikibin
+    provided: true
+- id: demo-jp-003
+  applicant:
+    id: app-jp-003
+    date_of_birth: '1957-08-12'
+    legal_name: Kim Min-jun
+    legal_status: permanent_resident
+    country_of_birth: KR
+  residency_periods:
+  - country: Korea
+    start_date: '1957-08-12'
+    end_date: '2010-04-01'
+  - country: Japan
+    start_date: '2010-04-01'
+    verified: true
+  evidence_items:
+  - id: 1ac296c28752
+    type: birth_certificate
+    description: Birth certificate (Korean, translated)
+    provided: true
+    verified: true
+  - id: f8197239f12f
+    type: residence_card
+    description: Zairyu card (special permanent resident)
+    provided: true
+    verified: true
+  - id: 3ddf7caafb46
+    type: tax_record
+    description: Nenkin teikibin 2010-2025
+    provided: true
+    verified: true
+- id: demo-jp-004
+  applicant:
+    id: app-jp-004
+    date_of_birth: '1956-05-30'
+    legal_name: Watanabe Aiko
+    legal_status: citizen
+    country_of_birth: JP
+  residency_periods:
+  - country: Japan
+    start_date: '1956-05-30'
+  evidence_items:
+  - id: e307e785ac55
+    type: tax_record
+    description: Nenkin teikibin (incomplete)
+    provided: true

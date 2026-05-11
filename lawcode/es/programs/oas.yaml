@@ -1,0 +1,203 @@
+# yaml-language-server: $schema=../../../schema/program-manifest-v1.0.json
+#
+# ES -- OAS program manifest (v3.1 Lane 2b migration from src/govops/jurisdictions.py).
+# Per ADR-014, structure (rules / authority / legal documents / demo
+# cases) lives here. Parameter values live in the ConfigValue substrate
+# (lawcode/es/config/oas-rules.yaml) and are referenced
+# via {ref: '<key>'}. ADR-020 (lawcode-as-discovery) reads this file
+# at startup to register the program with the running engine.
+
+schema_version: '1.0'
+program_id: oas
+jurisdiction_id: jur-es-national
+shape: old_age_pension
+status: active
+name:
+  es: Pension de jubilacion
+authority_chain:
+- id: auth-es-constitution
+  layer: constitution
+  title: Constitucion Espanola de 1978
+  citation: CE 1978, Art. 41, Art. 50
+  effective_date: '1978-12-29'
+  url: https://www.boe.es/buscar/act.php?id=BOE-A-1978-31229
+- id: auth-es-lgss
+  layer: act
+  title: Ley General de la Seguridad Social
+  citation: Real Decreto Legislativo 8/2015
+  effective_date: '2015-10-30'
+  url: https://www.boe.es/buscar/act.php?id=BOE-A-2015-11724
+  parent: auth-es-constitution
+- id: auth-es-seg-social
+  layer: program
+  title: Seguridad Social - Instituto Nacional de la Seguridad Social (INSS)
+  citation: LGSS, Art. 1
+  parent: auth-es-lgss
+- id: auth-es-jubilacion
+  layer: service
+  title: Pension de jubilacion ordinaria
+  citation: LGSS, Arts. 205-209
+  parent: auth-es-seg-social
+legal_documents:
+- id: doc-es-lgss
+  type: statute
+  title: Ley General de la Seguridad Social
+  citation: Real Decreto Legislativo 8/2015
+  effective_date: '2015-10-30'
+  sections:
+  - id: sec-es-art205
+    ref: Art. 205.1
+    heading: Pension de jubilacion
+    text: Tendran derecho a la pension de jubilacion las personas incluidas en el Regimen General que, ademas de la general, reuna la edad de 66 anos y 4 meses o 65 anos cuando se acrediten 38 anos y 3 meses de cotizacion.
+  - id: sec-es-art205-carencia
+    ref: Art. 205.1.b
+    heading: Periodo minimo de cotizacion
+    text: Tener cubierto un periodo minimo de cotizacion de 15 anos, de los cuales al menos 2 anos deberan estar comprendidos dentro de los 15 anos inmediatamente anteriores al momento de causar el derecho.
+rules:
+- id: rule-es-age
+  rule_type: age_threshold
+  description: 'Edad minima de jubilacion: 66 anos y 4 meses (regla general 2025)'
+  formal_expression: age >= 66
+  citation: LGSS, Art. 205.1.a
+  source_document_id: doc-es-lgss
+  source_section_ref: Art. 205.1
+  param_key_prefix: es.rule.age
+  parameters:
+    min_age:
+      ref: es.rule.age.min_age
+- id: rule-es-contribution-min
+  rule_type: residency_minimum
+  description: 'Periodo minimo de cotizacion: 15 anos'
+  formal_expression: contribution_years >= 15
+  citation: LGSS, Art. 205.1.b
+  source_document_id: doc-es-lgss
+  source_section_ref: Art. 205.1.b
+  param_key_prefix: es.rule.contribution-min
+  parameters:
+    min_years:
+      ref: es.rule.contribution-min.min_years
+    home_countries:
+      ref: es.rule.contribution-min.home_countries
+- id: rule-es-contribution-calc
+  rule_type: residency_partial
+  description: Pension completa con 36+ anos de cotizacion; proporcional con 15-35 anos
+  formal_expression: pension_ratio = min(contribution_years, 36) / 36
+  citation: LGSS, Art. 210
+  source_document_id: doc-es-lgss
+  source_section_ref: Art. 205.1.b
+  param_key_prefix: es.rule.contribution-calc
+  parameters:
+    full_years:
+      ref: es.rule.contribution-calc.full_years
+    min_years:
+      ref: es.rule.contribution-calc.min_years
+- id: rule-es-status
+  rule_type: legal_status
+  description: Afiliado al Regimen General de la Seguridad Social
+  formal_expression: legal_status in ['citizen', 'permanent_resident']
+  citation: LGSS, Art. 7
+  source_document_id: doc-es-lgss
+  source_section_ref: Art. 205.1
+  param_key_prefix: es.rule.status
+  parameters:
+    accepted_statuses:
+      ref: es.rule.status.accepted_statuses
+- id: rule-es-evidence
+  rule_type: evidence_required
+  description: Documento de identidad (DNI, NIE, o pasaporte)
+  formal_expression: has_evidence('birth_certificate') or has_evidence('id_card')
+  citation: LGSS, Disposicion adicional
+  source_document_id: doc-es-lgss
+  source_section_ref: Art. 205.1
+  param_key_prefix: es.rule.evidence
+  parameters:
+    required_types:
+      ref: es.rule.evidence.required_types
+demo_cases:
+- id: demo-es-001
+  applicant:
+    id: app-es-001
+    date_of_birth: '1957-04-18'
+    legal_name: Antonio Garcia Lopez
+    legal_status: citizen
+    country_of_birth: ES
+  residency_periods:
+  - country: Spain
+    start_date: '1957-04-18'
+    verified: true
+  evidence_items:
+  - id: 096f78020f02
+    type: birth_certificate
+    description: Certificado de nacimiento
+    provided: true
+    verified: true
+  - id: 6bf389132299
+    type: tax_record
+    description: Vida laboral - TGSS 1977-2025
+    provided: true
+    verified: true
+- id: demo-es-002
+  applicant:
+    id: app-es-002
+    date_of_birth: '1970-11-03'
+    legal_name: Maria Carmen Rodriguez
+    legal_status: citizen
+    country_of_birth: ES
+  residency_periods:
+  - country: Spain
+    start_date: '1970-11-03'
+    verified: true
+  evidence_items:
+  - id: 1afce124b6d5
+    type: birth_certificate
+    description: Certificado de nacimiento
+    provided: true
+    verified: true
+  - id: fe20b83e632b
+    type: tax_record
+    description: Vida laboral
+    provided: true
+- id: demo-es-003
+  applicant:
+    id: app-es-003
+    date_of_birth: '1956-07-22'
+    legal_name: Mohammed El Fassi
+    legal_status: permanent_resident
+    country_of_birth: MA
+  residency_periods:
+  - country: Morocco
+    start_date: '1956-07-22'
+    end_date: '2000-03-01'
+  - country: Spain
+    start_date: '2000-03-01'
+    verified: true
+  evidence_items:
+  - id: d0fc0a6131e4
+    type: birth_certificate
+    description: Acta de nacimiento (traducida)
+    provided: true
+    verified: true
+  - id: 81af99ced835
+    type: tax_record
+    description: Vida laboral 2000-2025
+    provided: true
+    verified: true
+  - id: 04a7c946510c
+    type: residency_declaration
+    description: NIE - tarjeta de residencia
+    provided: true
+- id: demo-es-004
+  applicant:
+    id: app-es-004
+    date_of_birth: '1952-02-14'
+    legal_name: Pilar Fernandez Ruiz
+    legal_status: citizen
+    country_of_birth: ES
+  residency_periods:
+  - country: Spain
+    start_date: '1952-02-14'
+  evidence_items:
+  - id: 87a95c4126d2
+    type: tax_record
+    description: Vida laboral parcial
+    provided: true
