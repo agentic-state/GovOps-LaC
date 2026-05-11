@@ -52,14 +52,14 @@ jobs:
         run: npx playwright test e2e/visual.spec.ts --update-snapshots
       - name: Upload baselines as artifact
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: visual-baselines-linux
           path: web/e2e/visual.spec.ts-snapshots/
           retention-days: 14
       - name: Upload Playwright report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: playwright-report
           path: web/playwright-report/
