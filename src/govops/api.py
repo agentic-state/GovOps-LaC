@@ -1715,6 +1715,46 @@ def _compare_jurisdiction_label(jur_code: str) -> str:
     return pack.jurisdiction.name
 
 
+# v3.1 L2b -- compare-endpoint manifest cache.
+#
+# `compare_program` called `load_program_manifest()` per jurisdiction per
+# request. Pre-v3.1 only CA had a `programs/oas.yaml`, so /compare/oas loaded
+# 1 manifest (5 substrate queries) per hit. Lane 2b adds OAS manifests for
+# the other 6 jurisdictions, fanning to 7 × 5 = 35 concurrent substrate
+# queries per request. Under E2E concurrency this trips a SQLAlchemy
+# session race on the in-memory SQLite ConfigStore -- `_apply_processors`
+# IndexError -- which crashes the uvicorn worker mid-request.
+#
+# Cache loaded manifests at module scope. Manifests are immutable on disk
+# during a server lifetime (ADR-020 hot-reload mutates the registry and can
+# invalidate this cache via `clear_compare_program_cache()` when wired).
+# (key = (jurisdiction_code, program_id))
+_COMPARE_MANIFEST_CACHE: dict[tuple[str, str], "Program"] = {}
+
+
+def _load_compare_program(jur_code: str, program_id: str) -> "Program":
+    """Cached ``load_program_manifest`` for the /compare/{program_id} surface.
+
+    Raises whatever ``load_program_manifest`` raises -- callers should
+    handle ``Exception`` and surface the jurisdiction as ``available: False``
+    in the response, matching the pre-cache behaviour.
+    """
+    key = (jur_code, program_id)
+    cached = _COMPARE_MANIFEST_CACHE.get(key)
+    if cached is not None:
+        return cached
+    manifest_path = LAWCODE_DIR / jur_code / "programs" / f"{program_id}.yaml"
+    program = load_program_manifest(manifest_path)
+    _COMPARE_MANIFEST_CACHE[key] = program
+    return program
+
+
+def clear_compare_program_cache() -> None:
+    """Invalidate the cache. Wired into ADR-020's ``reload_registry()`` (L3)
+    so a draft commit + registry rebuild also refreshes the compare surface."""
+    _COMPARE_MANIFEST_CACHE.clear()
+
+
 @app.get("/api/programs/{program_id}/interactions")
 def program_interactions_endpoint(program_id: str):
     """Static metadata about cross-program interaction rules involving this program.
@@ -1828,7 +1868,10 @@ def compare_program(
             )
             continue
         try:
-            program = load_program_manifest(manifest_path)
+            # v3.1 L2b: cached load to avoid the per-request fan-out that
+            # tripped a SQLAlchemy session race on /compare/oas once 7
+            # jurisdictions had OAS manifests on disk.
+            program = _load_compare_program(code, program_id)
         except Exception as exc:
             jur_slots.append(
                 {
