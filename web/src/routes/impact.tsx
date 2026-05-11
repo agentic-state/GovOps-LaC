@@ -228,7 +228,7 @@ function ImpactPage() {
             <p className="mb-4 text-sm text-foreground-muted">
               <FormattedMessage
                 id="impact.summary"
-                values={{ n: data.total, m: data.jurisdiction_count, query: data.query }}
+                values={{ n: data.total, m: data.country_count, query: data.query }}
               />
             </p>
             <ImpactPaginationBar
@@ -239,7 +239,7 @@ function ImpactPage() {
               onPageChange={gotoPage}
             />
             {data.results.map((r) => (
-              <ImpactSection key={r.jurisdiction_id ?? "global"} result={r} query={data.query} />
+              <ImpactSection key={r.country_code ?? "global"} result={r} query={data.query} />
             ))}
             <ImpactPaginationBar
               limit={data.limit ?? limit}
