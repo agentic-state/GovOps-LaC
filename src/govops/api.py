@@ -456,12 +456,42 @@ def get_jurisdiction(jur_code: str):
 
 
 @app.get("/api/authority-chain")
-def get_authority_chain():
+def get_authority_chain(jurisdiction_id: str | None = None):
+    """Return the authority chain for a jurisdiction.
+
+    v3.1 L4: optional ``?jurisdiction_id=`` query param. Default behaviour
+    preserved (uses the active jurisdiction from the store) so existing
+    callers keep working. The frontend picker passes the chosen code so a
+    single backend serves the multi-jurisdiction /authority page without
+    server-side state mutation. Per ADR-020 the registry is now derived
+    from lawcode/, so every JURISDICTION_REGISTRY[code] carries its own
+    authority_chain ready to return.
+    """
+    available = [
+        {"code": code, "label": p.jurisdiction.name}
+        for code, p in sorted(JURISDICTION_REGISTRY.items())
+    ]
+    if jurisdiction_id and jurisdiction_id in JURISDICTION_REGISTRY:
+        pack = JURISDICTION_REGISTRY[jurisdiction_id]
+        return {
+            "jurisdiction": pack.jurisdiction,
+            "chain": pack.authority_chain,
+            "available_jurisdictions": available,
+            "active_jurisdiction_code": jurisdiction_id,
+        }
+    if jurisdiction_id is not None and jurisdiction_id not in JURISDICTION_REGISTRY:
+        raise HTTPException(
+            404,
+            f"Unknown jurisdiction: {jurisdiction_id!r}. "
+            f"Available: {sorted(JURISDICTION_REGISTRY.keys())}",
+        )
     jur_code = _current_jur_code()
     pack = JURISDICTION_REGISTRY[jur_code]
     return {
         "jurisdiction": pack.jurisdiction,
         "chain": store.authority_chain,
+        "available_jurisdictions": available,
+        "active_jurisdiction_code": jur_code,
     }
 
 
@@ -1017,10 +1047,36 @@ async def api_bulk_review_encoding_proposals(batch_id: str, request: Request):
 
 @app.post("/api/encode/batches/{batch_id}/commit")
 def api_commit_encoding_batch(batch_id: str):
+    """Commit approved proposals to the engine.
+
+    v3.1 L6 Bug 4: idempotency gate. A second commit attempt against the
+    same batch returns 409 Conflict so a re-clicked button doesn't silently
+    re-run. The committed_at field on EncodingBatch is the source of truth;
+    set on first successful commit and checked here.
+    """
+    from datetime import datetime, timezone
+
     batch = encoding_store.batches.get(batch_id)
     if not batch:
         raise HTTPException(404, f"batch {batch_id!r} not found")
+    if batch.committed_at is not None:
+        raise HTTPException(
+            409,
+            {
+                "error": "batch already committed",
+                "batch_id": batch_id,
+                "committed_at": batch.committed_at.isoformat(),
+            },
+        )
     approved_rules = encoding_store.get_approved_rules(batch_id)
+    batch.committed_at = datetime.now(timezone.utc)
+    encoding_store._log(
+        batch_id,
+        "batch_committed",
+        "api",
+        f"{len(approved_rules)} approved rule(s) committed",
+        {"rule_ids": [r.id for r in approved_rules]},
+    )
     return {"committed_rule_ids": [r.id for r in approved_rules]}
 
 

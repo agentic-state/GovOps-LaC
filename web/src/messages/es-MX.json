@@ -1173,5 +1173,7 @@
  "check.lifeEvent.scenario.event": "Evento de vida",
  "check.lifeEvent.event.job_loss": "Perdí mi empleo",
  "check.lifeEvent.noEi": "{jurisdiction} no ofrece actualmente esta prestación a través del marco. Prueba otra jurisdicción o usa la verificación de entrada para la lista completa de programas.",
- "check.lifeEvent.backToEntry": "← Volver a la verificación de entrada"
+ "check.lifeEvent.backToEntry": "← Volver a la verificación de entrada",
+ "authority.jurisdiction.picker.label": "Jurisdiccion",
+ "cases.review.rationale.too_short": "Minimo 20 caracteres"
 }

@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useIntl } from "react-intl";
 
@@ -19,20 +19,59 @@ import type {
   RuleType,
 } from "@/lib/types";
 
+const JUR_QUERY_PARAM = "jurisdiction";
+
+interface AvailableJurisdiction {
+  code: string;
+  label: string;
+}
+
+interface AuthorityChainResponse {
+  jurisdiction: Jurisdiction;
+  chain: AuthorityReference[];
+  available_jurisdictions?: AvailableJurisdiction[];
+  active_jurisdiction_code?: string;
+}
+
 interface LoaderData {
-  chain: { jurisdiction: Jurisdiction; chain: AuthorityReference[] };
+  chain: AuthorityChainResponse;
   documents: LegalDocument[];
   rules: LegalRule[];
 }
 
+function readJurisdictionFromUrl(): string | undefined {
+  if (typeof window === "undefined") return undefined;
+  const params = new URLSearchParams(window.location.search);
+  return params.get(JUR_QUERY_PARAM) ?? undefined;
+}
+
+function writeJurisdictionToUrl(code: string | undefined): void {
+  if (typeof window === "undefined") return;
+  const url = new URL(window.location.href);
+  if (!code) {
+    url.searchParams.delete(JUR_QUERY_PARAM);
+  } else {
+    url.searchParams.set(JUR_QUERY_PARAM, code);
+  }
+  window.history.replaceState({}, "", url.toString());
+}
+
 export const Route = createFileRoute("/authority")({
   loader: async (): Promise<LoaderData> => {
+    // v3.1 L4: hydrate the picker selection from the URL so deep-links work.
+    // SSR has no window so this returns undefined; the client refetches if
+    // the URL carries a jurisdiction selection.
+    const initialJur = readJurisdictionFromUrl();
     const [chain, documents, rules] = await Promise.all([
-      getAuthorityChain(),
+      getAuthorityChain(initialJur),
       listLegalDocuments(),
       listRules(),
     ]);
-    return { chain, documents: documents.documents, rules: rules.rules };
+    return {
+      chain: chain as AuthorityChainResponse,
+      documents: documents.documents,
+      rules: rules.rules,
+    };
   },
   errorComponent: ({ error, reset }) => <RouteError error={error as Error} reset={reset} />,
   pendingComponent: () => <RouteLoading variant="panel" />,
@@ -61,7 +100,30 @@ const RULE_TYPES: RuleType[] = [
 function AuthorityPage() {
   const intl = useIntl();
   const data = Route.useLoaderData() as LoaderData;
-  const { chain, documents, rules } = data;
+
+  // v3.1 L4: jurisdiction picker. Local chain state mirrors the loader's
+  // initial response; switching the picker refetches without a route nav.
+  const [chain, setChain] = useState<AuthorityChainResponse>(data.chain);
+  const documents = data.documents;
+  const rules = data.rules;
+  const available = chain.available_jurisdictions ?? [];
+  const activeCode = chain.active_jurisdiction_code ?? "";
+  const [pickerCode, setPickerCode] = useState<string>(activeCode);
+
+  useEffect(() => {
+    if (!pickerCode || pickerCode === activeCode) return;
+    let cancelled = false;
+    (async () => {
+      const next = (await getAuthorityChain(pickerCode)) as AuthorityChainResponse;
+      if (!cancelled) {
+        setChain(next);
+        writeJurisdictionToUrl(pickerCode);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [pickerCode, activeCode]);
 
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
   const [search, setSearch] = useState("");
@@ -123,6 +185,27 @@ function AuthorityPage() {
 
   return (
     <div className="space-y-10">
+      {available.length > 1 && (
+        <div className="flex items-center justify-end gap-3 rounded-md border border-border bg-surface-raised p-3">
+          <label className="flex items-center gap-2 text-sm">
+            <span className="text-xs uppercase tracking-wider text-foreground-muted">
+              {intl.formatMessage({ id: "authority.jurisdiction.picker.label" })}
+            </span>
+            <select
+              value={pickerCode}
+              onChange={(e) => setPickerCode(e.target.value)}
+              aria-label={intl.formatMessage({ id: "authority.jurisdiction.picker.label" })}
+              className="rounded-md border border-border bg-surface px-2 py-1 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              {available.map((j) => (
+                <option key={j.code} value={j.code}>
+                  {j.label} ({j.code.toUpperCase()})
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
+      )}
       <JurisdictionHeader jurisdiction={chain.jurisdiction} />
 
       <section

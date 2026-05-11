@@ -1173,5 +1173,7 @@
  "check.lifeEvent.scenario.event": "Life event",
  "check.lifeEvent.event.job_loss": "Lost my job",
  "check.lifeEvent.noEi": "{jurisdiction} does not currently offer this benefit through the framework. Try another jurisdiction or use the entry check for the full program list.",
- "check.lifeEvent.backToEntry": "← Back to the entry check"
+ "check.lifeEvent.backToEntry": "← Back to the entry check",
+ "authority.jurisdiction.picker.label": "Jurisdiction",
+ "cases.review.rationale.too_short": "Minimum 20 characters"
 }

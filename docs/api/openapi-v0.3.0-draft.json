@@ -135,13 +135,42 @@
     "/api/authority-chain": {
       "get": {
         "summary": "Get Authority Chain",
+        "description": "Return the authority chain for a jurisdiction.\n\nv3.1 L4: optional ``?jurisdiction_id=`` query param. Default behaviour\npreserved (uses the active jurisdiction from the store) so existing\ncallers keep working. The frontend picker passes the chosen code so a\nsingle backend serves the multi-jurisdiction /authority page without\nserver-side state mutation. Per ADR-020 the registry is now derived\nfrom lawcode/, so every JURISDICTION_REGISTRY[code] carries its own\nauthority_chain ready to return.",
         "operationId": "get_authority_chain_api_authority_chain_get",
+        "parameters": [
+          {
+            "name": "jurisdiction_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Jurisdiction Id"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Successful Response",
             "content": {
               "application/json": {
                 "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
               }
             }
           }
@@ -658,6 +687,7 @@
     "/api/encode/batches/{batch_id}/commit": {
       "post": {
         "summary": "Api Commit Encoding Batch",
+        "description": "Commit approved proposals to the engine.\n\nv3.1 L6 Bug 4: idempotency gate. A second commit attempt against the\nsame batch returns 409 Conflict so a re-clicked button doesn't silently\nre-run. The committed_at field on EncodingBatch is the source of truth;\nset on first successful commit and checked here.",
         "operationId": "api_commit_encoding_batch_api_encode_batches__batch_id__commit_post",
         "parameters": [
           {
