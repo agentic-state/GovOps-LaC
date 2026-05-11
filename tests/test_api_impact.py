@@ -1,4 +1,11 @@
-"""API tests for the Phase 7 impact / reverse-index endpoint."""
+"""API tests for the Phase 7 impact / reverse-index endpoint.
+
+v3.1 L5 (ADR-021): grouping key changed from program-scoped
+``jurisdiction_id`` to country, so Spanish OAS (``es-jub``) + EI
+(``es-ei``) substrate records that share a citation count as one country
+(``es``), not two jurisdictions. The response shape carries
+``country_count`` and per-result ``country_code`` / ``country_label``.
+"""
 
 from __future__ import annotations
 
@@ -167,7 +174,7 @@ class TestImpactMatching:
         r = client.get("/api/impact", params={"citation": "nonexistent statute"})
         data = r.json()
         assert data["total"] == 0
-        assert data["jurisdiction_count"] == 0
+        assert data["country_count"] == 0
         assert data["results"] == []
 
 
@@ -177,27 +184,61 @@ class TestImpactMatching:
 
 
 class TestImpactGrouping:
-    def test_groups_by_jurisdiction(self, client):
-        # Match across all citations: every approved record in the fixture
-        # references something — but no single substring matches all four.
-        # Pick "1985" which appears in both CA citations + nothing else.
+    def test_groups_by_country(self, client):
+        # "1985" matches both CA citations in the fixture, no others. The pre-L5
+        # bug: 1 jurisdiction. Post-L5: 1 country (ca), with the per-program
+        # jurisdiction_id ("ca-oas") still visible on each value.
         r = client.get("/api/impact", params={"citation": "1985"})
         data = r.json()
-        assert data["jurisdiction_count"] == 1
+        assert data["country_count"] == 1
         section = data["results"][0]
-        assert section["jurisdiction_id"] == "ca-oas"
+        assert section["country_code"] == "ca"
         assert len(section["values"]) == 2
+        # The per-program scope is preserved on each individual value.
+        for v in section["values"]:
+            assert v["jurisdiction_id"] == "ca-oas"
+
+    def test_two_programs_one_country_count_as_one_country(self, client):
+        # The ADR-021 motivating case: a Spanish citation that matches across
+        # both OAS (es-jub) and EI (es-ei) substrate must report
+        # country_count=1 -- not 2.
+        for jid in ("es-jub", "es-ei"):
+            config_store.put(
+                ConfigValue(
+                    domain="rule",
+                    key=f"{jid}.rule.real-decreto-fixture",
+                    jurisdiction_id=jid,
+                    value=1,
+                    value_type=ValueType.NUMBER,
+                    effective_from=datetime(2020, 1, 1, tzinfo=UTC),
+                    citation="Real Decreto 1234/2020, art. 5",
+                    author="seed",
+                    approved_by="seed",
+                    rationale="ADR-021 motivating fixture.",
+                )
+            )
+        r = client.get("/api/impact", params={"citation": "Real Decreto"})
+        data = r.json()
+        assert data["total"] == 2
+        assert data["country_count"] == 1, (
+            "L5 regression: two Spanish programs must group as ONE country"
+        )
+        section = data["results"][0]
+        assert section["country_code"] == "es"
+        # Both per-program jurisdiction_ids are visible underneath.
+        scopes = {v["jurisdiction_id"] for v in section["values"]}
+        assert scopes == {"es-jub", "es-ei"}
 
     def test_global_records_appear_under_global_label(self, client):
         r = client.get("/api/impact", params={"citation": "GovOps engine"})
         data = r.json()
         assert data["total"] == 1
         section = data["results"][0]
-        assert section["jurisdiction_id"] is None
-        assert section["jurisdiction_label"] == "Global"
+        assert section["country_code"] is None
+        assert section["country_label"] == "Global"
 
     def test_global_section_listed_first(self, client):
-        # Add a record sharing a citation token with the global one.
+        # Add a CA record sharing a citation token with the global one.
         config_store.put(
             ConfigValue(
                 domain="rule",
@@ -214,18 +255,16 @@ class TestImpactGrouping:
         )
         r = client.get("/api/impact", params={"citation": "GovOps engine"})
         data = r.json()
-        assert data["jurisdiction_count"] == 2
-        assert data["results"][0]["jurisdiction_id"] is None
-        assert data["results"][1]["jurisdiction_id"] == "ca-oas"
+        assert data["country_count"] == 2  # Global + ca
+        assert data["results"][0]["country_code"] is None
+        assert data["results"][1]["country_code"] == "ca"
 
-    def test_jurisdiction_label_resolves_via_registry(self, client):
+    def test_country_label_resolves_via_registry(self, client):
         r = client.get("/api/impact", params={"citation": "OAS Act"})
         section = r.json()["results"][0]
-        # Label is "Old Age Security (OAS) — Canada (federal)" or similar — exact
-        # text comes from the registry, but it must include both program + country.
-        label = section["jurisdiction_label"]
-        assert "Old Age Security" in label
-        assert "Canada" in label
+        # Country label is country-level (not program-scoped), so just the
+        # registry's jurisdiction.name -- "Canada (federal)" or similar.
+        assert "Canada" in section["country_label"]
 
     def test_unknown_jurisdiction_prefix_falls_back_to_raw_id(self, client):
         config_store.put(
@@ -244,8 +283,10 @@ class TestImpactGrouping:
         )
         r = client.get("/api/impact", params={"citation": "Hypothetical Act"})
         section = r.json()["results"][0]
-        assert section["jurisdiction_id"] == "zz-test"
-        assert section["jurisdiction_label"] == "zz-test"
+        # Unknown prefix -- bucket key is the raw jurisdiction_id; label
+        # mirrors it so users still see something coherent.
+        assert section["country_code"] == "zz-test"
+        assert section["country_label"] == "zz-test"
 
 
 # ---------------------------------------------------------------------------
@@ -260,14 +301,14 @@ def test_impact_response_shape(client):
     assert set(data.keys()) == {
         "query",
         "total",
-        "jurisdiction_count",
+        "country_count",
         "limit",
         "page",
         "page_count",
         "results",
     }
     for section in data["results"]:
-        assert set(section.keys()) == {"jurisdiction_id", "jurisdiction_label", "values"}
+        assert set(section.keys()) == {"country_code", "country_label", "values"}
         for v in section["values"]:
             # Each value is a serialised ConfigValue — sanity-check the load-bearing fields.
             assert "id" in v
@@ -389,11 +430,11 @@ class TestImpactPagination:
         )
         assert r.json()["page"] == 1
 
-    def test_jurisdiction_count_is_stable_across_pages(self, client):
-        # Spread 30 matches across 2 jurisdictions; pageize at 10 so a page
-        # can contain values from only one section. jurisdiction_count must
-        # reflect the FULL match set, not just what's on this page — that's
-        # what the UI summary "{n} records across {m} jurisdictions" needs.
+    def test_country_count_is_stable_across_pages(self, client):
+        # Spread 30 matches across 2 countries (ca + fr); pagesize at 10 so a
+        # page can contain values from only one section. country_count must
+        # reflect the FULL match set, not just what's on this page -- that's
+        # what the UI summary "{n} records across {m} countries" needs.
         _seed_n_records(20, citation="Cross Act, s. 1")
         for i in range(10):
             config_store.put(
@@ -407,25 +448,25 @@ class TestImpactPagination:
                     citation="Cross Act, s. 1",
                     author="seed",
                     approved_by="seed",
-                    rationale="Cross-jurisdiction fixture.",
+                    rationale="Cross-country fixture.",
                 )
             )
-        # Page 1 — only ca-oas section (10 values, alphabetically first).
+        # Page 1 -- only ca section (10 values, alphabetically first).
         page1 = client.get(
             "/api/impact",
             params={"citation": "Cross Act", "limit": 10, "page": 1},
         ).json()
-        assert page1["jurisdiction_count"] == 2
+        assert page1["country_count"] == 2
         assert len(page1["results"]) == 1
-        assert page1["results"][0]["jurisdiction_id"] == "ca-oas"
-        # Page 3 — only fr-cnav section.
+        assert page1["results"][0]["country_code"] == "ca"
+        # Page 3 -- only fr section.
         page3 = client.get(
             "/api/impact",
             params={"citation": "Cross Act", "limit": 10, "page": 3},
         ).json()
-        assert page3["jurisdiction_count"] == 2  # unchanged
+        assert page3["country_count"] == 2  # unchanged
         assert len(page3["results"]) == 1
-        assert page3["results"][0]["jurisdiction_id"] == "fr-cnav"
+        assert page3["results"][0]["country_code"] == "fr"
 
     def test_page_size_change_recomputes_page_count(self, client):
         _seed_n_records(40, citation="Resize Act, s. 1")

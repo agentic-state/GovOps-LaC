@@ -791,7 +791,7 @@ export async function impactByCitation(
     return {
       query: "",
       total: 0,
-      jurisdiction_count: 0,
+      country_count: 0,
       results: [],
       limit: opts.limit,
       page: opts.page,

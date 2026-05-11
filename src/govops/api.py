@@ -1653,6 +1653,42 @@ def _jurisdiction_label(jurisdiction_id: str | None) -> str:
     return f"{pack.program_name} — {pack.jurisdiction.name}"
 
 
+def _country_code_for_value(jurisdiction_id: str | None) -> str | None:
+    """Resolve a ConfigValue's program-scoped ``jurisdiction_id`` to the
+    country-level code the L5 impact endpoint groups by.
+
+    ConfigValues are stored with per-program scope (``es-jub`` for Spanish
+    OAS, ``es-ei`` for Spanish EI, ``ca-oas`` for Canadian OAS, etc.).
+    Pre-L5 the /impact endpoint grouped by this program-scoped id directly,
+    producing a misleading "across 2 jurisdictions" summary when both rows
+    in fact belonged to the same country (per ADR-021). We now resolve the
+    prefix back to the registry's country code so a citation that matches
+    "Real Decreto" across both Spanish programs is reported as 1 country /
+    2 records.
+
+    Global records (``jurisdiction_id is None`` or ``"global"``) return
+    ``None`` so the caller keeps the Global bucket distinct.
+    """
+    if jurisdiction_id is None or jurisdiction_id == "global":
+        return None
+    code = jurisdiction_id.split("-", 1)[0]
+    if code in JURISDICTION_REGISTRY:
+        return code
+    return jurisdiction_id
+
+
+def _country_label(country_code: str | None) -> str:
+    """Display label for an L5 country bucket. Falls back to the raw code
+    when the registry does not carry the country (e.g. federation packs
+    that haven't been hydrated yet)."""
+    if country_code is None:
+        return "Global"
+    pack = JURISDICTION_REGISTRY.get(country_code)
+    if pack is None:
+        return country_code
+    return pack.jurisdiction.name
+
+
 _IMPACT_LIMIT_DEFAULT = 50
 _IMPACT_LIMIT_MAX = 200
 
@@ -1663,17 +1699,25 @@ def impact_by_citation(
     limit: int = _IMPACT_LIMIT_DEFAULT,
     page: int = 1,
 ):
-    """Return ConfigValues referencing ``citation``, grouped by jurisdiction.
+    """Return ConfigValues referencing ``citation``, grouped by country.
 
     Phase 7 reverse-index endpoint with §12 7.x.1 pagination. Empty / whitespace
     ``citation`` rejects with 400 so clients always send a meaningful query.
     Normalization (whitespace collapse + case-insensitive match) lives in
     ``ConfigStore.find_by_citation``.
 
+    v3.1 L5 (ADR-021) changes the grouping key from program-scoped
+    ``jurisdiction_id`` (``es-jub``, ``es-ei``) to country (``es``). The
+    pre-L5 shape implied a citation matched across "2 jurisdictions" when
+    both rows in fact belonged to Spain. Records inside a country result
+    still carry their full ``jurisdiction_id`` so consumers can see which
+    program's substrate they came from. Global records (jurisdiction_id
+    null or "global") keep their own bucket.
+
     Pagination contract:
       - ``limit`` defaults to 50, floors at 1, caps at 200.
       - ``page`` is 1-indexed, floors at 1.
-      - ``total`` and ``jurisdiction_count`` describe the full match set (so the
+      - ``total`` and ``country_count`` describe the full match set (so the
         UI summary stays meaningful regardless of which page is shown).
       - ``results`` only carries the sections that have values on this page;
         sections with zero values on the page are omitted.
@@ -1690,27 +1734,29 @@ def impact_by_citation(
     matches = config_store.find_by_citation(normalized)
     total = len(matches)
 
-    # Group the FULL match set first so jurisdiction_count is stable across pages.
+    # Group the FULL match set by country (or None for Global). Per ADR-021,
+    # the country is derived from the ConfigValue's program-scoped
+    # jurisdiction_id prefix via _country_code_for_value().
     groups: dict[str | None, list[ConfigValue]] = {}
     for cv in matches:
-        scope: str | None = None if cv.jurisdiction_id in (None, "global") else cv.jurisdiction_id
-        groups.setdefault(scope, []).append(cv)
+        country = _country_code_for_value(cv.jurisdiction_id)
+        groups.setdefault(country, []).append(cv)
 
-    jurisdiction_count = len(groups)
+    country_count = len(groups)
     page_count = (total + effective_limit - 1) // effective_limit if total else 0
 
-    # Display order: Global first, then jurisdictions alphabetically. Build a
-    # flat list in display order, slice the page, then re-group preserving the
-    # same order so section ordering is stable.
-    ordered_jids: list[str | None] = []
+    # Display order: Global first, then countries alphabetically. Build a
+    # flat list in display order, slice the page, then re-group preserving
+    # the same order so section ordering is stable.
+    ordered_countries: list[str | None] = []
     if None in groups:
-        ordered_jids.append(None)
-    ordered_jids.extend(sorted(k for k in groups if k is not None))
+        ordered_countries.append(None)
+    ordered_countries.extend(sorted(k for k in groups if k is not None))
 
     flat: list[tuple[str | None, ConfigValue]] = []
-    for jid in ordered_jids:
-        for cv in groups[jid]:
-            flat.append((jid, cv))
+    for country in ordered_countries:
+        for cv in groups[country]:
+            flat.append((country, cv))
 
     start = (effective_page - 1) * effective_limit
     end = start + effective_limit
@@ -1718,25 +1764,25 @@ def impact_by_citation(
 
     page_groups: dict[str | None, list[ConfigValue]] = {}
     page_order: list[str | None] = []
-    for jid, cv in page_slice:
-        if jid not in page_groups:
-            page_groups[jid] = []
-            page_order.append(jid)
-        page_groups[jid].append(cv)
+    for country, cv in page_slice:
+        if country not in page_groups:
+            page_groups[country] = []
+            page_order.append(country)
+        page_groups[country].append(cv)
 
     results: list[dict[str, Any]] = [
         {
-            "jurisdiction_id": jid,
-            "jurisdiction_label": _jurisdiction_label(jid),
-            "values": page_groups[jid],
+            "country_code": country,
+            "country_label": _country_label(country),
+            "values": page_groups[country],
         }
-        for jid in page_order
+        for country in page_order
     ]
 
     return {
         "query": normalized,
         "total": total,
-        "jurisdiction_count": jurisdiction_count,
+        "country_count": country_count,
         "limit": effective_limit,
         "page": effective_page,
         "page_count": page_count,

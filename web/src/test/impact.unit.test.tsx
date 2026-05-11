@@ -16,19 +16,19 @@ describe("MOCK_IMPACT_RESPONSE", () => {
     expect(b.total).toBe(a.total);
   });
 
-  it("groups results by jurisdiction with the global section first", () => {
+  it("groups results by country with the global section first", () => {
     const r = MOCK_IMPACT_RESPONSE("Internal");
     expect(r.results.length).toBeGreaterThan(0);
-    expect(r.results[0].jurisdiction_id).toBeNull();
-    // remainder sorted by jurisdiction_label asc
+    expect(r.results[0].country_code).toBeNull();
+    // remainder sorted by country_label asc
     const tail = r.results.slice(1);
-    const labels = tail.map((s) => s.jurisdiction_label);
+    const labels = tail.map((s) => s.country_label);
     expect(labels).toEqual([...labels].sort((a, b) => a.localeCompare(b)));
   });
 
-  it("respects custom limit + page (paginates jurisdiction sections)", () => {
-    const all = MOCK_IMPACT_RESPONSE("a"); // broad match across many jurisdictions
-    const sectionCount = all.jurisdiction_count;
+  it("respects custom limit + page (paginates country sections)", () => {
+    const all = MOCK_IMPACT_RESPONSE("a"); // broad match across many countries
+    const sectionCount = all.country_count;
     const limited = MOCK_IMPACT_RESPONSE("a", { limit: 1, page: 1 });
     expect(limited.results.length).toBe(1);
     expect(limited.limit).toBe(1);
@@ -37,7 +37,7 @@ describe("MOCK_IMPACT_RESPONSE", () => {
 
     const page2 = MOCK_IMPACT_RESPONSE("a", { limit: 1, page: 2 });
     if (sectionCount >= 2) {
-      expect(page2.results[0].jurisdiction_id).not.toBe(limited.results[0].jurisdiction_id);
+      expect(page2.results[0].country_code).not.toBe(limited.results[0].country_code);
     }
   });
 
@@ -45,7 +45,7 @@ describe("MOCK_IMPACT_RESPONSE", () => {
     const r = MOCK_IMPACT_RESPONSE("xyz-zzz-no-match-zzz");
     expect(r.total).toBe(0);
     expect(r.results).toEqual([]);
-    expect(r.jurisdiction_count).toBe(0);
+    expect(r.country_count).toBe(0);
   });
 
   it("clamps limit to a sane range and defaults when not provided", () => {
@@ -81,7 +81,7 @@ describe("impactByCitation()", () => {
     const r = await impactByCitation("OAS");
     expect(r.total).toBeGreaterThan(0);
     expect(r.query).toBe("OAS");
-    expect(r.results[0]).toHaveProperty("jurisdiction_label");
+    expect(r.results[0]).toHaveProperty("country_label");
   });
 
   it("forwards limit + page in the query string when fetch succeeds", async () => {
@@ -90,7 +90,7 @@ describe("impactByCitation()", () => {
         JSON.stringify({
           query: "OAS",
           total: 0,
-          jurisdiction_count: 0,
+          country_count: 0,
           results: [],
           limit: 10,
           page: 2,

@@ -58,6 +58,13 @@ jobs:
       - name: Journey coverage gate
         working-directory: web
         run: npm run check:coverage
+      - name: Vitest (i18n ICU + impact mock + components)
+        # v3.1 L5: PR #46 shipped ICU UNCLOSED_TAG breakage in runbook
+        # strings that vitest catches in 0.8s but Playwright cannot see
+        # because the broken keys don't appear in the journeys it walks.
+        # Run vitest before Playwright so this class of bug fails fast.
+        working-directory: web
+        run: npx vitest run
       - name: Install Playwright browsers
         working-directory: web
         run: npx playwright install --with-deps chromium firefox webkit

@@ -1,14 +1,25 @@
 import type { ImpactResponse } from "./types";
 import { MOCK_CONFIG_VALUES } from "./mock-config-values";
 
-const JURISDICTION_LABELS: Record<string, string> = {
-  "ca-oas": "Canada — Old Age Security",
-  "us-fed": "United States — Federal",
-  "uk-gov": "United Kingdom — Government",
-  "fr-gouv": "France — Gouvernement",
-  "de-bund": "Germany — Bund",
-  "br-fed": "Brazil — Federal",
+// v3.1 L5: country-level labels. Mock keys are program-scoped
+// jurisdiction_ids (e.g. "ca-oas"); the bucket key is the country prefix
+// ("ca"), so the labels here are country names.
+const COUNTRY_LABELS: Record<string, string> = {
+  ca: "Canada",
+  us: "United States",
+  uk: "United Kingdom",
+  fr: "France",
+  de: "Germany",
+  br: "Brazil",
+  es: "Spain",
+  ua: "Ukraine",
+  jp: "Japan",
 };
+
+function countryFromJurisdiction(jid: string | null): string | null {
+  if (jid === null || jid === "global") return null;
+  return jid.split("-", 1)[0];
+}
 
 export const DEFAULT_IMPACT_LIMIT = 25;
 
@@ -23,21 +34,23 @@ export function MOCK_IMPACT_RESPONSE(
   );
   const groups = new Map<string | null, typeof matches>();
   for (const m of matches) {
-    const key = m.jurisdiction_id;
-    if (!groups.has(key)) groups.set(key, []);
-    groups.get(key)!.push(m);
+    const country = countryFromJurisdiction(m.jurisdiction_id);
+    if (!groups.has(country)) groups.set(country, []);
+    groups.get(country)!.push(m);
   }
   const allResults = Array.from(groups.entries())
-    .map(([jid, values]) => ({
-      jurisdiction_id: jid,
-      jurisdiction_label:
-        jid === null ? "Global / cross-jurisdictional" : (JURISDICTION_LABELS[jid] ?? jid),
+    .map(([country, values]) => ({
+      country_code: country,
+      country_label:
+        country === null
+          ? "Global / cross-jurisdictional"
+          : (COUNTRY_LABELS[country] ?? country),
       values,
     }))
     .sort((a, b) => {
-      if (a.jurisdiction_id === null) return -1;
-      if (b.jurisdiction_id === null) return 1;
-      return a.jurisdiction_label.localeCompare(b.jurisdiction_label);
+      if (a.country_code === null) return -1;
+      if (b.country_code === null) return 1;
+      return a.country_label.localeCompare(b.country_label);
     });
   const limit = Math.max(1, Math.min(200, opts.limit ?? DEFAULT_IMPACT_LIMIT));
   const page = Math.max(1, opts.page ?? 1);
@@ -47,7 +60,7 @@ export function MOCK_IMPACT_RESPONSE(
   return {
     query: normalized,
     total: matches.length,
-    jurisdiction_count: allResults.length,
+    country_count: allResults.length,
     results,
     limit,
     page,
