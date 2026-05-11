@@ -12,7 +12,91 @@ illustrative purposes only.
 
 ## [Unreleased]
 
-_No unreleased changes._
+v3.1 lanes have landed on `main` since v3.0.0; no GitHub release yet
+(waits for the in-app authoring substrate + adoption walkthrough). The
+architectural headline is **lawcode-as-discovery**: adding a
+jurisdiction no longer requires a Python edit. Drop a `lawcode/<code>/`
+directory in the right shape, restart (or call `reload_registry()`),
+and the new jurisdiction appears.
+
+### Added
+
+- **ADR-019 - `jurisdiction:` metadata block** in
+  `lawcode/<code>/config/jurisdiction.yaml`. Carries identity
+  (country, level, localized names, legal tradition, language regime,
+  default language) for the discovery loader. The `lawcode-v1.0.json`
+  schema gains an optional `jurisdiction` top-level key with inline
+  `$defs.jurisdictionMetadata`.
+- **ADR-020 - lawcode-as-discovery loader**. New
+  `build_registry_from_lawcode(lawcode_root)` walks
+  `lawcode/<code>/config/jurisdiction.yaml` +
+  `lawcode/<code>/programs/oas.yaml` for each jurisdiction directory;
+  federation packs at `lawcode/.federated/<publisher>/` flow the same
+  loader. A new `reload_registry()` rebuilds the dict in place for hot
+  reload.
+- **OAS program manifests for BR / ES / FR / DE / UA / JP** (6 new)
+  plus a CA OAS `name.en` tweak. Each manifest carries authority
+  chain, legal documents, rules, and demo cases per ADR-014.
+  Plain-language sidecars (`oas.md`) are emitted alongside.
+- **Jurisdiction picker on `/authority`**. URL-driven
+  (`?jurisdiction=ca`); the backend `GET /api/authority-chain` accepts
+  an optional `?jurisdiction_id=` and returns `available_jurisdictions`
+  + `active_jurisdiction_code` so the picker hydrates from a single
+  round trip.
+- **`govops init` -> loader round-trip test**
+  (`TestInitLoaderRoundTrip`) pins the scaffolder + loader path
+  alignment so the v3.0 adoption gap stays closed.
+
+### Changed
+
+- **`JURISDICTION_REGISTRY` is no longer a Python literal.** It is
+  built from `lawcode/` at module import. The hand-written
+  `dict[str, JurisdictionPack]` at the bottom of
+  `src/govops/jurisdictions.py` is gone; the 35+ call sites in
+  `api.py` + `screen.py` keep working because the dict shape is
+  preserved.
+- **`govops init <code>`** now scaffolds the jurisdiction metadata file
+  to `lawcode/<code>/config/jurisdiction.yaml` instead of
+  `lawcode/<code>/jurisdiction.yaml`. This matches the path the L3
+  loader reads, closing a regression where `govops init` produced a
+  jurisdiction the running app could not discover.
+- **`/admin` Operator runbook** "Onboard a new jurisdiction" panel
+  rewritten across all 6 locales (en / fr / pt-BR / es-MX / de / uk):
+  step 1 now points at `govops init`; step 2 describes filling TODO
+  markers in the scaffolded YAML and notes that demo cases live in the
+  program manifest. The pre-v3.1 step 2 ("Register the jurisdiction
+  in src/govops/jurisdictions.py") is gone.
+- **`docs/runbooks/add-jurisdiction.md`** and **`add-program.md`**
+  rewritten for the lawcode-only flow. Demo cases live in
+  `programs/<id>.yaml demo_cases:`, not in
+  `src/govops/jurisdictions.py`.
+
+### Fixed
+
+- **`/cases` review action no longer silently disabled.** Pre-v3.1 the
+  submit button was disabled whenever the rationale was under 20
+  characters; the form looked broken with no hint. Now the button is
+  always enabled, and submitting with a too-short rationale surfaces an
+  inline i18n hint below the textarea.
+- **`/encode` "Commit to engine" is idempotent.** Pre-v3.1 the JSON
+  commit endpoint had no guard; re-clicking re-invoked the endpoint
+  and a fresh `committed_rule_ids` response came back, suggesting the
+  commit happened a second time. `EncodingBatch.committed_at` is now
+  set on first success and subsequent attempts return `409 Conflict`.
+- **`/about` "Read deeper" dead links.** Dropped the relocated
+  `PLAN.md` entry (moved to `eva-foundation/plans/` under the
+  visibility rule on 2026-04-30); fixed `docs/adr/` ->
+  `docs/design/ADRs/`.
+
+### Not yet shipped (still pending for the v3.1.0 release)
+
+- L5: structured citation linkage (`cited_authority` URI) + `/impact`
+  grouping by country (ADR-021).
+- L7: authoring substrate for non-ConfigValue records (ADR-022) and
+  the L8-L12 in-app editors (Onboard wizard, authority chain editor,
+  legal documents editor, demo cases editor, program manifest creator).
+- L14: adoption walkthrough doc + E2E spec; tag `v3.1.0`; redeploy
+  HF Space.
 
 ## [3.0.0] -- Program-as-Primitive (2026-05-10)
 
