@@ -106,3 +106,11 @@ Rejected: a jurisdiction with N programs would carry the same identity facts N t
 - `schema/lawcode-v1.0.json` -- the file shape this ADR extends
 - `src/govops/cli_init.py` -- the scaffolder this ADR updates
 - v3.1 plan, Lane 1 -- this ADR's implementation context
+
+## Amendment 2026-05-10 -- legal_tradition relaxed to free-form
+
+L2 (data migration) surfaced that the 7 running jurisdictions carry prose `legal_tradition` strings -- "Bijural (common law / civil law)" for Canada, "Civil law (Romano-Germanic)" for Brazil, "Civil law (Japanese hybrid; German + French + post-war common-law influence)" for Japan -- with semantic detail the original 6-bucket enum cannot represent. Forcing those into the enum would either lose detail or require a parallel `legal_tradition_detail` field, which conflates intent with prose.
+
+The cleaner call: relax `legal_tradition` from enum to free-form string with `minLength: 1`. The schema description still lists the canonical short buckets (`common_law`, `civil_law`, `bijural`, `mixed`, `religious`, `customary`) as recommended for new entries, so wizard-driven authoring (ADR-022) defaults toward the structured bucket set while back-fill from the existing prose round-trips unchanged. A tighter taxonomy may land in v3.2 once concrete UI requirements settle (e.g. a comparison surface that needs structured matching across the 7 traditions).
+
+Test coverage updated: `test_metadata_invalid_legal_tradition_fails` (L1) is replaced by `test_metadata_legal_tradition_is_free_form` (L2) asserting that representative prose strings validate while the empty string remains rejected.

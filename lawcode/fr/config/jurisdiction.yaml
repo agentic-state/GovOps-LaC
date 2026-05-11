@@ -1,6 +1,19 @@
 # yaml-language-server: $schema=../../../schema/lawcode-v1.0.json
 # fr/config/jurisdiction.yaml — see ca/config/jurisdiction.yaml for the
 # load-bearing comment. Substrate-resolved per govops-022.
+# Per ADR-019 the `jurisdiction:` block declares identity for the
+# lawcode-as-discovery loader (ADR-020).
+
+jurisdiction:
+  id: jur-fr-national
+  country: FR
+  level: federal
+  parent_id: null
+  name:
+    fr: Republique francaise
+  legal_tradition: Civil law (Napoleonic code)
+  language_regime: Francais
+  default_language: fr
 
 defaults:
   domain: jurisdiction
