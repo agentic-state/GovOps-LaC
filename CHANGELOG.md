@@ -12,12 +12,17 @@ illustrative purposes only.
 
 ## [Unreleased]
 
-v3.1 lanes have landed on `main` since v3.0.0; no GitHub release yet
-(waits for the in-app authoring substrate + adoption walkthrough). The
-architectural headline is **lawcode-as-discovery**: adding a
-jurisdiction no longer requires a Python edit. Drop a `lawcode/<code>/`
-directory in the right shape, restart (or call `reload_registry()`),
-and the new jurisdiction appears.
+_No unreleased changes._
+
+## [3.1.0] -- Lawcode-as-discovery + authoring substrate (2026-05-11)
+
+v3.1 closes the v3.0 adoption gap. The architectural headline is
+**lawcode-as-discovery**: `JURISDICTION_REGISTRY` is now built at
+startup by walking `lawcode/` (ADR-020). Adding a jurisdiction no
+longer requires a Python edit, and the new L7 substrate provides a
+draft / approve / commit HTTP API (ADR-022) for in-app authoring of
+jurisdictions and program manifests. Five playthrough bugs from the
+2026-05-10 review are closed in the process.
 
 ### Added
 
@@ -88,15 +93,68 @@ and the new jurisdiction appears.
   visibility rule on 2026-04-30); fixed `docs/adr/` ->
   `docs/design/ADRs/`.
 
-### Not yet shipped (still pending for the v3.1.0 release)
+### Added (v3.1 L5 / L7 / L13 / L14 closeouts)
 
-- L5: structured citation linkage (`cited_authority` URI) + `/impact`
-  grouping by country (ADR-021).
-- L7: authoring substrate for non-ConfigValue records (ADR-022) and
-  the L8-L12 in-app editors (Onboard wizard, authority chain editor,
-  legal documents editor, demo cases editor, program manifest creator).
-- L14: adoption walkthrough doc + E2E spec; tag `v3.1.0`; redeploy
-  HF Space.
+- **ADR-021 -- `/impact` groups by country.** Search across config
+  records that share a citation now reports "N records across M
+  countries" instead of "N jurisdictions"; the response shape carries
+  `country_count` and per-result `country_code` / `country_label`.
+  Each ConfigValue inside a country section preserves its
+  program-scoped `jurisdiction_id` (`es-jub` vs `es-ei`) via a
+  per-row chip. ADR-021 flags the forward-looking structured
+  `cited_authority` URI for v4 (no code yet).
+- **ADR-022 -- authoring substrate** for non-ConfigValue records.
+  `DraftStore` mirrors `ConfigStore`'s draft / approve / commit
+  pattern but for `jurisdiction.yaml` + program manifests. Drafts
+  live in memory + file-per-draft persistence under
+  `lawcode/.drafts/` (survive restart). New endpoints under
+  `/api/authoring/`: `POST /drafts`, `GET /drafts`,
+  `GET /drafts/{id}`, `POST /drafts/{id}/{approve,reject}`,
+  `DELETE /drafts/{id}`, `POST /commit`. `commit` writes approved
+  drafts to `lawcode/<code>/...` and calls `reload_registry()` +
+  `clear_compare_program_cache()` so the new content is immediately
+  visible on `/api/authority-chain`, `/screen`, `/compare`.
+- **Operator runbook** at `/admin` gains a fourth panel "Author
+  changes through the substrate API (v3.1 L7)" across all 6 locales
+  describing the draft / approve / commit flow.
+- **Adoption walkthrough** at `docs/adoption/HOW-TO-ADD-A-JURISDICTION.md`
+  documents both paths (CLI + file edit, and substrate API).
+- **Adoption pytest coverage** at
+  `tests/test_authoring_substrate.py::TestCommitWritesToDiskAndRehydrates`
+  pins the full substrate flow: draft + approve + commit + the L3
+  loader picking up the new jurisdiction. Browser-level adoption E2E is
+  deferred to v3.1.x because the substrate's `commit` mutates the live
+  `JURISDICTION_REGISTRY` in the running process and races with the
+  cross-browser Playwright pool's concurrent reads (same SQLAlchemy
+  ``_apply_processors`` class of race we saw in L2b). The L8 Onboard
+  wizard E2E will re-introduce browser coverage with worker-scoped
+  lawcode roots.
+- **Vitest now runs in CI** as a step in the E2E job. PR #46 (truth
+  alignment) silently shipped ICU `UNCLOSED_TAG` breakage in 6 locales
+  because vitest wasn't wired -- vitest catches this in 0.8s but
+  Playwright doesn't because the broken keys live in surfaces the
+  journey suite doesn't walk. Class-fix landed in #47 along with the
+  ICU breakage repair.
+
+### Changed
+
+- **`govops init <code>`** scaffolds metadata to
+  `lawcode/<code>/config/jurisdiction.yaml` (was top-level
+  `lawcode/<code>/jurisdiction.yaml`). This closes a regression where
+  a fresh scaffold produced a jurisdiction the L3 loader could not
+  see. New test `TestInitLoaderRoundTrip` pins the scaffolder +
+  loader path alignment.
+
+### Not yet shipped (v3.1.x backlog)
+
+- **L8-L12 in-app authoring UIs** (Onboard wizard, authority chain
+  editor, legal documents editor, demo cases editor, program manifest
+  creator). The L7 substrate API is the v3.1 surface; the wizards
+  drive it in v3.1.x.
+- **v3.2 substrate hardening**: per-path conflict refusal when two
+  drafts target the same `target_path`, author / approver role
+  separation + RBAC, structural-aware YAML emission preserving
+  comments + ordering, git-commit-diff projection.
 
 ## [3.0.0] -- Program-as-Primitive (2026-05-10)
 
@@ -233,6 +291,7 @@ for each phase.
 - 423 backend tests (Python 3.10 / 3.11 / 3.12), 53 web vitest tests,
   cross-browser Playwright + axe E2E.
 
-[Unreleased]: https://github.com/agentic-state/GovOps-LaC/compare/v3.0.0...HEAD
+[Unreleased]: https://github.com/agentic-state/GovOps-LaC/compare/v3.1.0...HEAD
+[3.1.0]: https://github.com/agentic-state/GovOps-LaC/compare/v3.0.0...v3.1.0
 [3.0.0]: https://github.com/agentic-state/GovOps-LaC/compare/v2.0.0...v3.0.0
 [2.0.0]: https://github.com/agentic-state/GovOps-LaC/releases/tag/v2.0.0
