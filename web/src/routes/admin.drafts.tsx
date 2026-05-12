@@ -360,6 +360,14 @@ function DraftRow({
               >
                 {intl.formatMessage({ id: "drafts.action.edit_legal_documents" })}
               </Link>
+              <Link
+                to="/admin/drafts/$id/demo-cases"
+                params={{ id: draft.id }}
+                className="inline-flex h-9 items-center justify-center rounded-md border border-border bg-surface px-3 text-sm text-foreground hover:bg-surface-raised"
+                data-testid={`edit-demo-cases-${draft.id}`}
+              >
+                {intl.formatMessage({ id: "drafts.action.edit_demo_cases" })}
+              </Link>
             </>
           )}
           <Button type="button" variant="ghost" disabled={busy} onClick={onReject} data-testid={`reject-${draft.id}`}>
