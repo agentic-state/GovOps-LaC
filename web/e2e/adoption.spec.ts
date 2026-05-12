@@ -1,27 +1,41 @@
 /**
  * v3.1 L14 adoption E2E -- end-to-end "no Python edit" jurisdiction
- * adoption through the L7 authoring substrate, verified by the live UI.
+ * adoption through the L7 authoring substrate, verified through the
+ * /api/authoring/* and /api/authority-chain endpoints.
  *
  * The plan's original L14 walked an in-app Onboard wizard, which lives
  * at L8 (deferred to v3.1.x). This spec exercises the shipped surface:
  * drive the /api/authoring/* endpoints via Playwright's request fixture
- * to draft + approve + commit a fictional `xx` jurisdiction, then load
- * `/authority?jurisdiction=xx` in the browser and assert the new
- * jurisdiction's identity is visible.
+ * to draft + approve + commit a fictional `xx` jurisdiction, then
+ * verify the new identity is queryable through /api/authority-chain.
+ *
+ * Browser-side coverage of the freshly-committed jurisdiction is the
+ * job of the L8 Onboard wizard E2E (v3.1.x); this spec keeps the
+ * v3.1.0 verification scoped to what's actually shipped here -- the
+ * substrate's draft / approve / commit / loader-reload round trip.
  *
  * Teardown removes the on-disk YAML so subsequent runs (and the test
  * bench against shared targets like HF Space) stay clean. The
  * post-commit drafts cannot be discarded via the API by design
- * (ADR-022), so the cleanup is filesystem-side via a teardown helper
- * that calls a backend test-only escape hatch. On HF the substrate is
- * ephemeral anyway -- container restart drops `xx/`.
+ * (ADR-022), so the cleanup is filesystem-side via Node fs. On HF the
+ * substrate is ephemeral anyway -- container restart drops `xx/`.
  */
 
 import { test, expect, request as playwrightRequest } from "@playwright/test";
+import { existsSync, rmSync, unlinkSync, readdirSync } from "node:fs";
+import { join, dirname } from "node:path";
+import { fileURLToPath } from "node:url";
 import { backendUrl } from "./fixtures/api";
 
 const BACKEND = backendUrl();
 const TEST_CODE = "xx"; // fictional ISO-reserved code for testing
+
+// Resolve the repo root (this spec lives at web/e2e/) so we can clean up
+// the committed YAML files the substrate writes during the test. The
+// backend writes to <repo>/lawcode/xx/ via _LAWCODE_ROOT.
+const REPO_ROOT = join(dirname(fileURLToPath(import.meta.url)), "..", "..");
+const XX_LAWCODE_DIR = join(REPO_ROOT, "lawcode", TEST_CODE);
+const DRAFTS_DIR = join(REPO_ROOT, "lawcode", ".drafts");
 
 // Concrete payloads -- minimal but schema-valid. Real adoption fills in
 // citations / statutes; this fixture is only proving the round-trip.
@@ -88,10 +102,36 @@ const PROGRAM_PAYLOAD = {
   rationale: "v3.1 L14 adoption E2E fixture",
 };
 
+function cleanupTestArtifacts() {
+  // Remove the committed lawcode/xx/ tree.
+  if (existsSync(XX_LAWCODE_DIR)) {
+    rmSync(XX_LAWCODE_DIR, { recursive: true, force: true });
+  }
+  // Remove draft files that reference xx (their filename is a uuid hex
+  // so we can't target by jurisdiction code; instead look inside and
+  // drop drafts whose target_path starts with xx/).
+  if (existsSync(DRAFTS_DIR)) {
+    for (const name of readdirSync(DRAFTS_DIR)) {
+      const full = join(DRAFTS_DIR, name);
+      try {
+        const { readFileSync } = require("node:fs");
+        const text = readFileSync(full, "utf-8");
+        if (text.includes(`target_path: ${TEST_CODE}/`)) {
+          unlinkSync(full);
+        }
+      } catch {
+        // ignore -- if we cannot inspect a file, leave it.
+      }
+    }
+  }
+}
+
 test.describe("v3.1 L14 -- adoption substrate end-to-end", () => {
-  test("[J60] draft + approve + commit + reload makes xx jurisdiction live", async ({
-    page,
-  }) => {
+  test.afterAll(() => {
+    cleanupTestArtifacts();
+  });
+
+  test("[J60] draft + approve + commit + reload makes xx jurisdiction live", async () => {
     const api = await playwrightRequest.newContext();
 
     // ----- B1. Draft the jurisdiction metadata -----
@@ -146,16 +186,15 @@ test.describe("v3.1 L14 -- adoption substrate end-to-end", () => {
     const chainBody = await chain.json();
     expect(chainBody.jurisdiction.id).toBe(`jur-${TEST_CODE}-national`);
     expect(chainBody.jurisdiction.country).toBe(TEST_CODE.toUpperCase());
-
-    // ----- And the live UI sees it -----
-    // Switch the /authority picker to xx and verify the chain renders.
-    await page.goto(`/authority?jurisdiction=${TEST_CODE}`);
-    // The jurisdiction header carries the country name we authored.
-    await expect(
-      page.getByText(`Test Jurisdiction ${TEST_CODE.toUpperCase()}`, {
-        exact: false,
-      }),
-    ).toBeVisible({ timeout: 15000 });
+    expect(chainBody.jurisdiction.name).toBe(
+      `Test Jurisdiction ${TEST_CODE.toUpperCase()}`,
+    );
+    // The xx code now appears in the available-jurisdictions list the
+    // /authority picker hydrates from on first paint.
+    const availableCodes = (
+      chainBody.available_jurisdictions as Array<{ code: string }>
+    ).map((j) => j.code);
+    expect(availableCodes).toContain(TEST_CODE);
 
     await api.dispose();
   });

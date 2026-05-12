@@ -202,19 +202,21 @@ test("[J32] encoder: approving a proposal locks the Approve/Modify/Reject button
   await expect(lockedHint).toBeVisible();
 });
 
-// Every operator page renders a runbook with three collapsible scenarios.
+// Every operator page renders a runbook with collapsible scenarios.
 // Consistency principle: if a page is operator-action, it has a runbook.
-const RUNBOOK_ROUTES = [
-  { path: "/cases", prefix: "runbook.cases" },
-  { path: "/encode", prefix: "runbook.encode" },
-  { path: "/config", prefix: "runbook.config" },
-  { path: "/config/approvals", prefix: "runbook.approvals" },
-  { path: "/config/prompts", prefix: "runbook.prompts" },
-  { path: "/admin", prefix: "runbook.admin" },
+// v3.1 L13: /admin gained a 4th scenario ("author through the substrate API")
+// so the count is page-specific.
+const RUNBOOK_ROUTES: Array<{ path: string; prefix: string; scenarios: number }> = [
+  { path: "/cases", prefix: "runbook.cases", scenarios: 3 },
+  { path: "/encode", prefix: "runbook.encode", scenarios: 3 },
+  { path: "/config", prefix: "runbook.config", scenarios: 3 },
+  { path: "/config/approvals", prefix: "runbook.approvals", scenarios: 3 },
+  { path: "/config/prompts", prefix: "runbook.prompts", scenarios: 3 },
+  { path: "/admin", prefix: "runbook.admin", scenarios: 4 },
 ];
 
-for (const { path, prefix } of RUNBOOK_ROUTES) {
-  test(`[M04] runbook: ${path} shows the operator runbook with 3 collapsible scenarios`, async ({
+for (const { path, prefix, scenarios } of RUNBOOK_ROUTES) {
+  test(`[M04] runbook: ${path} shows the operator runbook with ${scenarios} collapsible scenarios`, async ({
     page,
   }) => {
     await page.goto(path);
@@ -222,7 +224,7 @@ for (const { path, prefix } of RUNBOOK_ROUTES) {
     const scenarioButtons = page.locator(
       `section[aria-labelledby="${prefix}-heading"] > ul > li > button`,
     );
-    await expect(scenarioButtons).toHaveCount(3);
+    await expect(scenarioButtons).toHaveCount(scenarios);
     const first = scenarioButtons.first();
     await first.click();
     await expect(first).toHaveAttribute("aria-expanded", "true");
