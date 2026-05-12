@@ -37,6 +37,7 @@ import { Route as AdminFederationRouteImport } from './routes/admin.federation'
 import { Route as AdminDraftsRouteImport } from './routes/admin.drafts'
 import { Route as ConfigApprovalsIdRouteImport } from './routes/config.approvals.$id'
 import { Route as ConfigKeyJurisdictionIdRouteImport } from './routes/config.$key.$jurisdictionId'
+import { Route as AdminDraftsIdLegalDocumentsRouteImport } from './routes/admin.drafts.$id.legal-documents'
 import { Route as AdminDraftsIdAuthorityRouteImport } from './routes/admin.drafts.$id.authority'
 import { Route as ConfigPromptsKeyJurisdictionIdEditRouteImport } from './routes/config.prompts.$key.$jurisdictionId.edit'
 
@@ -180,6 +181,12 @@ const ConfigKeyJurisdictionIdRoute = ConfigKeyJurisdictionIdRouteImport.update({
   path: '/$key/$jurisdictionId',
   getParentRoute: () => ConfigRoute,
 } as any)
+const AdminDraftsIdLegalDocumentsRoute =
+  AdminDraftsIdLegalDocumentsRouteImport.update({
+    id: '/$id/legal-documents',
+    path: '/$id/legal-documents',
+    getParentRoute: () => AdminDraftsRoute,
+  } as any)
 const AdminDraftsIdAuthorityRoute = AdminDraftsIdAuthorityRouteImport.update({
   id: '/$id/authority',
   path: '/$id/authority',
@@ -222,6 +229,7 @@ export interface FileRoutesByFullPath {
   '/config/$key/$jurisdictionId': typeof ConfigKeyJurisdictionIdRoute
   '/config/approvals/$id': typeof ConfigApprovalsIdRoute
   '/admin/drafts/$id/authority': typeof AdminDraftsIdAuthorityRoute
+  '/admin/drafts/$id/legal-documents': typeof AdminDraftsIdLegalDocumentsRoute
   '/config/prompts/$key/$jurisdictionId/edit': typeof ConfigPromptsKeyJurisdictionIdEditRoute
 }
 export interface FileRoutesByTo {
@@ -253,6 +261,7 @@ export interface FileRoutesByTo {
   '/config/$key/$jurisdictionId': typeof ConfigKeyJurisdictionIdRoute
   '/config/approvals/$id': typeof ConfigApprovalsIdRoute
   '/admin/drafts/$id/authority': typeof AdminDraftsIdAuthorityRoute
+  '/admin/drafts/$id/legal-documents': typeof AdminDraftsIdLegalDocumentsRoute
   '/config/prompts/$key/$jurisdictionId/edit': typeof ConfigPromptsKeyJurisdictionIdEditRoute
 }
 export interface FileRoutesById {
@@ -286,6 +295,7 @@ export interface FileRoutesById {
   '/config/$key/$jurisdictionId': typeof ConfigKeyJurisdictionIdRoute
   '/config/approvals/$id': typeof ConfigApprovalsIdRoute
   '/admin/drafts/$id/authority': typeof AdminDraftsIdAuthorityRoute
+  '/admin/drafts/$id/legal-documents': typeof AdminDraftsIdLegalDocumentsRoute
   '/config/prompts/$key/$jurisdictionId/edit': typeof ConfigPromptsKeyJurisdictionIdEditRoute
 }
 export interface FileRouteTypes {
@@ -320,6 +330,7 @@ export interface FileRouteTypes {
     | '/config/$key/$jurisdictionId'
     | '/config/approvals/$id'
     | '/admin/drafts/$id/authority'
+    | '/admin/drafts/$id/legal-documents'
     | '/config/prompts/$key/$jurisdictionId/edit'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -351,6 +362,7 @@ export interface FileRouteTypes {
     | '/config/$key/$jurisdictionId'
     | '/config/approvals/$id'
     | '/admin/drafts/$id/authority'
+    | '/admin/drafts/$id/legal-documents'
     | '/config/prompts/$key/$jurisdictionId/edit'
   id:
     | '__root__'
@@ -383,6 +395,7 @@ export interface FileRouteTypes {
     | '/config/$key/$jurisdictionId'
     | '/config/approvals/$id'
     | '/admin/drafts/$id/authority'
+    | '/admin/drafts/$id/legal-documents'
     | '/config/prompts/$key/$jurisdictionId/edit'
   fileRoutesById: FileRoutesById
 }
@@ -600,6 +613,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ConfigKeyJurisdictionIdRouteImport
       parentRoute: typeof ConfigRoute
     }
+    '/admin/drafts/$id/legal-documents': {
+      id: '/admin/drafts/$id/legal-documents'
+      path: '/$id/legal-documents'
+      fullPath: '/admin/drafts/$id/legal-documents'
+      preLoaderRoute: typeof AdminDraftsIdLegalDocumentsRouteImport
+      parentRoute: typeof AdminDraftsRoute
+    }
     '/admin/drafts/$id/authority': {
       id: '/admin/drafts/$id/authority'
       path: '/$id/authority'
@@ -619,10 +639,12 @@ declare module '@tanstack/react-router' {
 
 interface AdminDraftsRouteChildren {
   AdminDraftsIdAuthorityRoute: typeof AdminDraftsIdAuthorityRoute
+  AdminDraftsIdLegalDocumentsRoute: typeof AdminDraftsIdLegalDocumentsRoute
 }
 
 const AdminDraftsRouteChildren: AdminDraftsRouteChildren = {
   AdminDraftsIdAuthorityRoute: AdminDraftsIdAuthorityRoute,
+  AdminDraftsIdLegalDocumentsRoute: AdminDraftsIdLegalDocumentsRoute,
 }
 
 const AdminDraftsRouteWithChildren = AdminDraftsRoute._addFileChildren(

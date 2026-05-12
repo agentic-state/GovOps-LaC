@@ -24,7 +24,9 @@
     "events.summary.move_country",
     "events.summary.add_evidence",
     "authority.field.id",
-    "authority.field.url"
+    "authority.field.url",
+    "legaldocs.field.id",
+    "legaldocs.field.url"
   ],
   "per_locale_keys": {
     "fr": [
