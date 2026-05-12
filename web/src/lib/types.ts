@@ -630,3 +630,36 @@ export interface ProgramInteractionsResponse {
   program_id: string;
   interactions: ProgramInteractionMeta[];
 }
+
+// ---- Authoring substrate (ADR-022 / v3.1 L7) ---------------------------------
+
+export type DraftType = "jurisdiction" | "program";
+export type DraftStatus = "pending" | "approved" | "rejected" | "committed";
+
+export interface AuthoringDraft {
+  id: string;
+  type: DraftType;
+  target_path: string;
+  content: Record<string, unknown>;
+  status: DraftStatus;
+  author: string;
+  rationale: string | null;
+  created_at: string;
+  approved_at: string | null;
+  approved_by: string | null;
+  rejected_at: string | null;
+  rejected_by: string | null;
+  rejection_reason: string | null;
+  committed_at: string | null;
+  committed_by: string | null;
+}
+
+export interface ListDraftsResponse {
+  drafts: AuthoringDraft[];
+}
+
+export interface CommitResponse {
+  committed: AuthoringDraft[];
+  reloaded: boolean;
+  reload_error?: string;
+}

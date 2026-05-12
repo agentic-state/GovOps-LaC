@@ -2345,6 +2345,76 @@ def authoring_commit(body: dict[str, Any]):
     }
 
 
+@app.post("/api/authoring/scaffold/jurisdiction")
+def authoring_scaffold_jurisdiction(body: dict[str, Any]):
+    """Pre-fill drafts for a fresh jurisdiction without writing anything.
+
+    The L8 Onboard wizard calls this on step 1 to get a complete
+    schema-valid skeleton (same templates ``govops init`` writes to
+    disk) returned in-memory. The wizard renders the content in a form,
+    the operator edits the TODO markers, and the wizard POSTs the
+    finalised content to ``/api/authoring/drafts`` on submit.
+
+    No filesystem side effects. The substrate refuses target_paths the
+    loader cannot see (see ``DraftStore.create`` path discipline), so
+    the scaffold respects the same layout: jurisdiction metadata at
+    ``<code>/config/jurisdiction.yaml`` and programs under
+    ``<code>/programs/<id>.yaml``.
+
+    Body shape: ``{code: str, shapes?: ["oas", "ei"]}``. Defaults to
+    ``["oas"]`` (the OAS shape is the only one the v3.1 registry loader
+    requires to register a jurisdiction; EI is additive).
+    """
+    import yaml as _yaml
+    from govops.cli_init import (
+        InitError,
+        _ei_program_yaml,
+        _jurisdiction_yaml,
+        _normalize_country_code,
+        _oas_program_yaml,
+    )
+
+    try:
+        code = _normalize_country_code(body.get("code", ""))
+    except InitError as e:
+        raise HTTPException(400, str(e))
+
+    requested_shapes = body.get("shapes") or ["oas"]
+    if not isinstance(requested_shapes, list):
+        raise HTTPException(400, "shapes must be a list")
+    valid_shapes = {"oas", "ei"}
+    unknown = set(requested_shapes) - valid_shapes
+    if unknown:
+        raise HTTPException(400, f"unknown shape(s): {sorted(unknown)}")
+
+    jurisdiction_yaml_text = _jurisdiction_yaml(code)
+    programs_out: list[dict[str, Any]] = []
+    if "oas" in requested_shapes:
+        programs_out.append(
+            {
+                "program_id": "oas",
+                "target_path": f"{code}/programs/oas.yaml",
+                "content": _yaml.safe_load(_oas_program_yaml(code)),
+            }
+        )
+    if "ei" in requested_shapes:
+        programs_out.append(
+            {
+                "program_id": "ei",
+                "target_path": f"{code}/programs/ei.yaml",
+                "content": _yaml.safe_load(_ei_program_yaml(code)),
+            }
+        )
+
+    return {
+        "jurisdiction": {
+            "target_path": f"{code}/config/jurisdiction.yaml",
+            "content": _yaml.safe_load(jurisdiction_yaml_text),
+        },
+        "programs": programs_out,
+    }
+
+
 # ---------------------------------------------------------------------------
 # HTML UI routes
 # ---------------------------------------------------------------------------
