@@ -223,6 +223,40 @@ class DraftStore:
             out = [d for d in out if d.status == status]
         return sorted(out, key=lambda d: d.created_at)
 
+    def update_content(
+        self,
+        draft_id: str,
+        *,
+        content: dict[str, Any],
+        editor: str,
+        rationale: Optional[str] = None,
+    ) -> Draft:
+        """Replace the draft payload while the draft is still PENDING.
+
+        Refuses on APPROVED / REJECTED / COMMITTED -- approval clears the
+        edit window, matching ConfigValue admin's draft-immutability rule.
+        Used by the structured editors (L9 authority chain, L10 legal
+        documents, L11 demo cases) to mutate slices of the program
+        manifest without recreating the draft.
+        """
+        d = self._drafts.get(draft_id)
+        if d is None:
+            raise AuthoringError(f"draft not found: {draft_id}")
+        if d.status != DraftStatus.PENDING:
+            raise AuthoringError(
+                f"cannot edit draft in status {d.status.value}"
+            )
+        if not editor:
+            raise AuthoringError("editor required")
+        if not isinstance(content, dict):
+            raise AuthoringError("content must be a mapping")
+        d.content = content
+        if rationale is not None:
+            d.rationale = rationale
+        d.author = editor
+        self._persist(d)
+        return d
+
     def approve(self, draft_id: str, approver: str) -> Draft:
         d = self._drafts.get(draft_id)
         if d is None:

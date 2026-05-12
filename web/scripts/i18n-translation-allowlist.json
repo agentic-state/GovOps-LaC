@@ -22,7 +22,9 @@
     "about.deeper.sprind",
     "about.cta.project_home",
     "events.summary.move_country",
-    "events.summary.add_evidence"
+    "events.summary.add_evidence",
+    "authority.field.id",
+    "authority.field.url"
   ],
   "per_locale_keys": {
     "fr": [

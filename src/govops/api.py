@@ -2259,6 +2259,33 @@ def authoring_get_draft(draft_id: str):
     return _draft_response(d)
 
 
+@app.patch("/api/authoring/drafts/{draft_id}")
+def authoring_update_draft(draft_id: str, body: dict[str, Any]):
+    """Replace a PENDING draft's payload. Body shape:
+    ``{content, editor, rationale?}``. Refuses on APPROVED / REJECTED /
+    COMMITTED. Used by the L9-L11 structured editors (authority chain,
+    legal documents, demo cases) to mutate slices of a program manifest
+    in place rather than re-creating the draft."""
+    content = body.get("content")
+    if not isinstance(content, dict):
+        raise HTTPException(400, "content must be an object")
+    try:
+        d = draft_store.update_content(
+            draft_id,
+            content=content,
+            editor=body.get("editor", ""),
+            rationale=body.get("rationale"),
+        )
+    except AuthoringError as e:
+        msg = str(e)
+        if "not found" in msg:
+            raise HTTPException(404, msg)
+        if "cannot edit" in msg:
+            raise HTTPException(409, msg)
+        raise HTTPException(400, msg)
+    return _draft_response(d)
+
+
 @app.post("/api/authoring/drafts/{draft_id}/approve")
 def authoring_approve_draft(draft_id: str, body: dict[str, Any]):
     """Approve a pending draft. Body shape: ``{approver}``. Idempotent on

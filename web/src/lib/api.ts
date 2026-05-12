@@ -872,6 +872,16 @@ export async function getAuthoringDraft(id: string): Promise<AuthoringDraft> {
   return fetcher<AuthoringDraft>(`/api/authoring/drafts/${encodeURIComponent(id)}`);
 }
 
+export async function updateAuthoringDraft(
+  id: string,
+  payload: { content: Record<string, unknown>; editor: string; rationale?: string },
+): Promise<AuthoringDraft> {
+  return fetcher<AuthoringDraft>(`/api/authoring/drafts/${encodeURIComponent(id)}`, {
+    method: "PATCH",
+    body: JSON.stringify(payload),
+  });
+}
+
 export async function approveAuthoringDraft(
   id: string,
   approver: string,

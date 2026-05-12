@@ -113,6 +113,50 @@ class TestDraftStoreLifecycle:
                 author="alice",
             )
 
+    def test_update_pending_draft_replaces_content(self, tmp_path: Path):
+        store = DraftStore(tmp_path)
+        d = store.create(
+            type=DraftType.PROGRAM,
+            target_path="xx/programs/oas.yaml",
+            content={"program_id": "oas", "authority_chain": []},
+            author="alice",
+        )
+        updated = store.update_content(
+            d.id,
+            content={
+                "program_id": "oas",
+                "authority_chain": [
+                    {"id": "auth-1", "layer": "constitution", "title": "C"},
+                ],
+            },
+            editor="bob",
+            rationale="add constitution",
+        )
+        assert updated.content["authority_chain"][0]["id"] == "auth-1"
+        assert updated.author == "bob"
+        assert updated.rationale == "add constitution"
+        # Persisted on disk.
+        persisted = (tmp_path / ".drafts" / f"{d.id}.yaml").read_text(encoding="utf-8")
+        assert "auth-1" in persisted
+
+    def test_update_refuses_after_approval(self, tmp_path: Path):
+        store = DraftStore(tmp_path)
+        d = store.create(
+            type=DraftType.PROGRAM,
+            target_path="xx/programs/oas.yaml",
+            content={"program_id": "oas"},
+            author="alice",
+        )
+        store.approve(d.id, approver="approver")
+        try:
+            store.update_content(
+                d.id, content={"program_id": "oas", "x": 1}, editor="bob"
+            )
+        except Exception as e:  # AuthoringError -> ValueError
+            assert "cannot edit" in str(e)
+        else:
+            raise AssertionError("expected AuthoringError on approved-draft edit")
+
     def test_discard_pending_draft(self, tmp_path: Path):
         store = DraftStore(tmp_path)
         d = store.create(
@@ -398,6 +442,93 @@ class TestAuthoringHTTP:
         g = client.get(f"/api/authoring/drafts/{draft_id}")
         assert g.status_code == 200
         assert g.json()["status"] == "pending"
+
+    def test_patch_updates_pending_draft(self, client):
+        r = client.post(
+            "/api/authoring/drafts",
+            json={
+                "type": "program",
+                "target_path": "xx/programs/oas.yaml",
+                "content": _minimal_program_manifest("xx"),
+                "author": "alice",
+            },
+        )
+        assert r.status_code == 200
+        did = r.json()["id"]
+        new_content = _minimal_program_manifest("xx")
+        new_content["authority_chain"].append(
+            {
+                "id": "auth-xx-oas-regs",
+                "layer": "regulation",
+                "title": "Pension Regulations",
+                "citation": "Pension Regs",
+                "effective_date": "1900-01-01",
+                "url": "https://example.org/regs",
+                "parent": "auth-xx-oas-act",
+            }
+        )
+        patch = client.patch(
+            f"/api/authoring/drafts/{did}",
+            json={
+                "content": new_content,
+                "editor": "bob",
+                "rationale": "add regulation tier",
+            },
+        )
+        assert patch.status_code == 200, patch.text
+        body = patch.json()
+        assert body["status"] == "pending"
+        assert len(body["content"]["authority_chain"]) == 3
+        assert body["author"] == "bob"
+        assert body["rationale"] == "add regulation tier"
+
+    def test_patch_refuses_after_approval(self, client):
+        r = client.post(
+            "/api/authoring/drafts",
+            json={
+                "type": "program",
+                "target_path": "xx/programs/oas.yaml",
+                "content": _minimal_program_manifest("xx"),
+                "author": "alice",
+            },
+        )
+        did = r.json()["id"]
+        client.post(
+            f"/api/authoring/drafts/{did}/approve",
+            json={"approver": "approver"},
+        )
+        patch = client.patch(
+            f"/api/authoring/drafts/{did}",
+            json={
+                "content": _minimal_program_manifest("xx"),
+                "editor": "bob",
+            },
+        )
+        assert patch.status_code == 409
+
+    def test_patch_unknown_returns_404(self, client):
+        patch = client.patch(
+            "/api/authoring/drafts/does-not-exist",
+            json={"content": {"x": 1}, "editor": "bob"},
+        )
+        assert patch.status_code == 404
+
+    def test_patch_400_on_non_object_content(self, client):
+        r = client.post(
+            "/api/authoring/drafts",
+            json={
+                "type": "program",
+                "target_path": "xx/programs/oas.yaml",
+                "content": _minimal_program_manifest("xx"),
+                "author": "alice",
+            },
+        )
+        did = r.json()["id"]
+        patch = client.patch(
+            f"/api/authoring/drafts/{did}",
+            json={"content": "not-a-dict", "editor": "bob"},
+        )
+        assert patch.status_code == 400
 
     def test_unknown_type_400(self, client):
         r = client.post(

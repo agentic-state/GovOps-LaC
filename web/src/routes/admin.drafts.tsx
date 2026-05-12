@@ -342,6 +342,16 @@ function DraftRow({
           <Button type="button" variant="authority" disabled={busy} onClick={onApprove} data-testid={`approve-${draft.id}`}>
             {intl.formatMessage({ id: "drafts.action.approve" })}
           </Button>
+          {draft.type === "program" && (
+            <Link
+              to="/admin/drafts/$id/authority"
+              params={{ id: draft.id }}
+              className="inline-flex h-9 items-center justify-center rounded-md border border-border bg-surface px-3 text-sm text-foreground hover:bg-surface-raised"
+              data-testid={`edit-authority-${draft.id}`}
+            >
+              {intl.formatMessage({ id: "drafts.action.edit_authority" })}
+            </Link>
+          )}
           <Button type="button" variant="ghost" disabled={busy} onClick={onReject} data-testid={`reject-${draft.id}`}>
             {intl.formatMessage({ id: "drafts.action.reject" })}
           </Button>
