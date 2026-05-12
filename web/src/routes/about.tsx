@@ -300,10 +300,13 @@ function About() {
                   href: PROJECT_HOME,
                   external: true,
                 },
-                { key: "about.deeper.plan", path: "PLAN.md" },
+                // v3.1 L6 Bug 5: PLAN.md was relocated 2026-04-30 per the
+                // workspace visibility rule; the in-repo link 404'd. ADR
+                // path corrected from docs/adr/ to docs/design/ADRs/ (the
+                // actual on-disk location).
                 { key: "about.deeper.idea", path: "IDEA-GovOps-v2.0-LawAsCode.md" },
                 { key: "about.deeper.lawcode_mapping", path: "docs/design/LAW-AS-CODE.md" },
-                { key: "about.deeper.adrs", path: "docs/adr/" },
+                { key: "about.deeper.adrs", path: "docs/design/ADRs/" },
                 { key: "about.deeper.lawcode_artefacts", path: "lawcode/" },
                 { key: "about.deeper.schema", path: "schema/configvalue-v1.0.json" },
                 { key: "about.deeper.aligned", path: "docs/aligned-initiatives.md" },

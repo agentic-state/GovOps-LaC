@@ -41,6 +41,75 @@ class ProgramManifestError(ValueError):
     """Raised when a program manifest fails to load or validate."""
 
 
+class JurisdictionMetadata(BaseModel):
+    """ADR-019 jurisdiction-level identity block.
+
+    Lives as the top-level ``jurisdiction:`` key in a lawcode YAML file
+    (typically ``lawcode/<code>/config/jurisdiction.yaml`` for the existing
+    7 jurisdictions, or ``lawcode/<code>/jurisdiction.yaml`` for cli_init
+    scaffolds). Distinct from ConfigValue records carried in the same file.
+    Read by the lawcode-as-discovery loader (ADR-020) at startup to register
+    a jurisdiction without a Python edit -- closing the v3.0 adoption gap.
+    """
+
+    id: str
+    country: str
+    level: str
+    parent_id: Optional[str] = None
+    name: dict[str, str]
+    legal_tradition: str = ""
+    language_regime: str = ""
+    default_language: str
+
+    def display_name(self) -> str:
+        """Pick the locale that matches the running engine's single-string
+        ``Jurisdiction.name`` field. Order: default_language, then en, then
+        first locale present. Mirrors the values currently authored as
+        Python literals at src/govops/jurisdictions.py + src/govops/seed.py."""
+        return (
+            self.name.get(self.default_language)
+            or self.name.get("en")
+            or next(iter(self.name.values()))
+        )
+
+    def to_jurisdiction(self):
+        """Project to the runtime ``Jurisdiction`` shape used by the engine.
+
+        Imports ``Jurisdiction`` lazily because ``govops.models`` already
+        imports from this module's neighbours; keeping the projection
+        lazy avoids circular-import surprises during package init.
+        """
+        from govops.models import Jurisdiction
+        return Jurisdiction(
+            id=self.id,
+            name=self.display_name(),
+            country=self.country,
+            level=self.level,
+            parent_id=self.parent_id,
+            legal_tradition=self.legal_tradition,
+            language_regime=self.language_regime,
+        )
+
+
+def load_jurisdiction_metadata(path: "str | Path") -> JurisdictionMetadata:
+    """Load the ADR-019 ``jurisdiction:`` block from a lawcode YAML file.
+
+    Raises :class:`ProgramManifestError` if the file is missing or carries no
+    metadata block. Pydantic validation enforces field shapes on top of the
+    JSON Schema gate at ``schema/lawcode-v1.0.json``.
+    """
+    p = Path(path)
+    if not p.exists():
+        raise ProgramManifestError(f"jurisdiction metadata file not found: {p}")
+    with p.open("r", encoding="utf-8") as fh:
+        raw = yaml.safe_load(fh)
+    if not isinstance(raw, dict) or "jurisdiction" not in raw:
+        raise ProgramManifestError(
+            f"{p}: missing top-level `jurisdiction:` block (ADR-019)"
+        )
+    return JurisdictionMetadata(**raw["jurisdiction"])
+
+
 class Program(BaseModel):
     """Loaded program manifest. Wraps existing model objects.
 

@@ -6,6 +6,8 @@ When adding a country / region to GovOps's coverage. Adds full execution support
 
 This is the canonical onboarding path for a new contributor or a partner government wanting their jurisdiction represented.
 
+Since v3.1 (ADR-020), the `JURISDICTION_REGISTRY` is built at startup by walking `lawcode/` — **adding a jurisdiction no longer requires a Python edit**. Drop the right YAML in the right place, restart (or hit the registry-reload endpoint), and the new jurisdiction appears.
+
 If the goal is just running an existing jurisdiction in a federated/external repo (publishing a signed pack to be consumed by a GovOps instance you don't control) — that's `federation-publish.md` (backlog), not this.
 
 ## Pre-flight
@@ -31,22 +33,26 @@ This writes:
 
 ```
 lawcode/pl/
-├── jurisdiction.yaml
-├── programs/
-│   ├── oas.yaml          # program manifest (ADR-014)
-│   ├── oas.md            # plain-language sidecar for non-coder review
-│   ├── ei.yaml
-│   └── ei.md
-└── config/
-    ├── oas-rules.yaml    # substrate values (per-parameter, dated)
-    └── ei-rules.yaml
+├── config/
+│   ├── jurisdiction.yaml    # ADR-019 metadata block + ConfigValue defaults
+│   ├── oas-rules.yaml       # substrate values (per-parameter, dated)
+│   └── ei-rules.yaml
+└── programs/
+    ├── oas.yaml             # program manifest (ADR-014)
+    ├── oas.md               # plain-language sidecar for non-coder review
+    ├── ei.yaml
+    └── ei.md
 ```
 
 Every TODO marker in those files is a hand-fill point. The skeleton is schema-valid the moment it lands; `pytest` confirms structure before you edit a single citation.
 
-### Step 2 — Fill the jurisdiction.yaml
+The metadata block at the top of `config/jurisdiction.yaml` is what the v3.1 loader reads to register the jurisdiction. The scaffolder + loader paths are pinned together by `tests/test_cli_init.py::TestInitLoaderRoundTrip` — if you change one, the test will tell you the other drifted.
 
-Authoritative metadata about the jurisdiction itself: country code, official languages, currency, authority chain (constitution → acts → regulations → policies). Each authority reference must include a citation a reader can look up.
+### Step 2 — Fill the metadata block in `config/jurisdiction.yaml`
+
+The top-level `jurisdiction:` block (per ADR-019) carries identity the loader needs: country code, level, parent_id, localized names, legal tradition, language regime, default language. Replace the TODO markers with values specific to the jurisdiction.
+
+The `defaults:` and `values:` blocks beneath it remain the ConfigValue substrate for citizen-facing surfaces (e.g. the `howto_url` link from `/screen`).
 
 Common authorship traps:
 - **Don't paste another country's structure.** Each country's authority chain is genuinely different (federal vs. unitary, codified constitution vs. unwritten, etc.). Encode what THIS country actually has.
@@ -56,7 +62,7 @@ Common authorship traps:
 
 For every program in `--shapes`, the scaffolder created `programs/<id>.yaml` and `config/<id>-rules.yaml`. Edit these:
 
-**`programs/<id>.yaml`** — declares the program's shape (`old_age_pension`, `unemployment_insurance`, etc.), its name in each official language, the legal authority (which Act / Code), and the rule_ids the engine will dispatch to.
+**`programs/<id>.yaml`** — declares the program's shape (`old_age_pension`, `unemployment_insurance`, etc.), its localized name (`name: { en: ..., fr: ..., ... }`), the authority chain, the legal documents, and the rules. The authority chain inside this file is what `/authority` will render when the jurisdiction is selected in the picker (ADR-020).
 
 **`config/<id>-rules.yaml`** — the dated `ConfigValue` records that supply each parameter the engine touches. Age thresholds, residency minima, calculation coefficients, accepted legal statuses, evidence requirements. Each record has:
 - `key` — the parameter name (matches what the engine resolves)
@@ -71,9 +77,9 @@ The plain-language sidecar `programs/<id>.md` is generated alongside the YAML so
 govops docs lawcode/pl/programs/oas.yaml
 ```
 
-### Step 4 — Add demo cases
+### Step 4 — Add demo cases (in the manifest, not in Python)
 
-Demo cases live in `src/govops/jurisdictions.py` per the existing pattern (see `_brazil_demo_cases`, `_spain_demo_cases`, etc. for examples).
+Since v3.1 L2b, demo cases live in `lawcode/<code>/programs/<id>.yaml` under a top-level `demo_cases:` key — **not** in `src/govops/jurisdictions.py`. See `lawcode/ca/programs/oas.yaml` for the canonical example, or any of the 6 jurisdictions migrated by L2b (`lawcode/{br,es,fr,de,ua,jp}/programs/oas.yaml`).
 
 Required: **4 demo cases per program**, covering the canonical outcome quartet:
 
@@ -84,30 +90,24 @@ Required: **4 demo cases per program**, covering the canonical outcome quartet:
 
 Cases are realistic — fictional names, plausible biographies, evidence that exercises the engine paths. They are public-facing demos; treat them with the care you'd put into onboarding documentation.
 
-### Step 5 — Register in JURISDICTION_REGISTRY
+### Step 5 — Reload the registry (no Python edit, no restart for tests)
 
-In `src/govops/jurisdictions.py`, add an entry to the registry at the bottom of the file:
+Since v3.1 L3 (ADR-020), the `JURISDICTION_REGISTRY` dict is built at module import by `build_registry_from_lawcode()`. A new `lawcode/<code>/` directory is picked up automatically on the next process start.
+
+For an already-running instance, call:
 
 ```python
-JURISDICTION_REGISTRY: dict[str, JurisdictionPack] = {
-    # ... existing entries ...
-    "pl": JurisdictionPack(
-        jurisdiction=POLAND,
-        authority_chain=POLAND_AUTHORITY_CHAIN,
-        legal_documents=POLAND_LEGAL_DOCS,
-        rules=POLAND_RULES,
-        cases_factory=_poland_demo_cases,
-        default_language="pl",
-        program_name="<canonical pension name in Polish>",
-    ),
-}
+from govops.jurisdictions import reload_registry
+reload_registry()
 ```
 
-The constants `POLAND`, `POLAND_AUTHORITY_CHAIN`, etc. are defined earlier in the same file alongside the demo-case factory.
+This rebuilds the dict in place; existing references stay valid because the dict object is mutated, not replaced.
 
-### Step 6 — Add UI surfaces
+There is no `JURISDICTION_REGISTRY = { ... }` literal to edit. If you find yourself adding entries to that file, you're working from a pre-v3.1 runbook — stop and re-check.
 
-Two frontend changes:
+### Step 6 — Add UI surfaces (`/screen` is still hardcoded)
+
+Two frontend changes — `/authority` and `/compare` are registry-driven and need no UI edit, but `/screen` still carries a static allowlist.
 
 **`web/src/lib/types.ts`** — add the jurisdiction code to the screen allowlist:
 
@@ -129,6 +129,8 @@ const JURISDICTION_LABELS = {
 
 **`web/src/routes/screen.$jurisdictionId.tsx`** — add the program-name fallback (the network-failure fallback map).
 
+Migrating these to the same registry-driven path as `/authority` is a v3.2 candidate; for now the static allowlist is the contract.
+
 ### Step 7 — Add translations
 
 Add the new jurisdiction's localized strings to `web/src/messages/<locale>.json` for every supported locale. The ICU + key-parity validators (`web/scripts/check-i18n-icu.mjs`, `web/scripts/check-i18n-keys.mjs`) run as `prebuild`; missing keys break the build.
@@ -148,7 +150,7 @@ cd web && npm run build                       # full build incl. prebuild gates
 cd .. && cd web && node scripts/check-bundle-no-localhost.mjs   # build-artifact sanity
 ```
 
-All five must pass. The pytest suite includes per-jurisdiction tests that use the demo cases to confirm the engine produces the right outcomes — those are your acceptance criteria.
+All five must pass. The pytest suite includes per-jurisdiction tests that use the demo cases to confirm the engine produces the right outcomes — those are your acceptance criteria. `TestInitLoaderRoundTrip` will also catch any drift between the scaffolder and the loader.
 
 ### Step 9 — Add a journey test (optional but strongly recommended)
 
@@ -158,7 +160,7 @@ If the new program has cross-program interactions (e.g. EI + OAS in CA), add an 
 
 ### Step 10 — Land via PR
 
-ADR optional unless the new jurisdiction introduces a new shape, a new rule type, or a new pattern of interactions. If it just adds another country using the existing shape library, no ADR — the registration is the documentation.
+ADR optional unless the new jurisdiction introduces a new shape, a new rule type, or a new pattern of interactions. If it just adds another country using the existing shape library, no ADR — the manifest plus its demo cases is the documentation.
 
 ## Post-checks
 
@@ -166,43 +168,43 @@ Jurisdiction is properly added when:
 
 - [ ] `govops-demo` boots and `/screen/<new-jur>` renders the form
 - [ ] `POST /api/screen` for the new jurisdiction returns a recommendation
+- [ ] `/authority?jurisdiction=<new-jur>` renders the authority chain
 - [ ] All 4 demo cases produce the expected outcomes (per-jurisdiction pytest)
 - [ ] `validate_lawcode.py` passes — YAML conforms to schema
 - [ ] All 6 locales render the jurisdiction's display name without missing keys
 - [ ] The bench's J02 (citizen self-screen per-jurisdiction) passes for the new code
 - [ ] If the jurisdiction has a different official-language family (RTL, non-Latin script), a screenshot pass confirms the UI handles it
-- [ ] Authority chain in `/authority` for the new jurisdiction renders the full constitution → act → regulation → policy chain
 
 ## Rollback
 
 Removing a jurisdiction is rare but valid — e.g. statutory change made the encoding obsolete and a re-encode is needed.
 
 ```bash
-# Remove from registry
-git rm src/govops/jurisdictions.py        # then edit to drop the entry; commit
 git rm -r lawcode/<jur>/
 git rm web/src/messages/<locale-only-for-this-jur>.json    # if applicable
-# Update web/src/lib/types.ts SCREEN_JURISDICTIONS
+# Update web/src/lib/types.ts SCREEN_JURISDICTIONS to drop the code
 # Update web/src/routes/screen.tsx JURISDICTION_LABELS
 git commit -m "chore: remove <jur> jurisdiction (encoding obsolete; will re-add post-statute-update)"
 ```
 
-The git history preserves the prior encoding — re-adding later starts from the diff.
+The loader will skip the missing directory on next startup; no Python edit needed. The git history preserves the prior encoding — re-adding later starts from the diff.
 
 ## Common gotchas
 
 - **Forgetting the screen allowlist (web/src/lib/types.ts).** This is the single most common bug when adding a jurisdiction — the engine works, the API works, but the UI 404s on `/screen/<new-jur>`. The 2026-04-29 v2.1 smoke test caught exactly this for JP. Always update the allowlist when registering a new jurisdiction.
 
-- **Pasting another country's authority chain.** Tempting because the existing structure is right there in the code; wrong because each country's legal hierarchy is genuinely different. Encode what the new jurisdiction's statute actually says.
+- **Pasting another country's authority chain.** Tempting because the existing structure is right there in the manifests; wrong because each country's legal hierarchy is genuinely different. Encode what the new jurisdiction's statute actually says.
 
-- **Citations that aren't statutes.** A citation like "Wikipedia article on Polish pensions" is editorial, not authoritative. The engine treats every citation as a statutory reference an auditor can chase. Government website URLs are OK as supplementary `howto_url` references on the program manifest, but the rule's `citation` field must be the statute itself.
+- **Citations that aren't statutes.** A citation like "Wikipedia article on Polish pensions" is editorial, not authoritative. The engine treats every citation as a statutory reference an auditor can chase. Government website URLs are OK as supplementary `howto_url` references on the jurisdiction's metadata, but the rule's `citation` field must be the statute itself.
 
-- **Forgetting to bump the test counts in CLAUDE.md or PLAN files.** When new jurisdiction tests land, the canonical test counts in CLAUDE.md ("640 backend tests") drift. Update them in the same PR.
+- **Forgetting to bump the test counts in CLAUDE.md or PLAN files.** When new jurisdiction tests land, the canonical test counts in CLAUDE.md ("789 backend tests" as of v3.1) drift. Update them in the same PR.
 
 - **i18n debt.** The translation validator (`check-i18n-translation.mjs`) catches strings that look untranslated (e.g. "Welcome" appearing in `pl.json`). If you can't translate everything, add the key to `web/scripts/i18n-translation-allowlist.json` with a comment explaining why (proper noun, brand token, etc.).
 
-- **Using `govops init` and then editing the routeTree.gen.ts manually.** Don't — that file is regenerated on every build. Edit only the files `govops init` produced under `lawcode/<jur>/`, plus the registration in `jurisdictions.py`.
+- **Editing `src/govops/jurisdictions.py` looking for a registry to extend.** Pre-v3.1 runbooks instructed this; the literal no longer exists. The discovery is `build_registry_from_lawcode()` and the source of truth is `lawcode/<code>/`. If you find yourself wanting to add a Python entry, the runbook you're following is stale.
+
+- **Editing `routeTree.gen.ts` manually.** That file is regenerated on every build. Edit only the files `govops init` produced under `lawcode/<jur>/`, plus the UI allowlists in step 6.
 
 ## Last validated
 
-- **Pending** — this runbook documents the conventions visible across CA/BR/ES/FR/DE/UA/JP. The next jurisdiction added will be the first end-to-end run.
+- **2026-05-11** — runbook rewritten for v3.1 lawcode-as-discovery (ADR-020). The CA/BR/ES/FR/DE/UA/JP migrations are the working reference; the cli_init → loader round-trip is pinned by `tests/test_cli_init.py::TestInitLoaderRoundTrip`.

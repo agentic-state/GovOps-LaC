@@ -1,6 +1,19 @@
 # yaml-language-server: $schema=../../../schema/lawcode-v1.0.json
 # es/config/jurisdiction.yaml — see ca/config/jurisdiction.yaml for the
 # load-bearing comment. Substrate-resolved per govops-022.
+# Per ADR-019 the `jurisdiction:` block declares identity for the
+# lawcode-as-discovery loader (ADR-020).
+
+jurisdiction:
+  id: jur-es-national
+  country: ES
+  level: federal
+  parent_id: null
+  name:
+    es: Reino de Espana
+  legal_tradition: Civil law (Continental European)
+  language_regime: 'Castellano (Spanish); co-official languages in autonomous communities'
+  default_language: es
 
 defaults:
   domain: jurisdiction

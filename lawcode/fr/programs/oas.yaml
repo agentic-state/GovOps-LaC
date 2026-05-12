@@ -1,0 +1,208 @@
+# yaml-language-server: $schema=../../../schema/program-manifest-v1.0.json
+#
+# FR -- OAS program manifest (v3.1 Lane 2b migration from src/govops/jurisdictions.py).
+# Per ADR-014, structure (rules / authority / legal documents / demo
+# cases) lives here. Parameter values live in the ConfigValue substrate
+# (lawcode/fr/config/oas-rules.yaml) and are referenced
+# via {ref: '<key>'}. ADR-020 (lawcode-as-discovery) reads this file
+# at startup to register the program with the running engine.
+
+schema_version: '1.0'
+program_id: oas
+jurisdiction_id: jur-fr-national
+shape: old_age_pension
+status: active
+name:
+  fr: Retraite de base (CNAV)
+authority_chain:
+- id: auth-fr-constitution
+  layer: constitution
+  title: Constitution de la Ve Republique
+  citation: Constitution du 4 octobre 1958, Preambule de 1946, al. 11
+  effective_date: '1958-10-04'
+  url: https://www.legifrance.gouv.fr/loda/id/LEGITEXT000006071194
+- id: auth-fr-css
+  layer: act
+  title: Code de la securite sociale
+  citation: CSS, Livre III, Titre V
+  effective_date: '1985-01-01'
+  url: https://www.legifrance.gouv.fr/codes/id/LEGITEXT000006073189/
+  parent: auth-fr-constitution
+- id: auth-fr-reform-2023
+  layer: act
+  title: Loi de financement rectificative de la securite sociale pour 2023
+  citation: Loi n. 2023-270 du 14 avril 2023
+  effective_date: '2023-09-01'
+  parent: auth-fr-constitution
+- id: auth-fr-cnav
+  layer: program
+  title: Caisse nationale d'assurance vieillesse (CNAV)
+  citation: CSS, Art. L. 222-1
+  parent: auth-fr-css
+- id: auth-fr-retraite
+  layer: service
+  title: Retraite de base - pension de vieillesse
+  citation: CSS, Art. L. 351-1 et seq.
+  parent: auth-fr-cnav
+legal_documents:
+- id: doc-fr-css
+  type: statute
+  title: Code de la securite sociale
+  citation: CSS, Livre III, Titre V
+  sections:
+  - id: sec-fr-l351-1
+    ref: Art. L. 351-1
+    heading: Conditions d'ouverture du droit
+    text: L'assurance vieillesse garantit une pension de retraite a l'assure qui en demande la liquidation a partir de l'age de 64 ans. (Modifie par Loi n. 2023-270 du 14 avril 2023)
+  - id: sec-fr-l351-1-duree
+    ref: Art. L. 351-1, al. 2
+    heading: Duree d'assurance
+    text: Le montant de la pension est calcule en fonction de la duree d'assurance, avec un taux plein pour 172 trimestres (43 annees) de cotisation.
+rules:
+- id: rule-fr-age
+  rule_type: age_threshold
+  description: 'Age legal de depart a la retraite : 64 ans (reforme 2023)'
+  formal_expression: age >= 64
+  citation: CSS, Art. L. 351-1; Loi n. 2023-270
+  source_document_id: doc-fr-css
+  source_section_ref: Art. L. 351-1
+  param_key_prefix: fr.rule.age
+  parameters:
+    min_age:
+      ref: fr.rule.age.min_age
+- id: rule-fr-trimestres-min
+  rule_type: residency_minimum
+  description: 'Duree minimale d''assurance : 2 ans (8 trimestres) pour ouvrir le droit'
+  formal_expression: contribution_years >= 2
+  citation: CSS, Art. L. 351-1
+  source_document_id: doc-fr-css
+  source_section_ref: Art. L. 351-1, al. 2
+  param_key_prefix: fr.rule.trimestres-min
+  parameters:
+    min_years:
+      ref: fr.rule.trimestres-min.min_years
+    home_countries:
+      ref: fr.rule.trimestres-min.home_countries
+- id: rule-fr-trimestres-calc
+  rule_type: residency_partial
+  description: Taux plein a 43 ans de cotisation (172 trimestres); proratise en dessous
+  formal_expression: pension_ratio = min(contribution_years, 43) / 43
+  citation: CSS, Art. L. 351-1
+  source_document_id: doc-fr-css
+  source_section_ref: Art. L. 351-1, al. 2
+  param_key_prefix: fr.rule.trimestres-calc
+  parameters:
+    full_years:
+      ref: fr.rule.trimestres-calc.full_years
+    min_years:
+      ref: fr.rule.trimestres-calc.min_years
+- id: rule-fr-status
+  rule_type: legal_status
+  description: Assure du regime general (citoyen ou resident)
+  formal_expression: legal_status in ['citizen', 'permanent_resident']
+  citation: CSS, Art. L. 311-2
+  source_document_id: doc-fr-css
+  source_section_ref: Art. L. 351-1
+  param_key_prefix: fr.rule.status
+  parameters:
+    accepted_statuses:
+      ref: fr.rule.status.accepted_statuses
+- id: rule-fr-evidence
+  rule_type: evidence_required
+  description: Piece d'identite (acte de naissance, carte d'identite, ou passeport)
+  formal_expression: has_evidence('birth_certificate')
+  citation: CSS, Art. R. 351-1
+  source_document_id: doc-fr-css
+  source_section_ref: Art. L. 351-1
+  param_key_prefix: fr.rule.evidence
+  parameters:
+    required_types:
+      ref: fr.rule.evidence.required_types
+demo_cases:
+- id: demo-fr-001
+  applicant:
+    id: app-fr-001
+    date_of_birth: '1958-05-20'
+    legal_name: Jean-Claude Dupont
+    legal_status: citizen
+    country_of_birth: FR
+  residency_periods:
+  - country: France
+    start_date: '1958-05-20'
+    verified: true
+  evidence_items:
+  - id: 2274a754218d
+    type: birth_certificate
+    description: Acte de naissance
+    provided: true
+    verified: true
+  - id: f126efa40ba9
+    type: tax_record
+    description: Releve de carriere CNAV 1978-2025
+    provided: true
+    verified: true
+- id: demo-fr-002
+  applicant:
+    id: app-fr-002
+    date_of_birth: '1975-08-14'
+    legal_name: Sophie Martin
+    legal_status: citizen
+    country_of_birth: FR
+  residency_periods:
+  - country: France
+    start_date: '1975-08-14'
+    verified: true
+  evidence_items:
+  - id: ff930f5bdf55
+    type: birth_certificate
+    description: Acte de naissance
+    provided: true
+    verified: true
+  - id: 3a3edd1626dd
+    type: tax_record
+    description: Releve de carriere
+    provided: true
+- id: demo-fr-003
+  applicant:
+    id: app-fr-003
+    date_of_birth: '1957-01-30'
+    legal_name: Fatima Benali
+    legal_status: permanent_resident
+    country_of_birth: DZ
+  residency_periods:
+  - country: Algeria
+    start_date: '1957-01-30'
+    end_date: '1990-06-01'
+  - country: France
+    start_date: '1990-06-01'
+    verified: true
+  evidence_items:
+  - id: 5ef909338ce7
+    type: birth_certificate
+    description: Acte de naissance (traduit)
+    provided: true
+    verified: true
+  - id: a85a88e3961e
+    type: tax_record
+    description: Releve de carriere CNAV 1990-2025
+    provided: true
+    verified: true
+  - id: e8b601e54c2b
+    type: residency_declaration
+    description: Titre de sejour
+    provided: true
+- id: demo-fr-004
+  applicant:
+    id: app-fr-004
+    date_of_birth: '1953-11-07'
+    legal_name: Pierre Lefevre
+    legal_status: citizen
+    country_of_birth: FR
+  residency_periods:
+  - country: France
+    start_date: '1953-11-07'
+  evidence_items:
+  - id: 69865b0df574
+    type: tax_record
+    description: Releve partiel
+    provided: true

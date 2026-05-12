@@ -30,6 +30,30 @@ class TestHealthAndMetadata:
         data = r.json()
         assert data["jurisdiction"]["id"] == "jur-ca-federal"
         assert len(data["chain"]) >= 5
+        # v3.1 L4: response now carries the picker dataset.
+        codes = {j["code"] for j in data["available_jurisdictions"]}
+        assert codes == {"br", "ca", "de", "es", "fr", "jp", "ua"}
+        assert data["active_jurisdiction_code"] == "ca"
+
+    def test_authority_chain_with_jurisdiction_param(self, client):
+        """v3.1 L4: ?jurisdiction_id= scopes the response so the /authority
+        picker drives a single backend without server-side state mutation."""
+        for code, expected_jur_id in [
+            ("br", "jur-br-federal"),
+            ("es", "jur-es-national"),
+            ("jp", "jur-jp-national"),
+        ]:
+            r = client.get(f"/api/authority-chain?jurisdiction_id={code}")
+            assert r.status_code == 200, f"{code}: {r.text}"
+            data = r.json()
+            assert data["jurisdiction"]["id"] == expected_jur_id
+            assert data["active_jurisdiction_code"] == code
+            assert len(data["chain"]) >= 3
+
+    def test_authority_chain_unknown_jurisdiction_404(self, client):
+        r = client.get("/api/authority-chain?jurisdiction_id=zz")
+        assert r.status_code == 404
+        assert "Unknown jurisdiction" in r.json()["detail"]
 
     def test_rules(self, client):
         r = client.get("/api/rules")

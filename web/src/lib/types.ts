@@ -344,16 +344,23 @@ export interface EncodingBatchSummary {
 
 // ── Citation impact (govops-014) ────────────────────────────────────────────
 
+/**
+ * v3.1 L5 (ADR-021): impact results are grouped by country, not by
+ * program-scoped jurisdiction_id. A single ImpactResult covers all the
+ * records from one country regardless of which program's substrate they
+ * came from; the per-program jurisdiction_id is still present on each
+ * ConfigValue inside `values`.
+ */
 export interface ImpactResult {
-  jurisdiction_id: string | null;
-  jurisdiction_label: string;
+  country_code: string | null;
+  country_label: string;
   values: ConfigValue[];
 }
 
 export interface ImpactResponse {
   query: string;
   total: number;
-  jurisdiction_count: number;
+  country_count: number;
   results: ImpactResult[];
   /** Page-level metadata (govops-014 pagination). Optional for backwards compat. */
   limit?: number;

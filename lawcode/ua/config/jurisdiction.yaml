@@ -1,6 +1,19 @@
 # yaml-language-server: $schema=../../../schema/lawcode-v1.0.json
 # ua/config/jurisdiction.yaml — see ca/config/jurisdiction.yaml for the
 # load-bearing comment. Substrate-resolved per govops-022.
+# Per ADR-019 the `jurisdiction:` block declares identity for the
+# lawcode-as-discovery loader (ADR-020).
+
+jurisdiction:
+  id: jur-ua-national
+  country: UA
+  level: federal
+  parent_id: null
+  name:
+    uk: Ukraina
+  legal_tradition: Civil law (Continental European / post-Soviet)
+  language_regime: Ukrainska mova (Ukrainian)
+  default_language: uk
 
 defaults:
   domain: jurisdiction

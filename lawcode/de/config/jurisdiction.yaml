@@ -1,6 +1,19 @@
 # yaml-language-server: $schema=../../../schema/lawcode-v1.0.json
 # de/config/jurisdiction.yaml — see ca/config/jurisdiction.yaml for the
 # load-bearing comment. Substrate-resolved per govops-022.
+# Per ADR-019 the `jurisdiction:` block declares identity for the
+# lawcode-as-discovery loader (ADR-020).
+
+jurisdiction:
+  id: jur-de-federal
+  country: DE
+  level: federal
+  parent_id: null
+  name:
+    de: Bundesrepublik Deutschland
+  legal_tradition: Civil law (Germanic tradition)
+  language_regime: Deutsch
+  default_language: de
 
 defaults:
   domain: jurisdiction

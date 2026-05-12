@@ -1,0 +1,203 @@
+# yaml-language-server: $schema=../../../schema/program-manifest-v1.0.json
+#
+# DE -- OAS program manifest (v3.1 Lane 2b migration from src/govops/jurisdictions.py).
+# Per ADR-014, structure (rules / authority / legal documents / demo
+# cases) lives here. Parameter values live in the ConfigValue substrate
+# (lawcode/de/config/oas-rules.yaml) and are referenced
+# via {ref: '<key>'}. ADR-020 (lawcode-as-discovery) reads this file
+# at startup to register the program with the running engine.
+
+schema_version: '1.0'
+program_id: oas
+jurisdiction_id: jur-de-federal
+shape: old_age_pension
+status: active
+name:
+  de: Regelaltersrente (DRV)
+authority_chain:
+- id: auth-de-grundgesetz
+  layer: constitution
+  title: Grundgesetz für die Bundesrepublik Deutschland
+  citation: GG, Art. 20 Abs. 1 (Sozialstaatsprinzip)
+  effective_date: '1949-05-23'
+  url: https://www.gesetze-im-internet.de/gg/
+- id: auth-de-sgb6
+  layer: act
+  title: Sozialgesetzbuch Sechstes Buch - Gesetzliche Rentenversicherung
+  citation: SGB VI
+  effective_date: '1992-01-01'
+  url: https://www.gesetze-im-internet.de/sgb_6/
+  parent: auth-de-grundgesetz
+- id: auth-de-drv
+  layer: program
+  title: Deutsche Rentenversicherung (DRV)
+  citation: SGB VI, §§ 125 ff. (Träger der Rentenversicherung)
+  parent: auth-de-sgb6
+- id: auth-de-regelaltersrente
+  layer: service
+  title: Regelaltersrente
+  citation: SGB VI, Para. 35, Para. 235
+  parent: auth-de-drv
+legal_documents:
+- id: doc-de-sgb6
+  type: statute
+  title: Sozialgesetzbuch Sechstes Buch (SGB VI)
+  citation: SGB VI
+  effective_date: '1992-01-01'
+  sections:
+  - id: sec-de-p35
+    ref: Para. 35
+    heading: Regelaltersrente
+    text: Versicherte haben Anspruch auf Regelaltersrente, wenn sie die Regelaltersgrenze erreicht und die allgemeine Wartezeit von fünf Jahren erfüllt haben.
+  - id: sec-de-p235
+    ref: Para. 235
+    heading: Regelaltersgrenze
+    text: Die Regelaltersgrenze wird ab dem Geburtsjahrgang 1964 auf 67 Jahre angehoben (stufenweise Anhebung von 65 auf 67 Jahre).
+rules:
+- id: rule-de-age
+  rule_type: age_threshold
+  description: 'Regelaltersgrenze: 67 Jahre (Jahrgang 1964 und später)'
+  formal_expression: age >= 67
+  citation: SGB VI, § 35, § 235
+  source_document_id: doc-de-sgb6
+  source_section_ref: Para. 35, Para. 235
+  param_key_prefix: de.rule.age
+  parameters:
+    min_age:
+      ref: de.rule.age.min_age
+- id: rule-de-wartezeit
+  rule_type: residency_minimum
+  description: 'Allgemeine Wartezeit: mindestens 5 Jahre Beitragszeit'
+  formal_expression: contribution_years >= 5
+  citation: SGB VI, § 35, § 50
+  source_document_id: doc-de-sgb6
+  source_section_ref: Para. 35
+  param_key_prefix: de.rule.wartezeit
+  parameters:
+    min_years:
+      ref: de.rule.wartezeit.min_years
+    home_countries:
+      ref: de.rule.wartezeit.home_countries
+- id: rule-de-beitragszeit
+  rule_type: residency_partial
+  description: 'Anteilige Rente nach Rentenformel (vereinfacht: bis 45 Beitragsjahre)'
+  formal_expression: pension_ratio = min(contribution_years, 45) / 45
+  citation: SGB VI, § 64 (Rentenformel); vgl. § 236b (besonders langjährig Versicherte)
+  source_document_id: doc-de-sgb6
+  source_section_ref: § 64
+  param_key_prefix: de.rule.beitragszeit
+  parameters:
+    full_years:
+      ref: de.rule.beitragszeit.full_years
+    min_years:
+      ref: de.rule.beitragszeit.min_years
+- id: rule-de-status
+  rule_type: legal_status
+  description: 'Versicherter der gesetzlichen Rentenversicherung (Proxy: legal_status)'
+  formal_expression: legal_status in ['citizen', 'permanent_resident']
+  citation: SGB VI, § 1 (Versicherungspflichtige Personen)
+  source_document_id: doc-de-sgb6
+  source_section_ref: § 1
+  param_key_prefix: de.rule.status
+  parameters:
+    accepted_statuses:
+      ref: de.rule.status.accepted_statuses
+- id: rule-de-evidence
+  rule_type: evidence_required
+  description: Personalausweis oder Reisepass, Geburtsurkunde (Mitwirkungspflicht)
+  formal_expression: has_evidence('birth_certificate') or has_evidence('id_card')
+  citation: SGB I, §§ 60–65 (Mitwirkungspflichten); SGB VI, § 99 (Beginn der Rente)
+  source_document_id: doc-de-sgb6
+  source_section_ref: § 99 SGB VI; §§ 60–65 SGB I
+  param_key_prefix: de.rule.evidence
+  parameters:
+    required_types:
+      ref: de.rule.evidence.required_types
+demo_cases:
+- id: demo-de-001
+  applicant:
+    id: app-de-001
+    date_of_birth: '1957-03-10'
+    legal_name: Hans Mueller
+    legal_status: citizen
+    country_of_birth: DE
+  residency_periods:
+  - country: Germany
+    start_date: '1957-03-10'
+    verified: true
+  evidence_items:
+  - id: de9548e38f7e
+    type: birth_certificate
+    description: Geburtsurkunde
+    provided: true
+    verified: true
+  - id: d5ed01ad4ce5
+    type: tax_record
+    description: Versicherungsverlauf DRV 1977-2025
+    provided: true
+    verified: true
+- id: demo-de-002
+  applicant:
+    id: app-de-002
+    date_of_birth: '1972-06-25'
+    legal_name: Petra Schmidt
+    legal_status: citizen
+    country_of_birth: DE
+  residency_periods:
+  - country: Germany
+    start_date: '1972-06-25'
+    verified: true
+  evidence_items:
+  - id: 0bc458c5213d
+    type: birth_certificate
+    description: Geburtsurkunde
+    provided: true
+    verified: true
+  - id: 4b961dc9986c
+    type: tax_record
+    description: Versicherungsverlauf
+    provided: true
+- id: demo-de-003
+  applicant:
+    id: app-de-003
+    date_of_birth: '1956-09-15'
+    legal_name: Mehmet Yilmaz
+    legal_status: permanent_resident
+    country_of_birth: TR
+  residency_periods:
+  - country: Turkey
+    start_date: '1956-09-15'
+    end_date: '1985-04-01'
+  - country: Germany
+    start_date: '1985-04-01'
+    verified: true
+  evidence_items:
+  - id: ec649488303c
+    type: birth_certificate
+    description: Geburtsurkunde (übersetzt)
+    provided: true
+    verified: true
+  - id: 1195023cdcd4
+    type: tax_record
+    description: Versicherungsverlauf DRV 1985-2025
+    provided: true
+    verified: true
+  - id: 3edd68b2f4e6
+    type: residency_declaration
+    description: Aufenthaltstitel
+    provided: true
+- id: demo-de-004
+  applicant:
+    id: app-de-004
+    date_of_birth: '1950-08-03'
+    legal_name: Ingrid Weber
+    legal_status: citizen
+    country_of_birth: DE
+  residency_periods:
+  - country: Germany
+    start_date: '1950-08-03'
+  evidence_items:
+  - id: 7d06bd2d07d5
+    type: tax_record
+    description: Versicherungsverlauf (unvollständig)
+    provided: true

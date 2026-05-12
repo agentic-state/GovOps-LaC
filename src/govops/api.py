@@ -9,9 +9,9 @@ from __future__ import annotations
 import os
 from contextlib import asynccontextmanager
 from pathlib import Path
-from typing import Any
+from typing import Any, Optional
 
-from fastapi import Depends, FastAPI, Header, HTTPException, Request
+from fastapi import Depends, FastAPI, Header, HTTPException, Request, Response
 from starlette.datastructures import FormData, UploadFile as StarletteUploadFile
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
@@ -20,6 +20,13 @@ from pydantic import BaseModel
 
 from datetime import date, datetime, timezone
 
+from govops.authoring import (
+    AuthoringError,
+    Draft,
+    DraftStatus,
+    DraftStore,
+    DraftType,
+)
 from govops.config import (
     ApprovalStatus,
     ConfigStore,
@@ -35,7 +42,11 @@ from govops.encoder import (
 )
 from govops.engine import ProgramEngine
 from govops.i18n import DEFAULT_LANGUAGE, SUPPORTED_LANGUAGES, get_translator
-from govops.jurisdictions import JURISDICTION_REGISTRY
+from govops.jurisdictions import (
+    JURISDICTION_REGISTRY,
+    _LAWCODE_ROOT,
+    reload_registry,
+)
 from govops.models import (
     AuditEntry,
     CaseEvent,
@@ -68,6 +79,10 @@ STATIC_DIR = Path(__file__).parent / "static"
 
 store = DemoStore()
 encoding_store = EncodingStore()
+# v3.1 L7 (ADR-022) authoring substrate: drafts of jurisdiction.yaml +
+# program manifests are staged here; commit_approved() writes them to
+# lawcode/ and reload_registry() picks them up.
+draft_store = DraftStore(_LAWCODE_ROOT)
 # Per ADR-010: persistent SQLite when GOVOPS_DB_PATH is set, in-memory otherwise.
 # Tests don't set the env var → fresh in-memory DB per process. The govops-demo
 # CLI sets it to var/govops.db so runtime edits survive restarts.
@@ -456,12 +471,42 @@ def get_jurisdiction(jur_code: str):
 
 
 @app.get("/api/authority-chain")
-def get_authority_chain():
+def get_authority_chain(jurisdiction_id: str | None = None):
+    """Return the authority chain for a jurisdiction.
+
+    v3.1 L4: optional ``?jurisdiction_id=`` query param. Default behaviour
+    preserved (uses the active jurisdiction from the store) so existing
+    callers keep working. The frontend picker passes the chosen code so a
+    single backend serves the multi-jurisdiction /authority page without
+    server-side state mutation. Per ADR-020 the registry is now derived
+    from lawcode/, so every JURISDICTION_REGISTRY[code] carries its own
+    authority_chain ready to return.
+    """
+    available = [
+        {"code": code, "label": p.jurisdiction.name}
+        for code, p in sorted(JURISDICTION_REGISTRY.items())
+    ]
+    if jurisdiction_id and jurisdiction_id in JURISDICTION_REGISTRY:
+        pack = JURISDICTION_REGISTRY[jurisdiction_id]
+        return {
+            "jurisdiction": pack.jurisdiction,
+            "chain": pack.authority_chain,
+            "available_jurisdictions": available,
+            "active_jurisdiction_code": jurisdiction_id,
+        }
+    if jurisdiction_id is not None and jurisdiction_id not in JURISDICTION_REGISTRY:
+        raise HTTPException(
+            404,
+            f"Unknown jurisdiction: {jurisdiction_id!r}. "
+            f"Available: {sorted(JURISDICTION_REGISTRY.keys())}",
+        )
     jur_code = _current_jur_code()
     pack = JURISDICTION_REGISTRY[jur_code]
     return {
         "jurisdiction": pack.jurisdiction,
         "chain": store.authority_chain,
+        "available_jurisdictions": available,
+        "active_jurisdiction_code": jur_code,
     }
 
 
@@ -1017,10 +1062,36 @@ async def api_bulk_review_encoding_proposals(batch_id: str, request: Request):
 
 @app.post("/api/encode/batches/{batch_id}/commit")
 def api_commit_encoding_batch(batch_id: str):
+    """Commit approved proposals to the engine.
+
+    v3.1 L6 Bug 4: idempotency gate. A second commit attempt against the
+    same batch returns 409 Conflict so a re-clicked button doesn't silently
+    re-run. The committed_at field on EncodingBatch is the source of truth;
+    set on first successful commit and checked here.
+    """
+    from datetime import datetime, timezone
+
     batch = encoding_store.batches.get(batch_id)
     if not batch:
         raise HTTPException(404, f"batch {batch_id!r} not found")
+    if batch.committed_at is not None:
+        raise HTTPException(
+            409,
+            {
+                "error": "batch already committed",
+                "batch_id": batch_id,
+                "committed_at": batch.committed_at.isoformat(),
+            },
+        )
     approved_rules = encoding_store.get_approved_rules(batch_id)
+    batch.committed_at = datetime.now(timezone.utc)
+    encoding_store._log(
+        batch_id,
+        "batch_committed",
+        "api",
+        f"{len(approved_rules)} approved rule(s) committed",
+        {"rule_ids": [r.id for r in approved_rules]},
+    )
     return {"committed_rule_ids": [r.id for r in approved_rules]}
 
 
@@ -1597,6 +1668,42 @@ def _jurisdiction_label(jurisdiction_id: str | None) -> str:
     return f"{pack.program_name} — {pack.jurisdiction.name}"
 
 
+def _country_code_for_value(jurisdiction_id: str | None) -> str | None:
+    """Resolve a ConfigValue's program-scoped ``jurisdiction_id`` to the
+    country-level code the L5 impact endpoint groups by.
+
+    ConfigValues are stored with per-program scope (``es-jub`` for Spanish
+    OAS, ``es-ei`` for Spanish EI, ``ca-oas`` for Canadian OAS, etc.).
+    Pre-L5 the /impact endpoint grouped by this program-scoped id directly,
+    producing a misleading "across 2 jurisdictions" summary when both rows
+    in fact belonged to the same country (per ADR-021). We now resolve the
+    prefix back to the registry's country code so a citation that matches
+    "Real Decreto" across both Spanish programs is reported as 1 country /
+    2 records.
+
+    Global records (``jurisdiction_id is None`` or ``"global"``) return
+    ``None`` so the caller keeps the Global bucket distinct.
+    """
+    if jurisdiction_id is None or jurisdiction_id == "global":
+        return None
+    code = jurisdiction_id.split("-", 1)[0]
+    if code in JURISDICTION_REGISTRY:
+        return code
+    return jurisdiction_id
+
+
+def _country_label(country_code: str | None) -> str:
+    """Display label for an L5 country bucket. Falls back to the raw code
+    when the registry does not carry the country (e.g. federation packs
+    that haven't been hydrated yet)."""
+    if country_code is None:
+        return "Global"
+    pack = JURISDICTION_REGISTRY.get(country_code)
+    if pack is None:
+        return country_code
+    return pack.jurisdiction.name
+
+
 _IMPACT_LIMIT_DEFAULT = 50
 _IMPACT_LIMIT_MAX = 200
 
@@ -1607,17 +1714,25 @@ def impact_by_citation(
     limit: int = _IMPACT_LIMIT_DEFAULT,
     page: int = 1,
 ):
-    """Return ConfigValues referencing ``citation``, grouped by jurisdiction.
+    """Return ConfigValues referencing ``citation``, grouped by country.
 
     Phase 7 reverse-index endpoint with §12 7.x.1 pagination. Empty / whitespace
     ``citation`` rejects with 400 so clients always send a meaningful query.
     Normalization (whitespace collapse + case-insensitive match) lives in
     ``ConfigStore.find_by_citation``.
 
+    v3.1 L5 (ADR-021) changes the grouping key from program-scoped
+    ``jurisdiction_id`` (``es-jub``, ``es-ei``) to country (``es``). The
+    pre-L5 shape implied a citation matched across "2 jurisdictions" when
+    both rows in fact belonged to Spain. Records inside a country result
+    still carry their full ``jurisdiction_id`` so consumers can see which
+    program's substrate they came from. Global records (jurisdiction_id
+    null or "global") keep their own bucket.
+
     Pagination contract:
       - ``limit`` defaults to 50, floors at 1, caps at 200.
       - ``page`` is 1-indexed, floors at 1.
-      - ``total`` and ``jurisdiction_count`` describe the full match set (so the
+      - ``total`` and ``country_count`` describe the full match set (so the
         UI summary stays meaningful regardless of which page is shown).
       - ``results`` only carries the sections that have values on this page;
         sections with zero values on the page are omitted.
@@ -1634,27 +1749,29 @@ def impact_by_citation(
     matches = config_store.find_by_citation(normalized)
     total = len(matches)
 
-    # Group the FULL match set first so jurisdiction_count is stable across pages.
+    # Group the FULL match set by country (or None for Global). Per ADR-021,
+    # the country is derived from the ConfigValue's program-scoped
+    # jurisdiction_id prefix via _country_code_for_value().
     groups: dict[str | None, list[ConfigValue]] = {}
     for cv in matches:
-        scope: str | None = None if cv.jurisdiction_id in (None, "global") else cv.jurisdiction_id
-        groups.setdefault(scope, []).append(cv)
+        country = _country_code_for_value(cv.jurisdiction_id)
+        groups.setdefault(country, []).append(cv)
 
-    jurisdiction_count = len(groups)
+    country_count = len(groups)
     page_count = (total + effective_limit - 1) // effective_limit if total else 0
 
-    # Display order: Global first, then jurisdictions alphabetically. Build a
-    # flat list in display order, slice the page, then re-group preserving the
-    # same order so section ordering is stable.
-    ordered_jids: list[str | None] = []
+    # Display order: Global first, then countries alphabetically. Build a
+    # flat list in display order, slice the page, then re-group preserving
+    # the same order so section ordering is stable.
+    ordered_countries: list[str | None] = []
     if None in groups:
-        ordered_jids.append(None)
-    ordered_jids.extend(sorted(k for k in groups if k is not None))
+        ordered_countries.append(None)
+    ordered_countries.extend(sorted(k for k in groups if k is not None))
 
     flat: list[tuple[str | None, ConfigValue]] = []
-    for jid in ordered_jids:
-        for cv in groups[jid]:
-            flat.append((jid, cv))
+    for country in ordered_countries:
+        for cv in groups[country]:
+            flat.append((country, cv))
 
     start = (effective_page - 1) * effective_limit
     end = start + effective_limit
@@ -1662,25 +1779,25 @@ def impact_by_citation(
 
     page_groups: dict[str | None, list[ConfigValue]] = {}
     page_order: list[str | None] = []
-    for jid, cv in page_slice:
-        if jid not in page_groups:
-            page_groups[jid] = []
-            page_order.append(jid)
-        page_groups[jid].append(cv)
+    for country, cv in page_slice:
+        if country not in page_groups:
+            page_groups[country] = []
+            page_order.append(country)
+        page_groups[country].append(cv)
 
     results: list[dict[str, Any]] = [
         {
-            "jurisdiction_id": jid,
-            "jurisdiction_label": _jurisdiction_label(jid),
-            "values": page_groups[jid],
+            "country_code": country,
+            "country_label": _country_label(country),
+            "values": page_groups[country],
         }
-        for jid in page_order
+        for country in page_order
     ]
 
     return {
         "query": normalized,
         "total": total,
-        "jurisdiction_count": jurisdiction_count,
+        "country_count": country_count,
         "limit": effective_limit,
         "page": effective_page,
         "page_count": page_count,
@@ -1713,6 +1830,46 @@ def _compare_jurisdiction_label(jur_code: str) -> str:
     if pack is None:
         return jur_code.upper()
     return pack.jurisdiction.name
+
+
+# v3.1 L2b -- compare-endpoint manifest cache.
+#
+# `compare_program` called `load_program_manifest()` per jurisdiction per
+# request. Pre-v3.1 only CA had a `programs/oas.yaml`, so /compare/oas loaded
+# 1 manifest (5 substrate queries) per hit. Lane 2b adds OAS manifests for
+# the other 6 jurisdictions, fanning to 7 × 5 = 35 concurrent substrate
+# queries per request. Under E2E concurrency this trips a SQLAlchemy
+# session race on the in-memory SQLite ConfigStore -- `_apply_processors`
+# IndexError -- which crashes the uvicorn worker mid-request.
+#
+# Cache loaded manifests at module scope. Manifests are immutable on disk
+# during a server lifetime (ADR-020 hot-reload mutates the registry and can
+# invalidate this cache via `clear_compare_program_cache()` when wired).
+# (key = (jurisdiction_code, program_id))
+_COMPARE_MANIFEST_CACHE: dict[tuple[str, str], "Program"] = {}
+
+
+def _load_compare_program(jur_code: str, program_id: str) -> "Program":
+    """Cached ``load_program_manifest`` for the /compare/{program_id} surface.
+
+    Raises whatever ``load_program_manifest`` raises -- callers should
+    handle ``Exception`` and surface the jurisdiction as ``available: False``
+    in the response, matching the pre-cache behaviour.
+    """
+    key = (jur_code, program_id)
+    cached = _COMPARE_MANIFEST_CACHE.get(key)
+    if cached is not None:
+        return cached
+    manifest_path = LAWCODE_DIR / jur_code / "programs" / f"{program_id}.yaml"
+    program = load_program_manifest(manifest_path)
+    _COMPARE_MANIFEST_CACHE[key] = program
+    return program
+
+
+def clear_compare_program_cache() -> None:
+    """Invalidate the cache. Wired into ADR-020's ``reload_registry()`` (L3)
+    so a draft commit + registry rebuild also refreshes the compare surface."""
+    _COMPARE_MANIFEST_CACHE.clear()
 
 
 @app.get("/api/programs/{program_id}/interactions")
@@ -1828,7 +1985,10 @@ def compare_program(
             )
             continue
         try:
-            program = load_program_manifest(manifest_path)
+            # v3.1 L2b: cached load to avoid the per-request fan-out that
+            # tripped a SQLAlchemy session race on /compare/oas once 7
+            # jurisdictions had OAS manifests on disk.
+            program = _load_compare_program(code, program_id)
         except Exception as exc:
             jur_slots.append(
                 {
@@ -2023,6 +2183,166 @@ def screen_notice(req: ScreenRequest, lang: str = "en"):
             "X-Notice-Language": lang,
         },
     )
+
+
+# ---------------------------------------------------------------------------
+# Authoring substrate API (v3.1 L7 / ADR-022)
+# ---------------------------------------------------------------------------
+#
+# Mirrors the ConfigValue admin pattern (draft -> approve -> commit) for
+# non-ConfigValue records: jurisdiction.yaml + program manifests. The
+# substrate writes to lawcode/<code>/... on commit and triggers
+# reload_registry() so the new content appears in the running app
+# immediately. See ADR-022 for the design contract and the deferred
+# v3.2 hardening items (per-path conflict refusal, structural-aware
+# YAML emission, RBAC).
+
+
+def _draft_response(draft: Draft) -> dict[str, Any]:
+    """Serialize a Draft for the JSON API. Mirrors draft.to_dict() but
+    keeps datetime fields as ISO strings (which to_dict already does)."""
+    return draft.to_dict()
+
+
+@app.post("/api/authoring/drafts")
+def authoring_create_draft(body: dict[str, Any]):
+    """Create a new draft. Body shape:
+    ``{type, target_path, content, author, rationale?}``
+    """
+    try:
+        draft_type = DraftType(body.get("type", ""))
+    except ValueError:
+        raise HTTPException(
+            400,
+            f"type must be one of: {[t.value for t in DraftType]}",
+        )
+    try:
+        d = draft_store.create(
+            type=draft_type,
+            target_path=body.get("target_path", ""),
+            content=body.get("content") or {},
+            author=body.get("author", ""),
+            rationale=body.get("rationale"),
+        )
+    except AuthoringError as e:
+        raise HTTPException(400, str(e))
+    return _draft_response(d)
+
+
+@app.get("/api/authoring/drafts")
+def authoring_list_drafts(
+    type: Optional[str] = None,
+    status: Optional[str] = None,
+):
+    """List drafts; optional ``?type=`` and ``?status=`` filters."""
+    type_filter: Optional[DraftType] = None
+    status_filter: Optional[DraftStatus] = None
+    if type:
+        try:
+            type_filter = DraftType(type)
+        except ValueError:
+            raise HTTPException(400, f"unknown type: {type}")
+    if status:
+        try:
+            status_filter = DraftStatus(status)
+        except ValueError:
+            raise HTTPException(400, f"unknown status: {status}")
+    drafts = draft_store.list(type=type_filter, status=status_filter)
+    return {"drafts": [_draft_response(d) for d in drafts]}
+
+
+@app.get("/api/authoring/drafts/{draft_id}")
+def authoring_get_draft(draft_id: str):
+    d = draft_store.get(draft_id)
+    if d is None:
+        raise HTTPException(404, f"draft not found: {draft_id}")
+    return _draft_response(d)
+
+
+@app.post("/api/authoring/drafts/{draft_id}/approve")
+def authoring_approve_draft(draft_id: str, body: dict[str, Any]):
+    """Approve a pending draft. Body shape: ``{approver}``. Idempotent on
+    APPROVED; refuses on REJECTED or COMMITTED."""
+    try:
+        d = draft_store.approve(draft_id, approver=body.get("approver", ""))
+    except AuthoringError as e:
+        msg = str(e)
+        if "not found" in msg:
+            raise HTTPException(404, msg)
+        raise HTTPException(409, msg)
+    return _draft_response(d)
+
+
+@app.post("/api/authoring/drafts/{draft_id}/reject")
+def authoring_reject_draft(draft_id: str, body: dict[str, Any]):
+    """Reject a draft with a rationale. Body shape: ``{rejector, reason}``.
+    Idempotent on REJECTED; refuses on COMMITTED."""
+    try:
+        d = draft_store.reject(
+            draft_id,
+            rejector=body.get("rejector", ""),
+            reason=body.get("reason", ""),
+        )
+    except AuthoringError as e:
+        msg = str(e)
+        if "not found" in msg:
+            raise HTTPException(404, msg)
+        raise HTTPException(409, msg)
+    return _draft_response(d)
+
+
+@app.delete("/api/authoring/drafts/{draft_id}")
+def authoring_discard_draft(draft_id: str):
+    """Discard a non-committed draft. Returns 204 on success, 404 if the
+    draft is unknown, 409 if it is already COMMITTED. Used by wizard
+    cancel flows and E2E teardown."""
+    d = draft_store.get(draft_id)
+    if d is None:
+        raise HTTPException(404, f"draft not found: {draft_id}")
+    try:
+        draft_store.discard(draft_id)
+    except AuthoringError as e:
+        raise HTTPException(409, str(e))
+    return Response(status_code=204)
+
+
+@app.post("/api/authoring/commit")
+def authoring_commit(body: dict[str, Any]):
+    """Commit all APPROVED drafts to disk under ``lawcode/<code>/...``
+    and rebuild the registry so the new content is immediately visible.
+    Body shape: ``{committer}``. Returns
+    ``{committed: [Draft], reloaded: bool}``."""
+    try:
+        committed = draft_store.commit_approved(committer=body.get("committer", ""))
+    except AuthoringError as e:
+        raise HTTPException(400, str(e))
+    if committed:
+        # Refresh JURISDICTION_REGISTRY so the new jurisdiction / program
+        # is immediately discoverable through the existing read APIs
+        # (/api/authority-chain, /api/screen, /compare, etc.). Per L3 +
+        # ADR-020, this rebuilds the dict in place; existing references
+        # stay valid.
+        try:
+            reload_registry()
+            # Per L4: the /compare endpoint caches per-program manifests
+            # by jurisdiction code; bust the cache so newly committed
+            # manifests are visible.
+            clear_compare_program_cache()
+        except Exception:  # noqa: BLE001
+            # Commit succeeded; reload failed -- surface a generic flag
+            # but do not echo the exception (would leak path / stack
+            # info to an external caller per CodeQL py/stack-trace-exposure).
+            # Operators can inspect the server log for the underlying
+            # cause.
+            return {
+                "committed": [_draft_response(d) for d in committed],
+                "reloaded": False,
+                "reload_error": "registry reload failed; see server log",
+            }
+    return {
+        "committed": [_draft_response(d) for d in committed],
+        "reloaded": bool(committed),
+    }
 
 
 # ---------------------------------------------------------------------------

@@ -29,6 +29,8 @@ GovOps turns authoritative governance sources into coherent, traceable, executab
 
 This is an open public-good contribution: a working MVP demo other contributors can fork to build whatever else they need.
 
+**Status — v3.1 shipped.** The architectural shift: **lawcode-as-discovery** — `JURISDICTION_REGISTRY` is built at startup by walking `lawcode/` (ADR-020). Adding a jurisdiction no longer requires a Python edit. The L7 authoring substrate (ADR-022) ships a draft / approve / commit HTTP API at `/api/authoring/*` for in-app authoring of jurisdictions and program manifests; see [`docs/adoption/HOW-TO-ADD-A-JURISDICTION.md`](docs/adoption/HOW-TO-ADD-A-JURISDICTION.md) for both supported paths (CLI + file edit, and substrate API). Five playthrough bugs from 2026-05-10 are closed: jurisdiction picker on `/authority`, inline rationale validation on `/cases`, 409-Conflict idempotency on `/encode` commits, two dead `/about` links repaired, and `/impact` now groups by country (ADR-021) instead of program-scoped jurisdiction id. The L8-L12 in-app UI wizards (Onboard, authority chain editor, legal docs editor, demo cases editor, program creator) are v3.1.x backlog — they will drive the L7 substrate under the hood. See [`CHANGELOG.md`](CHANGELOG.md) for the full v3.1 ledger.
+
 **Project home**: [agentic-state.github.io/GovOps-LaC](https://agentic-state.github.io/GovOps-LaC/) · **Source**: [github.com/agentic-state/GovOps-LaC](https://github.com/agentic-state/GovOps-LaC) · **Live demo**: [huggingface.co/spaces/agentic-state/govops-lac](https://huggingface.co/spaces/agentic-state/govops-lac) — _free-tier; first load may take ~30s if idle_
 
 <p align="center">
@@ -97,18 +99,20 @@ This writes:
 
 ```
 lawcode/pl/
-├── jurisdiction.yaml
-├── programs/
-│   ├── oas.yaml          # program manifest (ADR-014)
-│   ├── oas.md            # plain-language sidecar for non-coder review
-│   ├── ei.yaml
-│   └── ei.md
-└── config/
-    ├── oas-rules.yaml    # substrate values (per-parameter, dated)
-    └── ei-rules.yaml
+├── config/
+│   ├── jurisdiction.yaml    # ADR-019 metadata block + ConfigValue defaults
+│   ├── oas-rules.yaml       # substrate values (per-parameter, dated)
+│   └── ei-rules.yaml
+└── programs/
+    ├── oas.yaml             # program manifest (ADR-014)
+    ├── oas.md               # plain-language sidecar for non-coder review
+    ├── ei.yaml
+    └── ei.md
 ```
 
 Every TODO marker in those files is a hand-fill point. The skeleton is schema-valid the moment it lands — `pytest` confirms the structure before you touch a single citation. The plain-language sidecars (`*.md`) are generated alongside the YAML so a non-coder program leader can review the encoded rules without reading YAML; regenerate them at any time with `govops docs lawcode/pl/programs/oas.yaml`.
+
+Since v3.1 (ADR-020) the running registry is built at startup by walking `lawcode/`, so the scaffolded jurisdiction appears in the dropdown after the next process start (or after `reload_registry()`) — **no Python edit, no PR required**. A round-trip test (`tests/test_cli_init.py::TestInitLoaderRoundTrip`) pins the scaffolder + loader path alignment so this stays closed.
 
 ### Zero-toolchain run via `docker compose`
 

@@ -298,6 +298,7 @@ function AdminPage() {
           { id: "switch", steps: 3 },
           { id: "reseed", steps: 3 },
           { id: "onboard", steps: 4 },
+          { id: "author", steps: 4 },
         ]}
       />
       <header className="flex flex-wrap items-center justify-between gap-3">
