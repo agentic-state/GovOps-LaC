@@ -1985,6 +1985,54 @@
           }
         }
       },
+      "patch": {
+        "summary": "Authoring Update Draft",
+        "description": "Replace a PENDING draft's payload. Body shape:\n``{content, editor, rationale?}``. Refuses on APPROVED / REJECTED /\nCOMMITTED. Used by the L9-L11 structured editors (authority chain,\nlegal documents, demo cases) to mutate slices of a program manifest\nin place rather than re-creating the draft.",
+        "operationId": "authoring_update_draft_api_authoring_drafts__draft_id__patch",
+        "parameters": [
+          {
+            "name": "draft_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Draft Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": true,
+                "title": "Body"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
       "delete": {
         "summary": "Authoring Discard Draft",
         "description": "Discard a non-committed draft. Returns 204 on success, 404 if the\ndraft is unknown, 409 if it is already COMMITTED. Used by wizard\ncancel flows and E2E teardown.",
