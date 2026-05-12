@@ -529,3 +529,75 @@ class TestAuthoringHTTP:
         r = client.post("/api/authoring/commit", json={"committer": "carol"})
         assert r.status_code == 200
         assert r.json() == {"committed": [], "reloaded": False}
+
+
+# ---------------------------------------------------------------------------
+# Scaffold helper (v3.1.x L12)
+# ---------------------------------------------------------------------------
+
+
+class TestAuthoringScaffold:
+    def test_scaffold_returns_jurisdiction_plus_oas_by_default(self, client):
+        r = client.post(
+            "/api/authoring/scaffold/jurisdiction",
+            json={"code": "pl"},
+        )
+        assert r.status_code == 200, r.text
+        body = r.json()
+        assert body["jurisdiction"]["target_path"] == "pl/config/jurisdiction.yaml"
+        assert "jurisdiction" in body["jurisdiction"]["content"]
+        assert body["jurisdiction"]["content"]["jurisdiction"]["country"] == "PL"
+        assert len(body["programs"]) == 1
+        assert body["programs"][0]["program_id"] == "oas"
+        assert body["programs"][0]["target_path"] == "pl/programs/oas.yaml"
+
+    def test_scaffold_with_ei_returns_both(self, client):
+        r = client.post(
+            "/api/authoring/scaffold/jurisdiction",
+            json={"code": "pl", "shapes": ["oas", "ei"]},
+        )
+        body = r.json()
+        ids = [p["program_id"] for p in body["programs"]]
+        assert ids == ["oas", "ei"]
+
+    def test_scaffold_writes_nothing_to_disk(self, client, tmp_path):
+        client.post(
+            "/api/authoring/scaffold/jurisdiction",
+            json={"code": "pl"},
+        )
+        # No file in tmp_path/pl/ -- scaffold is pure in-memory.
+        assert not (tmp_path / "pl").exists()
+
+    def test_scaffold_rejects_invalid_code(self, client):
+        for bad in ["", "123", "toolongcountry"]:
+            r = client.post(
+                "/api/authoring/scaffold/jurisdiction",
+                json={"code": bad},
+            )
+            assert r.status_code == 400, f"code={bad!r} unexpectedly accepted"
+
+    def test_scaffold_rejects_unknown_shape(self, client):
+        r = client.post(
+            "/api/authoring/scaffold/jurisdiction",
+            json={"code": "pl", "shapes": ["asylum"]},
+        )
+        assert r.status_code == 400
+
+    def test_scaffold_output_round_trips_through_create_draft(self, client):
+        """Wizard contract: the scaffolded content shape can be POSTed
+        directly to /api/authoring/drafts without transformation."""
+        scaffold = client.post(
+            "/api/authoring/scaffold/jurisdiction",
+            json={"code": "pl"},
+        ).json()
+        r = client.post(
+            "/api/authoring/drafts",
+            json={
+                "type": "jurisdiction",
+                "target_path": scaffold["jurisdiction"]["target_path"],
+                "content": scaffold["jurisdiction"]["content"],
+                "author": "alice",
+            },
+        )
+        assert r.status_code == 200, r.text
+        assert r.json()["status"] == "pending"

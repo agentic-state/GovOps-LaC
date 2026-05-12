@@ -2161,6 +2161,45 @@
         }
       }
     },
+    "/api/authoring/scaffold/jurisdiction": {
+      "post": {
+        "summary": "Authoring Scaffold Jurisdiction",
+        "description": "Pre-fill drafts for a fresh jurisdiction without writing anything.\n\nThe L8 Onboard wizard calls this on step 1 to get a complete\nschema-valid skeleton (same templates ``govops init`` writes to\ndisk) returned in-memory. The wizard renders the content in a form,\nthe operator edits the TODO markers, and the wizard POSTs the\nfinalised content to ``/api/authoring/drafts`` on submit.\n\nNo filesystem side effects. The substrate refuses target_paths the\nloader cannot see (see ``DraftStore.create`` path discipline), so\nthe scaffold respects the same layout: jurisdiction metadata at\n``<code>/config/jurisdiction.yaml`` and programs under\n``<code>/programs/<id>.yaml``.\n\nBody shape: ``{code: str, shapes?: [\"oas\", \"ei\"]}``. Defaults to\n``[\"oas\"]`` (the OAS shape is the only one the v3.1 registry loader\nrequires to register a jurisdiction; EI is additive).",
+        "operationId": "authoring_scaffold_jurisdiction_api_authoring_scaffold_jurisdiction_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "type": "object",
+                "title": "Body"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/": {
       "get": {
         "summary": "Ui About",

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useIntl } from "react-intl";
 import {
   getAuthorityChain,
@@ -325,6 +325,45 @@ function AdminPage() {
           <RefreshButton onRefresh={handleRefresh} refreshing={refreshing} />
         </div>
       </header>
+
+      {/* v3.1.x L8: in-browser authoring entry. The wizard + drafts queue
+          drive /api/authoring/* (ADR-022); the operator can onboard a
+          new jurisdiction without shell access or a Python edit. */}
+      <nav
+        aria-label={intl.formatMessage({ id: "admin.authoring.heading" })}
+        className="grid grid-cols-1 gap-3 rounded-md border border-border bg-surface-raised p-4 sm:grid-cols-2"
+      >
+        <Link
+          to="/admin/onboard"
+          className="block rounded-md border border-border bg-surface p-3 transition-colors hover:bg-surface-sunken"
+          data-testid="admin-cta-onboard"
+        >
+          <p
+            className="text-sm text-foreground"
+            style={{ fontFamily: "var(--font-serif)", fontWeight: 600 }}
+          >
+            {intl.formatMessage({ id: "admin.authoring.onboard.title" })}
+          </p>
+          <p className="mt-1 text-xs text-foreground-muted">
+            {intl.formatMessage({ id: "admin.authoring.onboard.lede" })}
+          </p>
+        </Link>
+        <Link
+          to="/admin/drafts"
+          className="block rounded-md border border-border bg-surface p-3 transition-colors hover:bg-surface-sunken"
+          data-testid="admin-cta-drafts"
+        >
+          <p
+            className="text-sm text-foreground"
+            style={{ fontFamily: "var(--font-serif)", fontWeight: 600 }}
+          >
+            {intl.formatMessage({ id: "admin.authoring.drafts.title" })}
+          </p>
+          <p className="mt-1 text-xs text-foreground-muted">
+            {intl.formatMessage({ id: "admin.authoring.drafts.lede" })}
+          </p>
+        </Link>
+      </nav>
 
       {errorCount > 0 && (
         <p
