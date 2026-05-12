@@ -9,9 +9,9 @@ from __future__ import annotations
 import os
 from contextlib import asynccontextmanager
 from pathlib import Path
-from typing import Any
+from typing import Any, Optional
 
-from fastapi import Depends, FastAPI, Header, HTTPException, Request
+from fastapi import Depends, FastAPI, Header, HTTPException, Request, Response
 from starlette.datastructures import FormData, UploadFile as StarletteUploadFile
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
@@ -20,6 +20,13 @@ from pydantic import BaseModel
 
 from datetime import date, datetime, timezone
 
+from govops.authoring import (
+    AuthoringError,
+    Draft,
+    DraftStatus,
+    DraftStore,
+    DraftType,
+)
 from govops.config import (
     ApprovalStatus,
     ConfigStore,
@@ -35,7 +42,11 @@ from govops.encoder import (
 )
 from govops.engine import ProgramEngine
 from govops.i18n import DEFAULT_LANGUAGE, SUPPORTED_LANGUAGES, get_translator
-from govops.jurisdictions import JURISDICTION_REGISTRY
+from govops.jurisdictions import (
+    JURISDICTION_REGISTRY,
+    _LAWCODE_ROOT,
+    reload_registry,
+)
 from govops.models import (
     AuditEntry,
     CaseEvent,
@@ -68,6 +79,10 @@ STATIC_DIR = Path(__file__).parent / "static"
 
 store = DemoStore()
 encoding_store = EncodingStore()
+# v3.1 L7 (ADR-022) authoring substrate: drafts of jurisdiction.yaml +
+# program manifests are staged here; commit_approved() writes them to
+# lawcode/ and reload_registry() picks them up.
+draft_store = DraftStore(_LAWCODE_ROOT)
 # Per ADR-010: persistent SQLite when GOVOPS_DB_PATH is set, in-memory otherwise.
 # Tests don't set the env var → fresh in-memory DB per process. The govops-demo
 # CLI sets it to var/govops.db so runtime edits survive restarts.
@@ -2168,6 +2183,162 @@ def screen_notice(req: ScreenRequest, lang: str = "en"):
             "X-Notice-Language": lang,
         },
     )
+
+
+# ---------------------------------------------------------------------------
+# Authoring substrate API (v3.1 L7 / ADR-022)
+# ---------------------------------------------------------------------------
+#
+# Mirrors the ConfigValue admin pattern (draft -> approve -> commit) for
+# non-ConfigValue records: jurisdiction.yaml + program manifests. The
+# substrate writes to lawcode/<code>/... on commit and triggers
+# reload_registry() so the new content appears in the running app
+# immediately. See ADR-022 for the design contract and the deferred
+# v3.2 hardening items (per-path conflict refusal, structural-aware
+# YAML emission, RBAC).
+
+
+def _draft_response(draft: Draft) -> dict[str, Any]:
+    """Serialize a Draft for the JSON API. Mirrors draft.to_dict() but
+    keeps datetime fields as ISO strings (which to_dict already does)."""
+    return draft.to_dict()
+
+
+@app.post("/api/authoring/drafts")
+def authoring_create_draft(body: dict[str, Any]):
+    """Create a new draft. Body shape:
+    ``{type, target_path, content, author, rationale?}``
+    """
+    try:
+        draft_type = DraftType(body.get("type", ""))
+    except ValueError:
+        raise HTTPException(
+            400,
+            f"type must be one of: {[t.value for t in DraftType]}",
+        )
+    try:
+        d = draft_store.create(
+            type=draft_type,
+            target_path=body.get("target_path", ""),
+            content=body.get("content") or {},
+            author=body.get("author", ""),
+            rationale=body.get("rationale"),
+        )
+    except AuthoringError as e:
+        raise HTTPException(400, str(e))
+    return _draft_response(d)
+
+
+@app.get("/api/authoring/drafts")
+def authoring_list_drafts(
+    type: Optional[str] = None,
+    status: Optional[str] = None,
+):
+    """List drafts; optional ``?type=`` and ``?status=`` filters."""
+    type_filter: Optional[DraftType] = None
+    status_filter: Optional[DraftStatus] = None
+    if type:
+        try:
+            type_filter = DraftType(type)
+        except ValueError:
+            raise HTTPException(400, f"unknown type: {type}")
+    if status:
+        try:
+            status_filter = DraftStatus(status)
+        except ValueError:
+            raise HTTPException(400, f"unknown status: {status}")
+    drafts = draft_store.list(type=type_filter, status=status_filter)
+    return {"drafts": [_draft_response(d) for d in drafts]}
+
+
+@app.get("/api/authoring/drafts/{draft_id}")
+def authoring_get_draft(draft_id: str):
+    d = draft_store.get(draft_id)
+    if d is None:
+        raise HTTPException(404, f"draft not found: {draft_id}")
+    return _draft_response(d)
+
+
+@app.post("/api/authoring/drafts/{draft_id}/approve")
+def authoring_approve_draft(draft_id: str, body: dict[str, Any]):
+    """Approve a pending draft. Body shape: ``{approver}``. Idempotent on
+    APPROVED; refuses on REJECTED or COMMITTED."""
+    try:
+        d = draft_store.approve(draft_id, approver=body.get("approver", ""))
+    except AuthoringError as e:
+        msg = str(e)
+        if "not found" in msg:
+            raise HTTPException(404, msg)
+        raise HTTPException(409, msg)
+    return _draft_response(d)
+
+
+@app.post("/api/authoring/drafts/{draft_id}/reject")
+def authoring_reject_draft(draft_id: str, body: dict[str, Any]):
+    """Reject a draft with a rationale. Body shape: ``{rejector, reason}``.
+    Idempotent on REJECTED; refuses on COMMITTED."""
+    try:
+        d = draft_store.reject(
+            draft_id,
+            rejector=body.get("rejector", ""),
+            reason=body.get("reason", ""),
+        )
+    except AuthoringError as e:
+        msg = str(e)
+        if "not found" in msg:
+            raise HTTPException(404, msg)
+        raise HTTPException(409, msg)
+    return _draft_response(d)
+
+
+@app.delete("/api/authoring/drafts/{draft_id}")
+def authoring_discard_draft(draft_id: str):
+    """Discard a non-committed draft. Returns 204 on success, 404 if the
+    draft is unknown, 409 if it is already COMMITTED. Used by wizard
+    cancel flows and E2E teardown."""
+    d = draft_store.get(draft_id)
+    if d is None:
+        raise HTTPException(404, f"draft not found: {draft_id}")
+    try:
+        draft_store.discard(draft_id)
+    except AuthoringError as e:
+        raise HTTPException(409, str(e))
+    return Response(status_code=204)
+
+
+@app.post("/api/authoring/commit")
+def authoring_commit(body: dict[str, Any]):
+    """Commit all APPROVED drafts to disk under ``lawcode/<code>/...``
+    and rebuild the registry so the new content is immediately visible.
+    Body shape: ``{committer}``. Returns
+    ``{committed: [Draft], reloaded: bool}``."""
+    try:
+        committed = draft_store.commit_approved(committer=body.get("committer", ""))
+    except AuthoringError as e:
+        raise HTTPException(400, str(e))
+    if committed:
+        # Refresh JURISDICTION_REGISTRY so the new jurisdiction / program
+        # is immediately discoverable through the existing read APIs
+        # (/api/authority-chain, /api/screen, /compare, etc.). Per L3 +
+        # ADR-020, this rebuilds the dict in place; existing references
+        # stay valid.
+        try:
+            reload_registry()
+            # Per L4: the /compare endpoint caches per-program manifests
+            # by jurisdiction code; bust the cache so newly committed
+            # manifests are visible.
+            clear_compare_program_cache()
+        except Exception as e:  # noqa: BLE001
+            # Commit succeeded; reload failed -- surface but don't 500.
+            return {
+                "committed": [_draft_response(d) for d in committed],
+                "reloaded": False,
+                "reload_error": str(e),
+            }
+    return {
+        "committed": [_draft_response(d) for d in committed],
+        "reloaded": bool(committed),
+    }
 
 
 # ---------------------------------------------------------------------------
