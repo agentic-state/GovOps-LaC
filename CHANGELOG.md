@@ -119,9 +119,16 @@ jurisdictions and program manifests. Five playthrough bugs from the
   describing the draft / approve / commit flow.
 - **Adoption walkthrough** at `docs/adoption/HOW-TO-ADD-A-JURISDICTION.md`
   documents both paths (CLI + file edit, and substrate API).
-- **Adoption E2E** at `web/e2e/adoption.spec.ts` exercises the full
-  substrate flow against a fictional `xx` jurisdiction and asserts it
-  becomes visible at `/authority?jurisdiction=xx` in the live UI.
+- **Adoption pytest coverage** at
+  `tests/test_authoring_substrate.py::TestCommitWritesToDiskAndRehydrates`
+  pins the full substrate flow: draft + approve + commit + the L3
+  loader picking up the new jurisdiction. Browser-level adoption E2E is
+  deferred to v3.1.x because the substrate's `commit` mutates the live
+  `JURISDICTION_REGISTRY` in the running process and races with the
+  cross-browser Playwright pool's concurrent reads (same SQLAlchemy
+  ``_apply_processors`` class of race we saw in L2b). The L8 Onboard
+  wizard E2E will re-introduce browser coverage with worker-scoped
+  lawcode roots.
 - **Vitest now runs in CI** as a step in the E2E job. PR #46 (truth
   alignment) silently shipped ICU `UNCLOSED_TAG` breakage in 6 locales
   because vitest wasn't wired -- vitest catches this in 0.8s but

@@ -166,5 +166,7 @@ When the wizards ship, they will drive `/api/authoring/*` under the hood. Path A
 - ADR-020 — lawcode-as-discovery loader (the read path)
 - ADR-022 — authoring substrate (the write path)
 - `docs/runbooks/add-jurisdiction.md` — full per-section editing discipline for Path A
-- `tests/test_authoring_substrate.py::TestCommitWritesToDiskAndRehydrates::test_jurisdiction_plus_program_commit_is_discoverable_by_loader` — the automated test pinning Path B
-- `tests/test_cli_init.py::TestInitLoaderRoundTrip::test_scaffolded_jurisdiction_is_discoverable_after_init` — the automated test pinning Path A
+- `tests/test_authoring_substrate.py::TestCommitWritesToDiskAndRehydrates::test_jurisdiction_plus_program_commit_is_discoverable_by_loader` — the automated test pinning Path B (pytest)
+- `tests/test_cli_init.py::TestInitLoaderRoundTrip::test_scaffolded_jurisdiction_is_discoverable_after_init` — the automated test pinning Path A (pytest)
+
+Browser-level E2E coverage of Path B is deferred to v3.1.x: the substrate's `commit` mutates the live `JURISDICTION_REGISTRY` in the running process, which races with the cross-browser Playwright pool's concurrent reads against `/check/life-event` and `/compare`. The L8 Onboard wizard E2E will re-introduce browser-side coverage in v3.1.x with proper test isolation (worker-scoped lawcode roots). The pytest-level coverage above already pins the full draft → approve → commit → loader-reload round-trip.
