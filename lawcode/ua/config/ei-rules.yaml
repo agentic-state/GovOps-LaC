@@ -1,0 +1,37 @@
+# yaml-language-server: $schema=../../../schema/lawcode-v1.0.json
+# ua/config/ei-rules.yaml — substrate values for UA Допомога по безробіттю (v3 Phase D).
+
+defaults:
+  domain: rule
+  jurisdiction_id: ua-ei
+  effective_from: '1900-01-01'
+values:
+  - key: ua-ei.rule.contribution.min_years
+    value: 1
+    value_type: number
+    citation: Закон України № 1533-III, ст. 22 (26 тижнів за 12 місяців ≈ півроку; 1 рік як ілюстративна базова межа)
+  - key: ua-ei.rule.contribution.home_countries
+    value: [UA, UKRAINE, УКРАЇНА]
+    value_type: list
+  - key: ua-ei.rule.legal-status.accepted_statuses
+    value: [citizen, permanent_resident]
+    value_type: list
+  - key: ua-ei.rule.evidence.required_types
+    value: [dovidka_zvilnennia]
+    value_type: list
+    citation: Закон України № 5067-VI, ст. 22
+  - key: ua-ei.rule.duration.weeks_total
+    value: 26
+    value_type: number
+    citation: Закон України № 1533-III, ст. 23
+    rationale: 'Illustrative midpoint — стандартна межа 360 календарних днів ≈ 51 тиждень. 26 weeks reflects typical mid-tier entitlement; full 360-day cap depends on прудентність служби зайнятості.'
+  - key: ua-ei.rule.duration.start_offset_days
+    value: 0
+    value_type: number
+  - key: ua-ei.rule.job-search.obligation_id
+    value: ua-dsz-active-cooperation
+    value_type: string
+  - key: ua-ei.rule.job-search.cadence
+    value: monthly
+    value_type: string
+    citation: Закон України № 1533-III, ст. 31

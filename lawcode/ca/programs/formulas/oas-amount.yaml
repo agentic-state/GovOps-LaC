@@ -1,0 +1,29 @@
+# Formula AST for the CA OAS amount calculation (per ADR-011).
+#
+# Structure (which ops connect which nodes) is policy logic and lives here.
+# Coefficients (e.g. base_monthly_amount, quarterly indexed) live in
+# lawcode/ca/config/rules.yaml and are resolved through the substrate at
+# evaluation time via the `ref` node.
+#
+# The shape mirrors src/govops/seed.py::_OAS_AMOUNT_FORMULA at the v3 Phase A
+# migration cutover; the loader injects this dict into the calc rule's
+# parameters['formula'] slot, identical to seed.py's inline literal.
+
+op: multiply
+citation: Old Age Security Act, ss. 7-8 (formula authority)
+note: base monthly amount × (eligible years / 40)
+args:
+  - op: ref
+    ref_key: ca.calc.oas.base_monthly_amount
+    citation: Old Age Security Act, R.S.C. 1985, c. O-9, s. 7
+    note: Base monthly OAS, quarterly indexed
+  - op: divide
+    args:
+      - op: field
+        field_name: eligible_years_oas
+        citation: Old Age Security Act, R.S.C. 1985, c. O-9, s. 3(2)(b)
+        note: Years of CA residency after 18, integer-floored, capped at 40
+      - op: const
+        value: 40
+        citation: Old Age Security Act, R.S.C. 1985, c. O-9, s. 3(2)(b)
+        note: Full-pension threshold (40 years)

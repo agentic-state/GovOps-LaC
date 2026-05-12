@@ -1,0 +1,66 @@
+{
+  // Pin to project venv. Windows path; on macOS/Linux change to "${workspaceFolder}/.venv/bin/python"
+  "python.defaultInterpreterPath": "${workspaceFolder}/.venv/Scripts/python.exe",
+  "python.terminal.activateEnvironment": true,
+
+  // Tests — single source: tests/ directory, pytest only
+  "python.testing.pytestEnabled": true,
+  "python.testing.unittestEnabled": false,
+  "python.testing.pytestArgs": ["tests"],
+
+  // Format/lint via Ruff
+  "[python]": {
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "charliermarsh.ruff",
+    "editor.codeActionsOnSave": {
+      "source.fixAll.ruff": "explicit",
+      "source.organizeImports.ruff": "explicit"
+    }
+  },
+
+  // YAML — 2-space, will pick up schema once Phase 5 publishes schema/lawcode-v1.0.json
+  "[yaml]": {
+    "editor.tabSize": 2,
+    "editor.insertSpaces": true
+  },
+  "yaml.schemas": {
+    // Wire in Phase 5: "schema/lawcode-v1.0.json": "lawcode/**/*.yaml"
+  },
+
+  // Markdown — wrap PLAN.md and ADRs cleanly
+  "[markdown]": {
+    "editor.wordWrap": "on",
+    "editor.quickSuggestions": { "comments": "off", "strings": "off", "other": "off" }
+  },
+
+  // File nesting: disabled. Maintainer preference is a flat explorer so every
+  // file is discoverable at its directory level. Pattern config preserved
+  // below (harmless while disabled) so future contributors can re-enable
+  // selectively if a directory grows enough to warrant it.
+  "explorer.fileNesting.enabled": false,
+  "explorer.fileNesting.expand": false,
+  "explorer.fileNesting.patterns": {
+    "engine.py": "test_engine.py",
+    "api.py": "test_api.py",
+    "encoder.py": "test_encoder.py",
+    "models.py": "test_models.py",
+    "pyproject.toml": "uv.lock, requirements*.txt",
+    "PLAN.md": "CLAUDE.md, CONTRIBUTING.md",
+    "README.md": "LICENSE, .gitignore, .gitattributes, .gitleaks.toml"
+  },
+
+  // Hide noisy paths from explorer
+  "files.exclude": {
+    "**/__pycache__": true,
+    "**/.pytest_cache": true,
+    "**/.hypothesis": true,
+    "**/*.egg-info": true,
+    ".venv": false
+  },
+
+  // Editor hygiene
+  "editor.rulers": [100],
+  "files.trimTrailingWhitespace": true,
+  "files.insertFinalNewline": true,
+  "files.eol": "\n"
+}

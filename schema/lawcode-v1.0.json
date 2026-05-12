@@ -1,0 +1,149 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/agentic-state/GovOps-LaC/schema/lawcode-v1.0.json",
+  "title": "lawcode/*.yaml file v1.0",
+  "description": "Shape of an on-disk YAML file under lawcode/. Per ADR-003 each file is a `defaults` mapping (merged into every record below) and a `values` list. The merged record must satisfy the ConfigValue v1.0 schema. Per ADR-019, an optional `jurisdiction` block at the top of a file declares jurisdiction-level identity (id, country, level, name, legal tradition, language regime, default language) used by the running engine to register a jurisdiction at startup; this block is structurally distinct from ConfigValue records.",
+  "type": "object",
+  "anyOf": [
+    { "required": ["values"] },
+    { "required": ["jurisdiction"] }
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "jurisdictionMetadata": {
+      "description": "Jurisdiction-level identity block per ADR-019. Used by the lawcode-as-discovery loader (ADR-020) to register a jurisdiction without a Python edit.",
+      "type": "object",
+      "required": ["id", "country", "level", "name", "default_language"],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "description": "Stable jurisdiction identifier (e.g. jur-ca-federal). Pattern aligns with authority-chain ids per ADR-014.",
+          "type": "string",
+          "pattern": "^jur-[a-z][a-z0-9-]+$"
+        },
+        "country": {
+          "description": "ISO 3166-1 alpha-2 country code, uppercase.",
+          "type": "string",
+          "pattern": "^[A-Z]{2}$"
+        },
+        "level": {
+          "description": "Government level the jurisdiction operates at.",
+          "type": "string",
+          "enum": ["federal", "national", "provincial", "state", "regional", "municipal"]
+        },
+        "parent_id": {
+          "description": "Parent jurisdiction id for sub-national jurisdictions; null or absent for top-level.",
+          "type": ["string", "null"]
+        },
+        "name": {
+          "description": "Display name keyed by IETF language tag. At least one entry required; en strongly recommended.",
+          "type": "object",
+          "minProperties": 1,
+          "additionalProperties": { "type": "string" }
+        },
+        "legal_tradition": {
+          "description": "Primary legal tradition. Free-form string. Canonical short buckets are recommended for new entries (common_law, civil_law, bijural, mixed, religious, customary) but the field stays free-form to carry the prose strings used by the running engine -- e.g. 'Bijural (common law / civil law)' for Canada or 'Civil law (Romano-Germanic)' for Brazil -- without lossy enum normalization. See ADR-019 §Amendment 2026-05-10. A tighter taxonomy may land in v3.2 once concrete UI requirements settle.",
+          "type": "string",
+          "minLength": 1
+        },
+        "language_regime": {
+          "description": "Free-form description of the language regime; short canonical keys preferred (e.g. en+fr, es-only, multi).",
+          "type": "string"
+        },
+        "default_language": {
+          "description": "IETF tag for the default UI language when no preference is set.",
+          "type": "string",
+          "pattern": "^[a-z]{2}(-[A-Z]{2})?$"
+        }
+      }
+    }
+  },
+  "properties": {
+    "jurisdiction": { "$ref": "#/$defs/jurisdictionMetadata" },
+    "defaults": {
+      "description": "Optional mapping merged into every record under `values`. Per-record fields override defaults.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "domain": { "type": "string" },
+        "jurisdiction_id": { "type": ["string", "null"] },
+        "value_type": {
+          "type": "string",
+          "enum": ["number", "string", "bool", "list", "object", "enum", "prompt", "formula", "template"]
+        },
+        "effective_from": {
+          "type": "string",
+          "anyOf": [
+            { "format": "date" },
+            { "format": "date-time" }
+          ]
+        },
+        "effective_to": {
+          "type": ["string", "null"],
+          "anyOf": [
+            { "type": "null" },
+            { "type": "string", "format": "date" },
+            { "type": "string", "format": "date-time" }
+          ]
+        },
+        "citation": { "type": ["string", "null"] },
+        "author": { "type": "string" },
+        "approved_by": { "type": ["string", "null"] },
+        "rationale": { "type": "string" },
+        "status": {
+          "type": "string",
+          "enum": ["draft", "pending", "approved", "rejected"]
+        },
+        "language": { "type": ["string", "null"] }
+      }
+    },
+    "values": {
+      "description": "List of ConfigValue records. Each item is merged with `defaults` and must satisfy ConfigValue v1.0.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["key"],
+        "additionalProperties": false,
+        "properties": {
+          "key": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9._-]*$",
+            "minLength": 3
+          },
+          "domain": { "type": "string" },
+          "jurisdiction_id": { "type": ["string", "null"] },
+          "value": {},
+          "value_type": {
+            "type": "string",
+            "enum": ["number", "string", "bool", "list", "object", "enum", "prompt", "formula", "template"]
+          },
+          "effective_from": {
+            "type": "string",
+            "anyOf": [
+              { "format": "date" },
+              { "format": "date-time" }
+            ]
+          },
+          "effective_to": {
+            "type": ["string", "null"],
+            "anyOf": [
+              { "type": "null" },
+              { "type": "string", "format": "date" },
+              { "type": "string", "format": "date-time" }
+            ]
+          },
+          "citation": { "type": ["string", "null"] },
+          "author": { "type": "string" },
+          "approved_by": { "type": ["string", "null"] },
+          "rationale": { "type": "string" },
+          "supersedes": { "type": ["string", "null"] },
+          "status": {
+            "type": "string",
+            "enum": ["draft", "pending", "approved", "rejected"]
+          },
+          "language": { "type": ["string", "null"] }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,209 @@
+# yaml-language-server: $schema=../../../schema/program-manifest-v1.0.json
+#
+# BR -- OAS program manifest (v3.1 Lane 2b migration from src/govops/jurisdictions.py).
+# Per ADR-014, structure (rules / authority / legal documents / demo
+# cases) lives here. Parameter values live in the ConfigValue substrate
+# (lawcode/br/config/oas-rules.yaml) and are referenced
+# via {ref: '<key>'}. ADR-020 (lawcode-as-discovery) reads this file
+# at startup to register the program with the running engine.
+
+schema_version: '1.0'
+program_id: oas
+jurisdiction_id: jur-br-federal
+shape: old_age_pension
+status: active
+name:
+  pt: Aposentadoria por Idade (INSS)
+authority_chain:
+- id: auth-br-constitution
+  layer: constitution
+  title: Constituicao da Republica Federativa do Brasil de 1988
+  citation: CF/1988, Art. 201
+  effective_date: '1988-10-05'
+  url: https://www.planalto.gov.br/ccivil_03/constituicao/constituicao.htm
+- id: auth-br-law-8213
+  layer: act
+  title: Lei de Beneficios da Previdencia Social
+  citation: Lei n. 8.213/1991
+  effective_date: '1991-07-24'
+  url: https://www.planalto.gov.br/ccivil_03/leis/l8213cons.htm
+  parent: auth-br-constitution
+- id: auth-br-ec-103
+  layer: act
+  title: Emenda Constitucional n. 103/2019 (Reforma da Previdencia)
+  citation: EC n. 103/2019
+  effective_date: '2019-11-13'
+  parent: auth-br-constitution
+- id: auth-br-inss
+  layer: program
+  title: Instituto Nacional do Seguro Social (INSS)
+  citation: Lei n. 8.029/1990, Art. 17
+  parent: auth-br-law-8213
+- id: auth-br-aposentadoria
+  layer: service
+  title: Aposentadoria por Idade
+  citation: Lei n. 8.213/1991, Art. 48; EC 103/2019, Art. 19
+  parent: auth-br-inss
+legal_documents:
+- id: doc-br-lei-8213
+  type: statute
+  title: Lei de Beneficios da Previdencia Social
+  citation: Lei n. 8.213/1991
+  effective_date: '1991-07-24'
+  sections:
+  - id: sec-br-art48
+    ref: Art. 48
+    heading: Aposentadoria por idade
+    text: A aposentadoria por idade sera devida ao segurado que, cumprida a carencia exigida nesta Lei, completar 65 (sessenta e cinco) anos de idade, se homem, e 62 (sessenta e dois) anos, se mulher. (Redacao dada pela Emenda Constitucional n. 103, de 2019)
+  - id: sec-br-art25
+    ref: Art. 25, II
+    heading: Carencia
+    text: A concessao da aposentadoria por idade depende de carencia de 180 contribuicoes mensais (15 anos).
+rules:
+- id: rule-br-age
+  rule_type: age_threshold
+  description: 'Idade minima: 65 anos (homens) ou 62 anos (mulheres)'
+  formal_expression: age >= 65 (male) or age >= 62 (female)
+  citation: Lei n. 8.213/1991, Art. 48; EC 103/2019
+  source_document_id: doc-br-lei-8213
+  source_section_ref: Art. 48
+  param_key_prefix: br.rule.age
+  parameters:
+    min_age:
+      ref: br.rule.age.min_age
+- id: rule-br-contribution
+  rule_type: residency_minimum
+  description: Minimo de 15 anos (180 meses) de contribuicao ao INSS
+  formal_expression: contribution_years >= 15
+  citation: Lei n. 8.213/1991, Art. 25, II
+  source_document_id: doc-br-lei-8213
+  source_section_ref: Art. 25, II
+  param_key_prefix: br.rule.contribution
+  parameters:
+    min_years:
+      ref: br.rule.contribution.min_years
+    home_countries:
+      ref: br.rule.contribution.home_countries
+- id: rule-br-contribution-calc
+  rule_type: residency_partial
+  description: Beneficio integral com 40 anos de contribuicao; proporcional com 15-39 anos
+  formal_expression: pension_ratio = min(contribution_years, 40) / 40
+  citation: EC 103/2019, Art. 26
+  source_document_id: doc-br-lei-8213
+  source_section_ref: Art. 48
+  param_key_prefix: br.rule.contribution-calc
+  parameters:
+    full_years:
+      ref: br.rule.contribution-calc.full_years
+    min_years:
+      ref: br.rule.contribution-calc.min_years
+- id: rule-br-status
+  rule_type: legal_status
+  description: Segurado deve estar inscrito no INSS (cidadao ou residente permanente)
+  formal_expression: legal_status in ['citizen', 'permanent_resident']
+  citation: Lei n. 8.213/1991, Art. 11
+  source_document_id: doc-br-lei-8213
+  source_section_ref: Art. 48
+  param_key_prefix: br.rule.status
+  parameters:
+    accepted_statuses:
+      ref: br.rule.status.accepted_statuses
+- id: rule-br-evidence
+  rule_type: evidence_required
+  description: Comprovante de idade (certidao de nascimento ou documento de identidade)
+  formal_expression: has_evidence('birth_certificate') or has_evidence('id_card')
+  citation: Lei n. 8.213/1991, Art. 62
+  source_document_id: doc-br-lei-8213
+  source_section_ref: Art. 48
+  param_key_prefix: br.rule.evidence
+  parameters:
+    required_types:
+      ref: br.rule.evidence.required_types
+demo_cases:
+- id: demo-br-001
+  applicant:
+    id: app-br-001
+    date_of_birth: '1955-06-12'
+    legal_name: Carlos Alberto Silva
+    legal_status: citizen
+    country_of_birth: BR
+  residency_periods:
+  - country: Brazil
+    start_date: '1955-06-12'
+    verified: true
+  evidence_items:
+  - id: a0ad866996e2
+    type: birth_certificate
+    description: Certidao de nascimento
+    provided: true
+    verified: true
+  - id: 584648454c8a
+    type: tax_record
+    description: CNIS - contribuicoes INSS 1975-2025
+    provided: true
+    verified: true
+- id: demo-br-002
+  applicant:
+    id: app-br-002
+    date_of_birth: '1980-03-20'
+    legal_name: Ana Lucia Ferreira
+    legal_status: citizen
+    country_of_birth: BR
+  residency_periods:
+  - country: Brazil
+    start_date: '1980-03-20'
+    verified: true
+  evidence_items:
+  - id: 4759090a2c21
+    type: birth_certificate
+    description: Certidao de nascimento
+    provided: true
+    verified: true
+  - id: e8a3ee3e3db5
+    type: tax_record
+    description: CNIS
+    provided: true
+- id: demo-br-003
+  applicant:
+    id: app-br-003
+    date_of_birth: '1958-09-05'
+    legal_name: Joao Pedro Oliveira
+    legal_status: permanent_resident
+    country_of_birth: PT
+  residency_periods:
+  - country: Portugal
+    start_date: '1958-09-05'
+    end_date: '1995-01-01'
+  - country: Brazil
+    start_date: '1995-01-01'
+    verified: true
+  evidence_items:
+  - id: a6c443f0550a
+    type: birth_certificate
+    description: Certidao de nascimento (Portugal, traduzida)
+    provided: true
+    verified: true
+  - id: ffd5bf0be0de
+    type: tax_record
+    description: CNIS 1995-2025
+    provided: true
+    verified: true
+  - id: f796e7f1a9df
+    type: residency_declaration
+    description: RNE - Registro Nacional de Estrangeiros
+    provided: true
+- id: demo-br-004
+  applicant:
+    id: app-br-004
+    date_of_birth: '1950-12-01'
+    legal_name: Maria das Gracas Costa
+    legal_status: citizen
+    country_of_birth: BR
+  residency_periods:
+  - country: Brazil
+    start_date: '1950-12-01'
+  evidence_items:
+  - id: a96c0bc2241d
+    type: tax_record
+    description: CNIS parcial
+    provided: true

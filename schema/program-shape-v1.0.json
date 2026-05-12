@@ -1,0 +1,90 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/agentic-state/GovOps-LaC/schema/program-shape-v1.0.json",
+  "title": "Program shape v1.0",
+  "description": "Meta-schema for a program shape published under schema/shapes/<shape-id>-vX.Y.yaml or declared locally under lawcode/<jur>/_shapes/<shape-id>.yaml. Per ADR-015, a shape declares the contract that a program manifest must satisfy: which rule_types are allowed, which are required, what outcome the engine produces, and which evaluator module implements the shape-specific post-processing. The shape catalog is the contribution surface for adopters who want to fork GovOps for a new legal tradition.",
+  "type": "object",
+  "required": ["shape_id", "version", "rule_types_allowed", "outcome_shape", "description"],
+  "additionalProperties": false,
+  "properties": {
+    "shape_id": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]*$",
+      "description": "Lowercase shape identifier. Manifests reference this in their `shape` field."
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+(\\.\\d+)?$",
+      "description": "Semver. Major bumps require an ADR; manifests pin to a specific major version."
+    },
+    "description": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Plain-language one-paragraph summary. Audience: program leaders reading the shape catalog."
+    },
+    "rule_types_allowed": {
+      "type": "array",
+      "description": "Which RuleType enum values may appear in a manifest declaring this shape. Manifests using other rule types fail validation at load time.",
+      "items": {
+        "type": "string",
+        "enum": [
+          "age_threshold",
+          "residency_minimum",
+          "residency_partial",
+          "legal_status",
+          "evidence_required",
+          "exclusion",
+          "calculation",
+          "benefit_duration_bounded",
+          "active_obligation"
+        ]
+      },
+      "uniqueItems": true,
+      "minItems": 1
+    },
+    "required_rules": {
+      "type": "array",
+      "description": "Rule types that MUST be present in any manifest declaring this shape. A manifest missing one of these fails validation.",
+      "items": {
+        "type": "string",
+        "enum": [
+          "age_threshold",
+          "residency_minimum",
+          "residency_partial",
+          "legal_status",
+          "evidence_required",
+          "exclusion",
+          "calculation",
+          "benefit_duration_bounded",
+          "active_obligation"
+        ]
+      },
+      "uniqueItems": true,
+      "default": []
+    },
+    "outcome_shape": {
+      "type": "string",
+      "enum": [
+        "pension_full_or_partial",
+        "bounded_benefit_period",
+        "binary_eligibility"
+      ],
+      "description": "Which ShapeOutcome variant the evaluator produces. The base ProgramEngine uses this to know how to render the program's recommendation in audit packages and UI surfaces."
+    },
+    "evaluator_module": {
+      "type": "string",
+      "description": "Python import path of the evaluator (e.g. 'govops.shapes.old_age_pension'). Required for published shapes; optional for local shapes that opt out of post-processing.",
+      "pattern": "^[a-z_][a-z0-9_.]*$"
+    },
+    "evaluator_class": {
+      "type": "string",
+      "description": "Class name within the evaluator module that implements the ShapeEvaluator protocol. Defaults to the title-cased shape_id + 'Evaluator'.",
+      "pattern": "^[A-Z][A-Za-z0-9]*$"
+    },
+    "references": {
+      "type": "array",
+      "description": "Free-form list of references — ADRs, charter sections, external statutory traditions this shape models. Audience: contributors evaluating whether to fork or extend.",
+      "items": { "type": "string" }
+    }
+  }
+}

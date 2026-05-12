@@ -1,0 +1,238 @@
+# yaml-language-server: $schema=../../../schema/program-manifest-v1.0.json
+#
+# Spain — Prestación por Desempleo (contributiva) program manifest (v3 Phase D).
+# Contributory unemployment benefit under Real Decreto Legislativo 8/2015
+# (Texto Refundido de la Ley General de la Seguridad Social).
+
+schema_version: "1.0"
+program_id: ei
+jurisdiction_id: jur-es-national
+shape: unemployment_insurance
+status: active
+
+name:
+  en: Unemployment Benefit (Prestación por Desempleo)
+  es-MX: Prestación por Desempleo
+
+description:
+  en: Contributory unemployment benefit administered by SEPE for workers with at least 360 days of contributions in the last 6 years (TRLGSS, Art. 266 et seq.).
+  es-MX: Prestación contributiva gestionada por el SEPE para trabajadores con al menos 360 días cotizados en los últimos 6 años (TRLGSS, Art. 266 y siguientes).
+
+authority_chain:
+  - id: auth-es-ei-constitution
+    layer: constitution
+    title: Constitución Española
+    citation: CE 1978, Art. 41
+    effective_date: 1978-12-29
+    url: https://www.boe.es/buscar/act.php?id=BOE-A-1978-31229
+  - id: auth-es-ei-trlgss
+    layer: act
+    title: Texto Refundido de la Ley General de la Seguridad Social
+    citation: Real Decreto Legislativo 8/2015
+    effective_date: 2015-10-30
+    url: https://www.boe.es/buscar/act.php?id=BOE-A-2015-11724
+    parent: auth-es-ei-constitution
+  - id: auth-es-ei-sepe
+    layer: program
+    title: Servicio Público de Empleo Estatal (SEPE)
+    citation: TRLGSS, Art. 295
+    parent: auth-es-ei-trlgss
+  - id: auth-es-ei-determination
+    layer: service
+    title: Reconocimiento de la prestación contributiva por desempleo
+    citation: TRLGSS, Arts. 266-272
+    parent: auth-es-ei-sepe
+
+legal_documents:
+  - id: doc-es-ei-trlgss
+    type: statute
+    title: Texto Refundido de la Ley General de la Seguridad Social
+    citation: Real Decreto Legislativo 8/2015
+    effective_date: 2015-10-30
+    sections:
+      - id: sec-es-ei-266
+        ref: Art. 266
+        heading: Requisitos para el nacimiento del derecho
+        text: >-
+          Para tener derecho a las prestaciones por desempleo las personas comprendidas en el artículo 264 deberán reunir los requisitos siguientes: a) Estar afiliadas a la Seguridad Social y en situación de alta o asimilada al alta. b) Tener cubierto un período mínimo de cotización de 360 días dentro de los seis años anteriores a la situación legal de desempleo.
+      - id: sec-es-ei-269
+        ref: Art. 269
+        heading: Duración de la prestación por desempleo
+        text: >-
+          La duración de la prestación por desempleo estará en función de los períodos de ocupación cotizada en los seis años anteriores a la situación legal de desempleo, conforme a la escala de 120 días para 360 días cotizados, hasta 720 días para 2160 días cotizados o más.
+      - id: sec-es-ei-300
+        ref: Art. 300
+        heading: Compromiso de actividad
+        text: >-
+          La concesión y mantenimiento de las prestaciones por desempleo exigirá la suscripción del compromiso de actividad por la persona solicitante, que implicará buscar activamente empleo, aceptar una colocación adecuada y participar en acciones específicas de motivación, información, orientación, formación, reconversión o inserción profesional.
+
+rules:
+  - id: rule-ei-contribution
+    rule_type: residency_minimum
+    description: Mínimo 360 días cotizados en los últimos 6 años
+    formal_expression: contributed_days_last_6_years >= 360
+    citation: Real Decreto Legislativo 8/2015, Art. 266
+    source_document_id: doc-es-ei-trlgss
+    source_section_ref: Art. 266
+    param_key_prefix: es-ei.rule.contribution
+    parameters:
+      min_years: { ref: es-ei.rule.contribution.min_years }
+      home_countries: { ref: es-ei.rule.contribution.home_countries }
+
+  - id: rule-ei-legal-status
+    rule_type: legal_status
+    description: Persona afiliada a la Seguridad Social y autorizada para trabajar
+    formal_expression: "applicant.legal_status in ['citizen', 'permanent_resident']"
+    citation: Real Decreto Legislativo 8/2015, Art. 266(a)
+    source_document_id: doc-es-ei-trlgss
+    source_section_ref: Art. 266
+    param_key_prefix: es-ei.rule.legal-status
+    parameters:
+      accepted_statuses: { ref: es-ei.rule.legal-status.accepted_statuses }
+
+  - id: rule-ei-evidence
+    rule_type: evidence_required
+    description: Certificado de empresa acreditando la situación legal de desempleo
+    formal_expression: has_evidence('certificado_empresa')
+    citation: Real Decreto Legislativo 8/2015, Art. 268
+    source_document_id: doc-es-ei-trlgss
+    source_section_ref: Art. 268
+    param_key_prefix: es-ei.rule.evidence
+    parameters:
+      required_types: { ref: es-ei.rule.evidence.required_types }
+
+  - id: rule-ei-duration
+    rule_type: benefit_duration_bounded
+    description: Duración máxima de la prestación según escala de cotización
+    formal_expression: days = scale(contributed_days)
+    citation: Real Decreto Legislativo 8/2015, Art. 269
+    source_document_id: doc-es-ei-trlgss
+    source_section_ref: Art. 269
+    param_key_prefix: es-ei.rule.duration
+    parameters:
+      weeks_total: { ref: es-ei.rule.duration.weeks_total }
+      start_offset_days: { ref: es-ei.rule.duration.start_offset_days }
+
+  - id: rule-ei-job-search
+    rule_type: active_obligation
+    description: Compromiso de actividad — búsqueda activa de empleo y aceptación de colocación adecuada
+    formal_expression: active_search AND accept_suitable_employment
+    citation: Real Decreto Legislativo 8/2015, Art. 300
+    source_document_id: doc-es-ei-trlgss
+    source_section_ref: Art. 300
+    param_key_prefix: es-ei.rule.job-search
+    parameters:
+      obligation_id: { ref: es-ei.rule.job-search.obligation_id }
+      cadence: { ref: es-ei.rule.job-search.cadence }
+
+demo_cases:
+  - id: demo-es-ei-001
+    applicant:
+      id: app-es-ei-001
+      date_of_birth: 1989-05-20
+      legal_name: Lucía García
+      legal_status: citizen
+      country_of_birth: ES
+    residency_periods:
+      - country: Spain
+        start_date: 1989-05-20
+        verified: true
+    evidence_items:
+      - id: ev-es-ei-001-bc
+        type: birth_certificate
+        description: Certificación literal de nacimiento
+        provided: true
+        verified: true
+      - id: ev-es-ei-001-tax
+        type: tax_record
+        description: Vida laboral 2010-2025 (Tesorería General de la Seguridad Social)
+        provided: true
+        verified: true
+      - id: ev-es-ei-001-cert
+        type: certificado_empresa
+        description: Certificado de empresa con baja por causas objetivas
+        provided: true
+        verified: true
+
+  - id: demo-es-ei-002
+    applicant:
+      id: app-es-ei-002
+      date_of_birth: 1997-08-14
+      legal_name: Diego Martínez
+      legal_status: permanent_resident
+      country_of_birth: AR
+    residency_periods:
+      - country: Argentina
+        start_date: 1997-08-14
+        end_date: 2025-10-01
+      - country: Spain
+        start_date: 2025-10-01
+        verified: true
+    evidence_items:
+      - id: ev-es-ei-002-bc
+        type: birth_certificate
+        description: Acta de nacimiento argentina (apostillada)
+        provided: true
+        verified: true
+      - id: ev-es-ei-002-pr
+        type: residency_declaration
+        description: TIE — Tarjeta de Identidad de Extranjero
+        provided: true
+        verified: true
+      - id: ev-es-ei-002-cert
+        type: certificado_empresa
+        description: Certificado de empresa de contrato corto
+        provided: true
+        verified: true
+
+  - id: demo-es-ei-003
+    applicant:
+      id: app-es-ei-003
+      date_of_birth: 1983-01-30
+      legal_name: Carmen López
+      legal_status: citizen
+      country_of_birth: ES
+    residency_periods:
+      - country: Spain
+        start_date: 1983-01-30
+        verified: true
+    evidence_items:
+      - id: ev-es-ei-003-bc
+        type: birth_certificate
+        description: Certificación literal de nacimiento
+        provided: true
+        verified: true
+      - id: ev-es-ei-003-tax
+        type: tax_record
+        description: Vida laboral 2005-2025
+        provided: true
+        verified: true
+      - id: ev-es-ei-003-cert
+        type: certificado_empresa
+        description: Certificado de empresa por despido objetivo
+        provided: true
+        verified: true
+
+  - id: demo-es-ei-004
+    applicant:
+      id: app-es-ei-004
+      date_of_birth: 1991-11-25
+      legal_name: Antonio Ruiz
+      legal_status: citizen
+      country_of_birth: ES
+    residency_periods:
+      - country: Spain
+        start_date: 1991-11-25
+        verified: true
+    evidence_items:
+      - id: ev-es-ei-004-bc
+        type: birth_certificate
+        description: Certificación literal de nacimiento
+        provided: true
+        verified: true
+      - id: ev-es-ei-004-tax
+        type: tax_record
+        description: Vida laboral parcial
+        provided: true
+        verified: true
+      # No certificado_empresa — INSUFFICIENT_EVIDENCE

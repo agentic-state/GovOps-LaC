@@ -1,0 +1,35 @@
+# yaml-language-server: $schema=../../../schema/lawcode-v1.0.json
+# fr/config/rules.yaml — generated from legacy_constants.py at Phase 3.2 cutover.
+# Schema: defaults + values list per ADR-003 §Mitigations.
+
+defaults:
+  domain: rule
+  jurisdiction_id: fr-cnav
+  effective_from: '1900-01-01'
+values:
+- key: fr.rule.age.min_age
+  value: 64
+  value_type: number
+- key: fr.rule.evidence.required_types
+  value:
+  - birth_certificate
+  value_type: list
+- key: fr.rule.status.accepted_statuses
+  value:
+  - citizen
+  - permanent_resident
+  value_type: list
+- key: fr.rule.trimestres-calc.full_years
+  value: 43
+  value_type: number
+- key: fr.rule.trimestres-calc.min_years
+  value: 2
+  value_type: number
+- key: fr.rule.trimestres-min.home_countries
+  value:
+  - FR
+  - FRANCE
+  value_type: list
+- key: fr.rule.trimestres-min.min_years
+  value: 2
+  value_type: number

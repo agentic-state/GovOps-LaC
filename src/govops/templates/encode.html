@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+{% block title %}GovOps - Encode: Legislative Text to Rules{% endblock %}
+{% block content %}
+<h2 class="mb-2" style="font-size:1.3rem;">Rule Encoding Pipeline</h2>
+<p class="text-sm text-muted mb-2">
+    Paste legislative text. The system extracts structured rules. You review and approve each one.
+    Every step is traceable.
+</p>
+
+<div style="display:flex; gap:0.5rem; flex-wrap:wrap; margin-bottom:1.5rem;">
+    <a href="#ingest" class="btn btn-primary btn-sm">1. Ingest</a>
+    <a href="#batches" class="btn btn-primary btn-sm">Encoding Batches</a>
+</div>
+
+<!-- Step 1: Ingest -->
+<div class="card" id="ingest">
+    <h2>Step 1: Ingest Legislative Text</h2>
+    <form method="POST" action="/encode/ingest?lang={{ lang }}">
+        <div class="grid-2">
+            <div>
+                <div class="mb-1">
+                    <label class="text-sm"><strong>Document Title</strong></label>
+                    <input type="text" name="document_title" placeholder="e.g., Zakon Ukrainy 'Pro zahalnooboviazkove derzhavne pensiine strakhuvannia'" required>
+                </div>
+                <div class="mb-1">
+                    <label class="text-sm"><strong>Document Citation</strong></label>
+                    <input type="text" name="document_citation" placeholder="e.g., Zakon No. 1058-IV vid 09.07.2003" required>
+                </div>
+                <div class="mb-1">
+                    <label class="text-sm"><strong>Extraction Method</strong></label>
+                    <select name="method">
+                        <option value="llm">AI-Assisted (Claude API)</option>
+                        <option value="manual">Manual Entry</option>
+                    </select>
+                </div>
+                <div class="mb-1" id="api-key-field">
+                    <label class="text-sm"><strong>API Key</strong> <span class="text-muted">(for AI extraction -- not stored)</span></label>
+                    <input type="text" name="api_key" placeholder="sk-ant-...">
+                </div>
+            </div>
+            <div>
+                <div class="mb-1">
+                    <label class="text-sm"><strong>Legislative Text</strong></label>
+                    <textarea name="input_text" rows="12" placeholder="Paste the legislative text here. Include article numbers, section references, and the full text of each provision you want to encode." required style="min-height:250px; font-family:monospace; font-size:0.85rem;"></textarea>
+                </div>
+            </div>
+        </div>
+        <button type="submit" class="btn btn-primary mt-1">Extract Rules</button>
+    </form>
+    <script>
+        document.querySelector('select[name="method"]').addEventListener('change', function() {
+            document.getElementById('api-key-field').style.display = this.value === 'llm' ? 'block' : 'none';
+        });
+    </script>
+</div>
+
+<!-- Existing batches -->
+<div class="card" id="batches">
+    <h2>Encoding Batches ({{ batches | length }})</h2>
+    {% if batches %}
+    <table>
+        <thead><tr><th>Batch</th><th>Document</th><th>Method</th><th>Proposals</th><th>Status</th><th>Created</th><th></th></tr></thead>
+        <tbody>
+        {% for batch in batches %}
+        {% set approved = batch.proposals | selectattr("status", "equalto", "approved") | list | length %}
+        {% set edited = batch.proposals | selectattr("status", "equalto", "edited") | list | length %}
+        {% set pending = batch.proposals | selectattr("status", "equalto", "pending") | list | length %}
+        {% set rejected = batch.proposals | selectattr("status", "equalto", "rejected") | list | length %}
+        <tr>
+            <td><code class="text-sm">{{ batch.id }}</code></td>
+            <td>{{ batch.document_title[:50] }}{% if batch.document_title | length > 50 %}...{% endif %}</td>
+            <td><span class="badge badge-muted">{{ batch.extraction_method }}</span></td>
+            <td>{{ batch.proposals | length }}</td>
+            <td>
+                {% if pending > 0 %}<span class="badge badge-warning">{{ pending }} pending</span>{% endif %}
+                {% if approved + edited > 0 %}<span class="badge badge-success">{{ approved + edited }} approved</span>{% endif %}
+                {% if rejected > 0 %}<span class="badge badge-danger">{{ rejected }} rejected</span>{% endif %}
+            </td>
+            <td class="text-sm">{{ batch.created_at.strftime("%Y-%m-%d %H:%M") }}</td>
+            <td><a href="/encode/{{ batch.id }}?lang={{ lang }}" class="btn btn-primary btn-sm">Review</a></td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p class="text-muted text-sm">No encoding batches yet. Paste legislative text above to start.</p>
+    {% endif %}
+</div>
+
+<!-- Pipeline audit -->
+{% if audit %}
+<div class="card">
+    <h2>Encoding Audit Trail ({{ audit | length }} entries)</h2>
+    <table>
+        <thead><tr><th>Time</th><th>Batch</th><th>Event</th><th>Actor</th><th>Detail</th></tr></thead>
+        <tbody>
+        {% for entry in audit[-20:] | reverse %}
+        <tr>
+            <td class="text-sm">{{ entry.timestamp.strftime("%H:%M:%S") }}</td>
+            <td><code class="text-sm">{{ entry.batch_id[:8] }}</code></td>
+            <td><span class="badge badge-muted">{{ entry.event }}</span></td>
+            <td class="text-sm">{{ entry.actor }}</td>
+            <td class="text-sm">{{ entry.detail }}</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endif %}
+{% endblock %}
