@@ -12,7 +12,6 @@ Covers:
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
 from pathlib import Path
 
 import pytest
@@ -21,7 +20,6 @@ from fastapi.testclient import TestClient
 
 from govops.authoring import (
     AuthoringError,
-    Draft,
     DraftStatus,
     DraftStore,
     DraftType,
@@ -123,7 +121,8 @@ class TestDraftStoreLifecycle:
             content={"jurisdiction": {}},
             author="alice",
         )
-        assert store.discard(d.id) is True
+        removed = store.discard(d.id)
+        assert removed is True
         assert store.get(d.id) is None
         # The on-disk persisted file is also gone.
         assert not (tmp_path / ".drafts" / f"{d.id}.yaml").exists()

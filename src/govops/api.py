@@ -2328,12 +2328,16 @@ def authoring_commit(body: dict[str, Any]):
             # by jurisdiction code; bust the cache so newly committed
             # manifests are visible.
             clear_compare_program_cache()
-        except Exception as e:  # noqa: BLE001
-            # Commit succeeded; reload failed -- surface but don't 500.
+        except Exception:  # noqa: BLE001
+            # Commit succeeded; reload failed -- surface a generic flag
+            # but do not echo the exception (would leak path / stack
+            # info to an external caller per CodeQL py/stack-trace-exposure).
+            # Operators can inspect the server log for the underlying
+            # cause.
             return {
                 "committed": [_draft_response(d) for d in committed],
                 "reloaded": False,
-                "reload_error": str(e),
+                "reload_error": "registry reload failed; see server log",
             }
     return {
         "committed": [_draft_response(d) for d in committed],
