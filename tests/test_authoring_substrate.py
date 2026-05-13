@@ -174,7 +174,10 @@ class TestDraftStoreLifecycle:
             content={"program_id": "oas"},
             author="alice",
         )
-        assert store.discard(first.id) is True
+        # CodeQL py/assert-side-effect: keep the side-effecting call
+        # outside the assert so the assertion checks a pure value.
+        discarded = store.discard(first.id)
+        assert discarded is True
         # Path is now free.
         second = store.create(
             type=DraftType.PROGRAM,
