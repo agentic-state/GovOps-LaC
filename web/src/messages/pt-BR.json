@@ -1212,6 +1212,7 @@
  "onboard.submitted.summary": "{n, plural, one {# rascunho pendente} other {# rascunhos pendentes}} na fila de aprovação. Um aprovador abre a fila, aprova e confirma -- é nesse momento que a nova jurisdição entra no ar.",
  "onboard.submitted.cta": "Abrir a fila de aprovação",
  "onboard.submitted.back": "Voltar à administração",
+ "onboard.error.conflict": "Um rascunho já tem como alvo {target}. Abra a fila de aprovação e aprove, rejeite ou descarte o rascunho {draftId} antes de enviar novamente.",
  "drafts.title": "Rascunhos de autoria",
  "drafts.lede": "Fila de aprovação para rascunhos de jurisdição e manifesto de programa enviados via substrato v3.1 (ADR-022). Aprove, rejeite ou descarte rascunhos pendentes; confirme os aprovados para ativá-los.",
  "drafts.onboard.cta": "Integrar uma nova jurisdição",

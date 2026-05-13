@@ -1212,6 +1212,7 @@
  "onboard.submitted.summary": "{n, plural, one {# draft} other {# drafts}} now pending in the approval queue. An approver visits the drafts queue, approves, and commits -- that is when the new jurisdiction goes live.",
  "onboard.submitted.cta": "Open the approval queue",
  "onboard.submitted.back": "Back to admin",
+ "onboard.error.conflict": "A draft already targets {target}. Open the approval queue and approve, reject, or discard draft {draftId} before submitting again.",
  "drafts.title": "Authoring drafts",
  "drafts.lede": "Approval queue for jurisdiction + program drafts submitted through the v3.1 substrate (ADR-022). Approve, reject, or discard pending drafts; commit the approved ones to make them live.",
  "drafts.onboard.cta": "Onboard a new jurisdiction",

@@ -3,6 +3,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useIntl } from "react-intl";
 import {
   createAuthoringDraft,
+  DraftConflictError,
   scaffoldJurisdiction,
 } from "@/lib/api";
 import type { AuthoringDraft } from "@/lib/types";
@@ -130,7 +131,19 @@ function OnboardWizard() {
       setSubmittedDrafts(created);
       setStep("submitted");
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Submission failed.");
+      if (e instanceof DraftConflictError) {
+        setError(
+          intl.formatMessage(
+            { id: "onboard.error.conflict" },
+            {
+              target: e.targetPath,
+              draftId: e.conflictingDraftId,
+            },
+          ),
+        );
+      } else {
+        setError(e instanceof Error ? e.message : "Submission failed.");
+      }
     } finally {
       setSubmitting(false);
     }

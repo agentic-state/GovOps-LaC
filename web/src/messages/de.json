@@ -1212,6 +1212,7 @@
  "onboard.submitted.summary": "{n, plural, one {# Entwurf} other {# Entwürfe}} ausstehend in der Genehmigungswarteschlange. Ein Genehmiger öffnet die Warteschlange, genehmigt und bestätigt -- dann wird der neue Hoheitsbereich aktiv.",
  "onboard.submitted.cta": "Genehmigungswarteschlange öffnen",
  "onboard.submitted.back": "Zurück zur Administration",
+ "onboard.error.conflict": "Ein Entwurf zielt bereits auf {target}. Öffnen Sie die Freigabewarteschlange und genehmigen, ablehnen oder verwerfen Sie Entwurf {draftId}, bevor Sie erneut einreichen.",
  "drafts.title": "Authoring-Entwürfe",
  "drafts.lede": "Genehmigungswarteschlange für Hoheitsbereichs- und Programm-Manifestentwürfe, die über das v3.1-Substrat (ADR-022) eingereicht wurden. Genehmigen, ablehnen oder verwerfen Sie ausstehende Entwürfe; bestätigen Sie genehmigte, um sie aktiv zu machen.",
  "drafts.onboard.cta": "Neuen Hoheitsbereich onboarden",

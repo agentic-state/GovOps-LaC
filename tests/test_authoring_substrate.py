@@ -23,6 +23,7 @@ from govops.authoring import (
     DraftStatus,
     DraftStore,
     DraftType,
+    TargetPathConflict,
 )
 
 
@@ -102,6 +103,89 @@ class TestDraftStoreLifecycle:
                 content={},
                 author="alice",
             )
+
+    def test_open_draft_holds_target_path_against_second_create(self, tmp_path: Path):
+        """ADR-023: a PENDING draft holds its target_path; a second
+        create() against the same path raises TargetPathConflict
+        carrying the colliding draft id."""
+        store = DraftStore(tmp_path)
+        first = store.create(
+            type=DraftType.JURISDICTION,
+            target_path="pl/config/jurisdiction.yaml",
+            content={"jurisdiction": {"id": "jur-pl-federal"}},
+            author="alice",
+        )
+        with pytest.raises(TargetPathConflict) as exc:
+            store.create(
+                type=DraftType.JURISDICTION,
+                target_path="pl/config/jurisdiction.yaml",
+                content={"jurisdiction": {"id": "jur-pl-federal"}},
+                author="bob",
+            )
+        assert exc.value.conflicting_draft_id == first.id
+        assert exc.value.target_path == "pl/config/jurisdiction.yaml"
+
+    def test_approved_draft_still_holds_target_path(self, tmp_path: Path):
+        """APPROVED counts as 'open' for conflict purposes -- the path
+        is committed-bound, not free."""
+        store = DraftStore(tmp_path)
+        first = store.create(
+            type=DraftType.PROGRAM,
+            target_path="pl/programs/oas.yaml",
+            content={"program_id": "oas"},
+            author="alice",
+        )
+        store.approve(first.id, approver="approver")
+        with pytest.raises(TargetPathConflict) as exc:
+            store.create(
+                type=DraftType.PROGRAM,
+                target_path="pl/programs/oas.yaml",
+                content={"program_id": "oas"},
+                author="bob",
+            )
+        assert exc.value.conflicting_draft_id == first.id
+
+    def test_rejected_draft_releases_target_path(self, tmp_path: Path):
+        """Rejecting clears the hold -- the next create() succeeds on
+        the same path."""
+        store = DraftStore(tmp_path)
+        first = store.create(
+            type=DraftType.JURISDICTION,
+            target_path="pl/config/jurisdiction.yaml",
+            content={"jurisdiction": {"id": "jur-pl-federal"}},
+            author="alice",
+        )
+        store.reject(first.id, rejector="reviewer", reason="not yet")
+        # Should succeed, not raise.
+        second = store.create(
+            type=DraftType.JURISDICTION,
+            target_path="pl/config/jurisdiction.yaml",
+            content={"jurisdiction": {"id": "jur-pl-federal"}},
+            author="bob",
+        )
+        assert second.id != first.id
+
+    def test_discarded_draft_releases_target_path(self, tmp_path: Path):
+        """Discarding clears the hold the same way rejection does."""
+        store = DraftStore(tmp_path)
+        first = store.create(
+            type=DraftType.PROGRAM,
+            target_path="pl/programs/oas.yaml",
+            content={"program_id": "oas"},
+            author="alice",
+        )
+        # CodeQL py/assert-side-effect: keep the side-effecting call
+        # outside the assert so the assertion checks a pure value.
+        discarded = store.discard(first.id)
+        assert discarded is True
+        # Path is now free.
+        second = store.create(
+            type=DraftType.PROGRAM,
+            target_path="pl/programs/oas.yaml",
+            content={"program_id": "oas"},
+            author="bob",
+        )
+        assert second.id != first.id
 
     def test_target_path_rejects_traversal(self, tmp_path: Path):
         store = DraftStore(tmp_path)
@@ -442,6 +526,38 @@ class TestAuthoringHTTP:
         g = client.get(f"/api/authoring/drafts/{draft_id}")
         assert g.status_code == 200
         assert g.json()["status"] == "pending"
+
+    def test_create_409_on_same_target_path(self, client):
+        """ADR-023: HTTP layer surfaces TargetPathConflict as 409 with
+        the colliding draft id in the body so the UI can route the
+        operator to resolve it."""
+        first_body = {
+            "type": "program",
+            "target_path": "xx/programs/oas.yaml",
+            "content": _minimal_program_manifest("xx"),
+            "author": "alice",
+        }
+        r = client.post("/api/authoring/drafts", json=first_body)
+        assert r.status_code == 200, r.text
+        first_id = r.json()["id"]
+
+        # Second create against the same target_path -> 409.
+        second_body = dict(first_body, author="bob")
+        r2 = client.post("/api/authoring/drafts", json=second_body)
+        assert r2.status_code == 409, r2.text
+        detail = r2.json()["detail"]
+        assert detail["target_path"] == "xx/programs/oas.yaml"
+        assert detail["conflicting_draft_id"] == first_id
+
+        # After the first is rejected, the path frees and second create
+        # succeeds.
+        client.post(
+            f"/api/authoring/drafts/{first_id}/reject",
+            json={"rejector": "reviewer", "reason": "stale"},
+        )
+        r3 = client.post("/api/authoring/drafts", json=second_body)
+        assert r3.status_code == 200
+        assert r3.json()["id"] != first_id
 
     def test_patch_updates_pending_draft(self, client):
         r = client.post(

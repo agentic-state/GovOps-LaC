@@ -1212,6 +1212,7 @@
  "onboard.submitted.summary": "{n, plural, one {# borrador pendiente} other {# borradores pendientes}} en la cola de aprobación. Un aprobador abre la cola, aprueba y confirma -- ese es el momento en que la nueva jurisdicción se activa.",
  "onboard.submitted.cta": "Abrir la cola de aprobación",
  "onboard.submitted.back": "Volver a administración",
+ "onboard.error.conflict": "Un borrador ya apunta a {target}. Abre la cola de aprobación y aprueba, rechaza o descarta el borrador {draftId} antes de enviar de nuevo.",
  "drafts.title": "Borradores de edición",
  "drafts.lede": "Cola de aprobación para borradores de jurisdicción y manifiestos de programa enviados a través del substrato v3.1 (ADR-022). Apruebe, rechace o descarte borradores pendientes; confirme los aprobados para activarlos.",
  "drafts.onboard.cta": "Integrar una nueva jurisdicción",

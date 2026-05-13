@@ -26,6 +26,7 @@ from govops.authoring import (
     DraftStatus,
     DraftStore,
     DraftType,
+    TargetPathConflict,
 )
 from govops.config import (
     ApprovalStatus,
@@ -2223,6 +2224,18 @@ def authoring_create_draft(body: dict[str, Any]):
             content=body.get("content") or {},
             author=body.get("author", ""),
             rationale=body.get("rationale"),
+        )
+    except TargetPathConflict as e:
+        # ADR-023: surface the colliding draft id so the UI can route
+        # the operator to approve / reject / discard / edit-in-place
+        # the existing draft before authoring a fresh one.
+        raise HTTPException(
+            status_code=409,
+            detail={
+                "error": "target_path already held by an open draft",
+                "target_path": e.target_path,
+                "conflicting_draft_id": e.conflicting_draft_id,
+            },
         )
     except AuthoringError as e:
         raise HTTPException(400, str(e))
