@@ -144,14 +144,16 @@ test.describe(`[A01] Onboard wizard -- adopt ${JUR_CODE} end-to-end`, () => {
     // -----------------------------------------------------------------
     // Step 6: Verify the new jurisdiction is live
     // -----------------------------------------------------------------
-    const programsRes = await request.get(
-      `${backendUrl()}/api/programs/oas/compare`,
-    );
-    expect(programsRes.status()).toBe(200);
-    const programs = await programsRes.json();
-    const codes: string[] = (programs.jurisdictions ?? []).map(
-      (j: { code: string }) => j.code,
-    );
+    // /api/health reads available_jurisdictions directly from
+    // JURISDICTION_REGISTRY.keys() so it reflects the post-commit
+    // reload_registry() state. The /compare endpoint can't be used here
+    // because _COMPARE_DEFAULT_JURISDICTIONS in api.py is still a v3.0
+    // hardcoded literal (ADR-020 migrated the registry but missed this
+    // whitelist -- tracked as v3.2 L6 cleanup).
+    const healthRes = await request.get(`${backendUrl()}/api/health`);
+    expect(healthRes.status()).toBe(200);
+    const health = await healthRes.json();
+    const codes: string[] = health.available_jurisdictions ?? [];
     expect(codes).toContain(JUR_CODE);
   });
 });
