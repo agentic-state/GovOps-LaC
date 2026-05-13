@@ -14,6 +14,85 @@ illustrative purposes only.
 
 _No unreleased changes._
 
+## [3.2.0] -- Substrate hardening (2026-05-13)
+
+v3.2 closes the substrate flake-class that v3.1.x E2E exposed and
+retires the last v3.0 -> v3.1 migration residue. Four lanes shipped;
+two more (L3 RBAC, L5 git-projection) were chartered but parked as
+enterprise concerns not justified by the MVP demo bar. Two cleanup
+items (L6b /walkthrough hydration, L6c lint baseline) deferred --
+non-blocking, not user-facing.
+
+### Added
+
+- **ADR-023 - substrate conflict refusal** (L2). The authoring
+  substrate now refuses to create a second open draft for the same
+  `target_path` -- `POST /api/authoring/drafts` returns 409 with the
+  conflicting draft id when a PENDING or APPROVED draft already holds
+  the slot. Client `createAuthoringDraft` surfaces a friendly
+  conflict message in the Onboard wizard.
+- **ADR-025 - structural-aware YAML emission** (L4). Substrate
+  commits now write through a `ruamel.yaml` round-trip emitter that
+  preserves comments and key ordering when merging draft content into
+  existing on-disk manifests. Replaces the prior `yaml.safe_dump` path
+  which clobbered any comments operators had authored.
+- **`GOVOPS_LAWCODE_ROOT` environment variable** (L1). Out-of-process
+  consumers (Playwright workers, ops scripts) can point the backend
+  at a sandboxed lawcode tree without monkeypatching internal module
+  state. Read at module-import time; honoured by every loader call.
+- **`adoption.spec.ts`** (L1). The full Onboard wizard end-to-end walk
+  -- deferred from v3.1.0 because the SQLAlchemy E2E race made the
+  spec flake -- is now in the cross-browser suite. Walks identity ->
+  review -> submit -> approve -> commit -> live for a synthetic
+  `zztest` jurisdiction.
+
+### Changed
+
+- **Atomic `reload_registry()`** (L1). `JURISDICTION_REGISTRY` is now
+  swapped via update-then-trim instead of clear-then-update, closing
+  the momentary-empty window that races concurrent ASGI requests.
+  This was the root cause of the v3.1.x SQLAlchemy `_apply_processors:
+  tuple index out of range` E2E flake.
+- **`/api/programs/{id}/compare` reads from `JURISDICTION_REGISTRY`**
+  (L6a). The pre-v3.2 hardcoded `_COMPARE_DEFAULT_JURISDICTIONS`
+  whitelist was a v3.0 -> v3.1 migration residue that ADR-020 missed
+  -- post-adoption-wizard jurisdictions appeared in `/api/health` and
+  powered `/authority` + `/screen` but were absent from `/compare`
+  and 400-rejected by its validator. Validation now uses the live
+  registry; the v3.0 7-jurisdiction display order is preserved for
+  the original codes, with adopted codes appended alphabetically.
+
+### Test coverage
+
+- 840 backend tests (838 -> 840: +2 L6a synthetic-adopted-code coverage,
+  +2 L1 atomic-reload + env-override coverage)
+- 76 web unit tests (vitest)
+- `adoption.spec.ts` cross-browser (chromium / firefox / webkit)
+
+### Charter + ADRs
+
+- `docs/IDEA-GovOps-v3.2-SubstrateHardening.md` (committed
+  `72c5a9c`, 2026-05-12) -- "two-operator floor" framing
+- ADR-023 `docs/design/ADRs/ADR-023-substrate-conflict-refusal.md`
+- ADR-025 `docs/design/ADRs/ADR-025-structural-yaml-emission.md`
+
+### Deferred (parked for re-charter if drivers appear)
+
+- **L3 author/approver role separation + thin RBAC (ADR-024)** --
+  enterprise concern; current MVP demo bar has no authentication
+  layer at all
+- **L5 git-projection commit mode (ADR-026)** -- "commit a YAML diff
+  to a branch instead of in-place overwrite"; HF demo runtime has no
+  git remote attached and disk is ephemeral
+- **L6b /walkthrough hydration #418** -- SPA-prerender shell falls
+  back to the home page's prerender for every route, baking
+  Home-active nav state that mismatches client re-render. Not
+  user-facing (J45 7-step walkthrough scenario passes); architectural
+  fix touching the vite build pipeline.
+- **L6c lint baseline** -- ~982 prettier errors on main from before
+  the v3.1.x editor PRs; none of the v3.1.x or v3.2 PRs grew the
+  count. Non-blocking cleanup.
+
 ## [3.1.0] -- Lawcode-as-discovery + authoring substrate (2026-05-11)
 
 v3.1 closes the v3.0 adoption gap. The architectural headline is
