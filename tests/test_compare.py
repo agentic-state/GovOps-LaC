@@ -197,3 +197,51 @@ class TestUnknownProgram:
         assert all(not j["available"] for j in body["jurisdictions"])
         assert body["comparison"]["rule_ids"] == []
         assert body["shape"] is None
+
+
+# ---------------------------------------------------------------------------
+# v3.2 L6a — dynamic registry-backed default + validation
+# ---------------------------------------------------------------------------
+
+
+class TestRegistryBackedDefault:
+    """Adoption-wizard-onboarded jurisdictions must flow through /compare
+    without a backend edit. Pre-v3.2 the endpoint used a hardcoded literal
+    that gated post-adoption codes out (the residue ADR-020 left behind).
+    """
+
+    def test_adopted_jurisdiction_appears_in_default_list(self, client, monkeypatch):
+        from govops import api as api_mod
+        import govops.jurisdictions as jur_mod
+
+        # Inject a synthetic adopted code -- mimics what reload_registry()
+        # produces after the onboard wizard commits.
+        original = dict(jur_mod.JURISDICTION_REGISTRY)
+        synthetic_pack = original["ca"]
+        try:
+            jur_mod.JURISDICTION_REGISTRY["adopted"] = synthetic_pack
+            r = client.get("/api/programs/ei/compare")
+            assert r.status_code == 200
+            codes = [j["code"] for j in r.json()["jurisdictions"]]
+            # v3.0 display order preserved, adopted code appended.
+            assert codes == ["ca", "br", "es", "fr", "de", "ua", "jp", "adopted"]
+        finally:
+            jur_mod.JURISDICTION_REGISTRY.clear()
+            jur_mod.JURISDICTION_REGISTRY.update(original)
+
+    def test_adopted_jurisdiction_accepted_as_explicit_filter(
+        self, client, monkeypatch
+    ):
+        import govops.jurisdictions as jur_mod
+
+        original = dict(jur_mod.JURISDICTION_REGISTRY)
+        try:
+            jur_mod.JURISDICTION_REGISTRY["adopted"] = original["ca"]
+            r = client.get("/api/programs/ei/compare?jurisdictions=adopted")
+            # No manifest on disk so available=False, but the validator no
+            # longer rejects the code.
+            assert r.status_code == 200
+            assert r.json()["jurisdictions"][0]["code"] == "adopted"
+        finally:
+            jur_mod.JURISDICTION_REGISTRY.clear()
+            jur_mod.JURISDICTION_REGISTRY.update(original)
