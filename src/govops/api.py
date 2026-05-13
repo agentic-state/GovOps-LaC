@@ -26,6 +26,7 @@ from govops.authoring import (
     DraftStatus,
     DraftStore,
     DraftType,
+    TargetPathConflict,
 )
 from govops.config import (
     ApprovalStatus,
@@ -354,7 +355,7 @@ def health():
     return {
         "status": "healthy",
         "engine": "govops-demo",
-        "version": "2.1.0",
+        "version": "3.2.0",
         "jurisdiction": jur_code,
         "program": pack.program_name if pack else "",
         "available_jurisdictions": list(JURISDICTION_REGISTRY.keys()),
@@ -1810,10 +1811,27 @@ def impact_by_citation(
 # ---------------------------------------------------------------------------
 
 
-# Active jurisdictions in v3 scope, in display order. JP is included as the
-# architectural-control entry; whether it appears in any specific comparison
-# depends on the program (e.g. JP has no EI manifest by design).
-_COMPARE_DEFAULT_JURISDICTIONS = ["ca", "br", "es", "fr", "de", "ua", "jp"]
+# v3.2 L6a: the /compare default + validation reads from the live
+# JURISDICTION_REGISTRY (ADR-020). The pre-v3.2 hardcoded literal was the
+# last v3.0 -> v3.1 migration residue -- post-adoption-wizard jurisdictions
+# committed via the substrate would not appear in /compare because the
+# whitelist gated them out.
+#
+# The v3.0 7-jurisdiction display order is preserved for the codes that
+# existed before adoption. New (adopted) codes appear after, sorted
+# alphabetically, so /compare?jurisdictions= (no value) reflects the
+# canonical ordering operators learned in v3.x.
+_COMPARE_DISPLAY_ORDER: tuple[str, ...] = ("ca", "br", "es", "fr", "de", "ua", "jp")
+
+
+def _default_compare_jurisdictions() -> list[str]:
+    """Dynamic default list: v3.0 codes first (display order), then any
+    adopted codes alphabetically. Reads from JURISDICTION_REGISTRY so
+    reload_registry() propagates immediately."""
+    keys = set(JURISDICTION_REGISTRY.keys())
+    ordered = [c for c in _COMPARE_DISPLAY_ORDER if c in keys]
+    extras = sorted(keys - set(_COMPARE_DISPLAY_ORDER))
+    return ordered + extras
 
 # Charter-locked: JP is the architectural control. Symmetric extension is
 # opt-in for adopters; absent manifests for the JP/program pair are by design,
@@ -1950,14 +1968,17 @@ def compare_program(
     """
     requested = [c.strip().lower() for c in jurisdictions.split(",") if c.strip()]
     if not requested:
-        requested = list(_COMPARE_DEFAULT_JURISDICTIONS)
+        requested = _default_compare_jurisdictions()
 
-    invalid = [c for c in requested if c not in _COMPARE_DEFAULT_JURISDICTIONS]
+    # v3.2 L6a: validate against live registry so adopted jurisdictions
+    # (post-onboard-wizard) are accepted without redeploying the backend.
+    allowed = set(JURISDICTION_REGISTRY.keys())
+    invalid = [c for c in requested if c not in allowed]
     if invalid:
         raise HTTPException(
             400,
             f"Unknown jurisdiction code(s): {invalid}. "
-            f"Allowed: {_COMPARE_DEFAULT_JURISDICTIONS}",
+            f"Allowed: {sorted(allowed)}",
         )
 
     jur_slots: list[dict[str, Any]] = []
@@ -2224,6 +2245,18 @@ def authoring_create_draft(body: dict[str, Any]):
             author=body.get("author", ""),
             rationale=body.get("rationale"),
         )
+    except TargetPathConflict as e:
+        # ADR-023: surface the colliding draft id so the UI can route
+        # the operator to approve / reject / discard / edit-in-place
+        # the existing draft before authoring a fresh one.
+        raise HTTPException(
+            status_code=409,
+            detail={
+                "error": "target_path already held by an open draft",
+                "target_path": e.target_path,
+                "conflicting_draft_id": e.conflicting_draft_id,
+            },
+        )
     except AuthoringError as e:
         raise HTTPException(400, str(e))
     return _draft_response(d)
@@ -2256,6 +2289,33 @@ def authoring_get_draft(draft_id: str):
     d = draft_store.get(draft_id)
     if d is None:
         raise HTTPException(404, f"draft not found: {draft_id}")
+    return _draft_response(d)
+
+
+@app.patch("/api/authoring/drafts/{draft_id}")
+def authoring_update_draft(draft_id: str, body: dict[str, Any]):
+    """Replace a PENDING draft's payload. Body shape:
+    ``{content, editor, rationale?}``. Refuses on APPROVED / REJECTED /
+    COMMITTED. Used by the L9-L11 structured editors (authority chain,
+    legal documents, demo cases) to mutate slices of a program manifest
+    in place rather than re-creating the draft."""
+    content = body.get("content")
+    if not isinstance(content, dict):
+        raise HTTPException(400, "content must be an object")
+    try:
+        d = draft_store.update_content(
+            draft_id,
+            content=content,
+            editor=body.get("editor", ""),
+            rationale=body.get("rationale"),
+        )
+    except AuthoringError as e:
+        msg = str(e)
+        if "not found" in msg:
+            raise HTTPException(404, msg)
+        if "cannot edit" in msg:
+            raise HTTPException(409, msg)
+        raise HTTPException(400, msg)
     return _draft_response(d)
 
 
@@ -2342,6 +2402,76 @@ def authoring_commit(body: dict[str, Any]):
     return {
         "committed": [_draft_response(d) for d in committed],
         "reloaded": bool(committed),
+    }
+
+
+@app.post("/api/authoring/scaffold/jurisdiction")
+def authoring_scaffold_jurisdiction(body: dict[str, Any]):
+    """Pre-fill drafts for a fresh jurisdiction without writing anything.
+
+    The L8 Onboard wizard calls this on step 1 to get a complete
+    schema-valid skeleton (same templates ``govops init`` writes to
+    disk) returned in-memory. The wizard renders the content in a form,
+    the operator edits the TODO markers, and the wizard POSTs the
+    finalised content to ``/api/authoring/drafts`` on submit.
+
+    No filesystem side effects. The substrate refuses target_paths the
+    loader cannot see (see ``DraftStore.create`` path discipline), so
+    the scaffold respects the same layout: jurisdiction metadata at
+    ``<code>/config/jurisdiction.yaml`` and programs under
+    ``<code>/programs/<id>.yaml``.
+
+    Body shape: ``{code: str, shapes?: ["oas", "ei"]}``. Defaults to
+    ``["oas"]`` (the OAS shape is the only one the v3.1 registry loader
+    requires to register a jurisdiction; EI is additive).
+    """
+    import yaml as _yaml
+    from govops.cli_init import (
+        InitError,
+        _ei_program_yaml,
+        _jurisdiction_yaml,
+        _normalize_country_code,
+        _oas_program_yaml,
+    )
+
+    try:
+        code = _normalize_country_code(body.get("code", ""))
+    except InitError as e:
+        raise HTTPException(400, str(e))
+
+    requested_shapes = body.get("shapes") or ["oas"]
+    if not isinstance(requested_shapes, list):
+        raise HTTPException(400, "shapes must be a list")
+    valid_shapes = {"oas", "ei"}
+    unknown = set(requested_shapes) - valid_shapes
+    if unknown:
+        raise HTTPException(400, f"unknown shape(s): {sorted(unknown)}")
+
+    jurisdiction_yaml_text = _jurisdiction_yaml(code)
+    programs_out: list[dict[str, Any]] = []
+    if "oas" in requested_shapes:
+        programs_out.append(
+            {
+                "program_id": "oas",
+                "target_path": f"{code}/programs/oas.yaml",
+                "content": _yaml.safe_load(_oas_program_yaml(code)),
+            }
+        )
+    if "ei" in requested_shapes:
+        programs_out.append(
+            {
+                "program_id": "ei",
+                "target_path": f"{code}/programs/ei.yaml",
+                "content": _yaml.safe_load(_ei_program_yaml(code)),
+            }
+        )
+
+    return {
+        "jurisdiction": {
+            "target_path": f"{code}/config/jurisdiction.yaml",
+            "content": _yaml.safe_load(jurisdiction_yaml_text),
+        },
+        "programs": programs_out,
     }
 
 

@@ -9,9 +9,11 @@
 # (FastAPI + Jinja fallback + JSON API). No Python venv, no Node install,
 # no Bun lockfile fight — the contribution path opens up to non-engineers.
 #
-# Editing `lawcode/<jur>/` on the host hot-reloads inside the api
-# container (bind mount + uvicorn auto-reload). Editing `web/src/` does
-# the same on the web side via vite's HMR.
+# Editing `lawcode/<jur>/` on the host lands inside the api container
+# via the bind mount; the JURISDICTION_REGISTRY is built at process
+# start (per ADR-020) so restart the api container to pick up edits:
+# `docker compose restart api`. Editing `web/src/` hot-reloads on the
+# web side via vite's HMR.
 #
 # This stack is DISTINCT from the top-level `Dockerfile` (which is the
 # v2.1 hosted-demo single-container image used by the HF Space). They do

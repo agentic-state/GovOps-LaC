@@ -720,8 +720,9 @@ def _run_init(
         "  Next steps:\n"
         "    1. Replace every TODO marker with jurisdiction-specific content.\n"
         "    2. Run `pytest -q` — schema validation runs on every push.\n"
-        "    3. Add the new code to `JURISDICTION_REGISTRY` if you need it\n"
-        "       to appear in the demo UI's jurisdiction dropdown.\n"
+        "    3. Restart the API process (the lawcode-as-discovery loader builds\n"
+        "       JURISDICTION_REGISTRY at startup per ADR-020); the new\n"
+        "       jurisdiction will appear in the demo UI dropdown automatically.\n"
     )
     return 0
 

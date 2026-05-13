@@ -31,6 +31,7 @@ this module deliberately does not duplicate it.
 
 from __future__ import annotations
 
+import io
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from enum import Enum
@@ -39,6 +40,8 @@ from typing import Any, Optional
 import uuid
 
 import yaml
+from ruamel.yaml import YAML
+from ruamel.yaml.comments import CommentedMap, CommentedSeq
 
 
 class DraftType(str, Enum):
@@ -94,6 +97,28 @@ class Draft:
 class AuthoringError(ValueError):
     """Raised for any authoring substrate refusal: missing draft, wrong
     status transition, malformed input."""
+
+
+class TargetPathConflict(AuthoringError):
+    """Raised when ``create()`` would land a second open draft on a
+    ``target_path`` already held by a PENDING or APPROVED draft.
+
+    Carries ``conflicting_draft_id`` so callers (and the HTTP layer)
+    can surface the exact draft an operator needs to deal with --
+    approve, reject, discard, or edit-in-place -- before authoring a
+    fresh draft against the same file.
+
+    Per ADR-023 (v3.2 substrate hardening): the substrate ships strict
+    refusal first. A future v3.3 may add a "merge into existing draft"
+    affordance once the refusal model has bedded in.
+    """
+
+    def __init__(self, conflicting_draft_id: str, target_path: str):
+        super().__init__(
+            f"target_path already held by an open draft: {conflicting_draft_id}"
+        )
+        self.conflicting_draft_id = conflicting_draft_id
+        self.target_path = target_path
 
 
 class DraftStore:
@@ -194,6 +219,13 @@ class DraftStore:
                 "program drafts must target <code>/programs/<id>.yaml"
             )
 
+        # ADR-023 conflict refusal: two open drafts cannot target the
+        # same file. PENDING or APPROVED count as "open"; REJECTED /
+        # COMMITTED drafts have settled and don't hold the path.
+        existing = self._open_draft_for_path(target_path)
+        if existing is not None:
+            raise TargetPathConflict(existing.id, target_path)
+
         d = Draft(
             id=uuid.uuid4().hex[:12],
             type=type,
@@ -210,6 +242,17 @@ class DraftStore:
     def get(self, draft_id: str) -> Optional[Draft]:
         return self._drafts.get(draft_id)
 
+    def _open_draft_for_path(self, target_path: str) -> Optional[Draft]:
+        """Return the PENDING or APPROVED draft holding ``target_path``,
+        or None if the path is free. Used by ``create()`` to enforce the
+        ADR-023 single-open-draft-per-path rule."""
+        for d in self._drafts.values():
+            if d.target_path != target_path:
+                continue
+            if d.status in (DraftStatus.PENDING, DraftStatus.APPROVED):
+                return d
+        return None
+
     def list(
         self,
         *,
@@ -222,6 +265,40 @@ class DraftStore:
         if status is not None:
             out = [d for d in out if d.status == status]
         return sorted(out, key=lambda d: d.created_at)
+
+    def update_content(
+        self,
+        draft_id: str,
+        *,
+        content: dict[str, Any],
+        editor: str,
+        rationale: Optional[str] = None,
+    ) -> Draft:
+        """Replace the draft payload while the draft is still PENDING.
+
+        Refuses on APPROVED / REJECTED / COMMITTED -- approval clears the
+        edit window, matching ConfigValue admin's draft-immutability rule.
+        Used by the structured editors (L9 authority chain, L10 legal
+        documents, L11 demo cases) to mutate slices of the program
+        manifest without recreating the draft.
+        """
+        d = self._drafts.get(draft_id)
+        if d is None:
+            raise AuthoringError(f"draft not found: {draft_id}")
+        if d.status != DraftStatus.PENDING:
+            raise AuthoringError(
+                f"cannot edit draft in status {d.status.value}"
+            )
+        if not editor:
+            raise AuthoringError("editor required")
+        if not isinstance(content, dict):
+            raise AuthoringError("content must be a mapping")
+        d.content = content
+        if rationale is not None:
+            d.rationale = rationale
+        d.author = editor
+        self._persist(d)
+        return d
 
     def approve(self, draft_id: str, approver: str) -> Draft:
         d = self._drafts.get(draft_id)
@@ -269,10 +346,20 @@ class DraftStore:
         SHOULD invoke ``govops.jurisdictions.reload_registry()`` so
         ``JURISDICTION_REGISTRY`` picks up the new content.
 
-        Concurrent drafts targeting the same target_path: sorted by
-        ``created_at``, the later-created one wins on disk because it
-        overwrites the earlier one. Both are marked COMMITTED. v3.2
-        hardening should refuse same-path conflicts explicitly.
+        ADR-023 (v3.2 L2) means ``create()`` already refuses same-path
+        conflicts, so at commit time each ``target_path`` is held by at
+        most one APPROVED draft. The pre-ADR-023 last-writer-wins
+        ordering is preserved for safety but no longer expected to fire.
+
+        ADR-025 (v3.2 L4) -- emission is now structural:
+        - If the target file already exists, load it with ruamel and
+          merge the draft's content in-place, preserving comments and
+          key ordering on keys the draft didn't touch. A no-op
+          commit (load file, save same content back) yields a zero-byte
+          diff.
+        - If the target file does NOT exist (fresh jurisdiction or
+          program), fall back to a clean ruamel dump from the draft
+          content -- no source file to round-trip against.
         """
         if not committer:
             raise AuthoringError("committer required")
@@ -286,7 +373,7 @@ class DraftStore:
             target = self._lawcode_root / d.target_path
             target.parent.mkdir(parents=True, exist_ok=True)
             target.write_text(
-                yaml.safe_dump(d.content, sort_keys=False, allow_unicode=True),
+                _render_yaml_for_commit(target, d.content),
                 encoding="utf-8",
             )
             d.status = DraftStatus.COMMITTED
@@ -318,3 +405,80 @@ class DraftStore:
         for did in list(self._drafts.keys()):
             self._delete_persisted(did)
         self._drafts.clear()
+
+
+# ---------------------------------------------------------------------------
+# ADR-025 structural-aware YAML emission
+# ---------------------------------------------------------------------------
+
+
+def _make_ruamel() -> YAML:
+    """Build a ruamel.YAML instance tuned for canonical-lawcode shape:
+    block style, 2-space indent, preserved quotes, no line-width
+    wrapping (lawcode files use natural paragraph wrapping in :>- block
+    scalars, not ruamel's mechanical 80-col wrap)."""
+    y = YAML()
+    y.preserve_quotes = True
+    y.default_flow_style = False
+    y.indent(mapping=2, sequence=4, offset=2)
+    y.width = 4096
+    return y
+
+
+def _render_yaml_for_commit(target: Path, content: dict) -> str:
+    """Render ``content`` as the bytes to write to ``target`` for the
+    ADR-025 round-trip discipline.
+
+    - Target exists: load it with ruamel (preserving comments + key
+      order), recursively merge ``content`` into the loaded structure,
+      dump. Keys the draft did not touch keep their original comment +
+      formatting. A no-op commit (content equals what's on disk) yields
+      a byte-identical output, modulo trailing newline normalisation.
+    - Target does not exist: clean ruamel dump from ``content``.
+    """
+    y = _make_ruamel()
+    if target.exists():
+        with target.open("r", encoding="utf-8") as f:
+            existing = y.load(f) or CommentedMap()
+        merged = _merge_for_commit(existing, content)
+    else:
+        merged = content
+    buf = io.StringIO()
+    y.dump(merged, buf)
+    return buf.getvalue()
+
+
+def _merge_for_commit(target: Any, source: Any) -> Any:
+    """Recursively merge ``source`` into ``target``, preserving ruamel
+    metadata (comments + ordering) on keys that don't structurally
+    change.
+
+    Contract:
+    - Both mappings: in-place merge -- recurse on shared mapping keys;
+      assign for differing leaf or sequence values; drop keys not in
+      source (drafts ARE the full file per L9-L11 editors).
+    - Both sequences (and equal): leave the target alone so the
+      ruamel CommentedSeq metadata survives. Otherwise replace.
+    - Mismatched or leaf: return ``source`` for the caller to assign.
+    """
+    if isinstance(target, (CommentedMap, dict)) and isinstance(source, dict):
+        # Drop keys the draft removed.
+        for k in list(target.keys()):
+            if k not in source:
+                del target[k]
+        # Update / recurse for keys the draft kept or added.
+        for k, v in source.items():
+            if k in target and isinstance(target[k], (CommentedMap, dict)) and isinstance(v, dict):
+                _merge_for_commit(target[k], v)
+            elif k in target and isinstance(target[k], (CommentedSeq, list)) and isinstance(v, list):
+                # Lists: keep ruamel's CommentedSeq when contents match;
+                # replace when they don't.
+                if list(target[k]) == v:
+                    continue
+                target[k] = v
+            else:
+                if k not in target or target[k] != v:
+                    target[k] = v
+                # else: equal leaf -- leave the ruamel-formatted version
+        return target
+    return source

@@ -824,3 +824,163 @@ export async function submitScreen(req: ScreenRequest): Promise<ScreenResponse> 
     return mockScreen(req);
   }
 }
+
+// ---- Authoring substrate (ADR-022 / v3.1 L7) -------------------------------
+
+import type {
+  AuthoringDraft,
+  CommitResponse,
+  DraftStatus,
+  DraftType,
+  ListDraftsResponse,
+} from "./types";
+
+export interface CreateDraftRequest {
+  type: DraftType;
+  target_path: string;
+  content: Record<string, unknown>;
+  author: string;
+  rationale?: string;
+}
+
+/**
+ * Thrown by createAuthoringDraft on HTTP 409 -- the target_path is
+ * held by an open (PENDING or APPROVED) draft. Carries the colliding
+ * draft id so the UI can route the operator to it. Per ADR-023.
+ */
+export class DraftConflictError extends Error {
+  readonly conflictingDraftId: string;
+  readonly targetPath: string;
+  constructor(conflictingDraftId: string, targetPath: string) {
+    super(
+      `target_path ${targetPath} already held by open draft ${conflictingDraftId}`,
+    );
+    this.name = "DraftConflictError";
+    this.conflictingDraftId = conflictingDraftId;
+    this.targetPath = targetPath;
+  }
+}
+
+export async function createAuthoringDraft(
+  req: CreateDraftRequest,
+): Promise<AuthoringDraft> {
+  const url = `${BASE}/api/authoring/drafts`;
+  const res = await fetch(url, {
+    method: "POST",
+    signal: AbortSignal.timeout(FETCHER_DEFAULT_TIMEOUT_MS),
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(req),
+  });
+  if (res.status === 409) {
+    const body = (await res.json().catch(() => null)) as {
+      detail?: { conflicting_draft_id?: string; target_path?: string };
+    } | null;
+    throw new DraftConflictError(
+      body?.detail?.conflicting_draft_id ?? "",
+      body?.detail?.target_path ?? req.target_path,
+    );
+  }
+  if (!res.ok) {
+    throw new Error(`Request failed: ${res.status} ${res.statusText}`);
+  }
+  return (await res.json()) as AuthoringDraft;
+}
+
+export async function listAuthoringDrafts(opts: {
+  type?: DraftType;
+  status?: DraftStatus;
+} = {}): Promise<ListDraftsResponse> {
+  const params = new URLSearchParams();
+  if (opts.type) params.set("type", opts.type);
+  if (opts.status) params.set("status", opts.status);
+  const qs = params.toString();
+  const url = qs ? `/api/authoring/drafts?${qs}` : "/api/authoring/drafts";
+  try {
+    return await fetcher<ListDraftsResponse>(url);
+  } catch {
+    return { drafts: [] };
+  }
+}
+
+export async function getAuthoringDraft(id: string): Promise<AuthoringDraft> {
+  return fetcher<AuthoringDraft>(`/api/authoring/drafts/${encodeURIComponent(id)}`);
+}
+
+export async function updateAuthoringDraft(
+  id: string,
+  payload: { content: Record<string, unknown>; editor: string; rationale?: string },
+): Promise<AuthoringDraft> {
+  return fetcher<AuthoringDraft>(`/api/authoring/drafts/${encodeURIComponent(id)}`, {
+    method: "PATCH",
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function approveAuthoringDraft(
+  id: string,
+  approver: string,
+): Promise<AuthoringDraft> {
+  return fetcher<AuthoringDraft>(
+    `/api/authoring/drafts/${encodeURIComponent(id)}/approve`,
+    { method: "POST", body: JSON.stringify({ approver }) },
+  );
+}
+
+export async function rejectAuthoringDraft(
+  id: string,
+  rejector: string,
+  reason: string,
+): Promise<AuthoringDraft> {
+  return fetcher<AuthoringDraft>(
+    `/api/authoring/drafts/${encodeURIComponent(id)}/reject`,
+    { method: "POST", body: JSON.stringify({ rejector, reason }) },
+  );
+}
+
+export async function discardAuthoringDraft(id: string): Promise<void> {
+  // The endpoint returns 204; fetcher only handles JSON, so call directly.
+  const res = await fetch(`/api/authoring/drafts/${encodeURIComponent(id)}`, {
+    method: "DELETE",
+  });
+  if (!res.ok) throw new Error(`discard failed: ${res.status}`);
+}
+
+export async function commitAuthoringDrafts(
+  committer: string,
+): Promise<CommitResponse> {
+  return fetcher<CommitResponse>("/api/authoring/commit", {
+    method: "POST",
+    body: JSON.stringify({ committer }),
+  });
+}
+
+// ---- Scaffold helper (v3.1.x L12) ------------------------------------------
+
+export interface ScaffoldJurisdictionRequest {
+  code: string;
+  shapes?: ("oas" | "ei")[];
+}
+
+export interface ScaffoldJurisdictionResponse {
+  /** Pre-filled drafts that the wizard can edit then submit. The
+   * backend does NOT persist them; the UI POSTs them to /api/authoring/drafts
+   * once the user has reviewed and tweaked the content. */
+  jurisdiction: {
+    target_path: string;
+    content: Record<string, unknown>;
+  };
+  programs: Array<{
+    program_id: string;
+    target_path: string;
+    content: Record<string, unknown>;
+  }>;
+}
+
+export async function scaffoldJurisdiction(
+  req: ScaffoldJurisdictionRequest,
+): Promise<ScaffoldJurisdictionResponse> {
+  return fetcher<ScaffoldJurisdictionResponse>(
+    "/api/authoring/scaffold/jurisdiction",
+    { method: "POST", body: JSON.stringify(req) },
+  );
+}

@@ -17,7 +17,7 @@ Built on **FKTE** (Fractal Knowledge Transformation Engine):
 
 ## Current State
 
-7 jurisdictions (CA/BR/ES/FR/DE/UA/JP), 6 languages (en/fr/pt/es/de/uk), **640 backend tests passing**. Two programs canonicalized: Old Age Security (all 7 jurisdictions, encoded from each country's own statutes — not a literal export of Canada's OAS Act) and Employment Insurance (6 jurisdictions — JP excluded as v3 architectural control). Cross-program evaluation API live: `POST /api/cases/{id}/evaluate` accepts an optional `programs: [...]` body and returns `program_evaluations` + interaction `warnings` per ADR-018. Comparison surface live at `/compare/<program-id>` backed by `GET /api/programs/{id}/compare?jurisdictions=...`. Citizen entry surface live at `/check` and `/check/life-event?event=job_loss` backed by `POST /api/check` — same privacy posture as `/api/screen`. Adoption substrate live: `govops init <iso-code>` scaffolds a complete `lawcode/<code>/` skeleton; `docker compose up` (root `docker-compose.yml` + `docker/{api,web}.Dockerfile`, distinct from the v2.1 hosted-demo `Dockerfile`) brings up the two-process demo on any Docker host; every program manifest has a plain-language sidecar rendered by `govops docs <manifest-path>`. Phase I cutover removed the deprecated `OASEngine` alias — all callers now use `ProgramEngine` directly; `GOVOPS_SEED_DEMO=1` populates EI demo cases alongside OAS for visitor-facing surfaces.
+7 jurisdictions (CA/BR/ES/FR/DE/UA/JP), 6 languages (en/fr/pt/es/de/uk), **840 backend tests passing**. Two programs canonicalized: Old Age Security (all 7 jurisdictions, encoded from each country's own statutes — not a literal export of Canada's OAS Act) and Employment Insurance (6 jurisdictions — JP excluded as v3 architectural control). Cross-program evaluation API live: `POST /api/cases/{id}/evaluate` accepts an optional `programs: [...]` body and returns `program_evaluations` + interaction `warnings` per ADR-018. Comparison surface live at `/compare/<program-id>` backed by `GET /api/programs/{id}/compare?jurisdictions=...`. Citizen entry surface live at `/check` and `/check/life-event?event=job_loss` backed by `POST /api/check` — same privacy posture as `/api/screen`. Adoption substrate live: `govops init <iso-code>` scaffolds a complete `lawcode/<code>/` skeleton; `docker compose up` (root `docker-compose.yml` + `docker/{api,web}.Dockerfile`, distinct from the v2.1 hosted-demo `Dockerfile`) brings up the two-process demo on any Docker host; every program manifest has a plain-language sidecar rendered by `govops docs <manifest-path>`. Phase I cutover removed the deprecated `OASEngine` alias — all callers now use `ProgramEngine` directly; `GOVOPS_SEED_DEMO=1` populates EI demo cases alongside OAS for visitor-facing surfaces.
 
 **Backend (Python / FastAPI):**
 - Deterministic rule engine for pension eligibility (age, residency/contribution, legal status, evidence)
@@ -44,7 +44,7 @@ govops-demo                                    # http://127.0.0.1:8000
 govops-demo --reload                           # auto-reload for development
 govops-demo --port 9000                        # custom port
 
-pytest -q                                      # all 561 tests
+pytest -q                                      # all 840 tests
 pytest tests/test_engine.py -v                 # one file
 pytest tests/test_engine.py::test_name -v      # one test
 pytest -k "residency" -v                       # by keyword
