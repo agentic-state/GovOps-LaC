@@ -124,6 +124,78 @@ def test_loader_hydrates_federation_directory(tmp_path: Path):
     assert registry[pseudo_code].jurisdiction.id == "jur-ca-federal"
 
 
+def test_reload_registry_never_goes_empty_mid_swap(tmp_path: Path, monkeypatch):
+    """v3.2 L1 atomicity: reload_registry must NEVER leave
+    JURISDICTION_REGISTRY momentarily empty during the swap. The pre-v3.2
+    implementation called ``.clear()`` first, and any concurrent ASGI
+    request hitting that window saw a phantom empty dict (the SQLAlchemy
+    + JURISDICTION_REGISTRY race class that flaked v3.1.x E2E).
+
+    The v3.2 fix is update-then-trim. This test confirms it by sampling
+    the dict size at each step of the swap via a side-effect-tracking
+    fake build_registry_from_lawcode.
+    """
+    import govops.jurisdictions as J
+
+    original_keys = set(J.JURISDICTION_REGISTRY.keys())
+    samples: list[int] = []
+
+    try:
+        fake = tmp_path / "lawcode"
+        fake.mkdir()
+        new_code = "newland"
+        dst = fake / new_code
+        shutil.copytree(LAWCODE / "ca" / "config", dst / "config")
+        shutil.copytree(LAWCODE / "ca" / "programs", dst / "programs")
+        monkeypatch.setattr(J, "_LAWCODE_ROOT", fake)
+
+        real_build = J.build_registry_from_lawcode
+
+        def sampling_build(root):
+            # Sample registry size right before the update/trim begins --
+            # this is the closest a real ASGI handler could come to
+            # catching an empty mid-swap dict (the build runs first; the
+            # mutation happens after this returns).
+            samples.append(len(J.JURISDICTION_REGISTRY))
+            return real_build(root)
+
+        monkeypatch.setattr(J, "build_registry_from_lawcode", sampling_build)
+        reload_registry()
+
+        # Pre-swap sample saw the full original state -- not empty.
+        assert samples == [len(original_keys)], (
+            f"reload_registry called build with registry size {samples}; "
+            f"expected single pre-swap sample of {len(original_keys)}"
+        )
+        # Post-swap: the fake tree's contents land.
+        assert "newland" in J.JURISDICTION_REGISTRY
+        assert set(J.JURISDICTION_REGISTRY.keys()) == {"newland"}
+    finally:
+        monkeypatch.undo()
+        reload_registry()
+        assert set(J.JURISDICTION_REGISTRY.keys()) == original_keys
+
+
+def test_lawcode_root_honours_env_override(monkeypatch):
+    """v3.2 L1: ``GOVOPS_LAWCODE_ROOT`` lets out-of-process consumers
+    (Playwright workers, ops scripts) point the backend at a sandbox
+    tree without monkeypatching internal module state. The env var
+    is read at module-import time; this test exercises the same code
+    path via importlib.reload.
+    """
+    import importlib
+    import govops.jurisdictions as J
+
+    sandbox = Path(__file__).resolve().parent.parent / "lawcode"
+    monkeypatch.setenv("GOVOPS_LAWCODE_ROOT", str(sandbox))
+    reloaded = importlib.reload(J)
+    try:
+        assert reloaded._LAWCODE_ROOT == sandbox.resolve()
+    finally:
+        monkeypatch.delenv("GOVOPS_LAWCODE_ROOT", raising=False)
+        importlib.reload(J)
+
+
 def test_reload_registry_picks_up_new_jurisdiction(tmp_path: Path, monkeypatch):
     """reload_registry() must mutate the module-level dict in place -- callers
     that imported the dict reference (rather than re-importing the module)

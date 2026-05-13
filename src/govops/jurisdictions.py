@@ -1545,9 +1545,23 @@ def build_registry_from_lawcode(
 # loads correctly whether the package is installed editable, run from source,
 # or imported from a federated venv. Tests monkeypatch this attribute to point
 # at a tmp tree before calling ``reload_registry()``.
+#
+# v3.2 L1 -- ``GOVOPS_LAWCODE_ROOT`` env var lets each Playwright worker (or
+# any out-of-process consumer) point the backend at its own sandboxed lawcode
+# tree before the module imports. Without this, every worker shares one
+# JURISDICTION_REGISTRY dict + one DraftStore, and substrate commits in
+# worker N race substrate reads in worker M -- the SQLAlchemy
+# "_apply_processors: tuple index out of range" class that flaked
+# v3.1.x cross-browser E2E.
+import os as _os  # noqa: E402
 from pathlib import Path as _Path  # noqa: E402
 
-_LAWCODE_ROOT = _Path(__file__).resolve().parent.parent.parent / "lawcode"
+_DEFAULT_LAWCODE_ROOT = _Path(__file__).resolve().parent.parent.parent / "lawcode"
+_LAWCODE_ROOT = (
+    _Path(_os.environ["GOVOPS_LAWCODE_ROOT"]).resolve()
+    if _os.environ.get("GOVOPS_LAWCODE_ROOT")
+    else _DEFAULT_LAWCODE_ROOT
+)
 
 
 def reload_registry() -> None:
@@ -1558,10 +1572,24 @@ def reload_registry() -> None:
     process restart. Mutates the module-level dict in place so other modules
     that imported the dict reference (rather than re-importing) see the
     updated state.
+
+    v3.2 L1 -- read-during-rebuild safety:
+
+    The pre-v3.2 implementation called ``clear()`` first, leaving the dict
+    momentarily empty before the new contents landed. Any concurrent
+    request (FastAPI handles requests via asyncio; many handlers read
+    JURISDICTION_REGISTRY) hitting that window saw a phantom empty
+    registry. Replaced with update-then-trim: readers always see at least
+    the union of the prior state plus the new additions during the swap,
+    never an empty dict. Worst case for a concurrent reader is reading a
+    stale entry being removed (acceptable; matches what they would see
+    one request earlier).
     """
     new = build_registry_from_lawcode(_LAWCODE_ROOT)
-    JURISDICTION_REGISTRY.clear()
     JURISDICTION_REGISTRY.update(new)
+    for k in list(JURISDICTION_REGISTRY.keys()):
+        if k not in new:
+            del JURISDICTION_REGISTRY[k]
 
 
 JURISDICTION_REGISTRY: dict[str, JurisdictionPack] = build_registry_from_lawcode(
