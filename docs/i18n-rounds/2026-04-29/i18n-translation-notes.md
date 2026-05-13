@@ -200,30 +200,13 @@ Re-loaded the output JSON and ran 7 checks programmatically:
 
 ## 4. Cells flagged for human re-look
 
-These are translated and shipped — but the local register is one a native
-reviewer might want to nudge:
+**Status: closed 2026-05-13 by native reviewer (MS — fr native; es/pt sufficient; de plausible).** Full row-by-row verdict ledger in [`section-12.1-review-packet.csv`](section-12.1-review-packet.csv). uk cells closed under the same verdict envelope (uk not reviewer-native; no signal of register issue — leave open for external uk review if surfaced later).
 
-- `home.eyebrow` — left as the literal spec string `spec govops-002 · law-as-code`
-  in all locales. This is intentional (developer-only reference), but a
-  locale-aware label could read better. Consider whether to localise
-  `spec`/`law-as-code` later.
-- `screen.benefit.op.*` — operator/trace verb tags are lowercase in
-  fr/es/pt/uk and capitalised in de. A reviewer should confirm whether the
-  UI prefers nominalisations (e.g. fr “Addition” instead of `ajouter`) once
-  the calculation trace component is finalised.
-- `events.summary.add_evidence` ⇒ `+ {evidence_type}` and
-  `events.summary.move_country` ⇒ `{from} → {to}` are pure placeholders;
-  identical in every locale (intentional). If `evidence_type` text is
-  English-only at runtime, the visible string will be EN regardless of
-  locale — that is an upstream concern, not a translation gap.
-- `cases.detail.heading` (`Case {id}`) — fr translates to `Dossier {id}` to
-  match `nav.cases`. If the product team prefers `Cas {id}` in French, this
-  is the single source of truth to flip.
-- Federation column re-emits — `admin.federation.col.actions [fr] = "Actions"`,
-  `…col.name [de] = "Name"`, `…col.status [de/pt-BR] = "Status"`,
-  `…col.version [fr/de] = "Version"`. These are valid loan/cognate
-  translations. Worth confirming that the existing locale JSON did not
-  intend a deeper localisation.
+- `home.eyebrow` — **FIX applied**. New value across all 6 locales: `spec govops-002 · Law-as-Code`. The string stays verbatim (not localised) but the methodology name is capitalised as a proper noun.
+- `screen.benefit.op.*` — **kept as-is**. Verdict: keep lowercase verbs in fr / es / pt / uk and capitalised nouns in de. Cross-locale mixed paradigm is intentional; German orthography forces noun capitalisation regardless.
+- `events.summary.add_evidence` / `events.summary.move_country` — **confirmed**. Pure-placeholder by design; the EN-only runtime payload is an upstream backend-i18n concern (event payload localisation), not a translation gap.
+- `cases.detail.heading` fr — **kept as-is**. `Dossier {id}` remains: administrative register, Service Canada / federal admin idiom, consistent with `nav.cases = Dossiers`.
+- Federation column re-emits (`admin.federation.col.{actions [fr], name [de], status [de/pt-BR], version [fr/de]}`) — **confirmed**. All flagged cells are native-correct loanwords / cognates in their target locale.
 
 ## 5. Tally
 
