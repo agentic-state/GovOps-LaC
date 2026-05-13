@@ -17,7 +17,7 @@ Run these checks before you even open this runbook in earnest. If any fail, fix 
 | Check | Command | Expected |
 |---|---|---|
 | You are on `main`, in sync with `origin/main` | `git status -sb` | `## main...origin/main` (no `[ahead/behind]`) |
-| Backend tests pass | `pytest -q` | `640 passed` (or current count) |
+| Backend tests pass | `pytest -q` | `840 passed` (v3.2.0 baseline; or current count) |
 | Local build succeeds | `cd web && npm run build && cd ..` | exits 0; `web/dist/client/` populated |
 | Build-artifact sanity | `cd web && node scripts/check-bundle-no-localhost.mjs` | exits 0 (no localhost / 127.0.0.1 in bundle) |
 | Local bench passes | (optional but recommended; needs `govops-demo` running on `:8000`) | bench-local matches the most recent baseline |
@@ -181,7 +181,7 @@ These bit us before. References point at memory entries with the *why*.
 
 - **Binary files block normal git push.** `web/brand/govops-wordmark.png` + `web/bun.lockb` exceed HF's git-storage policy. Always use the orphan-branch pattern (step 3). A regular `git push hf main` will be rejected.
 
-- **`/api/health` reports stale version string.** `src/govops/api.py` hardcodes `"version": "2.1.0"`. The bench's run record will label v0.5.0 deploys as `v2.1.0` because it reads this field. This is a known minor inaccuracy; doesn't affect deploy correctness. Fix tracked in maintenance backlog.
+- **`/api/health` version string is hardcoded.** `src/govops/api.py` (line ~358 in v3.2.0) holds the version string as a literal. Bump it as part of every release per release-readiness.md Gate 5. Closed for v3.2.0 (was `2.1.0`, now `3.2.0`).
 
 - **`/check/life-event`, `/about` FR locale, `/config` SSR title** — known cookie-based SSR locale issues that survive across deploys. Documented in `docs/test-bench/runs/20260502-2210-findings.md` as pending root-cause. Don't treat their failure as a deploy regression.
 

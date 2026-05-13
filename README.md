@@ -386,7 +386,7 @@ pip install -e ".[dev]"
 pytest -v
 ```
 
-678 backend tests covering (all green on Python 3.10 / 3.11 / 3.12):
+840 backend tests covering (all green on Python 3.10 / 3.11 / 3.12 as of v3.2.0):
 - Rule engine unit tests (all decision paths, edge cases, residency calculation)
 - Determinism verification (identical inputs = identical outputs)
 - Authority traceability (every rule has a statutory citation)

@@ -25,7 +25,7 @@ The release readiness gate is **every dimension of "tested"**. Each step is one 
 pytest -q
 ```
 
-**Expected**: every test passes (current baseline: 640). The pre-commit Claude hook also enforces this on every commit, so this should always be clean — but always re-run before tagging.
+**Expected**: every test passes (current baseline: 840 as of v3.2.0). The pre-commit Claude hook also enforces this on every commit, so this should always be clean — but always re-run before tagging.
 
 If any test fails, **stop**. Fix the test or fix the code. Tagging with red tests is forbidden.
 
@@ -75,7 +75,7 @@ Three places need to agree on the version:
 |---|---|---|
 | `pyproject.toml` | `version = "X.Y.Z"` | yes — this is the canonical version |
 | `web/package.json` | `"version": "X.Y.Z"` | should match `pyproject.toml` |
-| `src/govops/api.py:321` | `"version": "X.Y.Z"` in the health endpoint | currently hardcoded; should match (known maintenance item) |
+| `src/govops/api.py` (search for `"version":`) | `"version": "X.Y.Z"` in the health endpoint | hardcoded; bump alongside the other two every release |
 
 Bump all three to the new version in a single commit:
 

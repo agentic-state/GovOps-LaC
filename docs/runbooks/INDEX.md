@@ -26,7 +26,7 @@ The release-readiness runbook composes these. Each is its own gate.
 
 | Dimension | Gate | Wired? |
 |---|---|---|
-| Backend unit + integration | `pytest -q` (640 tests) + project-level Claude pre-commit hook | yes |
+| Backend unit + integration | `pytest -q` (840 tests as of v3.2.0) + project-level Claude pre-commit hook | yes |
 | UI journeys + a11y + i18n + cross-browser | Test bench against HF (55 journeys) | yes |
 | API contracts | Bench's API journeys | partial |
 | Data validity (lawcode YAML schema, ConfigValue chains) | `python scripts/validate_lawcode.py` | yes (CI) |
