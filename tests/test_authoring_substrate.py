@@ -24,6 +24,7 @@ from govops.authoring import (
     DraftStore,
     DraftType,
     TargetPathConflict,
+    _render_yaml_for_commit,
 )
 
 
@@ -416,6 +417,157 @@ class TestCommitWritesToDiskAndRehydrates:
         pack = registry["xx"]
         assert pack.jurisdiction.id == "jur-xx-national"
         assert pack.jurisdiction.country == "XX"
+
+
+# ---------------------------------------------------------------------------
+# ADR-025 structural YAML emission
+# ---------------------------------------------------------------------------
+
+
+class TestStructuralYAMLEmission:
+    """L4 / ADR-025: commit_approved preserves comments + ordering on
+    unchanged keys; a no-op load-then-commit produces a zero-byte diff."""
+
+    def _write(self, p: Path, body: str) -> None:
+        p.parent.mkdir(parents=True, exist_ok=True)
+        p.write_text(body, encoding="utf-8")
+
+    def test_no_op_load_and_commit_yields_byte_identical_output(
+        self, tmp_path: Path
+    ):
+        """The canonical L4 bar: load an existing canonical-shape file,
+        commit its contents back unchanged, expect zero-byte diff."""
+        target = tmp_path / "ca" / "programs" / "oas.yaml"
+        canonical = (
+            "# yaml-language-server: $schema=../../../schema/program-manifest-v1.0.json\n"
+            "schema_version: '1.0'\n"
+            "program_id: oas\n"
+            "jurisdiction_id: jur-ca-federal\n"
+            "name:\n"
+            "  en: Old Age Security (OAS)\n"
+            "  fr: Sécurité de la vieillesse\n"
+            "authority_chain:\n"
+            "  - id: auth-constitution\n"
+            "    layer: constitution\n"
+            "    title: Constitution Act, 1867\n"
+        )
+        self._write(target, canonical)
+        # Load to plain dict (as the substrate stores), then commit back
+        loaded = yaml.safe_load(canonical)
+        out = _render_yaml_for_commit(target, loaded)
+        assert out == canonical, (
+            "no-op commit should be byte-identical to the source; got:\n"
+            f"--- expected ---\n{canonical}--- got ---\n{out}"
+        )
+
+    def test_unchanged_keys_keep_their_comments(self, tmp_path: Path):
+        """Only the changed key loses formatting metadata; other keys
+        keep their inline + leading comments."""
+        target = tmp_path / "ca" / "programs" / "oas.yaml"
+        canonical = (
+            "# Top-level comment block.\n"
+            "schema_version: '1.0'\n"
+            "program_id: oas  # inline comment on program_id\n"
+            "status: active\n"
+            "# A comment that introduces name.\n"
+            "name:\n"
+            "  en: Old Age Security\n"
+        )
+        self._write(target, canonical)
+        loaded = yaml.safe_load(canonical)
+        # Change only `status`.
+        loaded["status"] = "deprecated"
+        out = _render_yaml_for_commit(target, loaded)
+        # The unchanged keys keep their comments.
+        assert "# Top-level comment block." in out
+        assert "# inline comment on program_id" in out
+        assert "# A comment that introduces name." in out
+        # The changed value landed.
+        assert "status: deprecated" in out
+        assert "status: active" not in out
+
+    def test_added_key_lands_at_end(self, tmp_path: Path):
+        """A net-new top-level key gets appended; the prior keys keep
+        their order + comments."""
+        target = tmp_path / "ca" / "programs" / "oas.yaml"
+        canonical = (
+            "schema_version: '1.0'\n"
+            "program_id: oas\n"
+            "# comment on status\n"
+            "status: active\n"
+        )
+        self._write(target, canonical)
+        loaded = yaml.safe_load(canonical)
+        loaded["description"] = {"en": "Federal pension."}
+        out = _render_yaml_for_commit(target, loaded)
+        assert "# comment on status" in out
+        assert "description:" in out
+        # The new key sits after the prior keys, not before.
+        idx_status = out.index("status:")
+        idx_desc = out.index("description:")
+        assert idx_status < idx_desc
+
+    def test_removed_key_drops_value_but_leaves_orphan_comment(
+        self, tmp_path: Path
+    ):
+        """Draft is the full file -- a key the draft omits is removed
+        from the projected output. The key's *leading* comment may
+        persist as an orphan because ruamel attaches it to the prior
+        key's post-comment slot, not the deleted key's slot. This is a
+        known ruamel round-trip behaviour; surfacing here as a pinned
+        contract rather than a regression so future readers aren't
+        surprised."""
+        target = tmp_path / "ca" / "programs" / "oas.yaml"
+        canonical = (
+            "schema_version: '1.0'\n"
+            "program_id: oas\n"
+            "# soon-to-be-removed\n"
+            "status: active\n"
+        )
+        self._write(target, canonical)
+        loaded = yaml.safe_load(canonical)
+        del loaded["status"]
+        out = _render_yaml_for_commit(target, loaded)
+        # The value is gone -- that's the load-bearing assertion.
+        assert "status:" not in out
+        # The orphan comment may persist (ruamel quirk). We don't assert
+        # either way; the test pins the value-removal contract only.
+
+    def test_new_file_falls_back_to_clean_dump(self, tmp_path: Path):
+        """No existing target -> nothing to round-trip against; clean
+        ruamel dump from the draft content."""
+        target = tmp_path / "xx" / "programs" / "oas.yaml"
+        loaded = {"schema_version": "1.0", "program_id": "oas"}
+        out = _render_yaml_for_commit(target, loaded)
+        assert "schema_version: '1.0'" in out
+        assert "program_id: oas" in out
+
+    def test_commit_approved_emits_structurally_through_draftstore(
+        self, tmp_path: Path
+    ):
+        """End-to-end: a draft committed through DraftStore.commit_approved
+        uses the structural emitter (zero-byte no-op diff on unchanged
+        content)."""
+        target = tmp_path / "ca" / "programs" / "oas.yaml"
+        canonical = (
+            "schema_version: '1.0'\n"
+            "program_id: oas\n"
+            "# preserve me\n"
+            "status: active\n"
+        )
+        self._write(target, canonical)
+
+        store = DraftStore(tmp_path)
+        d = store.create(
+            type=DraftType.PROGRAM,
+            target_path="ca/programs/oas.yaml",
+            content=yaml.safe_load(canonical),
+            author="alice",
+        )
+        store.approve(d.id, approver="approver")
+        committed = store.commit_approved(committer="committer")
+        assert len(committed) == 1
+        assert target.read_text(encoding="utf-8") == canonical
 
 
 # ---------------------------------------------------------------------------

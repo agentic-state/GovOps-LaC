@@ -30,6 +30,8 @@ dependencies = [
     "python-multipart>=0.0.9",
     "python-ulid>=2.0.0",
     "pyyaml>=6.0",
+    "ruamel.yaml>=0.18.0",  # v3.2 L4 / ADR-025 -- round-trip YAML emission preserving comments + ordering on commit_approved
+
     "sqlmodel>=0.0.16",
     "cryptography>=42.0.0",  # Phase 8 / ADR-009 — Ed25519 signing for lawcode federation
     "httpx>=0.27.0",          # v2.1 — used by llm_proxy multi-provider failover + encoder
