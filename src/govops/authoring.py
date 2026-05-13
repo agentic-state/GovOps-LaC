@@ -96,6 +96,28 @@ class AuthoringError(ValueError):
     status transition, malformed input."""
 
 
+class TargetPathConflict(AuthoringError):
+    """Raised when ``create()`` would land a second open draft on a
+    ``target_path`` already held by a PENDING or APPROVED draft.
+
+    Carries ``conflicting_draft_id`` so callers (and the HTTP layer)
+    can surface the exact draft an operator needs to deal with --
+    approve, reject, discard, or edit-in-place -- before authoring a
+    fresh draft against the same file.
+
+    Per ADR-023 (v3.2 substrate hardening): the substrate ships strict
+    refusal first. A future v3.3 may add a "merge into existing draft"
+    affordance once the refusal model has bedded in.
+    """
+
+    def __init__(self, conflicting_draft_id: str, target_path: str):
+        super().__init__(
+            f"target_path already held by an open draft: {conflicting_draft_id}"
+        )
+        self.conflicting_draft_id = conflicting_draft_id
+        self.target_path = target_path
+
+
 class DraftStore:
     """In-memory draft store with file-per-draft persistence.
 
@@ -194,6 +216,13 @@ class DraftStore:
                 "program drafts must target <code>/programs/<id>.yaml"
             )
 
+        # ADR-023 conflict refusal: two open drafts cannot target the
+        # same file. PENDING or APPROVED count as "open"; REJECTED /
+        # COMMITTED drafts have settled and don't hold the path.
+        existing = self._open_draft_for_path(target_path)
+        if existing is not None:
+            raise TargetPathConflict(existing.id, target_path)
+
         d = Draft(
             id=uuid.uuid4().hex[:12],
             type=type,
@@ -209,6 +238,17 @@ class DraftStore:
 
     def get(self, draft_id: str) -> Optional[Draft]:
         return self._drafts.get(draft_id)
+
+    def _open_draft_for_path(self, target_path: str) -> Optional[Draft]:
+        """Return the PENDING or APPROVED draft holding ``target_path``,
+        or None if the path is free. Used by ``create()`` to enforce the
+        ADR-023 single-open-draft-per-path rule."""
+        for d in self._drafts.values():
+            if d.target_path != target_path:
+                continue
+            if d.status in (DraftStatus.PENDING, DraftStatus.APPROVED):
+                return d
+        return None
 
     def list(
         self,

@@ -1212,6 +1212,7 @@
  "onboard.submitted.summary": "{n, plural, one {# brouillon} other {# brouillons}} en attente dans la file d'approbation. Un approbateur ouvre la file, approuve, puis valide -- c'est à ce moment que la nouvelle juridiction devient active.",
  "onboard.submitted.cta": "Ouvrir la file d'approbation",
  "onboard.submitted.back": "Retour à l'administration",
+ "onboard.error.conflict": "Un brouillon cible déjà {target}. Ouvrez la file d'approbation et approuvez, rejetez ou abandonnez le brouillon {draftId} avant de soumettre à nouveau.",
  "drafts.title": "Brouillons d'édition",
  "drafts.lede": "File d'approbation pour les brouillons de juridictions et de manifestes de programmes soumis via le substrat v3.1 (ADR-022). Approuvez, rejetez ou supprimez les brouillons en attente ; validez les approuvés pour les rendre actifs.",
  "drafts.onboard.cta": "Intégrer une nouvelle juridiction",

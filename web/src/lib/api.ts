@@ -843,13 +843,47 @@ export interface CreateDraftRequest {
   rationale?: string;
 }
 
+/**
+ * Thrown by createAuthoringDraft on HTTP 409 -- the target_path is
+ * held by an open (PENDING or APPROVED) draft. Carries the colliding
+ * draft id so the UI can route the operator to it. Per ADR-023.
+ */
+export class DraftConflictError extends Error {
+  readonly conflictingDraftId: string;
+  readonly targetPath: string;
+  constructor(conflictingDraftId: string, targetPath: string) {
+    super(
+      `target_path ${targetPath} already held by open draft ${conflictingDraftId}`,
+    );
+    this.name = "DraftConflictError";
+    this.conflictingDraftId = conflictingDraftId;
+    this.targetPath = targetPath;
+  }
+}
+
 export async function createAuthoringDraft(
   req: CreateDraftRequest,
 ): Promise<AuthoringDraft> {
-  return fetcher<AuthoringDraft>("/api/authoring/drafts", {
+  const url = `${BASE}/api/authoring/drafts`;
+  const res = await fetch(url, {
     method: "POST",
+    signal: AbortSignal.timeout(FETCHER_DEFAULT_TIMEOUT_MS),
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify(req),
   });
+  if (res.status === 409) {
+    const body = (await res.json().catch(() => null)) as {
+      detail?: { conflicting_draft_id?: string; target_path?: string };
+    } | null;
+    throw new DraftConflictError(
+      body?.detail?.conflicting_draft_id ?? "",
+      body?.detail?.target_path ?? req.target_path,
+    );
+  }
+  if (!res.ok) {
+    throw new Error(`Request failed: ${res.status} ${res.statusText}`);
+  }
+  return (await res.json()) as AuthoringDraft;
 }
 
 export async function listAuthoringDrafts(opts: {
