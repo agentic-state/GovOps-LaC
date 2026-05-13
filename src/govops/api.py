@@ -355,7 +355,7 @@ def health():
     return {
         "status": "healthy",
         "engine": "govops-demo",
-        "version": "2.1.0",
+        "version": "3.2.0",
         "jurisdiction": jur_code,
         "program": pack.program_name if pack else "",
         "available_jurisdictions": list(JURISDICTION_REGISTRY.keys()),
