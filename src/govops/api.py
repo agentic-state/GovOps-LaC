@@ -1811,10 +1811,27 @@ def impact_by_citation(
 # ---------------------------------------------------------------------------
 
 
-# Active jurisdictions in v3 scope, in display order. JP is included as the
-# architectural-control entry; whether it appears in any specific comparison
-# depends on the program (e.g. JP has no EI manifest by design).
-_COMPARE_DEFAULT_JURISDICTIONS = ["ca", "br", "es", "fr", "de", "ua", "jp"]
+# v3.2 L6a: the /compare default + validation reads from the live
+# JURISDICTION_REGISTRY (ADR-020). The pre-v3.2 hardcoded literal was the
+# last v3.0 -> v3.1 migration residue -- post-adoption-wizard jurisdictions
+# committed via the substrate would not appear in /compare because the
+# whitelist gated them out.
+#
+# The v3.0 7-jurisdiction display order is preserved for the codes that
+# existed before adoption. New (adopted) codes appear after, sorted
+# alphabetically, so /compare?jurisdictions= (no value) reflects the
+# canonical ordering operators learned in v3.x.
+_COMPARE_DISPLAY_ORDER: tuple[str, ...] = ("ca", "br", "es", "fr", "de", "ua", "jp")
+
+
+def _default_compare_jurisdictions() -> list[str]:
+    """Dynamic default list: v3.0 codes first (display order), then any
+    adopted codes alphabetically. Reads from JURISDICTION_REGISTRY so
+    reload_registry() propagates immediately."""
+    keys = set(JURISDICTION_REGISTRY.keys())
+    ordered = [c for c in _COMPARE_DISPLAY_ORDER if c in keys]
+    extras = sorted(keys - set(_COMPARE_DISPLAY_ORDER))
+    return ordered + extras
 
 # Charter-locked: JP is the architectural control. Symmetric extension is
 # opt-in for adopters; absent manifests for the JP/program pair are by design,
@@ -1951,14 +1968,17 @@ def compare_program(
     """
     requested = [c.strip().lower() for c in jurisdictions.split(",") if c.strip()]
     if not requested:
-        requested = list(_COMPARE_DEFAULT_JURISDICTIONS)
+        requested = _default_compare_jurisdictions()
 
-    invalid = [c for c in requested if c not in _COMPARE_DEFAULT_JURISDICTIONS]
+    # v3.2 L6a: validate against live registry so adopted jurisdictions
+    # (post-onboard-wizard) are accepted without redeploying the backend.
+    allowed = set(JURISDICTION_REGISTRY.keys())
+    invalid = [c for c in requested if c not in allowed]
     if invalid:
         raise HTTPException(
             400,
             f"Unknown jurisdiction code(s): {invalid}. "
-            f"Allowed: {_COMPARE_DEFAULT_JURISDICTIONS}",
+            f"Allowed: {sorted(allowed)}",
         )
 
     jur_slots: list[dict[str, Any]] = []
