@@ -6,7 +6,7 @@
 
 ## Context
 
-Phase A (committed `3b7dca7`) made *Program* a first-class declarable manifest. CA OAS now loads from `lawcode/ca/programs/oas.yaml` and produces byte-identical engine output to the seed.py path. But the engine itself — `OASEngine` in `src/govops/engine.py` — is still program-shaped:
+Phase A (landed in v3.0.0) made *Program* a first-class declarable manifest. CA OAS now loads from `lawcode/ca/programs/oas.yaml` and produces byte-identical engine output to the seed.py path. But the engine itself — `OASEngine` in `src/govops/engine.py` — is still program-shaped:
 
 - Class name encodes the program (`OASEngine`)
 - `_determine_outcome` returns `(DecisionOutcome, pension_type, partial_ratio)` — pension-type and 40-year ratio are baked into the eligible-branch logic

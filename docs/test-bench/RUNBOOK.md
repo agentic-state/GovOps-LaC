@@ -9,7 +9,7 @@
 | Field | Value |
 |---|---|
 | Bench version | `0.1.0` (framework + 55 journeys + first baseline run captured) |
-| Local code version | `v0.5.0` (commit `8ec2645`) |
+| Local code version | `v0.5.0` |
 | Hosted demo version | `v2.1.0` — meaningfully behind local (Phases F/G/H/I features absent) |
 | Default deploy target | `https://agentic-state-govops-lac.hf.space` |
 | Default local target | `http://127.0.0.1:17081` (frontend) + `http://127.0.0.1:17765` (backend), per [`web/playwright.config.ts`](../../web/playwright.config.ts) |

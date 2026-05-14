@@ -6,7 +6,7 @@
 
 ## Context
 
-Phase B (committed `d5f6c40`) made the engine shape-agnostic: the eligible-branch in `_determine_outcome` delegates to a registered `ShapeEvaluator`, and `calculate()` reads its formula-field map from the shape. The OAS shape (`old_age_pension`) covers age-and-residency-based lifetime pensions.
+Phase B (landed in v3.0.0) made the engine shape-agnostic: the eligible-branch in `_determine_outcome` delegates to a registered `ShapeEvaluator`, and `calculate()` reads its formula-field map from the shape. The OAS shape (`old_age_pension`) covers age-and-residency-based lifetime pensions.
 
 Phase C introduces **Employment Insurance** as the second canonical shape. EI is structurally different from OAS in two ways that v2's rule type vocabulary cannot express:
 

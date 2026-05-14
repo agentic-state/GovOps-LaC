@@ -71,8 +71,8 @@ non-blocking, not user-facing.
 
 ### Charter + ADRs
 
-- `docs/IDEA-GovOps-v3.2-SubstrateHardening.md` (committed
-  `72c5a9c`, 2026-05-12) -- "two-operator floor" framing
+- `docs/IDEA-GovOps-v3.2-SubstrateHardening.md` (drafted
+  2026-05-12, included in v3.2.0 release) -- "two-operator floor" framing
 - ADR-023 `docs/design/ADRs/ADR-023-substrate-conflict-refusal.md`
 - ADR-025 `docs/design/ADRs/ADR-025-structural-yaml-emission.md`
 
