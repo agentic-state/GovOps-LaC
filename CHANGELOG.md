@@ -12,7 +12,46 @@ illustrative purposes only.
 
 ## [Unreleased]
 
-_No unreleased changes._
+### Removed
+
+- **`GlobalJurisdictionSwitcher` component + V05 test + `header.jurisdiction.*`
+  i18n keys.** Closes the v3.2.0 "Header global jurisdiction switcher does
+  not propagate to page-level selectors" Known Issue by removing the
+  misleading affordance entirely. Per-page jurisdiction selectors keep
+  working unchanged. The `localStorage('govops-jurisdiction')` key is now
+  abandoned; no other consumer reads it. Bench tagged-journey count drops
+  by 1 (V05 retired) -- next deploy baseline becomes 57/0/6.
+
+### Changed
+
+- **9 uk (Ukrainian) locale cells closed** (CHANGELOG v3.2.0 Known Issue):
+  2 obsoleted by the switcher removal (`header.jurisdiction.{label,help}`),
+  7 translated in-place (`compare.filter.legend`, `compare.filter.clear`,
+  `compare.filter.help.all`, `compare.filter.help.subset`,
+  `compare.interactions.heading`, `compare.interactions.empty`,
+  `drafts.row.id`). Per-locale untranslated counts also drop by 2 across
+  fr/de/es-MX/pt-BR from the same key removal. The Ukrainian plural form
+  on `compare.filter.help.subset` uses the four-category form
+  (`one`/`few`/`many`/`other`) per CLDR plural rules.
+
+### Docs
+
+- **`docs/runbooks/deploy-to-hf.md`** -- visual-snapshot strip step (orphan
+  build) inlined into Step 3 with a matching entry under Common gotchas.
+  v3.2.0 deploy hit this gotcha; runbook now anticipates it.
+
+### Test infrastructure
+
+- **`settleForScreenshot` hardened (LO-011 partial)**. The visual-regression
+  helper at `web/e2e/visual.spec.ts` now waits for `document.body.scrollHeight`
+  to be stable across 3 consecutive animation frames (1s ceiling) after the
+  scroll round-trip + networkidle. Closes the PR #39 root cause: under
+  `--update-snapshots`, Playwright captures once without its usual
+  consecutive-stability check, so a hydration race could bake viewport-only
+  baselines for routes mid-mount. Next step toward closing the LO-011
+  Known Issue (visual gate skipped on HF) is to re-trigger
+  `update-visual-snapshots.yml` workflow_dispatch, commit the produced
+  Linux PNGs, and flip `RUN_VISUAL_REGRESSION=1`.
 
 ## [3.2.0] -- Substrate hardening (2026-05-13)
 

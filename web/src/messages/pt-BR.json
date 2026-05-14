@@ -1120,8 +1120,6 @@
  "compare.interactions.heading": "Cross-program interactions",
  "compare.interactions.lede": "Other programs whose statutory eligibility may interact with this one. Advisory only -- applies when the same applicant qualifies for more than one program.",
  "compare.interactions.empty": "No cross-program interactions registered for this program.",
- "header.jurisdiction.label": "Jurisdiction",
- "header.jurisdiction.help": "Switch the active jurisdiction. Pages that take a jurisdiction parameter will follow.",
  "compare.ruleType.age_threshold": "Limiar de idade",
  "compare.ruleType.residency_minimum": "Contribuição / residência mínima",
  "compare.ruleType.residency_partial": "Pró-rata parcial",

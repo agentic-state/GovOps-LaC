@@ -162,36 +162,3 @@ test.describe("[L04] View program-interaction warnings", () => {
   });
 });
 
-test.describe("[V05] Switch jurisdiction via header selector", () => {
-  // LO-010 RESOLVED in L8.5: GlobalJurisdictionSwitcher in Masthead.tsx
-  // (desktop header), persists to localStorage('govops-jurisdiction').
-  test("the global header jurisdiction selector renders, accepts a change, and persists", async ({
-    page,
-  }) => {
-    await page.goto("/");
-    // Wait for the React bundle to finish loading + hydration to complete
-    // so the controlled-component onChange handler is wired before we
-    // drive the select. Without networkidle + a small grace, selectOption
-    // mutates the DOM but onChange never runs and localStorage stays empty.
-    await page.waitForLoadState("networkidle");
-    const switcher = page.getByTestId("global-jurisdiction-switcher").first();
-    await expect(switcher).toBeVisible({ timeout: 10_000 });
-
-    const select = switcher.getByLabel(/^jurisdiction$/i);
-    await expect(select).toHaveValue("ca", { timeout: 10_000 });
-    await page.waitForTimeout(300);
-
-    await select.selectOption("fr");
-    await expect(select).toHaveValue("fr");
-
-    // Persist contract: localStorage carries the choice across reloads.
-    await expect.poll(
-      () => page.evaluate(() => window.localStorage.getItem("govops-jurisdiction")),
-      { timeout: 5_000 },
-    ).toBe("fr");
-
-    await page.reload();
-    await expect(page.getByTestId("global-jurisdiction-switcher").first().getByLabel(/^jurisdiction$/i))
-      .toHaveValue("fr");
-  });
-});

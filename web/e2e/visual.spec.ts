@@ -84,10 +84,9 @@ async function setLocaleCookie(page: Page, locale: Locale): Promise<void> {
 }
 
 async function settleForScreenshot(page: Page): Promise<void> {
-  // Force lazy-mounted sections to materialize. Some routes (notably
-  // /check) only render the lower form sections after the user scrolls
-  // them into view. A round trip to the bottom + back to the top
-  // guarantees the full page height is stable before the screenshot.
+  // Step 1: force lazy-mounted sections to materialize. Some routes
+  // (notably /check) only render the lower form sections after the
+  // user scrolls them into view.
   await page.evaluate(async () => {
     const last = document.body.scrollHeight;
     window.scrollTo(0, last);
@@ -95,7 +94,48 @@ async function settleForScreenshot(page: Page): Promise<void> {
     window.scrollTo(0, 0);
     await new Promise((r) => setTimeout(r, 100));
   });
+
+  // Step 2: drain in-flight network so any fetch the scroll triggered
+  // can land before we measure stability.
   await page.waitForLoadState("networkidle");
+
+  // Step 3: wait for scrollHeight to be stable across N consecutive
+  // animation frames. The previous version skipped this check, which
+  // bit `--update-snapshots` runs (see PR #39 / LO-011): Playwright's
+  // regular mode does its own consecutive-stability check, but
+  // --update-snapshots writes after a single capture, so a hydration
+  // race between scrollTo and the screenshot baked viewport-only
+  // baselines for some routes (e.g. /encode at 765px when the real
+  // page is 1539px). The CI re-render then failed visual diff.
+  await page.evaluate(async () => {
+    const TARGET_STABLE_FRAMES = 3;
+    const MAX_FRAMES = 60; // ~1s ceiling at 60fps -- bail out rather than hang
+    return new Promise<void>((resolve) => {
+      let lastHeight = document.body.scrollHeight;
+      let stableFrames = 0;
+      let framesObserved = 0;
+      function tick() {
+        framesObserved += 1;
+        const current = document.body.scrollHeight;
+        if (current === lastHeight) {
+          stableFrames += 1;
+          if (stableFrames >= TARGET_STABLE_FRAMES) {
+            resolve();
+            return;
+          }
+        } else {
+          stableFrames = 0;
+          lastHeight = current;
+        }
+        if (framesObserved >= MAX_FRAMES) {
+          resolve();
+          return;
+        }
+        requestAnimationFrame(tick);
+      }
+      requestAnimationFrame(tick);
+    });
+  });
 }
 
 /**

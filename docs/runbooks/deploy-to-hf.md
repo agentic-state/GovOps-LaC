@@ -61,6 +61,20 @@ HF Spaces can't store binary files in git history (Xet storage required for thin
 git checkout --orphan hf-deploy-tmp
 # Verify the orphan has all of main's files staged:
 git status --short | wc -l   # expect ~520+
+```
+
+**Before committing**, strip large binary fixtures that exceed HF's per-file git threshold. As of v3.2.0 the offender is the visual regression snapshot directory (6 PNGs at 350-500 KB each). They stay tracked on `origin/main` for CI; HF just doesn't run e2e tests:
+
+```bash
+# If web/e2e/visual.spec.ts-snapshots/ exists on the tree, strip it:
+if [ -d "web/e2e/visual.spec.ts-snapshots" ]; then
+  git rm -r --cached web/e2e/visual.spec.ts-snapshots/
+fi
+```
+
+Then commit:
+
+```bash
 git commit -m "$(git describe --tags --abbrev=0 2>/dev/null || git rev-parse --short main) snapshot"
 ```
 
@@ -181,10 +195,13 @@ These bit us before. References point at memory entries with the *why*.
 
 - **Binary files block normal git push.** `web/brand/govops-wordmark.png` + `web/bun.lockb` exceed HF's git-storage policy. Always use the orphan-branch pattern (step 3). A regular `git push hf main` will be rejected.
 
+- **Visual regression snapshots reject the orphan push.** First seen during v3.2.0 deploy (2026-05-14). `web/e2e/visual.spec.ts-snapshots/walkthrough-*.png` (6 files, 350-500 KB each) exceed HF's git per-file size threshold. Symptom: orphan `git push hf` fails with `Please use https://huggingface.co/docs/hub/xet to store binary files`, listing the PNGs. **Fix is now baked into step 3** — strip the directory via `git rm -r --cached` before committing the orphan. Snapshots remain tracked on `origin/main` so CI's visual regression keeps working; HF's runtime doesn't run e2e tests anyway. v3.1.1 didn't hit this because the snapshots were added between v3.1.1 and v3.2.0.
+
 - **`/api/health` version string is hardcoded.** `src/govops/api.py` (line ~358 in v3.2.0) holds the version string as a literal. Bump it as part of every release per release-readiness.md Gate 5. Closed for v3.2.0 (was `2.1.0`, now `3.2.0`).
 
 - **`/check/life-event`, `/about` FR locale, `/config` SSR title** — known cookie-based SSR locale issues that survive across deploys. Documented in `docs/test-bench/runs/20260502-2210-findings.md` as pending root-cause. Don't treat their failure as a deploy regression.
 
 ## Last validated
 
-- **2026-05-02** by Claude (this session) — bench-5 confirmed clean v0.5.0 deploy; 7 journey deltas matched expectations; runbook captures the playbook proven in this run.
+- **2026-05-14** — v3.2.0 deploy executed end-to-end; orphan rebuilt in 4m9s; post-deploy probes all green; Gate 9 bench 58/0/6 (better than v3.1.1 baseline of 57/1/6). Visual-snapshot strip step added to runbook based on this deploy's gotcha.
+- **2026-05-02** — bench-5 confirmed clean v0.5.0 deploy; 7 journey deltas matched expectations; runbook captures the playbook proven in this run.
