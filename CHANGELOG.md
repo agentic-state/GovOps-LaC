@@ -76,6 +76,34 @@ non-blocking, not user-facing.
 - ADR-023 `docs/design/ADRs/ADR-023-substrate-conflict-refusal.md`
 - ADR-025 `docs/design/ADRs/ADR-025-structural-yaml-emission.md`
 
+### Known issues
+
+These are present in v3.2.0 and tracked for v3.3 (or earlier patch). None are
+release-blockers; documented so testers and integrators have honest expectations.
+
+- **Header global jurisdiction switcher does not propagate to page-level
+  selectors.** The header dropdown's tooltip says "Pages that take a
+  jurisdiction parameter will follow" -- in practice each page's own
+  jurisdiction selector keeps its own state. Visible on `/authority`,
+  `/compare`, `/admin`, `/screen`. Cosmetic; the per-page selectors work
+  correctly. Discovered post-deploy 2026-05-14.
+- **`/walkthrough` route nav state mismatch.** SPA-prerender shell falls back
+  to the home-page render for every route, baking Home-active nav state into
+  the initial HTML. Functional behaviour passes (the J45 7-step scenario
+  works); visible only in the brief moment before client hydration repaints
+  the nav. Architectural fix deferred per LO-011 (vite build pipeline).
+- **9 untranslated cells in `uk` (Ukrainian) locale.** Surfaces in `/compare`
+  filter strings, header jurisdiction help text, and drafts row labels.
+  Visitors see the EN source string. Zero impact on the other 5 locales.
+  Fix: translate or add to `web/scripts/i18n-translation-allowlist.json`
+  (per `docs/i18n-rounds/README.md`).
+- **Visual regression test gate intentionally skipped on HF deploys.** The
+  `web/e2e/visual.spec.ts` baseline PNGs are Windows-baked; HF runs Linux,
+  producing pixel diffs. Per LO-011 (settle-helper hydration race), the
+  gate stays skipped pending a baseline-cross-platform-aware
+  `settleForScreenshot` rewrite. Bench journey results (58/0/6 for v3.2.0)
+  are the canonical proof-of-release signal.
+
 ### Deferred (parked for re-charter if drivers appear)
 
 - **L3 author/approver role separation + thin RBAC (ADR-024)** --
