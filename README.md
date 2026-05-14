@@ -31,7 +31,7 @@ This is an open public-good contribution: a working MVP demo other contributors 
 
 **Status — v3.1 shipped.** The architectural shift: **lawcode-as-discovery** — `JURISDICTION_REGISTRY` is built at startup by walking `lawcode/` (ADR-020). Adding a jurisdiction no longer requires a Python edit. The L7 authoring substrate (ADR-022) ships a draft / approve / commit HTTP API at `/api/authoring/*` for in-app authoring of jurisdictions and program manifests; see [`docs/adoption/HOW-TO-ADD-A-JURISDICTION.md`](docs/adoption/HOW-TO-ADD-A-JURISDICTION.md) for both supported paths (CLI + file edit, and substrate API). Five playthrough bugs from 2026-05-10 are closed: jurisdiction picker on `/authority`, inline rationale validation on `/cases`, 409-Conflict idempotency on `/encode` commits, two dead `/about` links repaired, and `/impact` now groups by country (ADR-021) instead of program-scoped jurisdiction id. The L8-L12 in-app UI wizards (Onboard, authority chain editor, legal docs editor, demo cases editor, program creator) are v3.1.x backlog — they will drive the L7 substrate under the hood. See [`CHANGELOG.md`](CHANGELOG.md) for the full v3.1 ledger.
 
-**Project home**: [agentic-state.github.io/GovOps-LaC](https://agentic-state.github.io/GovOps-LaC/) · **Source**: [github.com/agentic-state/GovOps-LaC](https://github.com/agentic-state/GovOps-LaC) · **Live demo**: [huggingface.co/spaces/agentic-state/govops-lac](https://huggingface.co/spaces/agentic-state/govops-lac) — _free-tier; first load may take ~30s if idle_
+**Project home**: [agentic-state.github.io/GovOps-LaC](https://agentic-state.github.io/GovOps-LaC/) · **Source**: [github.com/agentic-state/GovOps-LaC](https://github.com/agentic-state/GovOps-LaC) · **Live demo**: [agentic-state-govops-lac.hf.space](https://agentic-state-govops-lac.hf.space) — _free-tier; first load may take ~30s if idle_
 
 <p align="center">
   <a href="https://agentic-state.github.io/GovOps-LaC/"><img src="docs/screenshots/v2/01-home.png" alt="GovOps product home — three registers (agent-drafted, human-ratified, citizen-auditable) summarise the Law-as-Code thesis." width="900"></a>
@@ -56,7 +56,7 @@ This README describes what is currently implemented. For load-bearing decisions:
 
 ## Quick Start
 
-The fastest path to seeing GovOps run is the **hosted demo** at [huggingface.co/spaces/agentic-state/govops-lac](https://huggingface.co/spaces/agentic-state/govops-lac) (free tier; ~30 s cold start). It's the same FastAPI + React surface you'd run locally, with the demo seed turned on.
+The fastest path to seeing GovOps run is the **hosted demo** at [agentic-state-govops-lac.hf.space](https://agentic-state-govops-lac.hf.space) (free tier; ~30 s cold start). It's the same FastAPI + React surface you'd run locally, with the demo seed turned on.
 
 For local development, GovOps has two surfaces. The React UI is what visitors see in the screenshots; the legacy Jinja UI is preserved as a no-build-step fallback.
 
