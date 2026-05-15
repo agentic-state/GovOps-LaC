@@ -45,13 +45,15 @@ illustrative purposes only.
 - **`settleForScreenshot` hardened (LO-011 partial)**. The visual-regression
   helper at `web/e2e/visual.spec.ts` now waits for `document.body.scrollHeight`
   to be stable across 3 consecutive animation frames (1s ceiling) after the
-  scroll round-trip + networkidle. Closes the PR #39 root cause: under
-  `--update-snapshots`, Playwright captures once without its usual
-  consecutive-stability check, so a hydration race could bake viewport-only
-  baselines for routes mid-mount. Next step toward closing the LO-011
-  Known Issue (visual gate skipped on HF) is to re-trigger
-  `update-visual-snapshots.yml` workflow_dispatch, commit the produced
-  Linux PNGs, and flip `RUN_VISUAL_REGRESSION=1`.
+  scroll round-trip + networkidle. Improvement on the prior helper but
+  insufficient on its own: a 2026-05-15 attempt to seed Linux baselines +
+  flip `RUN_VISUAL_REGRESSION=1` was reverted (commit 25188ec) because the
+  hardened helper still baked a viewport-only `/encode` baseline (765px vs
+  the 1539px CI re-render). Stability check sees "no change" but doesn't
+  catch "stable at the wrong height before async data arrives". Next
+  iteration needs route-specific content-ready selectors (e.g. wait for
+  `[data-testid="encode-list-row"]` on `/encode`) or a longer pre-stability
+  delay to give async fetches time to materialize.
 
 ## [3.2.0] -- Substrate hardening (2026-05-13)
 
