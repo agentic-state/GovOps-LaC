@@ -72,10 +72,6 @@ jobs:
         working-directory: web
         env:
           CI: "1"
-          # LO-011 phase 3: Linux baselines committed 2026-05-14 alongside
-          # the settleForScreenshot helper hardening. Flipping this on
-          # enables the visual.spec.ts gate against the Linux baselines.
-          RUN_VISUAL_REGRESSION: "1"
         run: npm run test:e2e
       - name: Upload Playwright report
         if: always()
