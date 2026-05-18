@@ -8,6 +8,13 @@ on:
   schedule:
     - cron: "42 5 * * 1"
 
+# Secret scan is the must-pass-to-merge security gate; keep on PR.
+# Concurrency cancels superseded PR runs when the same PR is pushed again,
+# but never cancels a push-to-main run (history scan must complete).
+concurrency:
+  group: gitleaks-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 permissions:
   contents: read
 
