@@ -1,0 +1,10 @@
+# CODEOWNERS for agentic-state/GovOps-LaC
+#
+# Sole maintainer; PRs do not require external review approval. CODEOWNERS
+# is declared anyway so the convention is explicit and ready for any
+# future contributors who pick up this open-source prototype.
+#
+# Per portfolio repo-hygiene Tier 1 (eva-foundation memory entry
+# `reference_portfolio_repo_hygiene_tier1_2026-05-17`).
+
+* @MarcoPolo483
