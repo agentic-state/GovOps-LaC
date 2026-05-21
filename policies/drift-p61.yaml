@@ -1,0 +1,26 @@
+# AIOS drift scanner rule-pack for 61-GovOps (agentic-state/GovOps-LaC).
+#
+# Loaded automatically by `aios drift scan --path <repo>` via the engine's
+# policies/drift-*.yaml auto-discovery. Documents the project-specific
+# exceptions to the engine's defaults.
+
+# 61-GovOps is a PUBLIC-tier repo on agentic-state. Per the two-tier layout
+# doctrine, public-tier project repos hold only public-safe content; the
+# canonical PLAN-p61-v3.md + Claude-Code-internal instructions live in
+# private workspace (eva-foundation), not here. README.md is the only
+# required anchor.
+required_files:
+  - README.md
+
+# The repo's GitHub identity slug. The README references "GovOps-LaC"
+# (the friendly product name) as well; either string satisfies the
+# repo-identity heuristic.
+repo_name: GovOps-LaC
+
+# Reserved for Wave 8 (broken_links_excluded_patterns + repo_visibility) when
+# those ScanContext fields land. Until then, ~24 medium-broken-link findings
+# pointing at ../PLAN.md / ../../PLAN.md / ../../../PLAN.md from ADRs +
+# design docs are expected false positives -- the PLAN was relocated to
+# private eva-foundation/plans/ per the 2026-04-30 visibility rule and the
+# references cannot be repointed in a public repo without leaking workspace
+# paths. Targeted text cleanup is the eventual fix.
