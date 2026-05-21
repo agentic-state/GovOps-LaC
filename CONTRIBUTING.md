@@ -25,7 +25,7 @@ A jurisdiction in GovOps is a country (or sub-national authority) that publishes
 git clone https://github.com/agentic-state/GovOps-LaC.git
 cd GovOps-LaC
 pip install -e ".[dev]"
-pytest -q                  # 375 tests should pass before you change anything
+pytest -q                  # 840 tests should pass before you change anything
 ```
 
 **Step 2 — Pick an existing jurisdiction as your template**
@@ -50,7 +50,7 @@ These YAML files are the substrate (Phase 1–3 of the project plan). They're th
 **Step 4 — Verify**
 
 ```bash
-pytest -q                                         # all 375 + your new tests should pass
+pytest -q                                         # all 840 + your new tests should pass
 python scripts/validate_lawcode.py                # YAML schema gate
 govops-demo                                       # http://127.0.0.1:8000 — see your jurisdiction live
 ```
@@ -59,7 +59,7 @@ govops-demo                                       # http://127.0.0.1:8000 — se
 
 Open a PR with: the legislative citation for each rule, a one-paragraph "what was hard" note (this helps the next contributor), and the country code + program name in the title.
 
-That's it. The Japan addition (commit history, PLAN §7) is a reference implementation: 15 ConfigValue records + a Python section with 4 demo cases, zero changes to existing tests, zero changes to the engine.
+That's it. The Japan addition (see commit history) is a reference implementation: 15 ConfigValue records + a Python section with 4 demo cases, zero changes to existing tests, zero changes to the engine.
 
 ## Extending the engine
 
@@ -90,7 +90,7 @@ Translations live in two places, distinct by audience:
 - **UI strings** (operator + citizen surfaces) — [`web/src/messages/{en,fr,pt-BR,es-MX,de,uk}.json`](web/src/messages/). Validated in `prebuild` via [`web/scripts/check-i18n-keys.mjs`](web/scripts/check-i18n-keys.mjs) (key parity), [`check-i18n-icu.mjs`](web/scripts/check-i18n-icu.mjs) (ICU MessageFormat well-formedness), and [`check-i18n-translation.mjs`](web/scripts/check-i18n-translation.mjs) (no copy-paste from EN).
 - **Backend strings** — migrated to ConfigValue records during Phase 2. Edit the YAML under `lawcode/global/` (cross-locale) or `lawcode/<jur>/config/` (jurisdiction-specific).
 
-For UI strings, native-speaker review is gold. The current parity check passes, but a few cells are flagged for human re-look — see PLAN §12.4 and use the [native-speaker review issue template](.github/ISSUE_TEMPLATE/native_speaker_review.md).
+For UI strings, native-speaker review is gold. The current parity check passes, but a few cells are flagged for human re-look — use the [native-speaker review issue template](.github/ISSUE_TEMPLATE/native_speaker_review.md).
 
 ## Reporting bugs and proposing features
 
@@ -105,7 +105,7 @@ The v2 dev experience runs in two terminals — modern UI on `:8080`, backend AP
 pip install -e ".[dev]"
 govops-demo                    # http://127.0.0.1:8000
 govops-demo --reload           # auto-reload during backend development
-pytest -q                      # 423 tests
+pytest -q                      # 840 tests
 pytest -k residency -v         # filter by keyword
 
 # Terminal 2 — modern v2 UI (Vite + TanStack + shadcn — what's in the screenshots)
