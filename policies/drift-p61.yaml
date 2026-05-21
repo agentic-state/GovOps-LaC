@@ -17,10 +17,16 @@ required_files:
 # repo-identity heuristic.
 repo_name: GovOps-LaC
 
-# Reserved for Wave 8 (broken_links_excluded_patterns + repo_visibility) when
-# those ScanContext fields land. Until then, ~24 medium-broken-link findings
-# pointing at ../PLAN.md / ../../PLAN.md / ../../../PLAN.md from ADRs +
-# design docs are expected false positives -- the PLAN was relocated to
-# private eva-foundation/plans/ per the 2026-04-30 visibility rule and the
-# references cannot be repointed in a public repo without leaking workspace
-# paths. Targeted text cleanup is the eventual fix.
+# Public-tier: repo_visibility: public is set above. Wave 8 also adds
+# broken_links_excluded_patterns to suppress known false-positive classes:
+repo_visibility: public
+
+broken_links_excluded_patterns:
+  - pattern: '^\.\.(/\.\.)*/PLAN\.md$'
+    description: legacy ../PLAN.md references from ADRs + design docs; canonical PLAN is private (eva-foundation/plans/PLAN-p61-v3.md) and cannot be repointed in a public repo without leaking
+  - pattern: '^\.\.?/govops-\d{3}-'
+    description: references to nonexistent govops-NNN spec stubs (014/015/016 etc) that were never committed
+  - pattern: '^docs/design/ADRs/README\.md$'
+    description: ADR README index aggregated externally
+  - pattern: '\.claude/agents/'
+    description: subagent definitions live in private workspace per two-tier doctrine
