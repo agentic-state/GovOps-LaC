@@ -101,3 +101,6 @@ Thumbs.db
 
 # Testing (hypothesis)
 .hypothesis/
+
+# AIOS drift scanner scratch output (see policies/drift-p61.yaml)
+.aios/

@@ -22,10 +22,10 @@ repo_name: GovOps-LaC
 repo_visibility: public
 
 broken_links_excluded_patterns:
-  - pattern: '^\.\.(/\.\.)*/PLAN\.md$'
-    description: legacy ../PLAN.md references from ADRs + design docs; canonical PLAN is private (eva-foundation/plans/PLAN-p61-v3.md) and cannot be repointed in a public repo without leaking
-  - pattern: '^\.\.?/govops-\d{3}-'
-    description: references to nonexistent govops-NNN spec stubs (014/015/016 etc) that were never committed
+  - pattern: '^\.\.(/\.\.)*/PLAN(-v\d+)?\.md$'
+    description: legacy ../PLAN.md and ../PLAN-vN.md references from ADRs + design docs; canonical PLAN is private (eva-foundation/plans/PLAN-p61-v3.md) and cannot be repointed in a public repo without leaking
+  - pattern: '^(\.\.?/)+govops-\d{3}-'
+    description: references to nonexistent govops-NNN spec stubs (003/014/015/016 etc) that were never committed; pattern allows any depth of relative-path prefix
   - pattern: '^docs/design/ADRs/README\.md$'
     description: ADR README index aggregated externally
   - pattern: '\.claude/agents/'
