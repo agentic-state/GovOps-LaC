@@ -39,7 +39,7 @@ lawcode/<code>/
     jurisdiction.yaml   # jurisdiction-level metadata + howto_url
 ```
 
-These YAML files are the substrate (Phase 1–3 of the [PLAN](PLAN.md)). They're the load-bearing artefact: changing a value here changes runtime behaviour without a deploy.
+These YAML files are the substrate (Phase 1–3 of the project plan). They're the load-bearing artefact: changing a value here changes runtime behaviour without a deploy.
 
 **Step 3 — Add your jurisdiction's data**
 
@@ -73,13 +73,13 @@ The rule engine ([`src/govops/engine.py`](src/govops/engine.py)) dispatches on `
 | `legal_status` | Citizenship / permanent residency check |
 | `evidence_required` | Required document presence |
 | `exclusion` | Disqualifying conditions |
-| `calculation` | Benefit amount via typed-AST formula (Phase 10B, [ADR-011](docs/design/ADRs/ADR-011-calculation-rule-type.md)) |
+| `calculation` | Benefit amount via typed-AST formula (Phase 10B, [ADR-011](docs/design/ADRs/ADR-011-calculation-rules-as-typed-ast.md)) |
 
 To add a new rule type:
 1. Extend the `RuleType` enum in [`src/govops/models.py`](src/govops/models.py).
 2. Add the evaluation method in [`src/govops/engine.py`](src/govops/engine.py).
 3. Add test coverage in [`tests/test_engine.py`](tests/test_engine.py) — at minimum: satisfied, not-satisfied, insufficient-evidence, and a date-aware case.
-4. If the new type holds a value the substrate should resolve (vs hardcoded), wire it through `ConfigStore.resolve()` per [ADR-013](docs/design/ADRs/ADR-013-substrate-resolution-seam.md).
+4. If the new type holds a value the substrate should resolve (vs hardcoded), wire it through `ConfigStore.resolve()`.
 
 Open an ADR for the new type if it changes the engine's contract or persistence shape.
 
@@ -88,7 +88,7 @@ Open an ADR for the new type if it changes the engine's contract or persistence 
 Translations live in two places, distinct by audience:
 
 - **UI strings** (operator + citizen surfaces) — [`web/src/messages/{en,fr,pt-BR,es-MX,de,uk}.json`](web/src/messages/). Validated in `prebuild` via [`web/scripts/check-i18n-keys.mjs`](web/scripts/check-i18n-keys.mjs) (key parity), [`check-i18n-icu.mjs`](web/scripts/check-i18n-icu.mjs) (ICU MessageFormat well-formedness), and [`check-i18n-translation.mjs`](web/scripts/check-i18n-translation.mjs) (no copy-paste from EN).
-- **Backend strings** — migrated to ConfigValue records during Phase 2 ([PLAN §4](PLAN.md#4-phase-plan-with-entryexit-criteria)). Edit the YAML under `lawcode/global/` (cross-locale) or `lawcode/<jur>/config/` (jurisdiction-specific).
+- **Backend strings** — migrated to ConfigValue records during Phase 2. Edit the YAML under `lawcode/global/` (cross-locale) or `lawcode/<jur>/config/` (jurisdiction-specific).
 
 For UI strings, native-speaker review is gold. The current parity check passes, but a few cells are flagged for human re-look — see PLAN §12.4 and use the [native-speaker review issue template](.github/ISSUE_TEMPLATE/native_speaker_review.md).
 
@@ -127,7 +127,7 @@ The Jinja UI on `:8000` carries a sticky banner labelling it as the v0 / v1 fall
 
 - **Citations are mandatory**: every formalized rule references a specific statute or regulation section.
 - **Tests must stay green** at every PR. CI runs Python 3.10/3.11/3.12 + cross-browser Playwright.
-- **Conventional Commits** ([adopted Phase 0](PLAN.md)): `type(scope): subject`. Types: `feat`, `fix`, `docs`, `chore`, `refactor`, `test`, `phase-N`.
+- **Conventional Commits** (adopted Phase 0): `type(scope): subject`. Types: `feat`, `fix`, `docs`, `chore`, `refactor`, `test`, `phase-N`.
 - **No personal names, organizational identifiers, or internal references** in code or docs (preserves the framing in the disclaimer).
 - **No hidden reasoning**: every recommendation traces back through `Decision → Rule → Policy → Regulation → Act → Jurisdiction`.
 - **Human-in-the-loop**: the system recommends; humans decide.

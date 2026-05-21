@@ -88,7 +88,7 @@ The **Track / Gate** line is load-bearing — it ties the ADR to the operational
 Append a row to `docs/design/ADRs/README.md` in the same PR:
 
 ```markdown
-| 019 | [Replace cookie locale with URL prefix](ADR-019-replace-cookie-locale-with-url-prefix.md) | Proposed | v3.1 / Gate 1 |
+| 019 | Lawcode jurisdiction metadata (`ADR-019-lawcode-jurisdiction-metadata.md`) | Proposed | v3.1 / Gate 1 |
 ```
 
 Status starts at `Proposed`. Flip to `Accepted` in a follow-up commit when the decision is locked. Don't mix proposing and accepting in the same PR — keep them separable so peers can review the proposal independent of the lock-in.

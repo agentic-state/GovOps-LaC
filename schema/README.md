@@ -130,7 +130,7 @@ These responsibilities live in the *caller*, not the resolver:
 
 | Concern | Where it lives | Why |
 | --- | --- | --- |
-| Language fallback (`fr` → `en` if FR missing) | i18n layer ([`src/govops/i18n.py`](../src/govops/i18n.py), [`web/src/lib/i18n.ts`](../web/src/lib/i18n.ts)) | Language is a *key suffix* convention for UI labels; the resolver treats `ui.label.foo.fr` and `ui.label.foo.en` as completely different keys |
+| Language fallback (`fr` → `en` if FR missing) | i18n layer ([`src/govops/i18n.py`](../src/govops/i18n.py), [`web/src/lib/i18n.tsx`](../web/src/lib/i18n.tsx)) | Language is a *key suffix* convention for UI labels; the resolver treats `ui.label.foo.fr` and `ui.label.foo.en` as completely different keys |
 | Default-language preference per request | i18n layer | The user's locale is a request-level concern, not a substrate-level one |
 | Citation back-trace | Caller renders the citation field; substrate just stores it | Provenance is data, not behaviour |
 | Reverse impact (which rules cite this section?) | Phase 7 reverse-index endpoint | Different access pattern; substrate's primary index is by key |
