@@ -2,7 +2,7 @@
 
 Decisions captured here are load-bearing — they shape what gets built and what does not. The format is intentionally light: context, decision, consequences, alternatives. New ADRs get the next sequential number; superseded ADRs stay in place with a `Superseded by ADR-NNN` (or `Superseded by reality`) line in the status header.
 
-Active track: **Program-as-Primitive v3.0** (see [PLAN-v3.md](../../../PLAN-v3.md)). v2.0 (Law-as-Code) shipped as v0.4.0; its plan lives in [PLAN.md](../../../PLAN.md).
+Active track: **Substrate-Hardening v3.2** (shipped 2026-05-13 — see [CHANGELOG.md](../../../CHANGELOG.md)). Prior tracks: **Program-as-Primitive v3.0** (charter at [`docs/IDEA-GovOps-v3.0-ProgramAsPrimitive.md`](../../IDEA-GovOps-v3.0-ProgramAsPrimitive.md), shipped 2026-05-10) and **Law-as-Code v2.0** (shipped 2026-04-29). Per-release scope is in [CHANGELOG.md](../../../CHANGELOG.md).
 
 ## ADR Format
 
@@ -35,6 +35,14 @@ Each ADR follows this structure:
 | 015 | [Canonical Program Shape Library](ADR-015-program-shape-library.md) | Accepted | v3.0 / Gate 2 |
 | 016 | [Engine refactor scope: OASEngine → ProgramEngine](ADR-016-engine-refactor-scope.md) | Accepted | v3.0 / Gate 3 |
 | 017 | [Bounded-benefit rule primitives](ADR-017-bounded-benefit-rule-primitives.md) | Accepted | v3.0 / Gate 4 |
+| 018 | [Cross-Program Evaluation API](ADR-018-cross-program-evaluation-api.md) | Accepted | v3.0 / Gate 5 |
+| 019 | [Lawcode jurisdiction-metadata block](ADR-019-lawcode-jurisdiction-metadata.md) | Accepted | v3.1 / Lane 1 |
+| 020 | [Lawcode-as-discovery (registry retired from Python)](ADR-020-lawcode-as-discovery.md) | Accepted | v3.1 / Lane 3 |
+| 021 | [Citation impact groups by country, not by program-scoped jurisdiction_id](ADR-021-citation-impact-by-country.md) | Accepted | v3.1 / L5 |
+| 022 | [Authoring substrate for non-ConfigValue records](ADR-022-authoring-substrate.md) | Accepted | v3.1 / L7 |
+| 023 | [Substrate conflict refusal on same target_path](ADR-023-substrate-conflict-refusal.md) | Accepted | v3.2 / L2 |
+| 024 | _(deliberately gap — see CHANGELOG v3.2.0 §Known Issues)_ | — | — |
+| 025 | [Structural-aware YAML emission for commit_approved](ADR-025-structural-yaml-emission.md) | Accepted | v3.2 / L3 |
 
 ## Contributing ADRs
 
@@ -43,7 +51,7 @@ When proposing a significant architectural decision:
 1. Use the next sequential number (`ADR-NNN`)
 2. Filename pattern: `ADR-NNN-short-kebab-title.md`
 3. Status starts at `Proposed`; flip to `Accepted` when the decision is locked
-4. Cross-link to the PLAN gate it satisfies (if any)
+4. Cross-link to the release-readiness gate or runbook it satisfies (if any)
 5. Add a row to the Index above in the same PR
 
 Significant decisions include: technology stack choices, data model design, integration patterns, security/privacy approaches, performance strategies, testing frameworks, governance policies.

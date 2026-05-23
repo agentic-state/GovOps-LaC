@@ -197,7 +197,7 @@ Phase A is purely additive. `seed.py` and `jurisdictions.py` continue to work; t
 - **JSON Schema gate in CI**: every `lawcode/*/programs/*.yaml` is validated against `schema/program-manifest-v1.0.json` on PR.
 - **Round-trip test**: load manifest → produce LegalRule list → must equal `seed.py`'s list for CA OAS in Phase A; this guards the migration.
 - **Shape catalog schema**: ADR-015 publishes the meta-schema for shapes, so a new shape goes through review before manifests can declare it.
-- **Deprecation cycle**: `OASEngine` alias preserved through Phase H; removed at Phase I cutover. CLAUDE.md tracks deprecation status.
+- **Deprecation cycle**: `OASEngine` alias preserved through Phase H; removed at Phase I cutover. CHANGELOG.md records the cutover; README's "Current state" tracks the active engine name.
 
 ## Alternatives considered
 
@@ -223,7 +223,7 @@ Rejected for the same reasons ADR-003 chose YAML for v2: comments matter for leg
 ## References
 
 - v3 charter: [docs/IDEA-GovOps-v3.0-ProgramAsPrimitive.md](../../IDEA-GovOps-v3.0-ProgramAsPrimitive.md)
-- v3 PLAN: [PLAN-v3.md](../../../PLAN-v3.md) §"Phase A — Manifest substrate"
+- v3 execution: CHANGELOG.md `[3.0.0]` -- Phase A (Manifest substrate)
 - ADR-003 (YAML over JSON for artefacts)
 - ADR-006 (Per-parameter granularity in substrate)
 - ADR-010 (SQLite from Phase 6)

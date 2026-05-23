@@ -1,9 +1,10 @@
 import { useIntl } from "react-intl";
 
 /**
- * Marker shown on prompt-type drafts in the approvals list. Per PLAN.md
- * Gate 4, prompt approvals will eventually require two approvers; this is a
- * UI-only placeholder until the Phase 4 backend mechanism lands.
+ * Marker shown on prompt-type drafts in the approvals list. Per ADR-008
+ * (prompt-as-config dual approval), prompt approvals will eventually
+ * require two approvers; this is a UI-only placeholder until the
+ * Phase 4 backend mechanism lands.
  */
 export function DualApprovalBadge() {
   const intl = useIntl();

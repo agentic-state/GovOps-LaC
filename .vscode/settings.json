@@ -27,7 +27,7 @@
     // Wire in Phase 5: "schema/lawcode-v1.0.json": "lawcode/**/*.yaml"
   },
 
-  // Markdown — wrap PLAN.md and ADRs cleanly
+  // Markdown — wrap README + ADRs + runbooks cleanly
   "[markdown]": {
     "editor.wordWrap": "on",
     "editor.quickSuggestions": { "comments": "off", "strings": "off", "other": "off" }
@@ -45,8 +45,7 @@
     "encoder.py": "test_encoder.py",
     "models.py": "test_models.py",
     "pyproject.toml": "uv.lock, requirements*.txt",
-    "PLAN.md": "CLAUDE.md, CONTRIBUTING.md",
-    "README.md": "LICENSE, .gitignore, .gitattributes, .gitleaks.toml"
+    "README.md": "LICENSE, .gitignore, .gitattributes, .gitleaks.toml, CONTRIBUTING.md, CHANGELOG.md"
   },
 
   // Hide noisy paths from explorer

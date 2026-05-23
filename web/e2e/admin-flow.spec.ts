@@ -1,5 +1,7 @@
 /**
- * Phase 6 admin flow — the literal PLAN.md exit-line scenario, driven
+ * Phase 6 admin flow -- the canonical draft + approve + date-boundary
+ * scenario covered by ADR-008 (prompt-as-config dual approval) and
+ * ADR-013 (event-driven reassessment with supersession chain), driven
  * through the live UI:
  *
  *   1. Confirm the demo-seeded draft is visible on /config/approvals

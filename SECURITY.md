@@ -50,4 +50,4 @@ The `main` branch CI matrix runs:
 
 The federation pipeline (Phase 8, [ADR-009](docs/design/ADRs/ADR-009-federation-trust-model.md)) ships fail-closed: unsigned packs are rejected by default; trust decisions are YAML PRs reviewed by humans, not API calls.
 
-There is **no AuthN / AuthZ** in v2.0 — the demo runs anonymous everywhere. Production hardening (auth, multi-tenancy, rate limiting, observability) is parked in PLAN.md §11 as a separate track.
+There is **no AuthN / AuthZ** in v2.0 — the demo runs anonymous everywhere. Production hardening (auth, multi-tenancy, rate limiting, observability) is deliberately out of scope for the public demo and tracked as a separate future track.

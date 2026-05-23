@@ -16,7 +16,7 @@ If the goal is just running an existing jurisdiction in a federated/external rep
 |---|---|---|
 | Source statutes available | (manual) gather links to authoritative legal text | Every rule needs a citation; without statute access, you can't author rules honestly |
 | Backend tests pass on `main` | `pytest -q` | Establishes the baseline before any change |
-| The PLAN allows new jurisdictions in this phase | grep current PLAN file in `eva-foundation/plans/` for "freeze" or "v3 architectural control" | Some phases freeze new jurisdictions to limit migration cost |
+| The current release phase accepts new jurisdictions | confirm with the maintainer or check the README's "Current state" / CHANGELOG for a freeze marker | Some phases freeze new jurisdictions during structural work to limit migration cost (e.g. the v2.0 YAML externalization phase) |
 | Locale for translations | check `src/govops/i18n.py` for the language code; if new, plan to add it | All UI strings must localize |
 
 ## Steps
@@ -197,7 +197,7 @@ The loader will skip the missing directory on next startup; no Python edit neede
 
 - **Citations that aren't statutes.** A citation like "Wikipedia article on Polish pensions" is editorial, not authoritative. The engine treats every citation as a statutory reference an auditor can chase. Government website URLs are OK as supplementary `howto_url` references on the jurisdiction's metadata, but the rule's `citation` field must be the statute itself.
 
-- **Forgetting to bump the test counts in CLAUDE.md or PLAN files.** When new jurisdiction tests land, the canonical test counts in CLAUDE.md ("789 backend tests" as of v3.1) drift. Update them in the same PR.
+- **Forgetting to bump test-count claims in the README + CHANGELOG.** When new jurisdiction tests land, any "N backend tests" claim in the README's "Current state" section or in the in-flight CHANGELOG entry drifts. Update in the same PR.
 
 - **i18n debt.** The translation validator (`check-i18n-translation.mjs`) catches strings that look untranslated (e.g. "Welcome" appearing in `pl.json`). If you can't translate everything, add the key to `web/scripts/i18n-translation-allowlist.json` with a comment explaining why (proper noun, brand token, etc.).
 

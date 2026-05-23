@@ -1,6 +1,6 @@
 """Phase 4 — prompts as ConfigValues.
 
-Per [PLAN.md §Phase 4](../PLAN.md): every encoder prompt resolves through
+Per the project plan, Phase 4: every encoder prompt resolves through
 the substrate (loaded from ``lawcode/global/prompts.yaml``); every batch
 records the ConfigValue keys it used so the audit trail can pin
 reproducibility.

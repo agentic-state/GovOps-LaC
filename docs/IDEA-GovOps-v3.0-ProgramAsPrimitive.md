@@ -4,7 +4,7 @@
 **Predecessor**: v2.0 (Law-as-Code), shipped as v0.4.0 on `main`.
 **One-sentence pitch**: *Add one program once. Six jurisdictions answer. Anyone can fork the shape library and run their own.*
 
-> This document is the strategic vision for v3. It does not constrain implementation. PLAN-v3.md will track v3 execution once it begins.
+> This document is the strategic vision for v3. It does not constrain implementation. v3 execution is tracked in the per-release CHANGELOG entries (v3.0.0 / v3.1.0 / v3.2.0) and in the ADRs landed under each phase.
 
 ---
 

@@ -78,7 +78,7 @@ curl -s "$BASE/assets/$HASH" | grep -oE '/api/[a-zA-Z0-9_/-]+' | sort -u | head 
 # scan the list for endpoints that don't exist in src/govops/api.py
 ```
 
-If anti-pattern 1 hits: this is almost certainly the same regression as 2026-05-02. The fix is to ensure `VITE_API_BASE_URL=""` is set on the build step in the Dockerfile (or wherever the build runs). See [`feedback_build_pattern_pivot_audit`](../../../eva-foundation/.claude-memory/feedback_build_pattern_pivot_audit.md).
+If anti-pattern 1 hits: this is almost certainly the same regression as 2026-05-02. Vite inlines `import.meta.env.VITE_API_BASE_URL` at build time; if it's unset, `api.ts`'s dev-fallback (`http://127.0.0.1:8000`) gets baked into every visitor's bundle. The fix is to ensure `VITE_API_BASE_URL=""` is set on the build step in the Dockerfile (or wherever the build runs). The build-time gate at [`web/scripts/check-bundle-no-localhost.mjs`](../../web/scripts/check-bundle-no-localhost.mjs) now catches this regression class — keep it green.
 
 ### Step 3 — If the failure is from a Playwright test, read the trace
 

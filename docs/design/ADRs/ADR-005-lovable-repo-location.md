@@ -3,7 +3,7 @@
 **Status**: Superseded — 2026-04-29. The Lovable authoring channel was retired at v2.0 launch. The `web/` artefact is now maintained directly in this repo. The decision below is preserved for historical context.
 **Date**: 2026-04-25
 **Gate**: 5 (locked at end of Phase 0; PLAN-introduced)
-**Context**: Phase 6 of [PLAN.md](../../../PLAN.md) replaces the Jinja UI with a Lovable application. We need to decide whether the Lovable code lives in this repo or a sibling repo.
+**Context**: Phase 6 of the project plan replaces the Jinja UI with a Lovable application. We need to decide whether the Lovable code lives in this repo or a sibling repo.
 
 ---
 

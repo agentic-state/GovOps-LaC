@@ -1,8 +1,7 @@
 # Pre-commit hooks for GovOps-LaC (P61)
 #
-# Per portfolio repo-hygiene Tier 1 (eva-foundation memory entry
-# reference_portfolio_repo_hygiene_tier1_2026-05-17). Pre-commit stays FAST
-# (target: under 5 seconds total). Tests run in CI, not here.
+# Part of the repo-hygiene baseline. Pre-commit stays FAST (target: under
+# 5 seconds total). Tests run in CI, not here.
 
 default_install_hook_types: [pre-commit, commit-msg]
 fail_fast: false

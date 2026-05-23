@@ -110,4 +110,4 @@ This artifact is now the canonical source for:
 3. the pilot jurisdiction boundary, and
 4. the initial evidence scope for architecture work.
 
-`PLAN.md`, `STATUS.md`, `ACCEPTANCE.md`, `README.md`, and `.github/copilot-instructions.md` should align to this baseline.
+All execution + status + acceptance + onboarding artefacts (at the time, `PLAN.md`, `STATUS.md`, `ACCEPTANCE.md`, `README.md`, `.github/copilot-instructions.md`) should align to this baseline. Note: this is a heritage document; the current canonical surfaces are `README.md`, [`CHANGELOG.md`](../../../CHANGELOG.md), [`docs/runbooks/INDEX.md`](../../runbooks/INDEX.md), and the [ADR set](../ADRs/).

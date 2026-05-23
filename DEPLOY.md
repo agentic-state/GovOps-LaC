@@ -2,7 +2,7 @@
 
 End-to-end recipe for the public live demo. Target platform: **Hugging Face Spaces**, free tier, single Docker container, $0/month.
 
-> The demo is intentionally MVP-grade — see PLAN.md §11 (out-of-scope items) for what's deliberately *not* in v2.1. Production hardening (managed PG, AuthN, multi-tenancy, observability) is a separate track.
+> The demo is intentionally MVP-grade. Production hardening (managed PG, AuthN, multi-tenancy, observability) is deliberately out of scope for the v2.1 hosted demo and tracked as a separate future track. See [`SECURITY.md`](SECURITY.md) for the explicit no-auth posture and [`docs/runbooks/release-readiness.md`](docs/runbooks/release-readiness.md) for the gate set the demo actually composes.
 
 ## Prerequisites (~15 min one-time setup)
 

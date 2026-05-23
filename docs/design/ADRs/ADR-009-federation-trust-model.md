@@ -114,7 +114,7 @@ Fetching never happens automatically at process start. The substrate hydrates fr
 
 ## Cross-references
 
-- [PLAN.md](../../../PLAN.md) §Phase 8 — entry/exit
+- the project plan §Phase 8 — entry/exit
 - [ADR-003](ADR-003-yaml-over-json.md) — YAML on disk, applies to federated packs identically
 - [ADR-006](ADR-006-per-parameter-granularity.md) — per-parameter granularity, federated records same shape as local
 - [ADR-010](ADR-010-sqlite-from-phase-6.md) — SQLite hydration; federation extends the lawcode root that the hydrator scans

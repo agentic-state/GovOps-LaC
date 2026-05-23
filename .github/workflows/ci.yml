@@ -49,13 +49,12 @@ jobs:
         run: pytest -v
 
   e2e:
-    # Tier 1 CI cost optimization (2026-05-18): cross-browser E2E is the
-    # worst per-PR offender (~22 min/run). Move it to post-merge (push to
-    # main) only. Per-PR keeps the fast 3.10/3.11/3.12 unit-test matrix
-    # plus all the must-pass gates above (schema + OpenAPI drift + strict
-    # mode). E2E regressions are still caught on every merge to main and
-    # block deploy via the same artifact path. See:
-    # eva-foundation/memory/reference_ci_cost_optimization_tier1_2026-05-18.
+    # CI cost optimization (2026-05-18): cross-browser E2E is the worst
+    # per-PR offender (~22 min/run). Move it to post-merge (push to main)
+    # only. Per-PR keeps the fast 3.10/3.11/3.12 unit-test matrix plus all
+    # the must-pass gates above (schema + OpenAPI drift + strict mode).
+    # E2E regressions are still caught on every merge to main and block
+    # deploy via the same artifact path.
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     needs: test
     runs-on: ubuntu-latest

@@ -204,9 +204,9 @@ Wire it in the dispatch table in `engine.py`. Add tests in `tests/test_engine.py
 
 Same as Path A (steps A1-A6), but using the new shape and any new rule types.
 
-#### B6 — Update CLAUDE.md
+#### B6 — Update the README's "Current state" + CHANGELOG entry
 
-The "Rule Types" table in CLAUDE.md is canonical — extend it. The "Project state" sections should mention the new shape as available.
+The README's "Current state" section is what readers consult to see what shapes ship today; mention the new shape there. The canonical rule-type catalog lives in code at `src/govops/models.py` (`RuleType` enum) and the dispatch in `src/govops/engine.py` — if a new rule type was added, the code itself is the catalog. Add a CHANGELOG entry under the in-flight release noting the new shape and any new rule types.
 
 #### B7 — Land
 

@@ -29,7 +29,7 @@ GovOps turns authoritative governance sources into coherent, traceable, executab
 
 This is an open public-good contribution: a working MVP demo other contributors can fork to build whatever else they need.
 
-**Status — v3.1 shipped.** The architectural shift: **lawcode-as-discovery** — `JURISDICTION_REGISTRY` is built at startup by walking `lawcode/` (ADR-020). Adding a jurisdiction no longer requires a Python edit. The L7 authoring substrate (ADR-022) ships a draft / approve / commit HTTP API at `/api/authoring/*` for in-app authoring of jurisdictions and program manifests; see [`docs/adoption/HOW-TO-ADD-A-JURISDICTION.md`](docs/adoption/HOW-TO-ADD-A-JURISDICTION.md) for both supported paths (CLI + file edit, and substrate API). Five playthrough bugs from 2026-05-10 are closed: jurisdiction picker on `/authority`, inline rationale validation on `/cases`, 409-Conflict idempotency on `/encode` commits, two dead `/about` links repaired, and `/impact` now groups by country (ADR-021) instead of program-scoped jurisdiction id. The L8-L12 in-app UI wizards (Onboard, authority chain editor, legal docs editor, demo cases editor, program creator) are v3.1.x backlog — they will drive the L7 substrate under the hood. See [`CHANGELOG.md`](CHANGELOG.md) for the full v3.1 ledger.
+**Status — v3.2 shipped.** The architectural shift: **lawcode-as-discovery** — `JURISDICTION_REGISTRY` is built at startup by walking `lawcode/` (ADR-020). Adding a jurisdiction no longer requires a Python edit. The L7 authoring substrate (ADR-022) ships a draft / approve / commit HTTP API at `/api/authoring/*` for in-app authoring of jurisdictions and program manifests; see [`docs/adoption/HOW-TO-ADD-A-JURISDICTION.md`](docs/adoption/HOW-TO-ADD-A-JURISDICTION.md) for both supported paths (CLI + file edit, and substrate API). Five playthrough bugs from 2026-05-10 are closed: jurisdiction picker on `/authority`, inline rationale validation on `/cases`, 409-Conflict idempotency on `/encode` commits, two dead `/about` links repaired, and `/impact` now groups by country (ADR-021) instead of program-scoped jurisdiction id. The L8-L12 in-app UI wizards (Onboard, authority chain editor, legal docs editor, demo cases editor, program creator) are v3.1.x backlog — they will drive the L7 substrate under the hood. See [`CHANGELOG.md`](CHANGELOG.md) for the full v3.1 ledger.
 
 **Project home**: [agentic-state.github.io/GovOps-LaC](https://agentic-state.github.io/GovOps-LaC/) · **Source**: [github.com/agentic-state/GovOps-LaC](https://github.com/agentic-state/GovOps-LaC) · **Live demo**: [agentic-state-govops-lac.hf.space](https://agentic-state-govops-lac.hf.space) — _free-tier; first load may take ~30s if idle_
 
@@ -48,9 +48,10 @@ This is an open public-good contribution: a working MVP demo other contributors 
 | **Citizen** | Self-screen for a benefit without creating a case (no PII stored, no audit row) | [`/screen` walkthrough](https://agentic-state.github.io/GovOps-LaC/) |
 | **Auditor** | Every recommendation traces `Decision → Rule → Policy → Regulation → Act → Jurisdiction` with the exact substrate values in effect on the evaluation date | [`/api/cases/{id}/audit`](#api) |
 | **Government / contributor** | Fork the repo, drop in your jurisdiction's YAML, run. 7 reference jurisdictions × 6 locales already shipped. | [`CONTRIBUTING.md`](CONTRIBUTING.md) |
+| **Compliance / audit officer** | Authority-aware decision support, evidence-first operation, human-in-the-loop review, full traceability, explicit uncertainty handling — the compliance posture spelled out | [`docs/design/COMPLIANCE.md`](docs/design/COMPLIANCE.md) |
 | **Researcher / SPRIND-curious** | A working reference implementation against the SPRIND "Law as Code" framework's 5 elements, plus a 6th GovOps adds (versioned interpretive apparatus) | [`docs/design/LAW-AS-CODE.md`](docs/design/LAW-AS-CODE.md) |
 
-This README describes what is currently implemented. For load-bearing decisions: [`docs/design/ADRs/`](docs/design/ADRs/). For per-release notes: [`CHANGELOG.md`](CHANGELOG.md). For build history: git log + tags. The roadmap (operational plans for v2 / v3 / v4) lives in the workspace memory, not in this repo, per the maintainer's visibility rule.
+This README describes what is currently implemented. For load-bearing decisions: [`docs/design/ADRs/`](docs/design/ADRs/). For per-release notes: [`CHANGELOG.md`](CHANGELOG.md). For build history: git log + tags. Per-release operational plans are maintained out-of-tree by the maintainer per the project's visibility rule.
 
 ---
 
@@ -76,7 +77,7 @@ govops-demo                            # http://127.0.0.1:8000
 cd web && npm install && npm run dev   # http://localhost:8080
 ```
 
-Open **http://localhost:8080** for the modern experience (23 routes, 6 locales, parchment-on-ink theme). The Jinja UI at `:8000` is retained for "no Node toolchain" demos and is clearly labelled as such.
+Open **http://localhost:8080** for the modern experience (~30 routes across 14 top-level URL families, 6 locales, parchment-on-ink theme). The Jinja UI at `:8000` is retained for "no Node toolchain" demos and is clearly labelled as such.
 
 If you'd rather skip the toolchain entirely: `docker compose up` brings the same two-process demo up on any Docker host. See [Add your country in 5 minutes](#add-your-country-in-5-minutes-v3--adoption-substrate) below.
 
@@ -254,14 +255,14 @@ YAML lives under [lawcode/](lawcode/), validated against [schema/lawcode-v1.0.js
 **Backend** (`src/govops/`):
 - **Python + FastAPI** with **Pydantic** models for the full domain (jurisdiction, authority chain, rules, cases, evidence, audit, ConfigValue)
 - **Embedded SQLite** at `var/govops.db` for `ConfigStore` persistence (Phase 6+ per [ADR-010](docs/design/ADRs/ADR-010-sqlite-from-phase-6.md)); legacy in-memory store retained for the case fixtures
-- **Schema-validated YAML** for every business value under [lawcode/](lawcode/) — 21 files, 564 records, validated in CI
+- **Schema-validated YAML** for every business value under [lawcode/](lawcode/) — 42 files, 612 records, validated in CI
 - **Ed25519** for federation (Phase 8) — signed lawcode packs with publisher allowlist per [ADR-009](docs/design/ADRs/)
 - **Jinja2** templates retained as a fallback rendering surface; the primary UI is the `web/` SPA below
 
 **Frontend** (`web/`):
 - **TanStack Start** (SSR + flat-route conventions) on **Vite** + **React 19** + **TypeScript**
 - **Tailwind v4** + **shadcn/ui** for design-system primitives
-- **react-intl** with ICU MessageFormat for 6 locales × ~498 keys; ICU + key-parity validators run as `prebuild`
+- **react-intl** with ICU MessageFormat for 6 locales × ~1350 keys; ICU + key-parity validators run as `prebuild`
 - **CodeMirror** + **react-diff-viewer-continued** for the ConfigValue admin surface; **react-hook-form** + **zod** for forms
 - **Playwright + axe** cross-browser E2E suite covering smoke, admin flow, approval actions, a11y (WCAG 2.1 AA), i18n, and SSR head coverage
 

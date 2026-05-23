@@ -1,6 +1,6 @@
 """Phase 6 exit-line E2E test.
 
-Per [PLAN.md §Phase 6](../PLAN.md):
+Per the project plan, Phase 6:
 
     > a maintainer can change `ca-oas.rule.age-65.min_age` from 65 to 67
     > effective 2027-01-01 entirely through the UI, and a case evaluated

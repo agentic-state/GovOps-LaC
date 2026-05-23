@@ -9,7 +9,7 @@
 
 ADR-007 locked pure in-memory storage for Phases 1–10, deferring all persistence to a separate "storage track" after Phase 10. That call was right for Phases 1–5: the substrate's job was to be a clean dated-key/value contract, and a Python dict + ULIDs + reseeding-from-YAML-on-startup was the simplest possible thing that demonstrated the contract worked. With 324 ConfigValues and a write-rate of zero, the dict was indistinguishable from a database except in cost.
 
-Phase 6 changes the calculus. The phase exit line, verbatim from [PLAN.md §Phase 6](../../../PLAN.md):
+Phase 6 changes the calculus. The phase exit line, verbatim from the project plan, Phase 6:
 
 > a maintainer can change `ca-oas.rule.age-65.min_age` from 65 to 67 effective 2027-01-01 entirely through the UI, and a case evaluated on 2027-01-02 picks up the new value
 
@@ -54,7 +54,7 @@ Operating contract:
 
 ### Mitigations
 
-- The hedge in [PLAN.md §11](../../../PLAN.md) — *"Persistence layer (SQLite / PostgreSQL) — separate track after Phase 10"* — referred to **production operational databases**: managed PostgreSQL with HA, backup, monitoring, ops on-call. **SQLite as embedded storage — a file beside the code, not infrastructure** — is a different category. PLAN.md will be updated alongside this ADR's first commit to make the distinction explicit.
+- The prior "Persistence layer (SQLite / PostgreSQL) — separate track after Phase 10" hedge referred to **production operational databases**: managed PostgreSQL with HA, backup, monitoring, ops on-call. **SQLite as embedded storage — a file beside the code, not infrastructure** — is a different category. This ADR makes the distinction explicit.
 - Test migration is mechanical, not architectural — the public interface holds, so most call sites don't change.
 - The hydrator is ~50 lines, idempotent, and safe to re-run on every startup. No migration framework needed at this scale.
 - `var/govops.db` is local-machine state. CI runs from a fresh DB seeded by the YAML hydrator each run. No machine-to-machine state coupling.

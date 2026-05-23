@@ -19,6 +19,7 @@
 | Running an LLM-assisted encoding batch | [`encoder-batch.md`](encoder-batch.md) |
 | Publishing or consuming a federated lawcode pack | [`federation-publish.md`](federation-publish.md) |
 | Validating any deploy with the journey bench | [`../test-bench/RUNBOOK.md`](../test-bench/RUNBOOK.md) |
+| Briefing a compliance / audit officer on GovOps's governance posture | [`../design/COMPLIANCE.md`](../design/COMPLIANCE.md) (doc, not a runbook) |
 
 ## Coverage map (the "100% tested" gates)
 
@@ -38,8 +39,7 @@ The release-readiness runbook composes these. Each is its own gate.
 
 - When you find yourself doing something twice and it has gotchas — add a runbook.
 - Update **Last validated** every time you actually run the runbook end-to-end.
-- Common gotchas should reference workspace memory entries in `eva-foundation/.claude-memory/` so the *why* doesn't rot.
-- Runbooks are P61-specific for now. If a pattern proves portable, promote it to `eva-foundation/docs/runbooks/` so other projects can copy it.
+- Common gotchas should carry the *why* inline (with dates of past incidents where useful) so the rationale travels with the runbook instead of relying on out-of-tree references.
 
 ## Active backlog
 

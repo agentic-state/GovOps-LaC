@@ -133,7 +133,7 @@ directory tree under version control, with a defined federation protocol
 | Cross-jurisdictional values (engine thresholds, UI labels, prompts) | [`lawcode/global/`](../../lawcode/global/) |
 | Schema enforcement | [`schema/`](../../schema/) (referenced from §1) |
 | CI gate that fails the build on malformed YAML | `validate_lawcode` job in [`.github/workflows/ci.yml`](../../.github/workflows/ci.yml) |
-| Federation protocol *(Phase 8)* | `lawcode/REGISTRY.yaml` schema + `govops fetch` CLI — signed manifests, checksum pinning ([PLAN.md §4 Phase 8](../../PLAN.md)) |
+| Federation protocol *(Phase 8)* | `lawcode/REGISTRY.yaml` schema + `govops fetch` CLI — signed manifests, checksum pinning ([ADR-009](ADRs/ADR-009-federation-trust-model.md)) |
 | OpenAPI contract surface | [`docs/api/openapi-v0.2.0.json`](../api/openapi-v0.2.0.json) (frozen Phase 0), [`openapi-v0.3.0-draft.json`](../api/openapi-v0.3.0-draft.json) (Phase 1+) |
 
 Storage from Phase 6 onward is embedded SQLite hydrated from YAML on
@@ -145,7 +145,7 @@ the reference implementation is meant to be forkable, not operationally
 opinionated.
 
 The repository is **the** repository for this implementation; federation
-([PLAN.md §4 Phase 8](../../PLAN.md)) is how a second jurisdiction's
+([ADR-009](ADRs/ADR-009-federation-trust-model.md)) is how a second jurisdiction's
 maintainers would publish their own legal code while pinning a verifiable
 manifest. Reject-unsigned-by-default is the design posture.
 
@@ -251,7 +251,7 @@ These boundaries are baked into every element above:
 
 ## Where to look next
 
-- The execution plan: [PLAN.md](../../PLAN.md)
-- The strategic argument: [docs/IDEA-GovOps-v2.0-LawAsCode.md](../IDEA-GovOps-v2.0-LawAsCode.md)
+- The compliance posture: [COMPLIANCE.md](COMPLIANCE.md) -- authority-aware decision support, evidence-first operation, human-in-the-loop review, full traceability
+- The strategic argument (heritage): [docs/design/heritage/IDEA-GovOps-v2.0-LawAsCode.md](heritage/IDEA-GovOps-v2.0-LawAsCode.md)
 - Architecture & ADRs: [docs/design/ADRs/](ADRs/)
 - The repo's framing for newcomers: [README.md](../../README.md)

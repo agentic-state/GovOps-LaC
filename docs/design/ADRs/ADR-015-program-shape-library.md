@@ -148,7 +148,7 @@ Like the IANA registry. Rejected — adds friction without payoff for an open-so
 ## References
 
 - v3 charter: [docs/IDEA-GovOps-v3.0-ProgramAsPrimitive.md](../../IDEA-GovOps-v3.0-ProgramAsPrimitive.md) §"The bet: Program-as-Primitive" + §"Adoption substrate"
-- v3 PLAN: [PLAN-v3.md](../../../PLAN-v3.md) §"Phase A" + §"Phase C"
+- v3 execution: CHANGELOG.md `[3.0.0]` -- Phase A + Phase C
 - ADR-014 — Program-as-Primitive (manifest model) — companion to this ADR
 - ADR-017 (pending) — New rule primitives for `unemployment_insurance` shape
 - v2 schema convention: `schema/configvalue-v1.0.json`, `schema/lawcode-v1.0.json`

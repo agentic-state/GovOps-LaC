@@ -78,9 +78,9 @@ The "future ADR + refactor" alluded to above landed without needing a new ADR �
 
 The original concern was that closing this would require a `ConfigContext` abstraction the engine carried alongside `evaluation_date`. In practice the substrate's `resolve_param(key, evaluation_date=...)` was already date-aware (added during 10B's formula-`ref` work), so closing the scalar seam was just plumbing — every read site already had access to the case's evaluation_date via `self.evaluation_date`. No new architectural decision.
 
-**What this means for PLAN.md §8 #4**:
+**What this means for the temporal-reproducibility success criterion**:
 
-Success criterion #4 ("statute changes are temporal, not destructive; historical evaluations reproducible") was already marked closed against the formula-`ref` half. With the scalar seam now closed, the claim is fully truthful — every parameter the engine reads honours the case's `evaluation_date`. The same reassessment of the same case dated 2025-06-01 will produce the same answer in 2030 as it did in 2026, regardless of how many supersessions intervene.
+The phase exit criterion ("statute changes are temporal, not destructive; historical evaluations reproducible") was already marked closed against the formula-`ref` half. With the scalar seam now closed, the claim is fully truthful — every parameter the engine reads honours the case's `evaluation_date`. The same reassessment of the same case dated 2025-06-01 will produce the same answer in 2030 as it did in 2026, regardless of how many supersessions intervene.
 
 **What's still deferred to Phase 11**:
 
@@ -105,7 +105,7 @@ The substrate's `resolve_value` only honours `effective_from`/`effective_to` win
 
 ## Cross-references
 
-- [PLAN.md](../../../PLAN.md) §Phase 10D — entry/exit
+- the project plan §Phase 10D — entry/exit
 - [ADR-006](ADR-006-per-parameter-granularity.md) — config supersession (the analogue to recommendation supersession)
 - [ADR-011](ADR-011-calculation-rules-as-typed-ast.md) — the formula's `ref` resolution is the seam for future config-time-travel
 - [ADR-012](ADR-012-notice-rendering.md) — re-rendering a notice for a superseded recommendation produces the same supersession chain in its trace

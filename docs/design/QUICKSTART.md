@@ -47,10 +47,9 @@ tests/
   test_api.py          # API and multi-jurisdiction tests
 docs/
   COMPLIANCE.md        # Governance and compliance alignment
-  IDEA-GovOps-v1.0-MVP.md    # MVP specification
-  IDEA-GovOps-v1.0-CDD.md    # Conceptual design document
-  ADRs/                # Architecture decision records
-  architecture/        # Architecture baselines
+  LAW-AS-CODE.md       # SPRIND mapping with code references
+  ADRs/                # Architecture decision records (current)
+  heritage/            # Pre-current-track design docs (v1.0 CDD/MVP, v2.0 charter, etc.)
 ```
 
 ## Core Model

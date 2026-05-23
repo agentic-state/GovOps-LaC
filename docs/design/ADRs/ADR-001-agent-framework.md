@@ -4,7 +4,7 @@
 **Date**: 2026-03-13  
 **Participants**: Project Lead, AI Architecture Advisor
 
-> **2026-04-25 superseding note**: This ADR was authored before the v1.0 working demo was built. The actual implementation does not depend on Microsoft Agent Framework or any agent-orchestration library. `pyproject.toml` shows the runtime stack: FastAPI + Pydantic + Jinja2 only. The encoder pipeline (`src/govops/encoder.py`) handles AI-assisted rule extraction with a pluggable backend, not a multi-agent framework. This ADR is preserved as historical context; the v2.0 Law-as-Code track ([PLAN.md](../../../PLAN.md)) does not introduce an agent framework either.
+> **2026-04-25 superseding note**: This ADR was authored before the v1.0 working demo was built. The actual implementation does not depend on Microsoft Agent Framework or any agent-orchestration library. `pyproject.toml` shows the runtime stack: FastAPI + Pydantic + Jinja2 only. The encoder pipeline (`src/govops/encoder.py`) handles AI-assisted rule extraction with a pluggable backend, not a multi-agent framework. This ADR is preserved as historical context; the v2.0 Law-as-Code track (the project plan) does not introduce an agent framework either.
 
 ---
 

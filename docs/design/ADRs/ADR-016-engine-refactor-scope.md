@@ -149,7 +149,7 @@ The three Recommendations must agree on `outcome`, `pension_type`, `partial_rati
 
 - **Byte-identical regression test as Phase B exit gate**: the three-constructor test above runs against every demo case in `seed.py` (4 cases) — full coverage of the eligible-full / ineligible / partial / insufficient-evidence decision paths.
 - **Deprecation warning is loud but non-fatal**: callers see it on the first construction; CI doesn't break.
-- **CLAUDE.md gets a "engine name change" note**: future contributors orienting from CLAUDE.md don't search for `OASEngine` and find only the deprecated alias.
+- **README's "Current state" section gets an "engine name change" note**: future contributors orienting from the README don't search for `OASEngine` and find only the deprecated alias.
 
 ## Alternatives considered
 
@@ -172,7 +172,7 @@ Forces the OAS shape's outcome detail under `program_outcome_detail.pension_type
 ## References
 
 - v3 charter: [docs/IDEA-GovOps-v3.0-ProgramAsPrimitive.md](../../IDEA-GovOps-v3.0-ProgramAsPrimitive.md)
-- v3 PLAN: [PLAN-v3.md](../../../PLAN-v3.md) §"Phase B — Engine generalization"
+- v3 execution: CHANGELOG.md `[3.0.0]` -- Phase B (Engine generalization)
 - ADR-014 — Program-as-Primitive (manifest model)
 - ADR-015 — Canonical Program Shape Library
 - ADR-013 — Event-driven reassessment (the scalar-seam addendum that closed `_param()`'s `evaluation_date` gap; the shape evaluator inherits this property by reading params through the engine's bound `_param` method)
