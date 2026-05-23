@@ -30,7 +30,7 @@ GovOps deals with legislation, policy, and decision-making about real public-sec
 
 - **Keep discussions evidence-based.** When debating rule encodings, cite the statute or regulation. When debating design choices, cite the relevant ADR.
 - **Domain disagreement is welcome; ad hominem is not.** A contributor saying "this rule type doesn't fit how my country's social-security law works" is doing the project a service. Saying "you don't understand law" is not.
-- **Respect translators.** The native-speaker review process (PLAN.md §12.1) exists because the maintainer is not a native speaker of all 6 supported locales. Reviewers correcting a phrasing are doing skilled work — credit them in commits.
+- **Respect translators.** The native-speaker review process (open a `[i18n] Native review` issue via the issue templates) exists because the maintainer is not a native speaker of all 6 supported locales. Reviewers correcting a phrasing are doing skilled work — credit them in commits.
 - **No partisan framing.** GovOps implements eligibility rules from real statutes; it doesn't take positions on whether those statutes are good policy. Keep PRs and issues to the engineering question; advocacy belongs elsewhere.
 
 ## Enforcement Responsibilities

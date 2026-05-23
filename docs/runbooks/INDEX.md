@@ -19,6 +19,7 @@
 | Running an LLM-assisted encoding batch | [`encoder-batch.md`](encoder-batch.md) |
 | Publishing or consuming a federated lawcode pack | [`federation-publish.md`](federation-publish.md) |
 | Validating any deploy with the journey bench | [`../test-bench/RUNBOOK.md`](../test-bench/RUNBOOK.md) |
+| Briefing a compliance / audit officer on GovOps's governance posture | [`../design/COMPLIANCE.md`](../design/COMPLIANCE.md) (doc, not a runbook) |
 
 ## Coverage map (the "100% tested" gates)
 

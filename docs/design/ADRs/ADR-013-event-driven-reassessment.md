@@ -78,9 +78,9 @@ The "future ADR + refactor" alluded to above landed without needing a new ADR �
 
 The original concern was that closing this would require a `ConfigContext` abstraction the engine carried alongside `evaluation_date`. In practice the substrate's `resolve_param(key, evaluation_date=...)` was already date-aware (added during 10B's formula-`ref` work), so closing the scalar seam was just plumbing — every read site already had access to the case's evaluation_date via `self.evaluation_date`. No new architectural decision.
 
-**What this means for PLAN.md §8 #4**:
+**What this means for the temporal-reproducibility success criterion**:
 
-Success criterion #4 ("statute changes are temporal, not destructive; historical evaluations reproducible") was already marked closed against the formula-`ref` half. With the scalar seam now closed, the claim is fully truthful — every parameter the engine reads honours the case's `evaluation_date`. The same reassessment of the same case dated 2025-06-01 will produce the same answer in 2030 as it did in 2026, regardless of how many supersessions intervene.
+The phase exit criterion ("statute changes are temporal, not destructive; historical evaluations reproducible") was already marked closed against the formula-`ref` half. With the scalar seam now closed, the claim is fully truthful — every parameter the engine reads honours the case's `evaluation_date`. The same reassessment of the same case dated 2025-06-01 will produce the same answer in 2030 as it did in 2026, regardless of how many supersessions intervene.
 
 **What's still deferred to Phase 11**:
 

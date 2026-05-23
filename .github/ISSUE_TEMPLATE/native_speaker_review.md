@@ -5,7 +5,7 @@ title: "[i18n] Native review — <locale>"
 labels: i18n, good first issue
 ---
 
-GovOps ships in 6 locales (en, fr, pt-BR, es-MX, de, uk). The current translations passed automated parity + ICU validation, but a few cells are flagged for native-speaker re-look — see [PLAN.md §12.4](https://github.com/agentic-state/GovOps-LaC/blob/main/PLAN.md#124--i18n-translation-round-2026-04-29-reviewer-follow-ups).
+GovOps ships in 6 locales (en, fr, pt-BR, es-MX, de, uk). The current translations passed automated parity + ICU validation, but a handful of cells are still flagged for native-speaker re-look. The list below captures the specific cells the maintainer wanted a second opinion on (originally tracked in the 2026-04-29 translation round).
 
 **Locale you're reviewing**: (e.g. `fr`, `de`, `pt-BR`, `es-MX`, `uk`)
 
@@ -13,12 +13,12 @@ GovOps ships in 6 locales (en, fr, pt-BR, es-MX, de, uk). The current translatio
 - I'm a native speaker of: 
 - Domain familiarity (public-sector / legal / general): 
 
-**Cells to confirm or nudge** (from PLAN §12.4)
-- [ ] `home.eyebrow` — should `spec` / `law-as-code` localise or stay verbatim?
-- [ ] `screen.benefit.op.*` — verbs vs nominalisations (currently mixed across locales)
-- [ ] `events.summary.add_evidence` / `events.summary.move_country` — pure-placeholder design; visible string is currently EN
-- [ ] `cases.detail.heading` (fr only) — `Dossier {id}` vs `Cas {id}`
-- [ ] `admin.federation.col.*` — loanwords vs local equivalents
+**Cells to confirm or nudge**
+- [ ] `home.eyebrow` -- should `spec` / `law-as-code` localise or stay verbatim?
+- [ ] `screen.benefit.op.*` -- verbs vs nominalisations (currently mixed across locales)
+- [ ] `events.summary.add_evidence` / `events.summary.move_country` -- pure-placeholder design; visible string is currently EN
+- [ ] `cases.detail.heading` (fr only) -- `Dossier {id}` vs `Cas {id}`
+- [ ] `admin.federation.col.*` -- loanwords vs local equivalents
 
 **Other cells you'd nudge**
 List any other strings you'd word differently. Source files: [`web/src/messages/<locale>.json`](https://github.com/agentic-state/GovOps-LaC/tree/main/web/src/messages).

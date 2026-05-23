@@ -36,7 +36,7 @@ After every round there will be substantive cells that look like copy-paste from
 
 - **Brand / proper-noun tokens** — `GovOps`, `SPRIND`, `Lovable`, `FastAPI`, `TanStack`, `Tailwind`, `shadcn`, the Agentic State, etc.
 - **Acronyms / standards** — `API`, `URL`, `JSON`, `YAML`, `OWASP`, `WCAG`, `ICU`, `MIT`, `Apache`.
-- **Filenames** — `PLAN.md`, `configvalue-v1.0.json`, `LAW-AS-CODE.md`.
+- **Filenames** — `README.md`, `configvalue-v1.0.json`, `LAW-AS-CODE.md`.
 - **ICU placeholders / number formats** — `{count}`, `{date, date, medium}`, `# ms`.
 - **Intentional loanwords** — e.g. `admin.federation.col.{actions,name,status,version}` — flagged in the round notes when accepted.
 - **Developer-only operator strings** — `home.eyebrow` reads `spec govops-002 · law-as-code` in every locale because it's a developer reference, not user-facing copy.

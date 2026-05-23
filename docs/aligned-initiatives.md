@@ -244,7 +244,7 @@ pays dividends across all other steps.
 ## Cross-references
 
 - The five-elements mapping to SPRIND: [docs/design/LAW-AS-CODE.md](design/LAW-AS-CODE.md)
-- The strategic argument: [docs/IDEA-GovOps-v2.0-LawAsCode.md](IDEA-GovOps-v2.0-LawAsCode.md)
+- The strategic argument (heritage): [docs/design/heritage/IDEA-GovOps-v2.0-LawAsCode.md](design/heritage/IDEA-GovOps-v2.0-LawAsCode.md)
 - The execution plan: the project plan
 - Architecture & decisions: [docs/design/ADRs/](design/ADRs/)
 - Live legal-code artefacts: [lawcode/](../lawcode/)

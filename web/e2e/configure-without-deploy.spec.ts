@@ -1,6 +1,7 @@
 /**
- * Configure-without-deploy E2E proof — PLAN.md §8 success criterion #9
- * driven through the citizen-facing surface, not the substrate API.
+ * Configure-without-deploy E2E proof -- per ADR-006 (per-parameter
+ * granularity) + ADR-013 (event-driven reassessment), driven through
+ * the citizen-facing surface, not the substrate API.
  *
  * The Phase 6 exit-line says: "a maintainer can change a coefficient
  * effective on a future date entirely through the UI, and a case

@@ -54,7 +54,7 @@ Operating contract:
 
 ### Mitigations
 
-- The hedge in the project plan section 11 — *"Persistence layer (SQLite / PostgreSQL) — separate track after Phase 10"* — referred to **production operational databases**: managed PostgreSQL with HA, backup, monitoring, ops on-call. **SQLite as embedded storage — a file beside the code, not infrastructure** — is a different category. PLAN.md will be updated alongside this ADR's first commit to make the distinction explicit.
+- The prior "Persistence layer (SQLite / PostgreSQL) — separate track after Phase 10" hedge referred to **production operational databases**: managed PostgreSQL with HA, backup, monitoring, ops on-call. **SQLite as embedded storage — a file beside the code, not infrastructure** — is a different category. This ADR makes the distinction explicit.
 - Test migration is mechanical, not architectural — the public interface holds, so most call sites don't change.
 - The hydrator is ~50 lines, idempotent, and safe to re-run on every startup. No migration framework needed at this scale.
 - `var/govops.db` is local-machine state. CI runs from a fresh DB seeded by the YAML hydrator each run. No machine-to-machine state coupling.

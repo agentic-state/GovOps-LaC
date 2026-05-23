@@ -319,9 +319,9 @@ def test_impact_response_shape(client):
 
 
 # ---------------------------------------------------------------------------
-# Pagination (PLAN.md §12 7.x.1) — backend honours `limit` / `page`
-# query params and returns `limit` / `page` / `page_count` in the body so the
-# Lovable UI's `ImpactPaginationBar` no longer falls back to `??` defaults.
+# Pagination -- backend honours `limit` / `page` query params and returns
+# `limit` / `page` / `page_count` in the body so the UI's pagination bar
+# no longer falls back to `??` defaults.
 # ---------------------------------------------------------------------------
 
 

@@ -172,7 +172,7 @@ Forces the OAS shape's outcome detail under `program_outcome_detail.pension_type
 ## References
 
 - v3 charter: [docs/IDEA-GovOps-v3.0-ProgramAsPrimitive.md](../../IDEA-GovOps-v3.0-ProgramAsPrimitive.md)
-- v3 PLAN: PLAN-v3.md §"Phase B — Engine generalization"
+- v3 execution: CHANGELOG.md `[3.0.0]` -- Phase B (Engine generalization)
 - ADR-014 — Program-as-Primitive (manifest model)
 - ADR-015 — Canonical Program Shape Library
 - ADR-013 — Event-driven reassessment (the scalar-seam addendum that closed `_param()`'s `evaluation_date` gap; the shape evaluator inherits this property by reading params through the engine's bound `_param` method)

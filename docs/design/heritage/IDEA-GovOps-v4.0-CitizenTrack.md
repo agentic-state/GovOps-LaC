@@ -4,7 +4,7 @@
 **Predecessor**: v3.1.x editor set on `main`; v3.2 (substrate hardening) chartered in parallel.
 **One-sentence pitch**: *A citizen tells GovOps a life-event happened; GovOps tells the citizen which programs they now qualify for, which they're about to lose, and -- if they crossed a border -- what the treaty says.*
 
-> This document is the strategic vision for v4. It does not constrain implementation. PLAN-v4.md will track v4 execution once it begins.
+> This document is the strategic vision for v4. It does not constrain implementation. If v4 ships, execution will be tracked in the per-release CHANGELOG entries and in ADRs landed under each phase. As of the heritage move (see [`heritage/README.md`](README.md)) this charter is parked, not on the active track.
 
 ---
 

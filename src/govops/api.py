@@ -1107,7 +1107,7 @@ def api_commit_encoding_batch(batch_id: str):
 def require_admin_token(
     x_govops_admin_token: str | None = Header(default=None, alias="X-Govops-Admin-Token"),
 ) -> None:
-    """Minimal admin gate (PLAN.md §11 auth-track placeholder).
+    """Minimal admin gate (placeholder until the auth track lands; see SECURITY.md).
 
     If the ``GOVOPS_ADMIN_TOKEN`` env var is unset, this dependency is a
     no-op — current open behaviour is preserved for the demo. If the env

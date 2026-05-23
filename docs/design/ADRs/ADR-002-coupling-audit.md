@@ -88,4 +88,4 @@ The engine accepts `evaluation_date` (`engine.py:69`), but the API (`/api/cases/
 - Phase 2 effort is reduced by exploiting global-scope ConfigValues; 5 jurisdictions × 1 identical value collapses to 1 record.
 - Phase 3 effort grows slightly (registry extraction added) but eliminates the late-import cycle permanently.
 - Phase 1 acquires one explicit OpenAPI delta; Lovable can track it before Phase 6 begins.
-- The risk register in PLAN.md should be updated to fold these mitigations in.
+- The risk register tracked off-tree should be updated to fold these mitigations in.

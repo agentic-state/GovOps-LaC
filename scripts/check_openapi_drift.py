@@ -1,8 +1,8 @@
 """Phase-6+ contract gate: detect OpenAPI drift between live FastAPI and the snapshot.
 
-Risk register §9 row 2 (PLAN.md): "Lovable contract drifts from backend
-OpenAPI" — mitigation was specified as "CI diff gate on openapi.json
-after Phase 6". This script implements that gate.
+Risk mitigation: "Lovable contract drifts from backend OpenAPI" was
+called out during Phase 6 design. The mitigation was a CI diff gate on
+openapi.json after Phase 6. This script implements that gate.
 
 Compares the freshly-generated OpenAPI document for the running app
 against the committed snapshot at ``docs/api/openapi-v0.3.0-draft.json``.
