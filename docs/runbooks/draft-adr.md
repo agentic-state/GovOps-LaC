@@ -165,4 +165,4 @@ If an Accepted ADR turns out to be wrong:
 
 ## Last validated
 
-- **2026-05-02** by Claude — runbook captures the conventions visible across ADR-001 through ADR-018 in `docs/design/ADRs/`. Pattern proven by the v3 phase A-I sequence: each phase landed an ADR before the implementation PR, and the implementation cross-referenced the ADR throughout.
+- **2026-05-02** by Claude — runbook captures the conventions visible across the current ADR set in `docs/design/ADRs/` (ADR-001 through ADR-025; see [the ADR index](../design/ADRs/README.md) for the active list). Pattern proven by the v3 phase A-I sequence: each phase landed an ADR before the implementation PR, and the implementation cross-referenced the ADR throughout.

@@ -10,8 +10,8 @@
  * instead of clear-then-update) closes that window so this spec can
  * walk the wizard end-to-end without racing concurrent reads.
  *
- * The spec drives the UI exclusively (per PLAN-p61-test-coverage
- * section 5): no API shortcuts past the initial setup, real form
+ * The spec drives the UI exclusively (per the journey-test conventions):
+ * no API shortcuts past the initial setup, real form
  * inputs, accessible-role locators, waits on observable side-effects.
  *
  * Unique-per-run jurisdiction code (`xx${epoch}-tail`) so concurrent

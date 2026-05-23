@@ -49,9 +49,9 @@ interface RouteSpec {
   fullPage?: boolean;
 }
 
-// PLAN-p61-test-coverage.md section 7: top routes for v3 visual
-// regression. /config + /check were excluded in L7.2 for instability;
-// L8.6 stabilizes them and re-includes them.
+// Top routes for v3 visual regression. /config + /check were excluded
+// during L7.2 for instability; L8.6 stabilized them and re-included
+// them.
 const ROUTES: RouteSpec[] = [
   { path: "/", id: "index" },
   { path: "/screen", id: "screen" },

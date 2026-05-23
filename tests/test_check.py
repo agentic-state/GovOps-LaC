@@ -5,10 +5,10 @@ against a citizen-declared fact set and returns per-program eligibility.
 Privacy posture identical to `/api/screen`: no case row, no audit, no
 PII echoed.
 
-PLAN-v3 §Phase G exit gate: a citizen lands on `/check`, declares facts,
-and sees "you may be eligible for OAS and/or EI in CA"; clicking "I just
-lost my job" surfaces an EI reassessment with a bounded-duration timeline.
-These tests pin the API contract that powers both surfaces.
+v3 Phase G acceptance (see CHANGELOG [3.0.0]): a citizen lands on `/check`,
+declares facts, and sees "you may be eligible for OAS and/or EI in CA"; clicking
+"I just lost my job" surfaces an EI reassessment with a bounded-duration
+timeline. These tests pin the API contract that powers both surfaces.
 """
 
 from __future__ import annotations
@@ -122,8 +122,8 @@ class TestEligibilityOutcomes:
     def test_ei_eligible_carries_benefit_period(self, client):
         """When EI is eligible, the program result must include a
         BenefitPeriod (start, end, weeks_total, weeks_remaining) so the
-        UI can render the bounded-duration timeline (PLAN-v3 §Phase G
-        exit-gate visualization)."""
+        UI can render the bounded-duration timeline (v3 Phase G
+        bounded-duration visualization, see ADR-017)."""
         payload = _baseline_payload()
         payload["evidence_present"]["job_loss"] = True
         r = client.post("/api/check", json=payload)

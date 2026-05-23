@@ -76,8 +76,9 @@ def demo_seed_client(monkeypatch):
 
 
 class TestDemoSeedIncludesEi:
-    """PLAN-v3 §Phase I: when GOVOPS_SEED_DEMO=1, the case list shows
-    OAS + EI cases for every jurisdiction that has both manifests."""
+    """v3 Phase I (cutover, see CHANGELOG [3.0.0]): when GOVOPS_SEED_DEMO=1,
+    the case list shows OAS + EI cases for every jurisdiction that has both
+    manifests."""
 
     def test_ca_demo_seed_lists_oas_and_ei_cases(self, demo_seed_client):
         client, _ = demo_seed_client

@@ -2,9 +2,9 @@
 
 Endpoint: ``GET /api/programs/{program_id}/compare?jurisdictions=ca,br,...``
 
-PLAN-v3 §Phase F exit gate: ``http://localhost:8080/compare/ei`` renders
-the 6-jurisdiction comparison with parameter diffs. The frontend reads
-this endpoint; these tests pin the contract so the UI is rendering off
+v3 Phase F acceptance (see CHANGELOG [3.0.0]): ``http://localhost:8080/compare/ei``
+renders the 6-jurisdiction comparison with parameter diffs. The frontend
+reads this endpoint; these tests pin the contract so the UI is rendering off
 something stable.
 """
 

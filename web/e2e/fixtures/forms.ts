@@ -6,7 +6,7 @@
  * panel rather than a silent no-op. The helpers exist because the
  * v3 forms enforce per-event-type / per-jurisdiction sub-schemas that
  * spec authors kept missing -- LO-003 (NewEventForm) and LO-005
- * (ScreenForm + CheckForm) in PLAN-p61-test-coverage.md section 9.
+ * (ScreenForm + CheckForm) journey-coverage items.
  *
  * Selectors prefer stable hooks in this order:
  *   1. element id (e.g. "#screen-dob")

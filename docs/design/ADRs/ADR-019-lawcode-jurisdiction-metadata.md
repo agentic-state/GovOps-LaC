@@ -100,7 +100,7 @@ Rejected: a jurisdiction with N programs would carry the same identity facts N t
 
 ## References
 
-- PLAN-p61-v3.md §Phase H -- the original adoption-substrate promise
+- v3 charter -- Phase H, the original adoption-substrate promise (see [`docs/IDEA-GovOps-v3.0-ProgramAsPrimitive.md`](../../IDEA-GovOps-v3.0-ProgramAsPrimitive.md))
 - ADR-014 -- program manifests under `lawcode/<jur>/programs/<id>.yaml`
 - ADR-003 -- ConfigValue substrate file shape
 - `schema/lawcode-v1.0.json` -- the file shape this ADR extends

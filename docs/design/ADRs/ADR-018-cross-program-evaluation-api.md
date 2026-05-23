@@ -12,7 +12,7 @@ The charter calls out **cross-program evaluation** explicitly as a v3 audience d
 
 > *Government leaders need a comparison surface; citizens need an entry path that says "what am I entitled to?" — both require a one-call API that returns per-program eligibility for a given case.*
 
-PLAN-v3 §Phase E defines the contract:
+v3 Phase E defines the contract:
 
 > *POST /api/cases/{id}/evaluate accepts `programs: [oas, ei]`; per-program slot in audit package; `ProgramInteractionWarning` surfaces when two programs conflict (e.g. EI + OAS for same claimant — locale-specific rules).*
 
@@ -69,7 +69,7 @@ class ProgramInteractionWarning(BaseModel):
     citation: str = ""               # statutory or guidance reference, when applicable
 ```
 
-Detection lives in a single pure function `detect_program_interactions(recommendations, jurisdiction_id)` in a new `src/govops/program_interactions.py`. Phase E ships exactly one rule — the one PLAN-v3 names as the test target:
+Detection lives in a single pure function `detect_program_interactions(recommendations, jurisdiction_id)` in a new `src/govops/program_interactions.py`. Phase E ships exactly one rule — the headline test target:
 
 - **OAS + EI dual eligibility** (severity `info`): when a single case is `ELIGIBLE` for both OAS and EI, surface a one-line note that the two programs operate on independent statutory bases and can be claimed concurrently. This is informational, not a blocker. The citation is the program-pair's authority chain root (the constitution / charter that allocates each).
 
@@ -113,7 +113,7 @@ When the engine runs against a registered program, it uses `ProgramEngine(progra
 
 ### Positive
 
-- One POST returns per-program eligibility — the cross-program API contract called for in PLAN-v3 ships intact.
+- One POST returns per-program eligibility — the cross-program API contract called for in the v3 charter ships intact.
 - Backward compatibility is preserved by additive design: every pre-v3 caller keeps working without code changes.
 - Interaction warnings have a registry shape (one pure function, dictionary-dispatched), so adopters can extend them without engine surgery.
 - `program_id` is now load-bearing on every Recommendation — the OAS path that previously left it `None` populates it as `"oas"` after Phase E, so cross-program clients can route reliably.
@@ -131,7 +131,7 @@ When the engine runs against a registered program, it uses `ProgramEngine(progra
 
 ## References
 
-- PLAN-v3 §Phase E
+- v3 execution: CHANGELOG.md `[3.0.0]` -- Phase E (cross-program evaluation)
 - ADR-014 (program manifest model — programs are first-class)
 - ADR-016 (ProgramEngine refactor — multiple shapes coexist)
 - ADR-017 (bounded-benefit + active-obligation primitives — second program proves the substrate)

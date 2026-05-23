@@ -6,8 +6,8 @@
 # does ONE thing: run uvicorn against `govops.api:app`. The web service
 # is a separate container — see `docker/web.Dockerfile`.
 #
-# Why split: v3's "Add your country in 5 minutes" adoption story (PLAN-v3
-# §Phase H) wants two-process docker-compose so a contributor can edit
+# Why split: v3's "Add your country in 5 minutes" adoption story (v3
+# Phase H, see CHANGELOG [3.0.0]) wants two-process docker-compose so a contributor can edit
 # `lawcode/<jur>/` on the host and the API picks up changes without a
 # rebuild. The v2.1 image is for the hosted demo; v3's compose is for
 # the local-dev / contributor flow.

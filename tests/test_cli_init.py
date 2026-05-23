@@ -1,8 +1,8 @@
 """Phase H — `govops init` scaffolder + plain-language doc generator tests.
 
-PLAN-v3 §Phase H exit gate: a contributor with neither Python nor Node
-runs `docker compose up` and sees the demo; `govops init` produces a
-schema-valid skeleton.
+v3 Phase H acceptance (see CHANGELOG [3.0.0]): a contributor with neither
+Python nor Node runs `docker compose up` and sees the demo; `govops init`
+produces a schema-valid skeleton.
 
 These tests pin the scaffolder contract — same files generated, all
 schema-valid against the existing Phase 5 validators, plain-language

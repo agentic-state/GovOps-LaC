@@ -4,7 +4,7 @@
 **Predecessor**: v3.1.x editor set (PRs #50/#51/#52/#53 on `main`, all merged 2026-05-11/12). v3.1.0 release tagged 2026-05-11.
 **One-sentence pitch**: *The authoring substrate works end-to-end through the UI; v3.2 makes it safe enough that two operators can use it at the same time without stepping on each other.*
 
-> This document is the strategic vision for v3.2. It does not constrain implementation. PLAN-v3.2.md will track execution once it begins.
+> This document is the strategic vision for v3.2. It does not constrain implementation. v3.2 execution shipped via the per-release CHANGELOG entry (v3.2.0 dated 2026-05-13) and the ADRs landed under each phase (ADR-023, ADR-025).
 
 ---
 
