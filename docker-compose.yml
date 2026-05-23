@@ -1,6 +1,6 @@
 # GovOps v3 — local-dev / contributor docker-compose stack.
 #
-# Phase H of PLAN-v3 — the adoption substrate. Run::
+# Phase H of v3 (see CHANGELOG [3.0.0]) — the adoption substrate. Run::
 #
 #   docker compose up
 #

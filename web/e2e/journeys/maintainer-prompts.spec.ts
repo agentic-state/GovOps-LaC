@@ -197,8 +197,8 @@ test.describe("[M11] Diff overlay toggle", () => {
 
 test.describe("[M12] Run fixture test against the prompt", () => {
   test.skip("deferred -- FixtureTestPanel requires an LLM provider key; not in this batch", () => {
-    // Tracked in PLAN-p61-test-coverage.md section 9 (v1/v2 leftovers
-    // queue). Will land in L1.4 follow-up or L8 once a stub provider /
-    // mock LLM mode is wired into the playwright fixture set.
+    // Tracked in the journey-coverage backlog (v1/v2 leftovers queue).
+    // Will land in a follow-up once a stub provider / mock LLM mode is
+    // wired into the playwright fixture set.
   });
 });

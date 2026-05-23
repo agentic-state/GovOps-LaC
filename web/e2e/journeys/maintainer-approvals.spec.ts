@@ -13,9 +13,9 @@
  *   M14 Search narrows the list
  *   M15 Load-more paginates additional rows
  *
- * Conventions per PLAN-p61-test-coverage.md section 5: drive the UI
- * (no API shortcuts past setup), accessible-role locators, run-unique
- * keys, wait on observable side-effects.
+ * Journey-test conventions: drive the UI (no API shortcuts past setup),
+ * accessible-role locators, run-unique keys, wait on observable
+ * side-effects.
  */
 
 import { test, expect } from "@playwright/test";
@@ -284,6 +284,6 @@ test.describe("[M15] Pagination -- Load more reveals additional rows", () => {
     // Skipped because the demo seed today provides 3 drafts and adding 8
     // more in the test would slow the run. Re-enabled when the seed
     // gains a "stress" mode or when a follow-up adds a fixture batch
-    // factory. Tracked in PLAN-p61-test-coverage.md section 9.
+    // factory. Tracked in the journey-coverage backlog.
   });
 });

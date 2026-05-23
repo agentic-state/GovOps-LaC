@@ -1,6 +1,6 @@
 """``govops init`` — scaffold a new jurisdiction from canonical shape templates.
 
-Phase H of v3 (per PLAN-v3 §Phase H): the adoption substrate. A non-engineer
+Phase H of v3 (see CHANGELOG [3.0.0]): the adoption substrate. A non-engineer
 program leader runs::
 
     govops init pl --shapes oas,ei

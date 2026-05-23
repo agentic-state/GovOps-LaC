@@ -1,7 +1,7 @@
 /**
  * Phase G — citizen entry + life-event reassessment E2E.
  *
- * PLAN-v3 §Phase G exit gate:
+ * v3 Phase G acceptance (see CHANGELOG [3.0.0] + ADR-018 cross-program API):
  *   A citizen lands on `/check`, declares facts, sees "you may be
  *   eligible for OAS and/or EI in CA", clicks "I just lost my job",
  *   and sees EI reassessment with a bounded-duration timeline.

@@ -2,10 +2,10 @@
 
 When a single case is evaluated against multiple programs in one round trip,
 the system emits :class:`ProgramInteractionWarning` records describing
-relationships between the program outcomes. Phase E ships exactly one rule —
-the OAS + EI dual-eligibility info note that PLAN-v3 names as the test target
-— behind a registry so adopters of the substrate can author richer rules at
-v4 without touching the engine.
+relationships between the program outcomes. Phase E (see CHANGELOG [3.0.0])
+ships exactly one rule — the OAS + EI dual-eligibility info note that ADR-018
+names as the test target — behind a registry so adopters of the substrate can
+author richer rules later without touching the engine.
 
 A rule is a pure function::
 

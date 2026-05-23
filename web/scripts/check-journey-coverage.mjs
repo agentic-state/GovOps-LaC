@@ -15,7 +15,7 @@
  * This gate is the structural follow-up: a new mutation surface lands
  * without a spec exercising it -> CI fails before E2E even runs.
  *
- * Mutation patterns tracked (per PLAN-p61-test-coverage.md section 6):
+ * Mutation patterns tracked (journey-coverage convention):
  *   approve*, reject*, requestChangesOnDraft, createDraft, commit*,
  *   set*Enabled, fetch*Pack, fetchEvaluation*, reviewCase, submit*,
  *   bulkReview*, bulkApprove*, fetchFederationPack

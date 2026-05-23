@@ -1,9 +1,9 @@
 """Phase E — cross-program evaluation API tests (per ADR-018).
 
-PLAN-v3 §Phase E exit gate: one case, one POST, returns per-program
-eligibility + warnings if any. The headline test target is *"a case
-eligible for both OAS and EI in CA produces both recommendations + the
-program-interaction warning."*
+v3 Phase E acceptance (see CHANGELOG [3.0.0] + ADR-018): one case, one
+POST, returns per-program eligibility + warnings if any. The headline test
+target is *"a case eligible for both OAS and EI in CA produces both
+recommendations + the program-interaction warning."*
 
 These tests exercise the API surface end-to-end via the FastAPI
 TestClient — including the lifespan that seeds the default jurisdiction
@@ -190,7 +190,7 @@ class TestExplicitProgramSelection:
 
 
 class TestDualEligibilityWarning:
-    """PLAN-v3 §Phase E test target: a case eligible for both OAS and EI
+    """ADR-018 headline test target: a case eligible for both OAS and EI
     in CA produces both recommendations + the program-interaction warning."""
 
     def test_both_programs_eligible(self, client, dual_eligible_case_id):
