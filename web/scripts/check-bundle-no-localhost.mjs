@@ -91,7 +91,6 @@ function main() {
   console.error("If the token is 'http://127.0.0.1:8000', the fix is to set");
   console.error("VITE_API_BASE_URL='' on the `vite build` command. See:");
   console.error("  docs/runbooks/debug-fetch-failure.md");
-  console.error("  eva-foundation/.claude-memory/feedback_build_pattern_pivot_audit.md");
   process.exit(1);
 }
 

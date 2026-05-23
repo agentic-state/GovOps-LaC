@@ -3,7 +3,7 @@
 **Status**: Accepted
 **Date**: 2026-04-25
 **Gate**: 6 (locked at end of Phase 0; PLAN-introduced)
-**Context**: Phases 1–2 of [PLAN.md](../../../PLAN.md) introduce `ConfigStore.resolve()` and migrate every hardcoded business constant. Tests must stay green at every phase exit. We need an explicit strategy for keeping the system green while the cutover is in flight.
+**Context**: Phases 1–2 of the project plan introduce `ConfigStore.resolve()` and migrate every hardcoded business constant. Tests must stay green at every phase exit. We need an explicit strategy for keeping the system green while the cutover is in flight.
 
 ---
 

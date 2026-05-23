@@ -144,7 +144,7 @@ Phase C ships only `BENEFIT_DURATION_BOUNDED`; obligations land later. Rejected 
 ## References
 
 - v3 charter: [docs/IDEA-GovOps-v3.0-ProgramAsPrimitive.md](../../IDEA-GovOps-v3.0-ProgramAsPrimitive.md) §"New primitives EI forces"
-- v3 PLAN: [PLAN-v3.md](../../../PLAN-v3.md) §"Phase C — EI canonical shape + new primitives"
+- v3 PLAN: PLAN-v3.md §"Phase C — EI canonical shape + new primitives"
 - ADR-014 — Program-as-Primitive (manifest model)
 - ADR-015 — Canonical Program Shape Library
 - ADR-016 — Engine refactor scope (the shape-evaluator interface this ADR extends)

@@ -130,8 +130,8 @@ curl -s -X POST "$BASE/api/check" \
   -d '{"jurisdiction_id":"ca","date_of_birth":"1958-01-01","legal_status":"citizen"}' \
   -o /dev/null -w "%{http_code}\n"
 
-# Sanity: NO 127.0.0.1 baked into the deployed bundle (this catches the regression
-# class documented in feedback_build_pattern_pivot_audit.md)
+# Sanity: NO 127.0.0.1 baked into the deployed bundle (see debug-fetch-failure.md
+# for the regression class this catches)
 HASH=$(curl -s "$BASE/check" | tr -d '\0' | grep -oE 'index-[A-Za-z0-9_-]+\.js' | head -1)
 curl -s "$BASE/assets/$HASH" | grep -c "127.0.0.1\|localhost:8000"
 # expected: 0
@@ -189,9 +189,9 @@ curl -s "https://huggingface.co/api/spaces/agentic-state/govops-lac/main/tree" |
 
 These bit us before. References point at memory entries with the *why*.
 
-- **Stage-1 docker cache hit serving stale SPA.** If `web/package.json` + `web/package-lock.json` haven't changed, HF will reuse the cached web-builder image and re-deploy the OLD `dist/client/`. Symptom: HF runtime SHA matches new push, but the served `/assets/index-*.js` is the previous hash. **Fix**: bump `web/package.json` version (step 2). See [project memory: HF v2.1 hosted demo plan](../../../eva-foundation/.claude-memory/p61_v2_1_hosted_demo_plan.md).
+- **Stage-1 docker cache hit serving stale SPA.** If `web/package.json` + `web/package-lock.json` haven't changed, HF will reuse the cached web-builder image and re-deploy the OLD `dist/client/`. Symptom: HF runtime SHA matches new push, but the served `/assets/index-*.js` is the previous hash. **Fix**: bump `web/package.json` version (step 2). First seen on the v2.1 hosted-demo rollout.
 
-- **Bundle hardcodes `127.0.0.1:8000`.** Vite inlines `import.meta.env.VITE_API_BASE_URL` at build time. If the Dockerfile RUN step doesn't set it, api.ts's fallback (`http://127.0.0.1:8000`) gets baked in — and every visitor's browser tries to fetch from THEIR localhost. Page renders, smoke passes, every action silently fails. **Fix is now in the Dockerfile** (env var fix landed in v0.5.0). The `node scripts/check-bundle-no-localhost.mjs` build-time gate now catches any future regression. See [feedback_build_pattern_pivot_audit](../../../eva-foundation/.claude-memory/feedback_build_pattern_pivot_audit.md).
+- **Bundle hardcodes `127.0.0.1:8000`.** Vite inlines `import.meta.env.VITE_API_BASE_URL` at build time. If the Dockerfile RUN step doesn't set it, api.ts's fallback (`http://127.0.0.1:8000`) gets baked in — and every visitor's browser tries to fetch from THEIR localhost. Page renders, smoke passes, every action silently fails. **Fix is now in the Dockerfile** (env var fix landed in v0.5.0). The `node scripts/check-bundle-no-localhost.mjs` build-time gate now catches any future regression. Bug class: build-pattern-pivot regression — confirmed 2026-04-29 → 2026-05-02 when a build-pattern change silently dropped the env var.
 
 - **Binary files block normal git push.** `web/brand/govops-wordmark.png` + `web/bun.lockb` exceed HF's git-storage policy. Always use the orphan-branch pattern (step 3). A regular `git push hf main` will be rejected.
 

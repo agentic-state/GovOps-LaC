@@ -96,7 +96,7 @@ Every numeric coefficient that varies over time (base monthly amount, COLA multi
 
 ## Cross-references
 
-- [PLAN.md](../../../PLAN.md) §Phase 10B — entry/exit
+- the project plan §Phase 10B — entry/exit
 - [ADR-006](ADR-006-per-parameter-granularity.md) — per-parameter granularity (a coefficient is one `ConfigValue`)
 - [ADR-010](ADR-010-sqlite-from-phase-6.md) — substrate persistence (formulas hydrate alongside other rules)
 - `src/govops/formula.py` (new) — AST models + walker

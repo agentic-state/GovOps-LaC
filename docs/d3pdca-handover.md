@@ -12,7 +12,7 @@ Steps:
 
 1. **Read sections 1–5 in full.** Don't skim. The lineage and lived failures are load-bearing.
 2. **Run a Discover pass on the receiving project.** Learn its source-of-truth doc (PLAN, ROADMAP, README), where decision records live, what tests look like, what hooks/CI gates exist, what the right runtime/venv path is. Use Section 4 as a checklist.
-3. **Save Section 2 as a memory** (Claude Code's memory system). Filename suggestion: `feedback_d3pdca_operational_form.md`. Replace the **lived failure modes** in section 2 with examples from the receiving project as you accumulate them — the GovOps examples are illustrative, not normative.
+3. **Save Section 2 as a memory** (Claude Code's memory system). Pick a stable, descriptive filename per the receiving project's naming convention. Replace the **lived failure modes** in section 2 with examples from the receiving project as you accumulate them — the GovOps examples are illustrative, not normative.
 4. **Save Section 3 as a project subagent** at `.claude/agents/<project>-delegate.md`. Fill in every `<<TBD>>` with the receiving project's actual values from your Section-4 Discover.
 5. **Surface Section 1 (the directive) to the user** as the policy layer if they want it; otherwise keep it as the governance reference for your own behavior.
 6. **Stress-test** on one non-trivial sub-task per Section 5 before applying broadly.
@@ -383,7 +383,7 @@ Before installing the subagent, answer these about the receiving project. The an
 | Strict-mode / CI gates equivalents? | Read `.github/workflows/`, `.gitlab-ci.yml`, etc. |
 | Pre-commit / pre-push hook config? | Look for `.claude/settings.json`, `.pre-commit-config.yaml`, `.husky/`, `lefthook.yml` |
 | Runtime + interpreter path? | Look for `.venv/`, `venv/`, `node_modules/`, `Pipfile`, `package.json` |
-| Style invariants? | Read CLAUDE.md, CONTRIBUTING.md, AGENTS.md, .cursorrules |
+| Style invariants? | Read README.md, CONTRIBUTING.md, AGENTS.md, .cursorrules (whichever the project carries) |
 | Out-of-scope domains? | Ask the user; look for "do not edit" markers |
 | Branch naming + commit convention? | `git log --oneline -20` + check CONTRIBUTING.md |
 | Currently active branch / phase? | `git status` + read the source-of-truth doc |

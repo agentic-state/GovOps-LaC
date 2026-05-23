@@ -3,7 +3,7 @@
 **Status**: Accepted
 **Date**: 2026-04-25
 **Gate**: 2 (locked at start of Phase 1)
-**Context**: [PLAN.md](../../../PLAN.md) §3 requires choosing the granularity of `ConfigValue` records before the substrate is built. The choice is between **per-parameter** (one `ConfigValue` per leaf number/string/enum) and **per-rule** (one `ConfigValue` carrying the whole rule's parameter dict).
+**Context**: the project plan §3 requires choosing the granularity of `ConfigValue` records before the substrate is built. The choice is between **per-parameter** (one `ConfigValue` per leaf number/string/enum) and **per-rule** (one `ConfigValue` carrying the whole rule's parameter dict).
 
 ---
 
@@ -52,7 +52,7 @@ The storage-cost objection is moot because of [ADR-007](ADR-007-in-memory-storag
 
 ## Consequences
 
-- Phase 2 migration touches **every parameter dict, every translation key, every enum**. Lockstep across all 6 jurisdictions per [PLAN.md §Phase 2](../../../PLAN.md). Backwards-compat fallback ([ADR-004](ADR-004-backcompat-during-migration.md)) keeps tests green during cutover.
+- Phase 2 migration touches **every parameter dict, every translation key, every enum**. Lockstep across all 6 jurisdictions per the project plan, Phase 2. Backwards-compat fallback ([ADR-004](ADR-004-backcompat-during-migration.md)) keeps tests green during cutover.
 - `ConfigStore.resolve(key, evaluation_date, jurisdiction_id)` is the only public read API. Engine code never reaches into `parameters` dicts by hardcoded key — every read goes through `resolve()`.
 - Audit integration (`ConfigResolution`) records the resolved `ConfigValue.id` per parameter read during evaluation. Per-parameter granularity gives audit packages precise pinning.
 - Phase 6 admin UI ([govops-003 through govops-008](../../govops-003-config-search.md)) renders per-parameter timelines and diffs.

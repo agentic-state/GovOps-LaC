@@ -2,7 +2,7 @@
 
 **Status**: Accepted
 **Date**: 2026-04-25
-**Context**: Phase 0 of [PLAN.md](../../../PLAN.md) requires identifying hidden coupling that will complicate the Phase 2 ConfigValue migration.
+**Context**: Phase 0 of the project plan requires identifying hidden coupling that will complicate the Phase 2 ConfigValue migration.
 
 ---
 

@@ -3,7 +3,7 @@
 **Status**: Accepted
 **Date**: 2026-04-25
 **Gate**: 1 (locked at end of Phase 0)
-**Context**: [PLAN.md](../../../PLAN.md) §3 requires choosing the on-disk format for `lawcode/<jurisdiction>/config/*.yaml` artefacts before Phase 3 begins.
+**Context**: the project plan §3 requires choosing the on-disk format for `lawcode/<jurisdiction>/config/*.yaml` artefacts before Phase 3 begins.
 
 ---
 

@@ -3,7 +3,8 @@
 # Blocks the commit (exit 2) if tests fail. No-op for any other Bash call.
 #
 # Wired in .claude/settings.json under hooks.PreToolUse for matcher "Bash".
-# See PLAN.md §6 (test budget per phase) and CLAUDE.md (tests must stay green at every phase exit).
+# Tests must stay green at every phase exit -- this gate blocks any commit
+# that would land with red tests.
 
 input=$(cat)
 command=$(printf '%s' "$input" | python -c "import json,sys; d=json.load(sys.stdin); print(d.get('tool_input',{}).get('command',''))" 2>/dev/null)

@@ -65,7 +65,7 @@ test.describe("[L01/L02] /compare/oas -- multi-jurisdiction comparison data flow
 
     // /compare/ei renders the SummaryStrip regardless; the table renders only
     // when at least one jurisdiction is available. EI is excluded from JP as
-    // v3 architectural control (per CLAUDE.md), so the ExclusionPanel always
+    // a v3 architectural control (per ADR-014), so the ExclusionPanel always
     // has at least one entry on /compare/ei.
     const summary = page.getByTestId("compare-summary");
     await expect(summary).toBeVisible({ timeout: 15_000 });

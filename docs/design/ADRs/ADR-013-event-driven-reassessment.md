@@ -105,7 +105,7 @@ The substrate's `resolve_value` only honours `effective_from`/`effective_to` win
 
 ## Cross-references
 
-- [PLAN.md](../../../PLAN.md) §Phase 10D — entry/exit
+- the project plan §Phase 10D — entry/exit
 - [ADR-006](ADR-006-per-parameter-granularity.md) — config supersession (the analogue to recommendation supersession)
 - [ADR-011](ADR-011-calculation-rules-as-typed-ast.md) — the formula's `ref` resolution is the seam for future config-time-travel
 - [ADR-012](ADR-012-notice-rendering.md) — re-rendering a notice for a superseded recommendation produces the same supersession chain in its trace

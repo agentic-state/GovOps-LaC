@@ -154,7 +154,7 @@ Per the locked intent: "B is honest demo-grade -- 'production answer is a one-li
 - Adjacent domains (licensing, tax, civil registry, healthcare entitlement)
 - Multi-leg moves (citizen who lived in CA, then DE, then FR)
 - Dual citizenship as treaty input
-- **Angle A** (unified provenance for governed affordances per `project_affordance_manifest_concept.md`) -- explicitly deferred to v5; can be either v4's substrate retro or v5's architectural axis, decided at v5 charter time
+- **Angle A** (unified provenance for governed affordances -- a forward-looking concept exploring whether every UI affordance can declare its substrate-bound policy provenance) -- explicitly deferred to v5; can be either v4's substrate retro or v5's architectural axis, decided at v5 charter time
 
 ## Phase decomposition (provisional, ~10-12 phases)
 
@@ -215,9 +215,9 @@ v3.2 (substrate hardening) and v4 (citizen track) are independent. v3.2's substr
 
 Recommended order: ship v3.2 first because (a) it's smaller, (b) it closes the v3.1.x carryover, and (c) it gives v4 a substrate that's already safe-for-two. If bandwidth forces a choice, v4 can proceed against v3.1.x's substrate and inherit v3.2's improvements on the next release.
 
-## Memory hooks (post-merge)
+## Post-merge follow-ups
 
-- New entry: `p61_v4_release_<date>.md` -- bundled v4 release record
-- Update `p61_v4_charter_intent_2026-05-07.md` -- mark as superseded by this charter doc
-- Update `p61_open_followups.md` -- close v4-medium scope items; v5 candidates (Posture C identity, remaining treaty pairs, Angle A unified provenance, multi-leg moves)
-- New entry: `p61_treaty_framework_design_<date>.md` -- design record for the treaty contract (pre-evaluator / post-evaluator shape, contract evolution rules)
+- Bundle a v4 release record (CHANGELOG entry + release tag).
+- Mark the prior v4 charter intent as superseded by this charter doc.
+- Close v4-medium scope items; v5 candidates (Posture C identity, remaining treaty pairs, Angle A unified provenance, multi-leg moves) move to the v5 backlog.
+- Capture the treaty-contract design (pre-evaluator / post-evaluator shape, contract evolution rules) as an ADR.

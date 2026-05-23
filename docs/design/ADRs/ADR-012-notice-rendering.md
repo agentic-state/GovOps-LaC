@@ -80,7 +80,7 @@ A binary PDF endpoint (`GET /api/cases/{case_id}/notice.pdf`) is deferred to a f
 
 ## Cross-references
 
-- [PLAN.md](../../../PLAN.md) §Phase 10C — entry/exit
+- the project plan §Phase 10C — entry/exit
 - [ADR-006](ADR-006-per-parameter-granularity.md) — per-parameter granularity (one record per template)
 - [ADR-008](ADR-008-prompt-as-config-dual-approval.md) — dual-approval pattern, extended to `value_type=template`
 - [ADR-010](ADR-010-sqlite-from-phase-6.md) — substrate persistence (templates hydrate alongside other records)

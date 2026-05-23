@@ -2,7 +2,7 @@
 
 Decisions captured here are load-bearing — they shape what gets built and what does not. The format is intentionally light: context, decision, consequences, alternatives. New ADRs get the next sequential number; superseded ADRs stay in place with a `Superseded by ADR-NNN` (or `Superseded by reality`) line in the status header.
 
-Active track: **Program-as-Primitive v3.0** (see [PLAN-v3.md](../../../PLAN-v3.md)). v2.0 (Law-as-Code) shipped as v0.4.0; its plan lives in [PLAN.md](../../../PLAN.md).
+Active track: **Program-as-Primitive v3.0** (see PLAN-v3.md). v2.0 (Law-as-Code) shipped as v0.4.0; its plan lives in the project plan.
 
 ## ADR Format
 

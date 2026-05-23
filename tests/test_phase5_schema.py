@@ -1,6 +1,6 @@
 """Phase 5 — schema gate.
 
-Per [PLAN.md §Phase 5](../PLAN.md): every YAML file under ``lawcode/`` must
+Per the project plan, Phase 5: every YAML file under ``lawcode/`` must
 validate against ``schema/lawcode-v1.0.json`` (file shape) AND every merged
 record must validate against ``schema/configvalue-v1.0.json`` (record shape).
 

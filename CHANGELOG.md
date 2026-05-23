@@ -237,8 +237,8 @@ jurisdictions and program manifests. Five playthrough bugs from the
   commit happened a second time. `EncodingBatch.committed_at` is now
   set on first success and subsequent attempts return `409 Conflict`.
 - **`/about` "Read deeper" dead links.** Dropped the relocated
-  `PLAN.md` entry (moved to `eva-foundation/plans/` under the
-  visibility rule on 2026-04-30); fixed `docs/adr/` ->
+  `PLAN.md` entry (moved to the maintainer's private workspace under
+  the visibility rule on 2026-04-30); fixed `docs/adr/` ->
   `docs/design/ADRs/`.
 
 ### Added (v3.1 L5 / L7 / L13 / L14 closeouts)
@@ -414,9 +414,9 @@ a UI-driven Playwright suite across every persona surface.
 ## [2.0.0] -- Law as Code reference implementation (2026-04-29)
 
 Initial public release. The build narrative (Phases 0-12) was squashed
-at launch; `PLAN.md` (later relocated to
-`eva-foundation/plans/PLAN-p61-v2.md`) carried the entry/exit criteria
-for each phase.
+at launch; the project plan (later relocated to the maintainer's
+private workspace under the visibility rule on 2026-04-30) carried
+the entry/exit criteria for each phase.
 
 ### Added
 

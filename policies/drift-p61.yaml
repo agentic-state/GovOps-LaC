@@ -5,9 +5,9 @@
 # exceptions to the engine's defaults.
 
 # 61-GovOps is a PUBLIC-tier repo on agentic-state. Per the two-tier layout
-# doctrine, public-tier project repos hold only public-safe content; the
-# canonical PLAN-p61-v3.md + Claude-Code-internal instructions live in
-# private workspace (eva-foundation), not here. README.md is the only
+# doctrine, public-tier project repos hold only public-safe content;
+# canonical plans and Claude-Code-internal instructions live in the
+# maintainer's private workspace, not here. README.md is the only
 # required anchor.
 required_files:
   - README.md
@@ -22,8 +22,6 @@ repo_name: GovOps-LaC
 repo_visibility: public
 
 broken_links_excluded_patterns:
-  - pattern: '^\.\.(/\.\.)*/PLAN(-v\d+)?\.md$'
-    description: legacy ../PLAN.md and ../PLAN-vN.md references from ADRs + design docs; canonical PLAN is private (eva-foundation/plans/PLAN-p61-v3.md) and cannot be repointed in a public repo without leaking
   - pattern: '^(\.\.?/)+govops-\d{3}-'
     description: references to nonexistent govops-NNN spec stubs (003/014/015/016 etc) that were never committed; pattern allows any depth of relative-path prefix
   - pattern: '^docs/design/ADRs/README\.md$'

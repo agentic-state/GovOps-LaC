@@ -48,7 +48,7 @@ node scripts/check-bundle-no-localhost.mjs
 cd ..
 ```
 
-**Expected**: build succeeds; the localhost-grep returns no hits in `dist/client/assets/*.js`. This catches the class of bug where a misconfigured build inlines a developer-only URL into the production bundle (the bug that bit us 2026-04-29 → 2026-05-02; see [`feedback_build_pattern_pivot_audit`](../../../eva-foundation/.claude-memory/feedback_build_pattern_pivot_audit.md)).
+**Expected**: build succeeds; the localhost-grep returns no hits in `dist/client/assets/*.js`. This catches the class of bug where a misconfigured build inlines a developer-only URL into the production bundle (the bug that bit us 2026-04-29 → 2026-05-02 when a build-pattern change silently dropped `VITE_API_BASE_URL=""` from the Dockerfile RUN step). See [`debug-fetch-failure.md`](debug-fetch-failure.md) for the root-cause walkthrough.
 
 ### Gate 4 — Local journey bench (optional but recommended)
 
@@ -93,7 +93,7 @@ The README describes what's IMPLEMENTED. The PLAN (in workspace memory) describe
 - Does the README claim anything that doesn't exist yet? Fix it.
 - Does the README omit a load-bearing feature that just shipped? Add a row.
 - Are screenshots in `docs/screenshots/v2/` representative of the current UI? If a feature changed, refresh the screenshot.
-- Does CLAUDE.md's "Active Track" section reflect the new release scope? Update it.
+- Does the README's "Current state" section reflect the new release scope (jurisdictions, programs, locales, test counts)? Update it.
 
 (There's no automated check for this — it's eyes-on. Spend 5 minutes.)
 

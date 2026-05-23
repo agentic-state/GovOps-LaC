@@ -38,8 +38,7 @@ The release-readiness runbook composes these. Each is its own gate.
 
 - When you find yourself doing something twice and it has gotchas — add a runbook.
 - Update **Last validated** every time you actually run the runbook end-to-end.
-- Common gotchas should reference workspace memory entries in `eva-foundation/.claude-memory/` so the *why* doesn't rot.
-- Runbooks are P61-specific for now. If a pattern proves portable, promote it to `eva-foundation/docs/runbooks/` so other projects can copy it.
+- Common gotchas should carry the *why* inline (with dates of past incidents where useful) so the rationale travels with the runbook instead of relying on out-of-tree references.
 
 ## Active backlog
 

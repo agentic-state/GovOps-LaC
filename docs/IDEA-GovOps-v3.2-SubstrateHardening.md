@@ -143,8 +143,8 @@ End-to-end checks before declaring v3.2 done:
 | Full suite | `pytest -q` + `cd web && npm run test && npm run test:e2e` | All green |
 | HF deploy | Push to `hf` remote | New v3.2 surfaces visible at `agentic-state-govops-lac.hf.space` |
 
-## Memory hooks (post-merge)
+## Post-merge follow-ups
 
-- New entry: `p61_v3_2_release_<date>.md` -- bundled v3.2 release record
-- Update `p61_open_followups.md` -- close all five carryover items (browser E2E, conflict refusal, RBAC, structural YAML, git projection)
-- Update `p61_v4_charter_intent_2026-05-07.md` -- mark substrate-hardening assumption met
+- Bundle a v3.2 release record (CHANGELOG entry + release tag).
+- Close the five carryover items from v3.1 (browser E2E, conflict refusal, RBAC, structural YAML, git projection).
+- Mark the substrate-hardening assumption met in the v4 charter intent.

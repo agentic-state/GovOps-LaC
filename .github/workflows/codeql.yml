@@ -1,10 +1,9 @@
 name: CodeQL
 
-# Tier 1 CI cost optimization (2026-05-18): CodeQL runs post-merge and on
-# weekly schedule only. Per-PR is unnecessary for a public-good repo
-# where main is the integration target; security findings on the merged
-# tree drive issue creation, not PR-blocking. See:
-# eva-foundation/memory/reference_ci_cost_optimization_tier1_2026-05-18.
+# CI cost optimization (2026-05-18): CodeQL runs post-merge and on weekly
+# schedule only. Per-PR is unnecessary for a public-good repo where main
+# is the integration target; security findings on the merged tree drive
+# issue creation, not PR-blocking.
 on:
   push:
     branches: [main]

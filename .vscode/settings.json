@@ -45,8 +45,7 @@
     "encoder.py": "test_encoder.py",
     "models.py": "test_models.py",
     "pyproject.toml": "uv.lock, requirements*.txt",
-    "PLAN.md": "CLAUDE.md, CONTRIBUTING.md",
-    "README.md": "LICENSE, .gitignore, .gitattributes, .gitleaks.toml"
+    "README.md": "LICENSE, .gitignore, .gitattributes, .gitleaks.toml, CONTRIBUTING.md, CHANGELOG.md"
   },
 
   // Hide noisy paths from explorer

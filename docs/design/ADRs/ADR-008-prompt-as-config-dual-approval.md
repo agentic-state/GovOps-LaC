@@ -2,7 +2,7 @@
 
 **Status**: Accepted
 **Date**: 2026-04-26
-**Gate**: 4 (locked at start of Phase 4 per [PLAN.md §3](../../../PLAN.md))
+**Gate**: 4 (locked at start of Phase 4 per the project plan section 3)
 **Context**: Phase 4 promotes LLM prompts to dated `ConfigValue` records (`value_type=prompt`). A bad prompt change has wider blast radius than a single rule parameter — a prompt regression silently degrades extraction across **all jurisdictions** at once, while a rule parameter only affects one specific evaluation step. This ADR locks the approval policy.
 
 ---

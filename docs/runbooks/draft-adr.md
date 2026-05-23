@@ -19,7 +19,7 @@ Three checks before you write a word:
 | Check | Command | Why |
 |---|---|---|
 | Next available ADR number | `ls docs/design/ADRs/ADR-*.md | tail -1` | Avoid collisions with peers (see [Common gotchas → ADR number races](#common-gotchas)) |
-| Open PRs that may also be claiming a number | `gh pr list --search "ADR" --state open` | Required check per [`feedback_adr_number_pre_claim_check`](../../../eva-foundation/.claude-memory/feedback_adr_number_pre_claim_check.md) |
+| Open PRs that may also be claiming a number | `gh pr list --search "ADR" --state open` | Avoid the ADR-number race; see Common gotchas below |
 | Recent commits on origin/main that landed an ADR | `git log origin/main --oneline -- 'docs/design/ADRs/ADR-*.md' | head -5` | Catch numbers claimed in the last hour that haven't propagated to your local branch yet |
 
 If your number is already claimed, take the next one. **Never two ADRs with the same number.**
@@ -115,7 +115,7 @@ git push -u origin feat/adr-019-url-prefix-locale
 gh pr create --fill
 ```
 
-PR title pattern: `docs(adr-NNN): <verb> <decision summary>`. ASCII-only per [`feedback_pr_quality_gate_conventions`](../../../eva-foundation/.claude-memory/feedback_pr_quality_gate_conventions.md).
+PR title pattern: `docs(adr-NNN): <verb> <decision summary>`. ASCII-only — no smart quotes, no curly em-dashes, no emojis. PR titles surface in places (mobile clients, plain-text shells, CI tooling) where non-ASCII characters render as `?` or get mangled, so keep them portable.
 
 ### Step 6 — Iterate or land
 
@@ -153,7 +153,7 @@ If an Accepted ADR turns out to be wrong:
 
 ## Common gotchas
 
-- **ADR number races.** Two contributors drafting ADRs simultaneously can both claim ADR-019. The pre-flight grep + `gh pr list` check prevents this. If a race happens anyway: whoever lands first keeps the number; the other re-numbers in their branch before merge. See [`feedback_adr_number_pre_claim_check`](../../../eva-foundation/.claude-memory/feedback_adr_number_pre_claim_check.md).
+- **ADR number races.** Two contributors drafting ADRs simultaneously can both claim ADR-019. The pre-flight check has two parts that must both run: `ls docs/design/ADRs/ADR-*.md | tail -1` (local + origin-merged) AND `gh pr list --search "ADR" --state open` (in-flight unmerged). Either alone is insufficient — a PR open for an hour against an ADR number won't show in your local tree. If a race happens anyway: whoever lands first keeps the number; the other re-numbers in their branch before merge.
 
 - **Skipping the Alternatives section because "it was obvious."** Future readers don't have your context. The 30 seconds to write "we considered X but it lost because Y" are worth hours of rework when X re-emerges as someone else's "obvious" idea.
 
