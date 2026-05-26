@@ -1,0 +1,187 @@
+# AIOS-IMPLEMENTS: ci_aios_audit
+# Portable cross-repo variant. Copy this file to any sibling repo as
+# .github/workflows/aios-audit.yml -- no edits needed if you use the defaults.
+#
+# Behavior matches 81-AIOS/.github/workflows/aios-audit.yml line-for-line
+# except for the install step: this variant installs AIOS from GitHub
+# rather than from the local checkout.
+#
+# Tunable env (override under `env:` below or via repo variables):
+#   AIOS_REPO_URL   git URL to pip-install (default: MarcoPolo483/81-AIOS)
+#   AIOS_REPO_REF   git ref / commit / tag (default: main)
+#
+# Observe-only: never fails the build on findings (Plan-2-Pareto instance 2.1).
+name: aios-audit
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+concurrency:
+  group: aios-audit-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  AIOS_REPO_URL: https://github.com/MarcoPolo483/81-AIOS.git
+  AIOS_REPO_REF: main
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install AIOS from GitHub
+        # Requires the target repo (MarcoPolo483/81-AIOS) to be readable by
+        # this workflow runner. Private repos need a PAT in AIOS_INSTALL_TOKEN
+        # (see docs/ci/aios-audit-workflow.md for setup).
+        #
+        # If install fails (e.g., secret not yet configured), this step
+        # records the failure and the audit steps below skip gracefully so
+        # the workflow stays observe-only and exits 0.
+        id: install
+        env:
+          AIOS_INSTALL_TOKEN: ${{ secrets.AIOS_INSTALL_TOKEN }}
+        run: |
+          python -m pip install --upgrade pip
+          if [ -n "${AIOS_INSTALL_TOKEN}" ]; then
+            url="${AIOS_REPO_URL/https:\/\//https://x-access-token:${AIOS_INSTALL_TOKEN}@}"
+          else
+            url="${AIOS_REPO_URL}"
+          fi
+          set +e
+          python -m pip install "git+${url}@${AIOS_REPO_REF}"
+          rc=$?
+          set -e
+          echo "install_rc=${rc}" >> "$GITHUB_OUTPUT"
+          if [ "$rc" -ne 0 ]; then
+            echo "::warning::AIOS install failed (rc=${rc}). Audits will be skipped. If 81-AIOS is private, set AIOS_INSTALL_TOKEN secret (see docs/ci/aios-audit-workflow.md)."
+          fi
+
+      - name: Run aios drift scan
+        id: drift
+        if: steps.install.outputs.install_rc == '0'
+        continue-on-error: true
+        run: |
+          mkdir -p aios-audit-out
+          set +e
+          aios drift scan --path . --json --no-event-log --no-artifact \
+            > aios-audit-out/drift.json
+          rc=$?
+          set -e
+          echo "exit_code=${rc}" >> "$GITHUB_OUTPUT"
+          findings_count=$(jq '.findings | length' aios-audit-out/drift.json 2>/dev/null || echo 0)
+          echo "findings_count=${findings_count}" >> "$GITHUB_OUTPUT"
+
+      - name: Run aios claims-audit
+        id: claims
+        if: steps.install.outputs.install_rc == '0'
+        continue-on-error: true
+        run: |
+          mkdir -p aios-audit-out
+          set +e
+          aios claims-audit --path . \
+            --json aios-audit-out/claims.json \
+            --markdown aios-audit-out/claims.md
+          rc=$?
+          set -e
+          echo "exit_code=${rc}" >> "$GITHUB_OUTPUT"
+          fails=$(jq '.summary.ledger_1_tally.FAIL // 0' aios-audit-out/claims.json 2>/dev/null || echo 0)
+          orphans=$(jq '.summary.orphan_severity_tally["LOAD-BEARING"] // 0' aios-audit-out/claims.json 2>/dev/null || echo 0)
+          echo "fail_count=${fails}" >> "$GITHUB_OUTPUT"
+          echo "loadbearing_orphan_count=${orphans}" >> "$GITHUB_OUTPUT"
+
+      - name: Upload audit artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: aios-audit-${{ github.run_id }}
+          path: aios-audit-out/
+          if-no-files-found: warn
+          retention-days: 30
+
+      - name: Post PR comment summary
+        if: github.event_name == 'pull_request' && always()
+        uses: actions/github-script@v7
+        env:
+          DRIFT_RC: ${{ steps.drift.outputs.exit_code }}
+          DRIFT_FINDINGS: ${{ steps.drift.outputs.findings_count }}
+          CLAIMS_RC: ${{ steps.claims.outputs.exit_code }}
+          CLAIMS_FAILS: ${{ steps.claims.outputs.fail_count }}
+          CLAIMS_ORPHANS: ${{ steps.claims.outputs.loadbearing_orphan_count }}
+        with:
+          script: |
+            const drift_rc = process.env.DRIFT_RC || 'n/a';
+            const drift_findings = process.env.DRIFT_FINDINGS || '0';
+            const claims_rc = process.env.CLAIMS_RC || 'n/a';
+            const claims_fails = process.env.CLAIMS_FAILS || '0';
+            const claims_orphans = process.env.CLAIMS_ORPHANS || '0';
+            const total = parseInt(drift_findings, 10) + parseInt(claims_fails, 10) + parseInt(claims_orphans, 10);
+            if (total === 0) {
+              core.info('No findings to report; skipping PR comment.');
+              return;
+            }
+            const run_url = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
+            const body = [
+              '## aios-audit summary (observe-only)',
+              '',
+              '| audit | exit | findings |',
+              '|---|---|---|',
+              `| \`aios drift scan\` | ${drift_rc} | ${drift_findings} |`,
+              `| \`aios claims-audit\` (FAIL) | ${claims_rc} | ${claims_fails} |`,
+              `| \`aios claims-audit\` (LOAD-BEARING ORPHAN) | ${claims_rc} | ${claims_orphans} |`,
+              '',
+              `Artifacts + raw JSON: ${run_url}`,
+              '',
+              '_This check is **observe-only**: findings are reported but do not fail the build. See [MarcoPolo483/81-AIOS docs/ci/aios-audit-workflow.md](https://github.com/MarcoPolo483/81-AIOS/blob/main/docs/ci/aios-audit-workflow.md)._',
+            ].join('\n');
+            const marker = '<!-- aios-audit-summary -->';
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+            const existing = comments.find(c => c.body && c.body.includes(marker));
+            const final = `${marker}\n${body}`;
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existing.id,
+                body: final,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: final,
+              });
+            }
+
+      - name: Always succeed (observe-only gate)
+        # The contract for Plan-2-Pareto 2.1 explicitly requires this to be
+        # observe-only. Future flip to fail-closed is deliberate (Plan-2-Full).
+        run: |
+          echo "aios drift scan exit:    ${{ steps.drift.outputs.exit_code }}"
+          echo "aios drift findings:     ${{ steps.drift.outputs.findings_count }}"
+          echo "aios claims-audit exit:  ${{ steps.claims.outputs.exit_code }}"
+          echo "claims FAIL:             ${{ steps.claims.outputs.fail_count }}"
+          echo "claims LB-ORPHAN:        ${{ steps.claims.outputs.loadbearing_orphan_count }}"
+          exit 0
